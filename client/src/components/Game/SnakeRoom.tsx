@@ -31,23 +31,27 @@ const SnakeRoom: React.FC = () => {
   // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      console.log('Key down:', event.code);
-      event.preventDefault();
-      setKeyPressed(event.code, true);
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) {
+        console.log('Key down:', event.code);
+        event.preventDefault();
+        setKeyPressed(event.code, true);
+      }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
-      console.log('Key up:', event.code);
-      event.preventDefault();
-      setKeyPressed(event.code, false);
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) {
+        console.log('Key up:', event.code);
+        event.preventDefault();
+        setKeyPressed(event.code, false);
+      }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
     };
   }, [setKeyPressed]);
 

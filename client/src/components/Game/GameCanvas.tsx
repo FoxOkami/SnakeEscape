@@ -21,8 +21,6 @@ const GameCanvas: React.FC = () => {
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
-    console.log('Drawing canvas - gameState:', gameState, 'levelSize:', levelSize, 'walls:', walls.length, 'snakes:', snakes.length, 'player:', player.position);
-    
     // Clear canvas
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, levelSize.width, levelSize.height);
@@ -128,7 +126,6 @@ const GameCanvas: React.FC = () => {
       lastTimeRef.current = currentTime;
 
       if (deltaTime < 0.1 && deltaTime > 0) { // Cap delta time to prevent large jumps
-        console.log('Game loop updating with deltaTime:', deltaTime);
         updateGame(deltaTime);
       }
     }
