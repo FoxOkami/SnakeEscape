@@ -127,7 +127,8 @@ const GameCanvas: React.FC = () => {
       const deltaTime = (currentTime - lastTimeRef.current) / 1000; // Convert to seconds
       lastTimeRef.current = currentTime;
 
-      if (deltaTime < 0.1) { // Cap delta time to prevent large jumps
+      if (deltaTime < 0.1 && deltaTime > 0) { // Cap delta time to prevent large jumps
+        console.log('Game loop updating with deltaTime:', deltaTime);
         updateGame(deltaTime);
       }
     }

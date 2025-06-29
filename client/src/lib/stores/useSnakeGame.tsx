@@ -126,16 +126,24 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     movePlayer: (direction: Position) => {
       const state = get();
-      if (state.gameState !== 'playing') return;
+      console.log('movePlayer called with direction:', direction, 'gameState:', state.gameState);
+      
+      if (state.gameState !== 'playing') {
+        console.log('Not playing, skipping movement');
+        return;
+      }
 
       const newPosition = {
         x: state.player.position.x + direction.x,
         y: state.player.position.y + direction.y
       };
 
+      console.log('Current position:', state.player.position, 'New position:', newPosition);
+
       // Check bounds
       if (newPosition.x < 0 || newPosition.x + state.player.size.width > state.levelSize.width ||
           newPosition.y < 0 || newPosition.y + state.player.size.height > state.levelSize.height) {
+        console.log('Movement blocked by bounds');
         return;
       }
 
@@ -151,8 +159,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         checkAABBCollision(playerRect, wall)
       );
 
-      if (hasWallCollision) return;
+      if (hasWallCollision) {
+        console.log('Movement blocked by wall collision');
+        return;
+      }
 
+      console.log('Updating player position to:', newPosition);
+      
       // Update player position
       set({
         player: {
@@ -170,23 +183,23 @@ export const useSnakeGame = create<SnakeGameState>()(
       const movement = { x: 0, y: 0 };
       const moveDistance = state.player.speed * deltaTime;
 
-      console.log('Keys pressed:', Array.from(state.keysPressed), 'deltaTime:', deltaTime);
+      console.log('Keys pressed:', Array.from(state.keysPressed), 'deltaTime:', deltaTime, 'moveDistance:', moveDistance);
 
       if (state.keysPressed.has('ArrowUp') || state.keysPressed.has('KeyW')) {
         movement.y -= moveDistance;
-        console.log('Moving up');
+        console.log('Moving up by', moveDistance);
       }
       if (state.keysPressed.has('ArrowDown') || state.keysPressed.has('KeyS')) {
         movement.y += moveDistance;
-        console.log('Moving down');
+        console.log('Moving down by', moveDistance);
       }
       if (state.keysPressed.has('ArrowLeft') || state.keysPressed.has('KeyA')) {
         movement.x -= moveDistance;
-        console.log('Moving left');
+        console.log('Moving left by', moveDistance);
       }
       if (state.keysPressed.has('ArrowRight') || state.keysPressed.has('KeyD')) {
         movement.x += moveDistance;
-        console.log('Moving right');
+        console.log('Moving right by', moveDistance);
       }
 
       if (movement.x !== 0 || movement.y !== 0) {
