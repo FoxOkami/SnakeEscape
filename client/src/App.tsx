@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="w-full h-screen bg-black overflow-hidden">
+      <div className="w-full h-screen bg-gray-900 overflow-hidden">
         <SnakeRoom />
       </div>
     </QueryClientProvider>

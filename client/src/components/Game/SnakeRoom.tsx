@@ -8,6 +8,8 @@ const SnakeRoom: React.FC = () => {
   const { gameState, setKeyPressed } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound } = useAudio();
 
+  console.log('SnakeRoom rendering, gameState:', gameState);
+
   // Initialize audio
   useEffect(() => {
     const backgroundMusic = new Audio('/sounds/background.mp3');
@@ -48,7 +50,7 @@ const SnakeRoom: React.FC = () => {
   }, [setKeyPressed]);
 
   return (
-    <div className="relative w-full h-screen bg-gray-900 overflow-hidden">
+    <div className="relative w-full h-screen bg-gray-900 overflow-hidden flex items-center justify-center">
       <GameCanvas />
       <GameUI />
     </div>

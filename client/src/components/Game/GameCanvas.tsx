@@ -5,6 +5,8 @@ const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>();
   const lastTimeRef = useRef<number>(0);
+
+  console.log('GameCanvas rendering');
   
   const {
     gameState,
@@ -163,8 +165,10 @@ const GameCanvas: React.FC = () => {
         ref={canvasRef}
         className="border-2 border-gray-600 bg-gray-800"
         style={{
-          maxWidth: '100%',
-          maxHeight: '100%',
+          width: `${levelSize.width}px`,
+          height: `${levelSize.height}px`,
+          maxWidth: '90vw',
+          maxHeight: '90vh',
           imageRendering: 'pixelated'
         }}
       />

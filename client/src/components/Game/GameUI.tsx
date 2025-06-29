@@ -19,6 +19,8 @@ const GameUI: React.FC = () => {
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
 
+  console.log('GameUI rendering, gameState:', gameState);
+
   // Handle audio based on game state
   React.useEffect(() => {
     if (gameState === 'playing' && backgroundMusic) {
@@ -38,8 +40,8 @@ const GameUI: React.FC = () => {
   }, [gameState, playSuccess]);
 
   const renderMenu = () => (
-    <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-10">
-      <Card className="w-96 bg-gray-800 text-white border-gray-600">
+    <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+      <Card className="w-96 bg-gray-800 text-white border-gray-600 shadow-2xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-blue-400">Snake Room</CardTitle>
           <CardDescription className="text-gray-300">
@@ -176,6 +178,11 @@ const GameUI: React.FC = () => {
 
   return (
     <>
+      {/* Debug text to ensure UI renders */}
+      <div className="absolute top-0 left-0 bg-red-500 text-white p-2 z-50">
+        Game State: {gameState}
+      </div>
+      
       {gameState === 'menu' && renderMenu()}
       {gameState === 'gameOver' && renderGameOver()}
       {gameState === 'levelComplete' && renderLevelComplete()}
