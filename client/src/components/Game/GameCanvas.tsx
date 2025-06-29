@@ -21,7 +21,7 @@ const GameCanvas: React.FC = () => {
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
-    console.log('Drawing canvas - gameState:', gameState, 'levelSize:', levelSize, 'walls:', walls.length, 'snakes:', snakes.length);
+    console.log('Drawing canvas - gameState:', gameState, 'levelSize:', levelSize, 'walls:', walls.length, 'snakes:', snakes.length, 'player:', player.position);
     
     // Clear canvas
     ctx.fillStyle = '#1a1a2e';
@@ -113,9 +113,16 @@ const GameCanvas: React.FC = () => {
       ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
     }
 
-  }, [player, snakes, walls, door, key, switches, levelSize]);
+  }, [player, snakes, walls, door, key, switches, levelSize, gameState]);
 
   const gameLoop = useCallback((currentTime: number) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    
+    if (ctx) {
+      draw(ctx);
+    }
+
     if (gameState === 'playing') {
       const deltaTime = (currentTime - lastTimeRef.current) / 1000; // Convert to seconds
       lastTimeRef.current = currentTime;
@@ -123,14 +130,6 @@ const GameCanvas: React.FC = () => {
       if (deltaTime < 0.1) { // Cap delta time to prevent large jumps
         updateGame(deltaTime);
       }
-    }
-
-    // Always draw, regardless of game state
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    
-    if (ctx) {
-      draw(ctx);
     }
 
     animationFrameRef.current = requestAnimationFrame(gameLoop);
@@ -155,17 +154,15 @@ const GameCanvas: React.FC = () => {
     };
   }, [levelSize, gameLoop]);
 
-  // Render static content when not playing
+  // Force initial render
   useEffect(() => {
-    if (gameState !== 'playing') {
-      const canvas = canvasRef.current;
-      const ctx = canvas?.getContext('2d');
-      
-      if (ctx) {
-        draw(ctx);
-      }
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    
+    if (ctx) {
+      draw(ctx);
     }
-  }, [gameState, draw]);
+  }, [draw]);
 
   return (
     <div className="flex items-center justify-center w-full h-full">
