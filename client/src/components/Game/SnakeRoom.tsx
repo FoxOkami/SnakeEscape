@@ -50,9 +50,13 @@ const SnakeRoom: React.FC = () => {
   }, [setKeyPressed]);
 
   return (
-    <div className="relative w-full h-screen bg-gray-900 overflow-hidden flex items-center justify-center">
-      <GameCanvas />
-      <GameUI />
+    <div className="relative w-full h-screen bg-gray-900 overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center z-0">
+        <GameCanvas />
+      </div>
+      <div className="relative z-10">
+        <GameUI />
+      </div>
     </div>
   );
 };

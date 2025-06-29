@@ -21,9 +21,16 @@ const GameCanvas: React.FC = () => {
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
+    console.log('Drawing canvas - gameState:', gameState, 'levelSize:', levelSize, 'walls:', walls.length, 'snakes:', snakes.length);
+    
     // Clear canvas
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, levelSize.width, levelSize.height);
+    
+    // Add test border to see if canvas is drawing
+    ctx.strokeStyle = '#ff0000';
+    ctx.lineWidth = 5;
+    ctx.strokeRect(5, 5, levelSize.width - 10, levelSize.height - 10);
 
     // Draw walls
     ctx.fillStyle = '#4a5568';
@@ -116,13 +123,14 @@ const GameCanvas: React.FC = () => {
       if (deltaTime < 0.1) { // Cap delta time to prevent large jumps
         updateGame(deltaTime);
       }
+    }
 
-      const canvas = canvasRef.current;
-      const ctx = canvas?.getContext('2d');
-      
-      if (ctx) {
-        draw(ctx);
-      }
+    // Always draw, regardless of game state
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    
+    if (ctx) {
+      draw(ctx);
     }
 
     animationFrameRef.current = requestAnimationFrame(gameLoop);
@@ -163,13 +171,16 @@ const GameCanvas: React.FC = () => {
     <div className="flex items-center justify-center w-full h-full">
       <canvas
         ref={canvasRef}
-        className="border-2 border-gray-600 bg-gray-800"
+        className="border-4 border-red-500"
+        width={levelSize.width}
+        height={levelSize.height}
         style={{
           width: `${levelSize.width}px`,
           height: `${levelSize.height}px`,
           maxWidth: '90vw',
           maxHeight: '90vh',
-          imageRendering: 'pixelated'
+          imageRendering: 'pixelated',
+          backgroundColor: '#1a1a2e'
         }}
       />
     </div>
