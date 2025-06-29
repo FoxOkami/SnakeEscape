@@ -170,20 +170,27 @@ export const useSnakeGame = create<SnakeGameState>()(
       const movement = { x: 0, y: 0 };
       const moveDistance = state.player.speed * deltaTime;
 
+      console.log('Keys pressed:', Array.from(state.keysPressed), 'deltaTime:', deltaTime);
+
       if (state.keysPressed.has('ArrowUp') || state.keysPressed.has('KeyW')) {
         movement.y -= moveDistance;
+        console.log('Moving up');
       }
       if (state.keysPressed.has('ArrowDown') || state.keysPressed.has('KeyS')) {
         movement.y += moveDistance;
+        console.log('Moving down');
       }
       if (state.keysPressed.has('ArrowLeft') || state.keysPressed.has('KeyA')) {
         movement.x -= moveDistance;
+        console.log('Moving left');
       }
       if (state.keysPressed.has('ArrowRight') || state.keysPressed.has('KeyD')) {
         movement.x += moveDistance;
+        console.log('Moving right');
       }
 
       if (movement.x !== 0 || movement.y !== 0) {
+        console.log('Moving player by:', movement);
         get().movePlayer(movement);
       }
 

@@ -31,11 +31,13 @@ const SnakeRoom: React.FC = () => {
   // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      console.log('Key down:', event.code);
       event.preventDefault();
       setKeyPressed(event.code, true);
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
+      console.log('Key up:', event.code);
       event.preventDefault();
       setKeyPressed(event.code, false);
     };
@@ -50,7 +52,11 @@ const SnakeRoom: React.FC = () => {
   }, [setKeyPressed]);
 
   return (
-    <div className="relative w-full h-screen bg-gray-900 overflow-hidden">
+    <div 
+      className="relative w-full h-screen bg-gray-900 overflow-hidden focus:outline-none" 
+      tabIndex={0}
+      autoFocus
+    >
       <div className="absolute inset-0 flex items-center justify-center z-0">
         <GameCanvas />
       </div>
