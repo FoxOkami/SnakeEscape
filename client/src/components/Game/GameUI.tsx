@@ -19,7 +19,7 @@ const GameUI: React.FC = () => {
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
 
-  console.log('GameUI rendering, gameState:', gameState);
+
 
   // Handle audio based on game state
   React.useEffect(() => {
@@ -178,11 +178,6 @@ const GameUI: React.FC = () => {
 
   return (
     <>
-      {/* Debug text to ensure UI renders */}
-      <div className="absolute top-0 left-0 bg-red-500 text-white p-2 z-50">
-        Game State: {gameState}
-      </div>
-      
       {gameState === 'menu' && renderMenu()}
       {gameState === 'gameOver' && renderGameOver()}
       {gameState === 'levelComplete' && renderLevelComplete()}

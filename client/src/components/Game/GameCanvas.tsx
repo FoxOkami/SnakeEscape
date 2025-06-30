@@ -6,7 +6,7 @@ const GameCanvas: React.FC = () => {
   const animationFrameRef = useRef<number>();
   const lastTimeRef = useRef<number>(0);
 
-  console.log('GameCanvas rendering');
+
   
   const {
     gameState,

@@ -8,7 +8,7 @@ const SnakeRoom: React.FC = () => {
   const { gameState, setKeyPressed } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound } = useAudio();
 
-  console.log('SnakeRoom rendering, gameState:', gameState);
+
 
   // Initialize audio
   useEffect(() => {
@@ -32,7 +32,6 @@ const SnakeRoom: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) {
-        console.log('Key down:', event.code);
         event.preventDefault();
         setKeyPressed(event.code, true);
       }
@@ -40,7 +39,6 @@ const SnakeRoom: React.FC = () => {
 
     const handleKeyUp = (event: KeyboardEvent) => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) {
-        console.log('Key up:', event.code);
         event.preventDefault();
         setKeyPressed(event.code, false);
       }

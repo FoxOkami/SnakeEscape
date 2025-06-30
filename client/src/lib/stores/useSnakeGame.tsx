@@ -45,6 +45,48 @@ export const useSnakeGame = create<SnakeGameState>()(
         const newKeysPressed = new Set(state.keysPressed);
         if (pressed) {
           newKeysPressed.add(key);
+          // Move immediately when key is pressed
+          const movement = { x: 0, y: 0 };
+          const moveAmount = 5; // Fixed movement amount per key press
+          
+          if (key === 'ArrowUp' || key === 'KeyW') movement.y -= moveAmount;
+          if (key === 'ArrowDown' || key === 'KeyS') movement.y += moveAmount;
+          if (key === 'ArrowLeft' || key === 'KeyA') movement.x -= moveAmount;
+          if (key === 'ArrowRight' || key === 'KeyD') movement.x += moveAmount;
+          
+          if (movement.x !== 0 || movement.y !== 0) {
+            const newPosition = {
+              x: state.player.position.x + movement.x,
+              y: state.player.position.y + movement.y
+            };
+            
+            // Check bounds
+            if (newPosition.x >= 0 && newPosition.x + state.player.size.width <= state.levelSize.width &&
+                newPosition.y >= 0 && newPosition.y + state.player.size.height <= state.levelSize.height) {
+              
+              // Check wall collisions
+              const playerRect = {
+                x: newPosition.x,
+                y: newPosition.y,
+                width: state.player.size.width,
+                height: state.player.size.height
+              };
+
+              const hasWallCollision = state.walls.some(wall => 
+                checkAABBCollision(playerRect, wall)
+              );
+
+              if (!hasWallCollision) {
+                return {
+                  keysPressed: newKeysPressed,
+                  player: {
+                    ...state.player,
+                    position: newPosition
+                  }
+                };
+              }
+            }
+          }
         } else {
           newKeysPressed.delete(key);
         }
@@ -166,27 +208,6 @@ export const useSnakeGame = create<SnakeGameState>()(
     updateGame: (deltaTime: number) => {
       const state = get();
       if (state.gameState !== 'playing') return;
-
-      // Handle keyboard input
-      const movement = { x: 0, y: 0 };
-      const moveDistance = state.player.speed * deltaTime;
-
-      if (state.keysPressed.has('ArrowUp') || state.keysPressed.has('KeyW')) {
-        movement.y -= moveDistance;
-      }
-      if (state.keysPressed.has('ArrowDown') || state.keysPressed.has('KeyS')) {
-        movement.y += moveDistance;
-      }
-      if (state.keysPressed.has('ArrowLeft') || state.keysPressed.has('KeyA')) {
-        movement.x -= moveDistance;
-      }
-      if (state.keysPressed.has('ArrowRight') || state.keysPressed.has('KeyD')) {
-        movement.x += moveDistance;
-      }
-
-      if (movement.x !== 0 || movement.y !== 0) {
-        get().movePlayer(movement);
-      }
 
       // Update snakes
       const updatedSnakes = state.snakes.map(snake => 
