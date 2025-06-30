@@ -22,14 +22,17 @@ export const LEVELS: Level[] = [
         id: 'snake1',
         position: { x: 300, y: 300 },
         size: { width: 30, height: 30 },
-        speed: 1,
+        speed: 50,
         direction: { x: 1, y: 0 },
         patrolPoints: [
           { x: 300, y: 300 },
           { x: 500, y: 300 }
         ],
         currentPatrolIndex: 0,
-        patrolDirection: 1
+        patrolDirection: 1,
+        chaseSpeed: 80,
+        sightRange: 150,
+        isChasing: false
       }
     ],
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
@@ -59,7 +62,7 @@ export const LEVELS: Level[] = [
         id: 'snake1',
         position: { x: 200, y: 400 },
         size: { width: 30, height: 30 },
-        speed: 1.5,
+        speed: 75,
         direction: { x: 0, y: 1 },
         patrolPoints: [
           { x: 200, y: 400 },
@@ -68,20 +71,26 @@ export const LEVELS: Level[] = [
           { x: 350, y: 400 }
         ],
         currentPatrolIndex: 0,
-        patrolDirection: 1
+        patrolDirection: 1,
+        chaseSpeed: 120,
+        sightRange: 180,
+        isChasing: false
       },
       {
         id: 'snake2',
         position: { x: 600, y: 200 },
         size: { width: 30, height: 30 },
-        speed: 1,
+        speed: 50,
         direction: { x: 1, y: 0 },
         patrolPoints: [
           { x: 600, y: 200 },
           { x: 700, y: 200 }
         ],
         currentPatrolIndex: 0,
-        patrolDirection: 1
+        patrolDirection: 1,
+        chaseSpeed: 90,
+        sightRange: 160,
+        isChasing: false
       }
     ],
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
@@ -117,7 +126,7 @@ export const LEVELS: Level[] = [
         id: 'snake1',
         position: { x: 150, y: 200 },
         size: { width: 30, height: 30 },
-        speed: 2,
+        speed: 100,
         direction: { x: 1, y: 0 },
         patrolPoints: [
           { x: 150, y: 200 },
@@ -126,13 +135,16 @@ export const LEVELS: Level[] = [
           { x: 150, y: 280 }
         ],
         currentPatrolIndex: 0,
-        patrolDirection: 1
+        patrolDirection: 1,
+        chaseSpeed: 150,
+        sightRange: 200,
+        isChasing: false
       },
       {
         id: 'snake2',
         position: { x: 400, y: 300 },
         size: { width: 30, height: 30 },
-        speed: 1.5,
+        speed: 75,
         direction: { x: 0, y: 1 },
         patrolPoints: [
           { x: 400, y: 300 },
@@ -141,13 +153,16 @@ export const LEVELS: Level[] = [
           { x: 500, y: 300 }
         ],
         currentPatrolIndex: 0,
-        patrolDirection: 1
+        patrolDirection: 1,
+        chaseSpeed: 130,
+        sightRange: 180,
+        isChasing: false
       },
       {
         id: 'snake3',
         position: { x: 600, y: 150 },
         size: { width: 30, height: 30 },
-        speed: 1,
+        speed: 50,
         direction: { x: 1, y: 0 },
         patrolPoints: [
           { x: 600, y: 150 },
@@ -156,7 +171,10 @@ export const LEVELS: Level[] = [
           { x: 600, y: 250 }
         ],
         currentPatrolIndex: 0,
-        patrolDirection: 1
+        patrolDirection: 1,
+        chaseSpeed: 100,
+        sightRange: 160,
+        isChasing: false
       }
     ],
     door: { x: 750, y: 500, width: 30, height: 40, isOpen: false },

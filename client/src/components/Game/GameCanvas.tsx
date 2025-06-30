@@ -73,11 +73,20 @@ const GameCanvas: React.FC = () => {
 
     // Draw snakes
     snakes.forEach(snake => {
-      ctx.fillStyle = '#38a169';
+      // Different colors for chasing vs patrolling snakes
+      if (snake.isChasing) {
+        ctx.fillStyle = '#e53e3e'; // Red when chasing
+      } else {
+        ctx.fillStyle = '#38a169'; // Green when patrolling
+      }
       ctx.fillRect(snake.position.x, snake.position.y, snake.size.width, snake.size.height);
       
       // Add snake pattern
-      ctx.fillStyle = '#2f855a';
+      if (snake.isChasing) {
+        ctx.fillStyle = '#c53030'; // Darker red pattern
+      } else {
+        ctx.fillStyle = '#2f855a'; // Green pattern
+      }
       for (let i = 0; i < snake.size.width; i += 6) {
         for (let j = 0; j < snake.size.height; j += 6) {
           if ((i + j) % 12 === 0) {
@@ -86,10 +95,27 @@ const GameCanvas: React.FC = () => {
         }
       }
       
-      // Snake eyes
-      ctx.fillStyle = '#fc8181';
+      // Snake eyes - glowing when chasing
+      if (snake.isChasing) {
+        ctx.fillStyle = '#ff6b6b'; // Bright red eyes when chasing
+      } else {
+        ctx.fillStyle = '#fc8181'; // Normal red eyes
+      }
       ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
       ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
+      
+      // Draw sight range when chasing (for visual feedback)
+      if (snake.isChasing) {
+        ctx.strokeStyle = '#e53e3e';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        const centerX = snake.position.x + snake.size.width / 2;
+        const centerY = snake.position.y + snake.size.height / 2;
+        ctx.arc(centerX, centerY, snake.sightRange, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset line dash
+      }
     });
 
     // Draw player

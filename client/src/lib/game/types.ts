@@ -26,6 +26,10 @@ export interface Snake {
   patrolPoints: Position[];
   currentPatrolIndex: number;
   patrolDirection: number;
+  chaseSpeed: number;
+  sightRange: number;
+  isChasing: boolean;
+  chaseTarget?: Position;
 }
 
 export interface Wall extends Rectangle {}

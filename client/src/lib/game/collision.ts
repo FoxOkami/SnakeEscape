@@ -40,3 +40,49 @@ export function moveTowards(from: Position, to: Position, speed: number): Positi
     y: from.y + direction.y * speed
   };
 }
+
+export function hasLineOfSight(
+  from: Position, 
+  to: Position, 
+  walls: Rectangle[], 
+  maxDistance: number
+): boolean {
+  const distance = getDistance(from, to);
+  
+  // Check if target is within sight range
+  if (distance > maxDistance) {
+    return false;
+  }
+  
+  // Cast a ray from snake to player
+  const steps = Math.ceil(distance);
+  const stepX = (to.x - from.x) / steps;
+  const stepY = (to.y - from.y) / steps;
+  
+  // Check each step along the line for wall collisions
+  for (let i = 1; i < steps; i++) {
+    const checkPoint = {
+      x: from.x + stepX * i,
+      y: from.y + stepY * i
+    };
+    
+    // Check if this point intersects with any wall
+    if (walls.some(wall => checkPointInRect(checkPoint, wall))) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+export function getDirectionVector(from: Position, to: Position): Position {
+  const distance = getDistance(from, to);
+  if (distance === 0) {
+    return { x: 0, y: 0 };
+  }
+  
+  return {
+    x: (to.x - from.x) / distance,
+    y: (to.y - from.y) / distance
+  };
+}

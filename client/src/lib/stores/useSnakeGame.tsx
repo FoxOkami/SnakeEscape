@@ -211,7 +211,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Update snakes
       const updatedSnakes = state.snakes.map(snake => 
-        updateSnake(snake, state.walls, deltaTime)
+        updateSnake(snake, state.walls, deltaTime, state.player)
       );
 
       // Check snake collisions
