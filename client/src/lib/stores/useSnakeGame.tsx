@@ -17,9 +17,14 @@ interface SnakeGameState extends GameData {
   // Input state
   keysPressed: Set<string>;
   setKeyPressed: (key: string, pressed: boolean) => void;
+  
+  // Movement state
+  currentVelocity: Position;
+  targetVelocity: Position;
 }
 
 const PLAYER_SPEED = 200; // pixels per second
+const ACCELERATION = 1200; // pixels per second squared
 
 export const useSnakeGame = create<SnakeGameState>()(
   subscribeWithSelector((set, get) => ({
@@ -39,58 +44,45 @@ export const useSnakeGame = create<SnakeGameState>()(
     switches: [],
     levelSize: { width: 800, height: 600 },
     keysPressed: new Set(),
+    currentVelocity: { x: 0, y: 0 },
+    targetVelocity: { x: 0, y: 0 },
 
     setKeyPressed: (key: string, pressed: boolean) => {
       set((state) => {
         const newKeysPressed = new Set(state.keysPressed);
         if (pressed) {
           newKeysPressed.add(key);
-          // Move immediately when key is pressed
-          const movement = { x: 0, y: 0 };
-          const moveAmount = 5; // Fixed movement amount per key press
-          
-          if (key === 'ArrowUp' || key === 'KeyW') movement.y -= moveAmount;
-          if (key === 'ArrowDown' || key === 'KeyS') movement.y += moveAmount;
-          if (key === 'ArrowLeft' || key === 'KeyA') movement.x -= moveAmount;
-          if (key === 'ArrowRight' || key === 'KeyD') movement.x += moveAmount;
-          
-          if (movement.x !== 0 || movement.y !== 0) {
-            const newPosition = {
-              x: state.player.position.x + movement.x,
-              y: state.player.position.y + movement.y
-            };
-            
-            // Check bounds
-            if (newPosition.x >= 0 && newPosition.x + state.player.size.width <= state.levelSize.width &&
-                newPosition.y >= 0 && newPosition.y + state.player.size.height <= state.levelSize.height) {
-              
-              // Check wall collisions
-              const playerRect = {
-                x: newPosition.x,
-                y: newPosition.y,
-                width: state.player.size.width,
-                height: state.player.size.height
-              };
-
-              const hasWallCollision = state.walls.some(wall => 
-                checkAABBCollision(playerRect, wall)
-              );
-
-              if (!hasWallCollision) {
-                return {
-                  keysPressed: newKeysPressed,
-                  player: {
-                    ...state.player,
-                    position: newPosition
-                  }
-                };
-              }
-            }
-          }
         } else {
           newKeysPressed.delete(key);
         }
-        return { keysPressed: newKeysPressed };
+        
+        // Calculate target velocity based on current pressed keys
+        const targetVelocity = { x: 0, y: 0 };
+        
+        if (newKeysPressed.has('ArrowUp') || newKeysPressed.has('KeyW')) {
+          targetVelocity.y -= PLAYER_SPEED;
+        }
+        if (newKeysPressed.has('ArrowDown') || newKeysPressed.has('KeyS')) {
+          targetVelocity.y += PLAYER_SPEED;
+        }
+        if (newKeysPressed.has('ArrowLeft') || newKeysPressed.has('KeyA')) {
+          targetVelocity.x -= PLAYER_SPEED;
+        }
+        if (newKeysPressed.has('ArrowRight') || newKeysPressed.has('KeyD')) {
+          targetVelocity.x += PLAYER_SPEED;
+        }
+        
+        // Normalize diagonal movement to maintain consistent speed
+        if (targetVelocity.x !== 0 && targetVelocity.y !== 0) {
+          const factor = Math.sqrt(2) / 2; // 1/sqrt(2)
+          targetVelocity.x *= factor;
+          targetVelocity.y *= factor;
+        }
+        
+        return { 
+          keysPressed: newKeysPressed,
+          targetVelocity: targetVelocity
+        };
       });
     },
 
@@ -110,7 +102,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         door: { ...level.door },
         key: { ...level.key },
         switches: level.switches ? level.switches.map(s => ({ ...s })) : [],
-        levelSize: { ...level.size }
+        levelSize: { ...level.size },
+        currentVelocity: { x: 0, y: 0 },
+        targetVelocity: { x: 0, y: 0 },
+        keysPressed: new Set()
       });
     },
 
@@ -130,7 +125,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         door: { ...level.door },
         key: { ...level.key },
         switches: level.switches ? level.switches.map(s => ({ ...s })) : [],
-        levelSize: { ...level.size }
+        levelSize: { ...level.size },
+        currentVelocity: { x: 0, y: 0 },
+        targetVelocity: { x: 0, y: 0 },
+        keysPressed: new Set()
       });
     },
 
@@ -158,7 +156,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         door: { ...level.door },
         key: { ...level.key },
         switches: level.switches ? level.switches.map(s => ({ ...s })) : [],
-        levelSize: { ...level.size }
+        levelSize: { ...level.size },
+        currentVelocity: { x: 0, y: 0 },
+        targetVelocity: { x: 0, y: 0 },
+        keysPressed: new Set()
       });
     },
 
@@ -209,17 +210,93 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.gameState !== 'playing') return;
 
-      // Update snakes
-      const updatedSnakes = state.snakes.map(snake => 
-        updateSnake(snake, state.walls, deltaTime, state.player)
-      );
-
-      // Check snake collisions
-      const playerRect = {
-        x: state.player.position.x,
+      // --- SMOOTH PLAYER MOVEMENT ---
+      // Smoothly interpolate current velocity toward target velocity
+      let newVelocity = { ...state.currentVelocity };
+      
+      // Calculate velocity difference
+      const velDiff = {
+        x: state.targetVelocity.x - state.currentVelocity.x,
+        y: state.targetVelocity.y - state.currentVelocity.y
+      };
+      
+      // Apply acceleration to approach target velocity
+      const maxAccel = ACCELERATION * deltaTime;
+      
+      if (Math.abs(velDiff.x) > maxAccel) {
+        newVelocity.x += Math.sign(velDiff.x) * maxAccel;
+      } else {
+        newVelocity.x = state.targetVelocity.x;
+      }
+      
+      if (Math.abs(velDiff.y) > maxAccel) {
+        newVelocity.y += Math.sign(velDiff.y) * maxAccel;
+      } else {
+        newVelocity.y = state.targetVelocity.y;
+      }
+      
+      // Calculate new player position based on velocity
+      const newPlayerPosition = {
+        x: state.player.position.x + newVelocity.x * deltaTime,
+        y: state.player.position.y + newVelocity.y * deltaTime
+      };
+      
+      // Check bounds and wall collisions for new position
+      let finalPosition = { ...state.player.position };
+      let finalVelocity = { ...newVelocity };
+      
+      // Check X movement
+      const testXPosition = {
+        x: newPlayerPosition.x,
         y: state.player.position.y,
         width: state.player.size.width,
         height: state.player.size.height
+      };
+      
+      const canMoveX = newPlayerPosition.x >= 0 && 
+                       newPlayerPosition.x + state.player.size.width <= state.levelSize.width &&
+                       !state.walls.some(wall => checkAABBCollision(testXPosition, wall));
+      
+      if (canMoveX) {
+        finalPosition.x = newPlayerPosition.x;
+      } else {
+        finalVelocity.x = 0; // Stop horizontal movement when hitting wall
+      }
+      
+      // Check Y movement
+      const testYPosition = {
+        x: finalPosition.x,
+        y: newPlayerPosition.y,
+        width: state.player.size.width,
+        height: state.player.size.height
+      };
+      
+      const canMoveY = newPlayerPosition.y >= 0 && 
+                       newPlayerPosition.y + state.player.size.height <= state.levelSize.height &&
+                       !state.walls.some(wall => checkAABBCollision(testYPosition, wall));
+      
+      if (canMoveY) {
+        finalPosition.y = newPlayerPosition.y;
+      } else {
+        finalVelocity.y = 0; // Stop vertical movement when hitting wall
+      }
+
+      let updatedPlayer = {
+        ...state.player,
+        position: finalPosition
+      };
+
+      // --- SNAKE AI ---
+      const updatedSnakes = state.snakes.map(snake => 
+        updateSnake(snake, state.walls, deltaTime, updatedPlayer)
+      );
+
+      // --- COLLISION DETECTION ---
+      const playerRect = {
+        x: updatedPlayer.position.x,
+        y: updatedPlayer.position.y,
+        width: updatedPlayer.size.width,
+        height: updatedPlayer.size.height
       };
 
       const hitBySnake = updatedSnakes.some(snake => {
@@ -237,13 +314,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
 
+      // --- ITEM INTERACTIONS ---
       // Check key collection
       let updatedKey = state.key;
-      let updatedPlayer = state.player;
-      
       if (!state.key.collected && checkAABBCollision(playerRect, state.key)) {
         updatedKey = { ...state.key, collected: true };
-        updatedPlayer = { ...state.player, hasKey: true };
+        updatedPlayer = { ...updatedPlayer, hasKey: true };
       }
 
       // Check switch interactions
@@ -258,7 +334,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       let updatedDoor = state.door;
       const allSwitchesPressed = updatedSwitches.length === 0 || updatedSwitches.every(s => s.isPressed);
       
-      if (state.player.hasKey && allSwitchesPressed) {
+      if (updatedPlayer.hasKey && allSwitchesPressed) {
         updatedDoor = { ...state.door, isOpen: true };
       }
 
@@ -268,8 +344,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
 
-      // Update state
+      // --- UPDATE STATE ---
       set({
+        currentVelocity: finalVelocity,
         snakes: updatedSnakes,
         key: updatedKey,
         player: updatedPlayer,
