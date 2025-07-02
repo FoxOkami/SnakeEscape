@@ -6,6 +6,17 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
   
   // Convert deltaTime from milliseconds to seconds for calculations
   const dt = deltaTime / 1000;
+  
+  // Debug logging
+  if (Math.random() < 0.01) { // Log only occasionally to avoid spam
+    console.log(`Snake ${snake.id} update:`, {
+      position: snake.position,
+      deltaTime: dt,
+      type: snake.type,
+      patrolPoints: snake.patrolPoints,
+      currentPatrolIndex: snake.currentPatrolIndex
+    });
+  }
 
   // Handle different snake types
   switch (snake.type) {
@@ -88,6 +99,17 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
   // Update lost sight cooldown
   if (snake.lostSightCooldown && snake.lostSightCooldown > 0) {
     snake.lostSightCooldown -= dt;
+  }
+  
+  // Debug logging for guard snake
+  if (Math.random() < 0.005) {
+    console.log(`Guard ${snake.id}:`, {
+      position: snake.position,
+      canSeePlayer,
+      patrolPoints: snake.patrolPoints,
+      currentTarget: snake.patrolPoints[snake.currentPatrolIndex],
+      dt
+    });
   }
 
   if (canSeePlayer && player) {
