@@ -23,7 +23,7 @@ export const LEVELS: Level[] = [
         type: 'guard' as const,
         position: { x: 300, y: 300 },
         size: { width: 30, height: 30 },
-        speed: 50,
+        speed: 120,
         direction: { x: 1, y: 0 },
         patrolPoints: [
           { x: 300, y: 300 },
