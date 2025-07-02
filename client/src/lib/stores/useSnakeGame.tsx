@@ -66,6 +66,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           newKeysPressed.delete(key);
         }
         
+        // Debug logging
+        if (pressed) {
+          console.log(`Key pressed: ${key}, all keys:`, Array.from(newKeysPressed));
+        }
+        
         // Check if walking (Shift key held)
         const isWalking = newKeysPressed.has('ShiftLeft') || newKeysPressed.has('ShiftRight');
         const moveSpeed = isWalking ? WALKING_SPEED : PLAYER_SPEED;
@@ -91,6 +96,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           const factor = Math.sqrt(2) / 2; // 1/sqrt(2)
           targetVelocity.x *= factor;
           targetVelocity.y *= factor;
+        }
+        
+        // Debug target velocity
+        if (targetVelocity.x !== 0 || targetVelocity.y !== 0) {
+          console.log(`Target velocity:`, targetVelocity);
         }
         
         return { 
@@ -233,6 +243,11 @@ export const useSnakeGame = create<SnakeGameState>()(
     updateGame: (deltaTime: number) => {
       const state = get();
       if (state.gameState !== 'playing') return;
+      
+      // Debug current velocity and target velocity
+      if (state.targetVelocity.x !== 0 || state.targetVelocity.y !== 0) {
+        console.log('UpdateGame - Target velocity:', state.targetVelocity, 'Current velocity:', state.currentVelocity);
+      }
 
       // --- SMOOTH PLAYER MOVEMENT ---
       // Smoothly interpolate current velocity toward target velocity
