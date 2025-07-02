@@ -15,7 +15,8 @@ const GameUI: React.FC = () => {
     resetGame,
     nextLevel,
     returnToMenu,
-    isWalking
+    isWalking,
+    carriedItem
   } = useSnakeGame();
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
@@ -157,6 +158,11 @@ const GameUI: React.FC = () => {
         {isWalking && (
           <Badge className="bg-green-600 text-white">
             🚶 Walking (Silent)
+          </Badge>
+        )}
+        {carriedItem && (
+          <Badge className="bg-purple-600 text-white">
+            🪨 Carrying {carriedItem.type} (Click to throw)
           </Badge>
         )}
       </div>

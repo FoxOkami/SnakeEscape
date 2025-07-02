@@ -16,6 +16,8 @@ const GameCanvas: React.FC = () => {
     door,
     key,
     switches,
+    throwableItems,
+    carriedItem,
     levelSize,
     updateGame,
     isWalking
@@ -46,6 +48,38 @@ const GameCanvas: React.FC = () => {
       ctx.strokeStyle = '#2d3748';
       ctx.lineWidth = 2;
       ctx.strokeRect(switchObj.x, switchObj.y, switchObj.width, switchObj.height);
+    });
+
+    // Draw throwable items
+    throwableItems.forEach(item => {
+      if (item.isPickedUp && !item.isThrown) return; // Don't draw picked up items unless being thrown
+      
+      if (item.type === 'rock') {
+        // Draw rock as a gray/brown circle
+        ctx.fillStyle = '#8b7355';
+        ctx.beginPath();
+        ctx.arc(item.x + item.width / 2, item.y + item.height / 2, item.width / 2, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Add darker center for texture
+        ctx.fillStyle = '#6d5a47';
+        ctx.beginPath();
+        ctx.arc(item.x + item.width / 2, item.y + item.height / 2, item.width / 3, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Add pickup indicator if player is nearby and not carrying anything
+        if (!item.isPickedUp && !carriedItem) {
+          const distance = Math.sqrt(
+            Math.pow(player.position.x - item.x, 2) + 
+            Math.pow(player.position.y - item.y, 2)
+          );
+          if (distance < 50) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '12px Arial';
+            ctx.fillText('E', item.x + item.width / 2 - 4, item.y - 5);
+          }
+        }
+      }
     });
 
     // Draw key (if not collected)
@@ -146,7 +180,7 @@ const GameCanvas: React.FC = () => {
       ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
     }
 
-  }, [player, snakes, walls, door, key, switches, levelSize, gameState, isWalking]);
+  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking]);
 
   const gameLoop = useCallback((currentTime: number) => {
     const canvas = canvasRef.current;

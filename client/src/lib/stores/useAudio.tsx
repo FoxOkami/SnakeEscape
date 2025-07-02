@@ -4,28 +4,33 @@ interface AudioState {
   backgroundMusic: HTMLAudioElement | null;
   hitSound: HTMLAudioElement | null;
   successSound: HTMLAudioElement | null;
+  rockSound: HTMLAudioElement | null;
   isMuted: boolean;
   
   // Setter functions
   setBackgroundMusic: (music: HTMLAudioElement) => void;
   setHitSound: (sound: HTMLAudioElement) => void;
   setSuccessSound: (sound: HTMLAudioElement) => void;
+  setRockSound: (sound: HTMLAudioElement) => void;
   
   // Control functions
   toggleMute: () => void;
   playHit: () => void;
   playSuccess: () => void;
+  playRock: () => void;
 }
 
 export const useAudio = create<AudioState>((set, get) => ({
   backgroundMusic: null,
   hitSound: null,
   successSound: null,
+  rockSound: null,
   isMuted: true, // Start muted by default
   
   setBackgroundMusic: (music) => set({ backgroundMusic: music }),
   setHitSound: (sound) => set({ hitSound: sound }),
   setSuccessSound: (sound) => set({ successSound: sound }),
+  setRockSound: (sound) => set({ rockSound: sound }),
   
   toggleMute: () => {
     const { isMuted } = get();
@@ -68,6 +73,24 @@ export const useAudio = create<AudioState>((set, get) => ({
       successSound.currentTime = 0;
       successSound.play().catch(error => {
         console.log("Success sound play prevented:", error);
+      });
+    }
+  },
+  
+  playRock: () => {
+    const { rockSound, isMuted } = get();
+    if (rockSound) {
+      // If sound is muted, don't play anything
+      if (isMuted) {
+        console.log("Rock sound skipped (muted)");
+        return;
+      }
+      
+      // Clone the sound to allow overlapping playback
+      const soundClone = rockSound.cloneNode() as HTMLAudioElement;
+      soundClone.volume = 0.4;
+      soundClone.play().catch(error => {
+        console.log("Rock sound play prevented:", error);
       });
     }
   }

@@ -5,8 +5,8 @@ import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
 
 const SnakeRoom: React.FC = () => {
-  const { gameState, setKeyPressed } = useSnakeGame();
-  const { setBackgroundMusic, setHitSound, setSuccessSound } = useAudio();
+  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem } = useSnakeGame();
+  const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } = useAudio();
 
 
 
@@ -15,6 +15,7 @@ const SnakeRoom: React.FC = () => {
     const backgroundMusic = new Audio('/sounds/background.mp3');
     const hitSound = new Audio('/sounds/hit.mp3');
     const successSound = new Audio('/sounds/success.mp3');
+    const rockSound = new Audio('/sounds/hit.mp3'); // Using hit sound as placeholder for rock sound
 
     backgroundMusic.loop = true;
     backgroundMusic.volume = 0.3;
@@ -22,11 +23,12 @@ const SnakeRoom: React.FC = () => {
     setBackgroundMusic(backgroundMusic);
     setHitSound(hitSound);
     setSuccessSound(successSound);
+    setRockSound(rockSound);
 
     return () => {
       backgroundMusic.pause();
     };
-  }, [setBackgroundMusic, setHitSound, setSuccessSound]);
+  }, [setBackgroundMusic, setHitSound, setSuccessSound, setRockSound]);
 
   // Handle keyboard events
   useEffect(() => {
@@ -34,6 +36,18 @@ const SnakeRoom: React.FC = () => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
         event.preventDefault();
         setKeyPressed(event.code, true);
+      }
+      
+      // Handle pickup with E key
+      if (event.code === 'KeyE' && gameState === 'playing') {
+        event.preventDefault();
+        // Try to pickup nearby items (this will be handled in the game logic)
+        // For now, we'll trigger pickup for the first available item
+        const gameState_current = useSnakeGame.getState();
+        const nearbyItem = gameState_current.throwableItems.find(item => !item.isPickedUp);
+        if (nearbyItem && !gameState_current.carriedItem) {
+          pickupItem(nearbyItem.id);
+        }
       }
     };
 
@@ -51,7 +65,35 @@ const SnakeRoom: React.FC = () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [setKeyPressed]);
+  }, [setKeyPressed, gameState, pickupItem]);
+
+  // Handle mouse events for throwing
+  useEffect(() => {
+    const handleMouseClick = (event: MouseEvent) => {
+      if (gameState !== 'playing' || !carriedItem) return;
+      
+      // Get canvas element to calculate relative coordinates
+      const canvas = document.querySelector('canvas');
+      if (!canvas) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      
+      const targetPosition = {
+        x: (event.clientX - rect.left) * scaleX,
+        y: (event.clientY - rect.top) * scaleY
+      };
+      
+      throwItem(targetPosition);
+    };
+
+    document.addEventListener('click', handleMouseClick);
+    
+    return () => {
+      document.removeEventListener('click', handleMouseClick);
+    };
+  }, [gameState, carriedItem, throwItem]);
 
   return (
     <div 

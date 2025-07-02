@@ -1,4 +1,4 @@
-import { Level, Snake, Wall, Door, Key, Switch } from './types';
+import { Level, Snake, Wall, Door, Key, Switch, ThrowableItem } from './types';
 
 export const LEVELS: Level[] = [
   // Level 1: Simple introduction
@@ -36,7 +36,19 @@ export const LEVELS: Level[] = [
       }
     ],
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
-    key: { x: 100, y: 100, width: 20, height: 20, collected: false }
+    key: { x: 100, y: 100, width: 20, height: 20, collected: false },
+    throwableItems: [
+      {
+        id: 'rock1',
+        type: 'rock' as const,
+        x: 150, 
+        y: 450, 
+        width: 15, 
+        height: 15,
+        isPickedUp: false,
+        isThrown: false
+      }
+    ]
   },
   
   // Level 2: More complex with switches

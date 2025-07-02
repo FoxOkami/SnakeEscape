@@ -47,6 +47,23 @@ export interface Switch extends Rectangle {
   id: string;
 }
 
+export interface ThrowableItem extends Rectangle {
+  id: string;
+  type: 'rock' | 'bottle' | 'can';
+  isPickedUp: boolean;
+  isThrown: boolean;
+  velocity?: Position;
+  throwStartTime?: number;
+  throwDuration?: number; // in seconds
+  throwStartPos?: Position;
+  throwTargetPos?: Position;
+}
+
+export interface CarriedItem {
+  type: 'rock' | 'bottle' | 'can';
+  id: string;
+}
+
 export interface Level {
   id: number;
   name: string;
@@ -56,6 +73,7 @@ export interface Level {
   door: Door;
   key: Key;
   switches?: Switch[];
+  throwableItems?: ThrowableItem[];
   size: Size;
 }
 
@@ -70,5 +88,7 @@ export interface GameData {
   door: Door;
   key: Key;
   switches: Switch[];
+  throwableItems: ThrowableItem[];
+  carriedItem: CarriedItem | null;
   levelSize: Size;
 }

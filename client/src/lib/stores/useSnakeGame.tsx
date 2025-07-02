@@ -4,6 +4,7 @@ import { GameData, GameState, Player, Snake, Position, Wall, Door, Key, Switch }
 import { LEVELS } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
 import { updateSnake } from "../game/entities";
+import { useAudio } from "./useAudio";
 
 interface SnakeGameState extends GameData {
   // Actions
@@ -22,6 +23,10 @@ interface SnakeGameState extends GameData {
   currentVelocity: Position;
   targetVelocity: Position;
   isWalking: boolean;
+  
+  // Item actions
+  pickupItem: (itemId: string) => void;
+  throwItem: (targetPosition: Position) => void;
 }
 
 const PLAYER_SPEED = 200; // pixels per second
@@ -44,6 +49,8 @@ export const useSnakeGame = create<SnakeGameState>()(
     door: { x: 0, y: 0, width: 30, height: 40, isOpen: false },
     key: { x: 0, y: 0, width: 20, height: 20, collected: false },
     switches: [],
+    throwableItems: [],
+    carriedItem: null,
     levelSize: { width: 800, height: 600 },
     keysPressed: new Set(),
     currentVelocity: { x: 0, y: 0 },
@@ -110,6 +117,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         door: { ...level.door },
         key: { ...level.key },
         switches: level.switches ? level.switches.map(s => ({ ...s })) : [],
+        throwableItems: level.throwableItems ? level.throwableItems.map(item => ({ ...item })) : [],
+        carriedItem: null,
         levelSize: { ...level.size },
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
@@ -134,6 +143,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         door: { ...level.door },
         key: { ...level.key },
         switches: level.switches ? level.switches.map(s => ({ ...s })) : [],
+        throwableItems: level.throwableItems ? level.throwableItems.map(item => ({ ...item })) : [],
+        carriedItem: null,
         levelSize: { ...level.size },
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
@@ -166,6 +177,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         door: { ...level.door },
         key: { ...level.key },
         switches: level.switches ? level.switches.map(s => ({ ...s })) : [],
+        throwableItems: level.throwableItems ? level.throwableItems.map(item => ({ ...item })) : [],
+        carriedItem: null,
         levelSize: { ...level.size },
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
@@ -325,6 +338,43 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
 
+      // --- THROWN ITEM PHYSICS ---
+      const currentTime = performance.now() / 1000;
+      let updatedThrowableItems = state.throwableItems.map(item => {
+        if (item.isThrown && item.throwStartTime && item.throwDuration && item.throwStartPos && item.throwTargetPos) {
+          const elapsedTime = currentTime - item.throwStartTime;
+          const progress = Math.min(elapsedTime / item.throwDuration, 1);
+          
+          if (progress >= 1) {
+            // Item has landed - play sound
+            const { playRock } = useAudio.getState();
+            playRock();
+            
+            return {
+              ...item,
+              x: item.throwTargetPos.x - item.width / 2,
+              y: item.throwTargetPos.y - item.height / 2,
+              isThrown: false,
+              throwStartTime: undefined,
+              throwDuration: undefined,
+              throwStartPos: undefined,
+              throwTargetPos: undefined
+            };
+          } else {
+            // Interpolate position during flight
+            const x = item.throwStartPos.x + (item.throwTargetPos.x - item.throwStartPos.x) * progress;
+            const y = item.throwStartPos.y + (item.throwTargetPos.y - item.throwStartPos.y) * progress;
+            
+            return {
+              ...item,
+              x: x - item.width / 2,
+              y: y - item.height / 2
+            };
+          }
+        }
+        return item;
+      });
+
       // --- ITEM INTERACTIONS ---
       // Check key collection
       let updatedKey = state.key;
@@ -362,7 +412,61 @@ export const useSnakeGame = create<SnakeGameState>()(
         key: updatedKey,
         player: updatedPlayer,
         switches: updatedSwitches,
-        door: updatedDoor
+        door: updatedDoor,
+        throwableItems: updatedThrowableItems
+      });
+    },
+
+    pickupItem: (itemId: string) => {
+      const state = get();
+      if (state.carriedItem) return; // Already carrying something
+      
+      const item = state.throwableItems.find(item => item.id === itemId && !item.isPickedUp);
+      if (!item) return;
+      
+      const playerRect = {
+        x: state.player.position.x,
+        y: state.player.position.y,
+        width: state.player.size.width,
+        height: state.player.size.height
+      };
+      
+      // Check if player is close enough to pick up the item
+      if (checkAABBCollision(playerRect, item)) {
+        set({
+          throwableItems: state.throwableItems.map(i => 
+            i.id === itemId ? { ...i, isPickedUp: true } : i
+          ),
+          carriedItem: { type: item.type, id: item.id }
+        });
+      }
+    },
+
+    throwItem: (targetPosition: Position) => {
+      const state = get();
+      if (!state.carriedItem) return; // Not carrying anything
+      
+      const currentTime = performance.now() / 1000; // Convert to seconds
+      const throwDuration = 1.0; // 1 second flight time
+      
+      // Find the carried item in throwableItems array
+      const itemIndex = state.throwableItems.findIndex(item => item.id === state.carriedItem!.id);
+      if (itemIndex === -1) return;
+      
+      const thrownItem = state.throwableItems[itemIndex];
+      
+      set({
+        throwableItems: state.throwableItems.map((item, index) => 
+          index === itemIndex ? {
+            ...item,
+            isThrown: true,
+            throwStartTime: currentTime,
+            throwDuration: throwDuration,
+            throwStartPos: { ...state.player.position },
+            throwTargetPos: { ...targetPosition }
+          } : item
+        ),
+        carriedItem: null
       });
     }
   }))
