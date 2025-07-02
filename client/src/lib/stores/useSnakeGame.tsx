@@ -21,9 +21,11 @@ interface SnakeGameState extends GameData {
   // Movement state
   currentVelocity: Position;
   targetVelocity: Position;
+  isWalking: boolean;
 }
 
 const PLAYER_SPEED = 200; // pixels per second
+const WALKING_SPEED = 80; // pixels per second when walking (shift held)
 const ACCELERATION = 1200; // pixels per second squared
 
 export const useSnakeGame = create<SnakeGameState>()(
@@ -46,6 +48,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     keysPressed: new Set(),
     currentVelocity: { x: 0, y: 0 },
     targetVelocity: { x: 0, y: 0 },
+    isWalking: false,
 
     setKeyPressed: (key: string, pressed: boolean) => {
       set((state) => {
@@ -56,20 +59,24 @@ export const useSnakeGame = create<SnakeGameState>()(
           newKeysPressed.delete(key);
         }
         
+        // Check if walking (Shift key held)
+        const isWalking = newKeysPressed.has('ShiftLeft') || newKeysPressed.has('ShiftRight');
+        const moveSpeed = isWalking ? WALKING_SPEED : PLAYER_SPEED;
+        
         // Calculate target velocity based on current pressed keys
         const targetVelocity = { x: 0, y: 0 };
         
         if (newKeysPressed.has('ArrowUp') || newKeysPressed.has('KeyW')) {
-          targetVelocity.y -= PLAYER_SPEED;
+          targetVelocity.y -= moveSpeed;
         }
         if (newKeysPressed.has('ArrowDown') || newKeysPressed.has('KeyS')) {
-          targetVelocity.y += PLAYER_SPEED;
+          targetVelocity.y += moveSpeed;
         }
         if (newKeysPressed.has('ArrowLeft') || newKeysPressed.has('KeyA')) {
-          targetVelocity.x -= PLAYER_SPEED;
+          targetVelocity.x -= moveSpeed;
         }
         if (newKeysPressed.has('ArrowRight') || newKeysPressed.has('KeyD')) {
-          targetVelocity.x += PLAYER_SPEED;
+          targetVelocity.x += moveSpeed;
         }
         
         // Normalize diagonal movement to maintain consistent speed
@@ -81,7 +88,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         return { 
           keysPressed: newKeysPressed,
-          targetVelocity: targetVelocity
+          targetVelocity: targetVelocity,
+          isWalking: isWalking
         };
       });
     },
@@ -105,7 +113,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         levelSize: { ...level.size },
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
-        keysPressed: new Set()
+        keysPressed: new Set(),
+        isWalking: false
       });
     },
 
@@ -128,7 +137,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         levelSize: { ...level.size },
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
-        keysPressed: new Set()
+        keysPressed: new Set(),
+        isWalking: false
       });
     },
 
@@ -159,7 +169,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         levelSize: { ...level.size },
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
-        keysPressed: new Set()
+        keysPressed: new Set(),
+        isWalking: false
       });
     },
 

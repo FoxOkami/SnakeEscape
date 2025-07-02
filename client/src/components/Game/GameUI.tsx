@@ -14,7 +14,8 @@ const GameUI: React.FC = () => {
     startGame,
     resetGame,
     nextLevel,
-    returnToMenu
+    returnToMenu,
+    isWalking
   } = useSnakeGame();
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
@@ -151,6 +152,11 @@ const GameUI: React.FC = () => {
         {player.hasKey && (
           <Badge className="bg-yellow-600 text-white">
             🗝️ Key Collected
+          </Badge>
+        )}
+        {isWalking && (
+          <Badge className="bg-green-600 text-white">
+            🚶 Walking (Silent)
           </Badge>
         )}
       </div>
