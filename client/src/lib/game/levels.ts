@@ -19,7 +19,8 @@ export const LEVELS: Level[] = [
     ],
     snakes: [
       {
-        id: 'snake1',
+        id: 'guard1',
+        type: 'guard' as const,
         position: { x: 300, y: 300 },
         size: { width: 30, height: 30 },
         speed: 50,
@@ -32,7 +33,8 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 80,
         sightRange: 150,
-        isChasing: false
+        isChasing: false,
+        lostSightCooldown: 0
       }
     ],
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
@@ -71,7 +73,8 @@ export const LEVELS: Level[] = [
     ],
     snakes: [
       {
-        id: 'snake1',
+        id: 'stalker1',
+        type: 'stalker' as const,
         position: { x: 200, y: 400 },
         size: { width: 30, height: 30 },
         speed: 75,
@@ -85,11 +88,14 @@ export const LEVELS: Level[] = [
         currentPatrolIndex: 0,
         patrolDirection: 1,
         chaseSpeed: 120,
-        sightRange: 180,
-        isChasing: false
+        sightRange: 0, // Stalkers are blind
+        hearingRange: 200,
+        isChasing: false,
+        soundCooldown: 0
       },
       {
-        id: 'snake2',
+        id: 'burster1',
+        type: 'burster' as const,
         position: { x: 600, y: 200 },
         size: { width: 30, height: 30 },
         speed: 50,
@@ -102,7 +108,11 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 90,
         sightRange: 160,
-        isChasing: false
+        isChasing: false,
+        dashSpeed: 200,
+        isDashing: false,
+        dashDuration: 0.8,
+        lostSightCooldown: 0
       }
     ],
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
@@ -135,7 +145,8 @@ export const LEVELS: Level[] = [
     ],
     snakes: [
       {
-        id: 'snake1',
+        id: 'guard1',
+        type: 'guard' as const,
         position: { x: 150, y: 200 },
         size: { width: 30, height: 30 },
         speed: 100,
@@ -150,10 +161,12 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 150,
         sightRange: 200,
-        isChasing: false
+        isChasing: false,
+        lostSightCooldown: 0
       },
       {
-        id: 'snake2',
+        id: 'stalker1',
+        type: 'stalker' as const,
         position: { x: 400, y: 300 },
         size: { width: 30, height: 30 },
         speed: 75,
@@ -167,11 +180,14 @@ export const LEVELS: Level[] = [
         currentPatrolIndex: 0,
         patrolDirection: 1,
         chaseSpeed: 130,
-        sightRange: 180,
-        isChasing: false
+        sightRange: 0, // Stalkers are blind
+        hearingRange: 220,
+        isChasing: false,
+        soundCooldown: 0
       },
       {
-        id: 'snake3',
+        id: 'burster1',
+        type: 'burster' as const,
         position: { x: 600, y: 150 },
         size: { width: 30, height: 30 },
         speed: 50,
@@ -186,7 +202,11 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 100,
         sightRange: 160,
-        isChasing: false
+        isChasing: false,
+        dashSpeed: 250,
+        isDashing: false,
+        dashDuration: 1.0,
+        lostSightCooldown: 0
       }
     ],
     door: { x: 750, y: 500, width: 30, height: 40, isOpen: false },

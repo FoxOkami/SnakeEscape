@@ -310,9 +310,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         position: finalPosition
       };
 
+
+
       // --- SNAKE AI ---
       const updatedSnakes = state.snakes.map(snake => 
-        updateSnake(snake, state.walls, deltaTime, updatedPlayer)
+        updateSnake(snake, state.walls, deltaTime, updatedPlayer, [])
       );
 
       // --- COLLISION DETECTION ---

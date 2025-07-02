@@ -52,9 +52,16 @@ const GameUI: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-sm text-gray-400 space-y-2">
-            <p><strong>Controls:</strong> WASD or Arrow Keys to move</p>
+            <p><strong>Controls:</strong> WASD/Arrow Keys: Move, Shift: Walk silently</p>
+            <p><strong>Items:</strong> E: Pick up, Mouse Click: Throw items</p>
             <p><strong>Goal:</strong> Collect the key, activate switches, and escape!</p>
-            <p><strong>Warning:</strong> Don't touch the snakes!</p>
+            
+            <div className="mt-3 pt-2 border-t border-gray-600">
+              <p className="text-white font-semibold mb-2">Snake Types:</p>
+              <p className="text-purple-400 text-xs">🟣 Stalkers: Blind, but follow sounds</p>
+              <p className="text-red-400 text-xs">🔴 Guards: Patrol routes, chase when they see you</p>
+              <p className="text-orange-400 text-xs">🟠 Bursters: Fast dash attacks when spotted</p>
+            </div>
           </div>
           <div className="flex flex-col gap-2">
             <Button onClick={startGame} className="w-full bg-blue-600 hover:bg-blue-700">

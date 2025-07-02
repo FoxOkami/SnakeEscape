@@ -106,42 +106,72 @@ const GameCanvas: React.FC = () => {
       ctx.fillRect(door.x + 5, door.y + 15, 5, 10);
     }
 
-    // Draw snakes
+    // Draw snakes with different visuals for each type
     snakes.forEach(snake => {
-      // Different colors for chasing vs patrolling snakes
-      if (snake.isChasing) {
-        ctx.fillStyle = '#e53e3e'; // Red when chasing
-      } else {
-        ctx.fillStyle = '#38a169'; // Green when patrolling
+      let baseColor = '#2d3748';
+      let accentColor = '#ff6b6b';
+      let eyeColor = '#ff6b6b';
+      
+      // Different colors and indicators for each snake type
+      switch (snake.type) {
+        case 'stalker':
+          baseColor = snake.isChasing ? '#805ad5' : '#553c9a'; // Purple
+          accentColor = '#d69e2e'; // Gold accents
+          eyeColor = '#2d3748'; // No visible eyes (blind)
+          break;
+        case 'guard':
+          baseColor = snake.isChasing ? '#e53e3e' : '#c53030'; // Red
+          accentColor = '#f56565';
+          eyeColor = '#ff6b6b'; // Red eyes (good sight)
+          break;
+        case 'burster':
+          baseColor = snake.isDashing ? '#f6ad55' : '#dd6b20'; // Orange
+          accentColor = snake.isDashing ? '#fbb6ce' : '#e53e3e';
+          eyeColor = '#f6ad55'; // Orange eyes
+          break;
       }
+      
+      // Main body
+      ctx.fillStyle = baseColor;
       ctx.fillRect(snake.position.x, snake.position.y, snake.size.width, snake.size.height);
       
-      // Add snake pattern
-      if (snake.isChasing) {
-        ctx.fillStyle = '#c53030'; // Darker red pattern
-      } else {
-        ctx.fillStyle = '#2f855a'; // Green pattern
-      }
-      for (let i = 0; i < snake.size.width; i += 6) {
-        for (let j = 0; j < snake.size.height; j += 6) {
-          if ((i + j) % 12 === 0) {
-            ctx.fillRect(snake.position.x + i, snake.position.y + j, 3, 3);
-          }
+      // Body pattern based on type
+      ctx.fillStyle = accentColor;
+      if (snake.type === 'stalker') {
+        // Stripes for stalkers (sound-following pattern)
+        for (let i = 0; i < 3; i++) {
+          ctx.fillRect(snake.position.x + i * 8, snake.position.y + 2, 4, snake.size.height - 4);
         }
+      } else if (snake.type === 'guard') {
+        // Crosshatch for guards (patrol pattern)
+        ctx.fillRect(snake.position.x + 2, snake.position.y + 2, snake.size.width - 4, 4);
+        ctx.fillRect(snake.position.x + 2, snake.position.y + snake.size.height - 6, snake.size.width - 4, 4);
+      } else if (snake.type === 'burster') {
+        // Diamond shape for bursters (dash pattern)
+        ctx.fillRect(snake.position.x + snake.size.width/2 - 4, snake.position.y + 2, 8, 8);
+        ctx.fillRect(snake.position.x + snake.size.width/2 - 4, snake.position.y + snake.size.height - 10, 8, 8);
       }
       
-      // Snake eyes - glowing when chasing
-      if (snake.isChasing) {
-        ctx.fillStyle = '#ff6b6b'; // Bright red eyes when chasing
-      } else {
-        ctx.fillStyle = '#fc8181'; // Normal red eyes
+      // Add snake eyes (stalkers have no visible eyes)
+      if (snake.type !== 'stalker') {
+        ctx.fillStyle = eyeColor;
+        ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
+        ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
       }
-      ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
-      ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
       
-      // Draw sight range when chasing (for visual feedback)
-      if (snake.isChasing) {
-        ctx.strokeStyle = '#e53e3e';
+      // Special dash indicator for bursters
+      if (snake.type === 'burster' && snake.isDashing) {
+        ctx.fillStyle = '#fff5b4';
+        ctx.strokeStyle = '#f6ad55';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(snake.position.x + snake.size.width/2, snake.position.y + snake.size.height/2, snake.size.width/2 + 5, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+      
+      // Draw sight range when chasing (for visual feedback) - not for stalkers
+      if (snake.isChasing && snake.type !== 'stalker') {
+        ctx.strokeStyle = baseColor;
         ctx.lineWidth = 1;
         ctx.setLineDash([5, 5]);
         ctx.beginPath();

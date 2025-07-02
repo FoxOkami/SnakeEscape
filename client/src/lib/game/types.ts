@@ -19,6 +19,7 @@ export interface Player {
 
 export interface Snake {
   id: string;
+  type: 'stalker' | 'guard' | 'burster';
   position: Position;
   size: Size;
   speed: number;
@@ -28,8 +29,18 @@ export interface Snake {
   patrolDirection: number;
   chaseSpeed: number;
   sightRange: number;
+  hearingRange?: number; // For stalkers
   isChasing: boolean;
   chaseTarget?: Position;
+  lastHeardSound?: Position;
+  soundCooldown?: number;
+  dashSpeed?: number; // For bursters
+  isDashing?: boolean;
+  dashStartTime?: number;
+  dashDuration?: number;
+  dashTarget?: Position;
+  lastSeenPlayer?: Position;
+  lostSightCooldown?: number;
 }
 
 export interface Wall extends Rectangle {}
