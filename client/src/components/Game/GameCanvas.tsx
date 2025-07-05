@@ -5,6 +5,9 @@ const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>();
   const lastTimeRef = useRef<number>(0);
+  const fpsRef = useRef<number>(0);
+  const frameCountRef = useRef<number>(0);
+  const lastFpsTimeRef = useRef<number>(0);
 
 
   
@@ -20,7 +23,9 @@ const GameCanvas: React.FC = () => {
     carriedItem,
     levelSize,
     updateGame,
-    isWalking
+    isWalking,
+    currentVelocity,
+    targetVelocity
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -210,11 +215,42 @@ const GameCanvas: React.FC = () => {
       ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
     }
 
-  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking]);
+    // Debug Display - FPS Counter (bottom left)
+    ctx.fillStyle = '#00ff00';
+    ctx.font = '16px Arial';
+    ctx.fillText(`FPS: ${fpsRef.current}`, 10, levelSize.height - 10);
+
+    // Debug Display - Player Info (bottom right)
+    ctx.fillStyle = '#0088ff';
+    ctx.font = '14px Arial';
+    const playerX = Math.round(player.position.x);
+    const playerY = Math.round(player.position.y);
+    const velX = Math.round(currentVelocity.x);
+    const velY = Math.round(currentVelocity.y);
+    const targetX = Math.round(targetVelocity.x);
+    const targetY = Math.round(targetVelocity.y);
+    
+    const debugText1 = `Pos: (${playerX}, ${playerY})`;
+    const debugText2 = `Vel: (${velX}, ${velY})`;
+    const debugText3 = `Target: (${targetX}, ${targetY})`;
+    
+    ctx.fillText(debugText1, levelSize.width - 150, levelSize.height - 50);
+    ctx.fillText(debugText2, levelSize.width - 150, levelSize.height - 30);
+    ctx.fillText(debugText3, levelSize.width - 150, levelSize.height - 10);
+
+  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity]);
 
   const gameLoop = useCallback((currentTime: number) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
+    
+    // Calculate FPS
+    frameCountRef.current++;
+    if (currentTime - lastFpsTimeRef.current >= 1000) {
+      fpsRef.current = Math.round((frameCountRef.current * 1000) / (currentTime - lastFpsTimeRef.current));
+      frameCountRef.current = 0;
+      lastFpsTimeRef.current = currentTime;
+    }
     
     if (ctx) {
       draw(ctx);
@@ -241,7 +277,10 @@ const GameCanvas: React.FC = () => {
     canvas.height = levelSize.height;
 
     // Start game loop
-    lastTimeRef.current = performance.now();
+    const now = performance.now();
+    lastTimeRef.current = now;
+    lastFpsTimeRef.current = now;
+    frameCountRef.current = 0;
     animationFrameRef.current = requestAnimationFrame(gameLoop);
 
     return () => {

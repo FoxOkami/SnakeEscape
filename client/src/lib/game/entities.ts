@@ -7,15 +7,7 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
   // Convert deltaTime from milliseconds to seconds for calculations
   const dt = deltaTime / 1000;
   
-  // Debug logging - much less frequent
-  if (Math.random() < 0.001) { // Very occasional logging
-    console.log(`Snake ${snake.id} update:`, {
-      position: snake.position,
-      deltaTime: dt,
-      type: snake.type,
-      speed: snake.speed
-    });
-  }
+
 
   // Handle different snake types
   switch (snake.type) {
