@@ -29,9 +29,9 @@ interface SnakeGameState extends GameData {
   throwItem: (targetPosition: Position) => void;
 }
 
-const PLAYER_SPEED = 200; // pixels per second
-const WALKING_SPEED = 80; // pixels per second when walking (shift held)
-const ACCELERATION = 1200; // pixels per second squared
+const PLAYER_SPEED = 80; // pixels per second
+const WALKING_SPEED = 40; // pixels per second when walking (shift held)
+const ACCELERATION = 400; // pixels per second squared
 
 export const useSnakeGame = create<SnakeGameState>()(
   subscribeWithSelector((set, get) => ({
@@ -293,6 +293,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         finalPosition.x = newPlayerPosition.x;
       } else {
         finalVelocity.x = 0; // Stop horizontal movement when hitting wall
+        newVelocity.x = 0; // Also reset current velocity
       }
       
       // Check Y movement
@@ -311,6 +312,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         finalPosition.y = newPlayerPosition.y;
       } else {
         finalVelocity.y = 0; // Stop vertical movement when hitting wall
+        newVelocity.y = 0; // Also reset current velocity
       }
 
       let updatedPlayer = {
@@ -417,7 +419,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // --- UPDATE STATE ---
       set({
-        currentVelocity: finalVelocity,
+        currentVelocity: newVelocity, // Use the updated velocity that includes wall collision resets
         snakes: updatedSnakes,
         key: updatedKey,
         player: updatedPlayer,
