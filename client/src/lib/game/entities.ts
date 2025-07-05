@@ -138,6 +138,18 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
     snake.position = newPosition;
+  } else if (!snake.isChasing) {
+    // If blocked by wall during patrol, skip to next patrol point
+    snake.currentPatrolIndex += snake.patrolDirection;
+    
+    // Reverse direction if we've reached the end
+    if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
+      snake.currentPatrolIndex = snake.patrolPoints.length - 2;
+      snake.patrolDirection = -1;
+    } else if (snake.currentPatrolIndex < 0) {
+      snake.currentPatrolIndex = 1;
+      snake.patrolDirection = 1;
+    }
   }
 
   snake.direction = getDirectionVector(snake.position, targetPoint);
@@ -224,6 +236,18 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     // Check collision and update position
     if (!checkWallCollision(snake, newPosition, walls)) {
       snake.position = newPosition;
+    } else if (!canSeePlayer && !snake.lostSightCooldown) {
+      // If blocked by wall during patrol, skip to next patrol point
+      snake.currentPatrolIndex += snake.patrolDirection;
+      
+      // Reverse direction if we've reached the end
+      if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
+        snake.currentPatrolIndex = snake.patrolPoints.length - 2;
+        snake.patrolDirection = -1;
+      } else if (snake.currentPatrolIndex < 0) {
+        snake.currentPatrolIndex = 1;
+        snake.patrolDirection = 1;
+      }
     }
   }
 

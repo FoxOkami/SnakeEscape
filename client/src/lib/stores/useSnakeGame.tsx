@@ -274,6 +274,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         newVelocity.y = state.targetVelocity.y;
       }
       
+      // Debug acceleration
+      if (state.targetVelocity.x !== 0 || state.targetVelocity.y !== 0) {
+        console.log('Acceleration debug:', {
+          deltaTime,
+          maxAccel,
+          velDiff,
+          newVelocity,
+          targetVelocity: state.targetVelocity
+        });
+      }
+      
       // Calculate new player position based on velocity
       const newPlayerPosition = {
         x: state.player.position.x + newVelocity.x * deltaTime,
