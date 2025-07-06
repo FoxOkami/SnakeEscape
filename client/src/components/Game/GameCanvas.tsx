@@ -6,8 +6,8 @@ const GameCanvas: React.FC = () => {
   const animationFrameRef = useRef<number>();
   const lastTimeRef = useRef<number>(0);
   const fpsRef = useRef<number>(0);
-  const frameCountRef = useRef<number>(0);
-  const lastFpsTimeRef = useRef<number>(0);
+  const frameTimesRef = useRef<number[]>([]);
+  const lastFpsUpdateRef = useRef<number>(0);
 
 
   
@@ -244,12 +244,24 @@ const GameCanvas: React.FC = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     
-    // Calculate FPS
-    frameCountRef.current++;
-    if (currentTime - lastFpsTimeRef.current >= 1000) {
-      fpsRef.current = Math.round((frameCountRef.current * 1000) / (currentTime - lastFpsTimeRef.current));
-      frameCountRef.current = 0;
-      lastFpsTimeRef.current = currentTime;
+    // Calculate FPS using rolling average of frame times
+    if (lastTimeRef.current > 0) {
+      const frameDelta = currentTime - lastTimeRef.current;
+      frameTimesRef.current.push(frameDelta);
+      
+      // Keep only last 60 frame times for rolling average
+      if (frameTimesRef.current.length > 60) {
+        frameTimesRef.current.shift();
+      }
+      
+      // Update FPS display every 100ms
+      if (currentTime - lastFpsUpdateRef.current >= 100) {
+        if (frameTimesRef.current.length > 0) {
+          const averageFrameTime = frameTimesRef.current.reduce((sum, time) => sum + time, 0) / frameTimesRef.current.length;
+          fpsRef.current = Math.round(1000 / averageFrameTime);
+        }
+        lastFpsUpdateRef.current = currentTime;
+      }
     }
     
     if (ctx) {
@@ -263,6 +275,8 @@ const GameCanvas: React.FC = () => {
       if (deltaTime < 100 && deltaTime > 0) { // Cap delta time to prevent large jumps (100ms)
         updateGame(deltaTime);
       }
+    } else {
+      lastTimeRef.current = currentTime;
     }
 
     animationFrameRef.current = requestAnimationFrame(gameLoop);
@@ -279,8 +293,8 @@ const GameCanvas: React.FC = () => {
     // Start game loop
     const now = performance.now();
     lastTimeRef.current = now;
-    lastFpsTimeRef.current = now;
-    frameCountRef.current = 0;
+    lastFpsUpdateRef.current = now;
+    frameTimesRef.current = [];
     animationFrameRef.current = requestAnimationFrame(gameLoop);
 
     return () => {
