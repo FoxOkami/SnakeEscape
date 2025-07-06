@@ -168,9 +168,22 @@ export function slideAlongWall(
     return from;
   }
   
-  // Try moving horizontally only
+  // Try full movement first to see if it's actually blocked
+  const fullMovementRect = {
+    x: intendedPosition.x,
+    y: intendedPosition.y,
+    width: entitySize.width,
+    height: entitySize.height
+  };
+  
+  // If full movement is possible, use it
+  if (!walls.some(wall => checkAABBCollision(fullMovementRect, wall))) {
+    return intendedPosition;
+  }
+  
+  // Try moving horizontally only (maintain full horizontal speed)
   const horizontalOnlyPos = {
-    x: from.x + movement.x,
+    x: intendedPosition.x,
     y: from.y
   };
   
@@ -183,10 +196,10 @@ export function slideAlongWall(
   
   const canMoveHorizontally = !walls.some(wall => checkAABBCollision(horizontalRect, wall));
   
-  // Try moving vertically only
+  // Try moving vertically only (maintain full vertical speed)
   const verticalOnlyPos = {
     x: from.x,
-    y: from.y + movement.y
+    y: intendedPosition.y
   };
   
   const verticalRect = {
@@ -198,7 +211,7 @@ export function slideAlongWall(
   
   const canMoveVertically = !walls.some(wall => checkAABBCollision(verticalRect, wall));
   
-  // Prioritize the direction with larger movement component
+  // Prioritize the direction with larger movement component to maintain speed
   const absMovementX = Math.abs(movement.x);
   const absMovementY = Math.abs(movement.y);
   
@@ -218,46 +231,6 @@ export function slideAlongWall(
     }
   }
   
-  // If neither direction works, try smaller incremental movements
-  const steps = 10;
-  for (let i = steps; i > 0; i--) {
-    const fraction = i / steps;
-    
-    // Try partial horizontal movement
-    const partialHorizontalPos = {
-      x: from.x + movement.x * fraction,
-      y: from.y
-    };
-    
-    const partialHorizontalRect = {
-      x: partialHorizontalPos.x,
-      y: partialHorizontalPos.y,
-      width: entitySize.width,
-      height: entitySize.height
-    };
-    
-    if (!walls.some(wall => checkAABBCollision(partialHorizontalRect, wall))) {
-      return partialHorizontalPos;
-    }
-    
-    // Try partial vertical movement
-    const partialVerticalPos = {
-      x: from.x,
-      y: from.y + movement.y * fraction
-    };
-    
-    const partialVerticalRect = {
-      x: partialVerticalPos.x,
-      y: partialVerticalPos.y,
-      width: entitySize.width,
-      height: entitySize.height
-    };
-    
-    if (!walls.some(wall => checkAABBCollision(partialVerticalRect, wall))) {
-      return partialVerticalPos;
-    }
-  }
-  
-  // If all else fails, stay in place
+  // If neither direction works, stay in place
   return from;
 }

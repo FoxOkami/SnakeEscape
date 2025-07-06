@@ -89,9 +89,8 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   // Move toward target with wall avoidance (use chase speed when chasing sounds)
   const moveSpeed = snake.isChasing && snake.chaseSpeed ? snake.chaseSpeed : snake.speed;
   
-  // Use smart pathfinding to avoid walls
-  const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
-  const newPosition = moveTowards(snake.position, smartTarget, moveSpeed * dt);
+  // Move toward target
+  const newPosition = moveTowards(snake.position, targetPoint, moveSpeed * dt);
   
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
@@ -99,10 +98,7 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   } else if (snake.isChasing) {
     // If blocked by wall while chasing, try sliding along the wall
     const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
-    // Only update position if sliding worked and doesn't cause collision
-    if (!checkWallCollision(snake, slidePosition, walls)) {
-      snake.position = slidePosition;
-    }
+    snake.position = slidePosition;
   }
   
   snake.direction = getDirectionVector(snake.position, targetPoint);
@@ -157,9 +153,8 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
   // Calculate movement speed
   const moveSpeed = snake.isChasing ? snake.chaseSpeed : snake.speed;
   
-  // Move toward target with wall avoidance
-  const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
-  const newPosition = moveTowards(snake.position, smartTarget, moveSpeed * dt);
+  // Move toward target
+  const newPosition = moveTowards(snake.position, targetPoint, moveSpeed * dt);
   
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
@@ -167,21 +162,26 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
   } else if (snake.isChasing) {
     // If blocked by wall while chasing, try sliding along the wall
     const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
-    // Only update position if sliding worked and doesn't cause collision
-    if (!checkWallCollision(snake, slidePosition, walls)) {
-      snake.position = slidePosition;
-    }
+    snake.position = slidePosition;
   } else {
-    // If blocked by wall during patrol, skip to next patrol point
-    snake.currentPatrolIndex += snake.patrolDirection;
+    // Use smart pathfinding for patrol behavior
+    const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
+    const smartNewPosition = moveTowards(snake.position, smartTarget, moveSpeed * dt);
     
-    // Reverse direction if we've reached the end
-    if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
-      snake.currentPatrolIndex = snake.patrolPoints.length - 2;
-      snake.patrolDirection = -1;
-    } else if (snake.currentPatrolIndex < 0) {
-      snake.currentPatrolIndex = 1;
-      snake.patrolDirection = 1;
+    if (!checkWallCollision(snake, smartNewPosition, walls)) {
+      snake.position = smartNewPosition;
+    } else {
+      // If still blocked during patrol, skip to next patrol point
+      snake.currentPatrolIndex += snake.patrolDirection;
+      
+      // Reverse direction if we've reached the end
+      if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
+        snake.currentPatrolIndex = snake.patrolPoints.length - 2;
+        snake.patrolDirection = -1;
+      } else if (snake.currentPatrolIndex < 0) {
+        snake.currentPatrolIndex = 1;
+        snake.patrolDirection = 1;
+      }
     }
   }
 
@@ -262,10 +262,9 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     snake.lastSeenPlayer = { ...player.position };
   }
 
-  // If not dashing, move normally with wall avoidance
+  // If not dashing, move normally
   if (!snake.isDashing) {
-    const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
-    const newPosition = moveTowards(snake.position, smartTarget, snake.speed * dt);
+    const newPosition = moveTowards(snake.position, targetPoint, snake.speed * dt);
     
     // Check collision and update position
     if (!checkWallCollision(snake, newPosition, walls)) {
@@ -273,21 +272,26 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     } else if (snake.isChasing) {
       // If blocked by wall while chasing, try sliding along the wall
       const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
-      // Only update position if sliding worked and doesn't cause collision
-      if (!checkWallCollision(snake, slidePosition, walls)) {
-        snake.position = slidePosition;
-      }
+      snake.position = slidePosition;
     } else {
-      // If blocked by wall during patrol, skip to next patrol point
-      snake.currentPatrolIndex += snake.patrolDirection;
+      // Use smart pathfinding for patrol behavior
+      const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
+      const smartNewPosition = moveTowards(snake.position, smartTarget, snake.speed * dt);
       
-      // Reverse direction if we've reached the end
-      if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
-        snake.currentPatrolIndex = snake.patrolPoints.length - 2;
-        snake.patrolDirection = -1;
-      } else if (snake.currentPatrolIndex < 0) {
-        snake.currentPatrolIndex = 1;
-        snake.patrolDirection = 1;
+      if (!checkWallCollision(snake, smartNewPosition, walls)) {
+        snake.position = smartNewPosition;
+      } else {
+        // If still blocked during patrol, skip to next patrol point
+        snake.currentPatrolIndex += snake.patrolDirection;
+        
+        // Reverse direction if we've reached the end
+        if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
+          snake.currentPatrolIndex = snake.patrolPoints.length - 2;
+          snake.patrolDirection = -1;
+        } else if (snake.currentPatrolIndex < 0) {
+          snake.currentPatrolIndex = 1;
+          snake.patrolDirection = 1;
+        }
       }
     }
   }
