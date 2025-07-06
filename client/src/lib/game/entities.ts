@@ -1,5 +1,5 @@
 import { Snake, Player, Wall, Position } from "./types";
-import { checkAABBCollision, getDistance, moveTowards, hasLineOfSight, getDirectionVector, findPathAroundWalls } from "./collision";
+import { checkAABBCollision, getDistance, moveTowards, hasLineOfSight, getDirectionVector, findPathAroundWalls, slideAlongWall } from "./collision";
 
 export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[]): Snake {
   const currentTime = Date.now();
@@ -96,6 +96,10 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
     snake.position = newPosition;
+  } else if (snake.isChasing) {
+    // If blocked by wall while chasing, try sliding along the wall
+    const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
+    snake.position = slidePosition;
   }
   
   snake.direction = getDirectionVector(snake.position, targetPoint);
@@ -157,7 +161,11 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
     snake.position = newPosition;
-  } else if (!snake.isChasing) {
+  } else if (snake.isChasing) {
+    // If blocked by wall while chasing, try sliding along the wall
+    const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
+    snake.position = slidePosition;
+  } else {
     // If blocked by wall during patrol, skip to next patrol point
     snake.currentPatrolIndex += snake.patrolDirection;
     
@@ -256,7 +264,11 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     // Check collision and update position
     if (!checkWallCollision(snake, newPosition, walls)) {
       snake.position = newPosition;
-    } else if (!canSeePlayer && !snake.lostSightCooldown) {
+    } else if (snake.isChasing) {
+      // If blocked by wall while chasing, try sliding along the wall
+      const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
+      snake.position = slidePosition;
+    } else {
       // If blocked by wall during patrol, skip to next patrol point
       snake.currentPatrolIndex += snake.patrolDirection;
       

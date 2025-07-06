@@ -150,3 +150,69 @@ export function findPathAroundWalls(
   // If all alternatives fail, return current position (stay put)
   return from;
 }
+
+export function slideAlongWall(
+  from: Position,
+  intendedPosition: Position,
+  walls: Rectangle[],
+  entitySize: { width: number; height: number }
+): Position {
+  // Calculate movement vector
+  const movement = {
+    x: intendedPosition.x - from.x,
+    y: intendedPosition.y - from.y
+  };
+  
+  // Try moving horizontally only
+  const horizontalOnlyPos = {
+    x: from.x + movement.x,
+    y: from.y
+  };
+  
+  const horizontalRect = {
+    x: horizontalOnlyPos.x - entitySize.width / 2,
+    y: horizontalOnlyPos.y - entitySize.height / 2,
+    width: entitySize.width,
+    height: entitySize.height
+  };
+  
+  const canMoveHorizontally = !walls.some(wall => checkAABBCollision(horizontalRect, wall));
+  
+  // Try moving vertically only
+  const verticalOnlyPos = {
+    x: from.x,
+    y: from.y + movement.y
+  };
+  
+  const verticalRect = {
+    x: verticalOnlyPos.x - entitySize.width / 2,
+    y: verticalOnlyPos.y - entitySize.height / 2,
+    width: entitySize.width,
+    height: entitySize.height
+  };
+  
+  const canMoveVertically = !walls.some(wall => checkAABBCollision(verticalRect, wall));
+  
+  // Prioritize the direction with larger movement component
+  const absMovementX = Math.abs(movement.x);
+  const absMovementY = Math.abs(movement.y);
+  
+  if (absMovementX > absMovementY) {
+    // Horizontal movement is dominant
+    if (canMoveHorizontally) {
+      return horizontalOnlyPos;
+    } else if (canMoveVertically) {
+      return verticalOnlyPos;
+    }
+  } else {
+    // Vertical movement is dominant
+    if (canMoveVertically) {
+      return verticalOnlyPos;
+    } else if (canMoveHorizontally) {
+      return horizontalOnlyPos;
+    }
+  }
+  
+  // If neither direction works, stay in place
+  return from;
+}
