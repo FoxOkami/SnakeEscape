@@ -39,9 +39,9 @@ interface SnakeGameState extends GameData {
   throwItem: (targetPosition: Position) => void;
 }
 
-const PLAYER_SPEED = 120; // pixels per second
-const WALKING_SPEED = 60; // pixels per second when walking (shift held)
-const ACCELERATION = 600; // pixels per second squared
+const PLAYER_SPEED = 0.2; // pixels per second
+const WALKING_SPEED = 0.1; // pixels per second when walking (shift held)
+const ACCELERATION = 1; // pixels per second squared
 
 export const useSnakeGame = create<SnakeGameState>()(
   subscribeWithSelector((set, get) => ({
@@ -338,8 +338,15 @@ export const useSnakeGame = create<SnakeGameState>()(
       };
 
       // --- SNAKE AI ---
+      // Generate player sounds for stalker snakes when moving
+      const playerSounds: Position[] = [];
+      const playerSpeed = Math.sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
+      if (playerSpeed > 10) { // Player makes sound when moving at reasonable speed
+        playerSounds.push(updatedPlayer.position);
+      }
+      
       const updatedSnakes = state.snakes.map((snake) =>
-        updateSnake(snake, state.walls, deltaTime, updatedPlayer, []),
+        updateSnake(snake, state.walls, deltaTime, updatedPlayer, playerSounds),
       );
 
       // --- COLLISION DETECTION ---

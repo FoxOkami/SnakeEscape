@@ -29,6 +29,11 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   let nearestSound: Position | null = null;
   let nearestSoundDistance = Infinity;
   
+  // Debug logging for stalker snakes
+  if (sounds && sounds.length > 0 && Math.random() < 0.01) {
+    console.log(`Stalker ${snake.id}: Received ${sounds.length} sounds, hearing range: ${snake.hearingRange}`);
+  }
+  
   // Check for sounds within hearing range
   if (sounds && snake.hearingRange) {
     for (const sound of sounds) {
@@ -36,6 +41,11 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       if (distance <= snake.hearingRange && distance < nearestSoundDistance) {
         nearestSound = sound;
         nearestSoundDistance = distance;
+        
+        // Debug log when sound is detected
+        if (Math.random() < 0.01) {
+          console.log(`Stalker ${snake.id}: Sound detected at distance ${Math.round(distance)}`);
+        }
       }
     }
   }
