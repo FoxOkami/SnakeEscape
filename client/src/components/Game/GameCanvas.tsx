@@ -218,7 +218,8 @@ const GameCanvas: React.FC = () => {
     // Debug Display - FPS Counter (bottom left)
     ctx.fillStyle = '#00ff00';
     ctx.font = '16px Arial';
-    ctx.fillText(`FPS: ${fpsRef.current}`, 10, levelSize.height - 10);
+    const fpsDisplay = fpsRef.current > 0 ? fpsRef.current : '--';
+    ctx.fillText(`FPS: ${fpsDisplay}`, 10, levelSize.height - 10);
 
     // Debug Display - Player Info (bottom right)
     ctx.fillStyle = '#0088ff';
@@ -244,21 +245,27 @@ const GameCanvas: React.FC = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     
-    // Calculate FPS using rolling average of frame times
+    // Calculate FPS using proper frame timing
     if (lastTimeRef.current > 0) {
       const frameDelta = currentTime - lastTimeRef.current;
-      frameTimesRef.current.push(frameDelta);
       
-      // Keep only last 60 frame times for rolling average
-      if (frameTimesRef.current.length > 60) {
-        frameTimesRef.current.shift();
+      // Only add frame time if it's reasonable (not from window focus/blur)
+      if (frameDelta > 0 && frameDelta < 100) { // Between 0ms and 100ms
+        frameTimesRef.current.push(frameDelta);
+        
+        // Keep only last 30 frame times for rolling average
+        if (frameTimesRef.current.length > 30) {
+          frameTimesRef.current.shift();
+        }
       }
       
-      // Update FPS display every 100ms
-      if (currentTime - lastFpsUpdateRef.current >= 100) {
-        if (frameTimesRef.current.length > 0) {
+      // Update FPS display every 200ms
+      if (currentTime - lastFpsUpdateRef.current >= 200) {
+        if (frameTimesRef.current.length >= 5) { // Need at least 5 samples
           const averageFrameTime = frameTimesRef.current.reduce((sum, time) => sum + time, 0) / frameTimesRef.current.length;
           fpsRef.current = Math.round(1000 / averageFrameTime);
+        } else {
+          fpsRef.current = 0; // Not enough samples
         }
         lastFpsUpdateRef.current = currentTime;
       }
@@ -297,10 +304,39 @@ const GameCanvas: React.FC = () => {
     frameTimesRef.current = [];
     animationFrameRef.current = requestAnimationFrame(gameLoop);
 
+    // Handle window focus/blur events to reset FPS tracking
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Window is hidden, clear frame times
+        frameTimesRef.current = [];
+      } else {
+        // Window is visible again, reset timing
+        const now = performance.now();
+        lastTimeRef.current = now;
+        lastFpsUpdateRef.current = now;
+        frameTimesRef.current = [];
+        fpsRef.current = 0;
+      }
+    };
+
+    const handleFocus = () => {
+      // Reset timing when window regains focus
+      const now = performance.now();
+      lastTimeRef.current = now;
+      lastFpsUpdateRef.current = now;
+      frameTimesRef.current = [];
+      fpsRef.current = 0;
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [levelSize, gameLoop]);
 
