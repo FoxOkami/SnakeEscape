@@ -338,10 +338,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       };
 
       // --- SNAKE AI ---
-      // Generate player sounds for stalker snakes when moving
+      // Generate player sounds for stalker snakes when not walking stealthily
       const playerSounds: Position[] = [];
-      const playerSpeed = Math.sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
-      if (playerSpeed > 10) { // Player makes sound when moving at reasonable speed
+      const isMoving = (newVelocity.x !== 0 || newVelocity.y !== 0);
+      if (isMoving && !state.isWalking) { // Player makes sound when moving normally (not walking stealthily)
         playerSounds.push(updatedPlayer.position);
       }
       
