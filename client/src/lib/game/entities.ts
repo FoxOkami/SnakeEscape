@@ -54,21 +54,37 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     // Reset sound cooldown since we're actively hearing the player
     snake.soundCooldown = 0;
   } else if (snake.lastHeardSound && snake.isChasing) {
-    // Continue chasing toward last heard sound for a short time
+    // Continue chasing toward last heard sound
     targetPoint = snake.lastHeardSound;
     
-    // Start cooldown when we lose the sound
-    if (!snake.soundCooldown) {
-      snake.soundCooldown = 3.0; // 3 seconds to search the last known location
+    const distanceToSound = getDistance(snake.position, targetPoint);
+    
+    // If we haven't reached the last known location yet, keep moving toward it
+    if (distanceToSound > 25) {
+      // Still moving toward the last heard sound
+      if (!snake.soundCooldown) {
+        snake.soundCooldown = 5.0; // Give more time to reach the location
+        console.log(`Stalker ${snake.id}: Moving toward last sound at distance ${Math.round(distanceToSound)}`);
+      }
     } else {
-      snake.soundCooldown -= dt;
-      
-      // Stop chasing if we've searched long enough or reached the location
-      const distanceToSound = getDistance(snake.position, targetPoint);
-      if (snake.soundCooldown <= 0 || distanceToSound < 30) {
-        snake.lastHeardSound = undefined;
-        snake.isChasing = false;
-        snake.soundCooldown = 0;
+      // We've reached the last known location, start searching
+      if (!snake.soundCooldown || snake.soundCooldown > 3.0) {
+        snake.soundCooldown = 3.0; // 3 seconds to search at this location
+        console.log(`Stalker ${snake.id}: Reached last sound location, starting 3-second search`);
+      } else {
+        snake.soundCooldown -= dt;
+        
+        if (Math.random() < 0.02) { // Occasional debug
+          console.log(`Stalker ${snake.id}: Searching... ${snake.soundCooldown.toFixed(1)}s remaining`);
+        }
+        
+        // Stop chasing after searching for 3 seconds
+        if (snake.soundCooldown <= 0) {
+          console.log(`Stalker ${snake.id}: Search complete, returning to patrol`);
+          snake.lastHeardSound = undefined;
+          snake.isChasing = false;
+          snake.soundCooldown = 0;
+        }
       }
     }
   } else {
