@@ -1,5 +1,5 @@
 import { Snake, Player, Wall, Position } from "./types";
-import { checkAABBCollision, getDistance, moveTowards, hasLineOfSight, getDirectionVector } from "./collision";
+import { checkAABBCollision, getDistance, moveTowards, hasLineOfSight, getDirectionVector, findPathAroundWalls } from "./collision";
 
 export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[]): Snake {
   const currentTime = Date.now();
@@ -64,23 +64,16 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       // Still moving toward the last heard sound
       if (!snake.soundCooldown) {
         snake.soundCooldown = 5.0; // Give more time to reach the location
-        console.log(`Stalker ${snake.id}: Moving toward last sound at distance ${Math.round(distanceToSound)}`);
       }
     } else {
       // We've reached the last known location, start searching
       if (!snake.soundCooldown || snake.soundCooldown > 3.0) {
         snake.soundCooldown = 3.0; // 3 seconds to search at this location
-        console.log(`Stalker ${snake.id}: Reached last sound location, starting 3-second search`);
       } else {
         snake.soundCooldown -= dt;
         
-        if (Math.random() < 0.02) { // Occasional debug
-          console.log(`Stalker ${snake.id}: Searching... ${snake.soundCooldown.toFixed(1)}s remaining`);
-        }
-        
         // Stop chasing after searching for 3 seconds
         if (snake.soundCooldown <= 0) {
-          console.log(`Stalker ${snake.id}: Search complete, returning to patrol`);
           snake.lastHeardSound = undefined;
           snake.isChasing = false;
           snake.soundCooldown = 0;
@@ -93,9 +86,12 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     targetPoint = getPatrolTarget(snake);
   }
   
-  // Move toward target (use chase speed when chasing sounds)
+  // Move toward target with wall avoidance (use chase speed when chasing sounds)
   const moveSpeed = snake.isChasing && snake.chaseSpeed ? snake.chaseSpeed : snake.speed;
-  const newPosition = moveTowards(snake.position, targetPoint, moveSpeed * dt);
+  
+  // Use smart pathfinding to avoid walls
+  const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
+  const newPosition = moveTowards(snake.position, smartTarget, moveSpeed * dt);
   
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
@@ -154,8 +150,9 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
   // Calculate movement speed
   const moveSpeed = snake.isChasing ? snake.chaseSpeed : snake.speed;
   
-  // Move toward target
-  const newPosition = moveTowards(snake.position, targetPoint, moveSpeed * dt);
+  // Move toward target with wall avoidance
+  const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
+  const newPosition = moveTowards(snake.position, smartTarget, moveSpeed * dt);
   
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
@@ -251,9 +248,10 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     snake.lastSeenPlayer = { ...player.position };
   }
 
-  // If not dashing, move normally
+  // If not dashing, move normally with wall avoidance
   if (!snake.isDashing) {
-    const newPosition = moveTowards(snake.position, targetPoint, snake.speed * dt);
+    const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
+    const newPosition = moveTowards(snake.position, smartTarget, snake.speed * dt);
     
     // Check collision and update position
     if (!checkWallCollision(snake, newPosition, walls)) {

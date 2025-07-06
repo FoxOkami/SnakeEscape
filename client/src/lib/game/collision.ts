@@ -86,3 +86,67 @@ export function getDirectionVector(from: Position, to: Position): Position {
     y: (to.y - from.y) / distance
   };
 }
+
+export function findPathAroundWalls(
+  from: Position, 
+  to: Position, 
+  walls: Rectangle[], 
+  entitySize: { width: number; height: number }
+): Position {
+  // First try direct path
+  const directDirection = getDirectionVector(from, to);
+  const testPos = {
+    x: from.x + directDirection.x * 10,
+    y: from.y + directDirection.y * 10
+  };
+  
+  // Check if direct path is blocked
+  const entityRect = {
+    x: testPos.x - entitySize.width / 2,
+    y: testPos.y - entitySize.height / 2,
+    width: entitySize.width,
+    height: entitySize.height
+  };
+  
+  const isDirectPathBlocked = walls.some(wall => checkAABBCollision(entityRect, wall));
+  
+  if (!isDirectPathBlocked) {
+    return testPos;
+  }
+  
+  // Try alternative paths by checking perpendicular directions
+  const alternatives = [
+    { x: directDirection.x + 0.5, y: directDirection.y }, // Right bias
+    { x: directDirection.x - 0.5, y: directDirection.y }, // Left bias
+    { x: directDirection.x, y: directDirection.y + 0.5 }, // Down bias
+    { x: directDirection.x, y: directDirection.y - 0.5 }, // Up bias
+  ];
+  
+  for (const altDirection of alternatives) {
+    // Normalize the alternative direction
+    const altLength = Math.sqrt(altDirection.x * altDirection.x + altDirection.y * altDirection.y);
+    const normalizedAlt = {
+      x: altDirection.x / altLength,
+      y: altDirection.y / altLength
+    };
+    
+    const altTestPos = {
+      x: from.x + normalizedAlt.x * 10,
+      y: from.y + normalizedAlt.y * 10
+    };
+    
+    const altEntityRect = {
+      x: altTestPos.x - entitySize.width / 2,
+      y: altTestPos.y - entitySize.height / 2,
+      width: entitySize.width,
+      height: entitySize.height
+    };
+    
+    if (!walls.some(wall => checkAABBCollision(altEntityRect, wall))) {
+      return altTestPos;
+    }
+  }
+  
+  // If all alternatives fail, return current position (stay put)
+  return from;
+}
