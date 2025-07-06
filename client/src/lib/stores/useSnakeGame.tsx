@@ -39,9 +39,9 @@ interface SnakeGameState extends GameData {
   throwItem: (targetPosition: Position) => void;
 }
 
-const PLAYER_SPEED = 0.16; // pixels per second
-const WALKING_SPEED = 0.08; // pixels per second when walking (shift held)
-const ACCELERATION = 0.8; // pixels per second squared
+const PLAYER_SPEED = 120; // pixels per second
+const WALKING_SPEED = 60; // pixels per second when walking (shift held)
+const ACCELERATION = 600; // pixels per second squared
 
 export const useSnakeGame = create<SnakeGameState>()(
   subscribeWithSelector((set, get) => ({

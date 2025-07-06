@@ -253,32 +253,17 @@ const GameCanvas: React.FC = () => {
       if (frameDelta > 0 && frameDelta < 100) { // Between 0ms and 100ms
         frameTimesRef.current.push(frameDelta);
         
-        // Keep only last 30 frame times for rolling average
-        if (frameTimesRef.current.length > 30) {
+        // Keep only last 60 frame times for rolling average
+        if (frameTimesRef.current.length > 60) {
           frameTimesRef.current.shift();
         }
       }
       
-      // Debug: log occasionally to see if we're getting frame times
-      if (Math.random() < 0.01) {
-        console.log('FPS Debug:', {
-          frameDelta,
-          frameTimesLength: frameTimesRef.current.length,
-          currentFPS: fpsRef.current
-        });
-      }
-      
-      // Update FPS display every 100ms
-      if (currentTime - lastFpsUpdateRef.current >= 100) {
-        if (frameTimesRef.current.length >= 3) { // Need at least 3 samples
+      // Update FPS display every 500ms for stability
+      if (currentTime - lastFpsUpdateRef.current >= 500) {
+        if (frameTimesRef.current.length >= 10) { // Need at least 10 samples
           const averageFrameTime = frameTimesRef.current.reduce((sum, time) => sum + time, 0) / frameTimesRef.current.length;
           fpsRef.current = Math.round(1000 / averageFrameTime);
-        } else if (frameTimesRef.current.length > 0) {
-          // Use what we have if we have at least 1 sample
-          const averageFrameTime = frameTimesRef.current.reduce((sum, time) => sum + time, 0) / frameTimesRef.current.length;
-          fpsRef.current = Math.round(1000 / averageFrameTime);
-        } else {
-          fpsRef.current = 0; // No samples yet
         }
         lastFpsUpdateRef.current = currentTime;
       }
@@ -292,8 +277,12 @@ const GameCanvas: React.FC = () => {
       const deltaTime = currentTime - lastTimeRef.current; // Keep in milliseconds
       lastTimeRef.current = currentTime;
 
-      if (deltaTime < 100 && deltaTime > 0) { // Cap delta time to prevent large jumps (100ms)
-        updateGame(deltaTime);
+      // Fixed timestep for smooth 60fps animation
+      const targetFrameTime = 1000 / 60; // 16.67ms for 60fps
+      const clampedDeltaTime = Math.min(deltaTime, targetFrameTime * 2); // Cap at 2 frames max
+
+      if (clampedDeltaTime > 0) {
+        updateGame(clampedDeltaTime);
       }
     } else {
       lastTimeRef.current = currentTime;
@@ -317,18 +306,14 @@ const GameCanvas: React.FC = () => {
     frameTimesRef.current = [];
     animationFrameRef.current = requestAnimationFrame(gameLoop);
 
-    // Handle window focus/blur events to reset FPS tracking
+    // Handle window focus/blur events to reset timing only
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // Window is hidden, clear frame times
-        frameTimesRef.current = [];
-      } else {
-        // Window is visible again, reset timing
+      if (!document.hidden) {
+        // Window is visible again, reset timing but keep some frame history
         const now = performance.now();
         lastTimeRef.current = now;
         lastFpsUpdateRef.current = now;
-        frameTimesRef.current = [];
-        fpsRef.current = 0;
+        // Don't clear frame times completely
       }
     };
 
@@ -337,8 +322,7 @@ const GameCanvas: React.FC = () => {
       const now = performance.now();
       lastTimeRef.current = now;
       lastFpsUpdateRef.current = now;
-      frameTimesRef.current = [];
-      fpsRef.current = 0;
+      // Don't clear frame times completely
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
