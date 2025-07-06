@@ -99,7 +99,10 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   } else if (snake.isChasing) {
     // If blocked by wall while chasing, try sliding along the wall
     const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
-    snake.position = slidePosition;
+    // Only update position if sliding worked and doesn't cause collision
+    if (!checkWallCollision(snake, slidePosition, walls)) {
+      snake.position = slidePosition;
+    }
   }
   
   snake.direction = getDirectionVector(snake.position, targetPoint);
@@ -164,7 +167,10 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
   } else if (snake.isChasing) {
     // If blocked by wall while chasing, try sliding along the wall
     const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
-    snake.position = slidePosition;
+    // Only update position if sliding worked and doesn't cause collision
+    if (!checkWallCollision(snake, slidePosition, walls)) {
+      snake.position = slidePosition;
+    }
   } else {
     // If blocked by wall during patrol, skip to next patrol point
     snake.currentPatrolIndex += snake.patrolDirection;
@@ -267,7 +273,10 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     } else if (snake.isChasing) {
       // If blocked by wall while chasing, try sliding along the wall
       const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
-      snake.position = slidePosition;
+      // Only update position if sliding worked and doesn't cause collision
+      if (!checkWallCollision(snake, slidePosition, walls)) {
+        snake.position = slidePosition;
+      }
     } else {
       // If blocked by wall during patrol, skip to next patrol point
       snake.currentPatrolIndex += snake.patrolDirection;

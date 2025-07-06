@@ -163,6 +163,11 @@ export function slideAlongWall(
     y: intendedPosition.y - from.y
   };
   
+  // If there's no movement, return original position
+  if (movement.x === 0 && movement.y === 0) {
+    return from;
+  }
+  
   // Try moving horizontally only
   const horizontalOnlyPos = {
     x: from.x + movement.x,
@@ -170,8 +175,8 @@ export function slideAlongWall(
   };
   
   const horizontalRect = {
-    x: horizontalOnlyPos.x - entitySize.width / 2,
-    y: horizontalOnlyPos.y - entitySize.height / 2,
+    x: horizontalOnlyPos.x,
+    y: horizontalOnlyPos.y,
     width: entitySize.width,
     height: entitySize.height
   };
@@ -185,8 +190,8 @@ export function slideAlongWall(
   };
   
   const verticalRect = {
-    x: verticalOnlyPos.x - entitySize.width / 2,
-    y: verticalOnlyPos.y - entitySize.height / 2,
+    x: verticalOnlyPos.x,
+    y: verticalOnlyPos.y,
     width: entitySize.width,
     height: entitySize.height
   };
@@ -213,6 +218,46 @@ export function slideAlongWall(
     }
   }
   
-  // If neither direction works, stay in place
+  // If neither direction works, try smaller incremental movements
+  const steps = 10;
+  for (let i = steps; i > 0; i--) {
+    const fraction = i / steps;
+    
+    // Try partial horizontal movement
+    const partialHorizontalPos = {
+      x: from.x + movement.x * fraction,
+      y: from.y
+    };
+    
+    const partialHorizontalRect = {
+      x: partialHorizontalPos.x,
+      y: partialHorizontalPos.y,
+      width: entitySize.width,
+      height: entitySize.height
+    };
+    
+    if (!walls.some(wall => checkAABBCollision(partialHorizontalRect, wall))) {
+      return partialHorizontalPos;
+    }
+    
+    // Try partial vertical movement
+    const partialVerticalPos = {
+      x: from.x,
+      y: from.y + movement.y * fraction
+    };
+    
+    const partialVerticalRect = {
+      x: partialVerticalPos.x,
+      y: partialVerticalPos.y,
+      width: entitySize.width,
+      height: entitySize.height
+    };
+    
+    if (!walls.some(wall => checkAABBCollision(partialVerticalRect, wall))) {
+      return partialVerticalPos;
+    }
+  }
+  
+  // If all else fails, stay in place
   return from;
 }
