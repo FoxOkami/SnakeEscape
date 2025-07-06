@@ -259,13 +259,26 @@ const GameCanvas: React.FC = () => {
         }
       }
       
-      // Update FPS display every 200ms
-      if (currentTime - lastFpsUpdateRef.current >= 200) {
-        if (frameTimesRef.current.length >= 5) { // Need at least 5 samples
+      // Debug: log occasionally to see if we're getting frame times
+      if (Math.random() < 0.01) {
+        console.log('FPS Debug:', {
+          frameDelta,
+          frameTimesLength: frameTimesRef.current.length,
+          currentFPS: fpsRef.current
+        });
+      }
+      
+      // Update FPS display every 100ms
+      if (currentTime - lastFpsUpdateRef.current >= 100) {
+        if (frameTimesRef.current.length >= 3) { // Need at least 3 samples
+          const averageFrameTime = frameTimesRef.current.reduce((sum, time) => sum + time, 0) / frameTimesRef.current.length;
+          fpsRef.current = Math.round(1000 / averageFrameTime);
+        } else if (frameTimesRef.current.length > 0) {
+          // Use what we have if we have at least 1 sample
           const averageFrameTime = frameTimesRef.current.reduce((sum, time) => sum + time, 0) / frameTimesRef.current.length;
           fpsRef.current = Math.round(1000 / averageFrameTime);
         } else {
-          fpsRef.current = 0; // Not enough samples
+          fpsRef.current = 0; // No samples yet
         }
         lastFpsUpdateRef.current = currentTime;
       }
