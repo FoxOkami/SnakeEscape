@@ -29,11 +29,6 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   let nearestSound: Position | null = null;
   let nearestSoundDistance = Infinity;
   
-  // Debug logging for stalker snakes
-  if (sounds && sounds.length > 0 && Math.random() < 0.01) {
-    console.log(`Stalker ${snake.id}: Received ${sounds.length} sounds, hearing range: ${snake.hearingRange}`);
-  }
-  
   // Check for sounds within hearing range
   if (sounds && snake.hearingRange) {
     for (const sound of sounds) {
@@ -41,11 +36,6 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       if (distance <= snake.hearingRange && distance < nearestSoundDistance) {
         nearestSound = sound;
         nearestSoundDistance = distance;
-        
-        // Debug log when sound is detected
-        if (Math.random() < 0.01) {
-          console.log(`Stalker ${snake.id}: Sound detected at distance ${Math.round(distance)}`);
-        }
       }
     }
   }
@@ -55,27 +45,41 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     snake.soundCooldown -= dt;
   }
   
-  if (nearestSound && (!snake.soundCooldown || snake.soundCooldown <= 0)) {
-    // Move toward sound
+  if (nearestSound) {
+    // Continuously follow current sounds with no cooldown
     snake.lastHeardSound = nearestSound;
-    snake.soundCooldown = 2.0; // 2 second cooldown before responding to new sounds
+    snake.isChasing = true;
     targetPoint = nearestSound;
-  } else if (snake.lastHeardSound) {
-    // Continue moving toward last heard sound
+    
+    // Reset sound cooldown since we're actively hearing the player
+    snake.soundCooldown = 0;
+  } else if (snake.lastHeardSound && snake.isChasing) {
+    // Continue chasing toward last heard sound for a short time
     targetPoint = snake.lastHeardSound;
     
-    // Stop if we've reached the sound location
-    const distanceToSound = getDistance(snake.position, targetPoint);
-    if (distanceToSound < 20) {
-      snake.lastHeardSound = undefined;
+    // Start cooldown when we lose the sound
+    if (!snake.soundCooldown) {
+      snake.soundCooldown = 3.0; // 3 seconds to search the last known location
+    } else {
+      snake.soundCooldown -= dt;
+      
+      // Stop chasing if we've searched long enough or reached the location
+      const distanceToSound = getDistance(snake.position, targetPoint);
+      if (snake.soundCooldown <= 0 || distanceToSound < 30) {
+        snake.lastHeardSound = undefined;
+        snake.isChasing = false;
+        snake.soundCooldown = 0;
+      }
     }
   } else {
-    // Default patrol behavior when no sounds
+    // Default patrol behavior when no sounds and not chasing
+    snake.isChasing = false;
     targetPoint = getPatrolTarget(snake);
   }
   
-  // Move toward target
-  const newPosition = moveTowards(snake.position, targetPoint, snake.speed * dt);
+  // Move toward target (use chase speed when chasing sounds)
+  const moveSpeed = snake.isChasing && snake.chaseSpeed ? snake.chaseSpeed : snake.speed;
+  const newPosition = moveTowards(snake.position, targetPoint, moveSpeed * dt);
   
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
