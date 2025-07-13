@@ -13,30 +13,31 @@ export const LEVELS: Level[] = [
       { x: 0, y: 580, width: 800, height: 20 },
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
-      // Key room walls (small chamber on the right)
-      { x: 550, y: 200, width: 180, height: 20 }, // top wall
-      { x: 550, y: 380, width: 180, height: 20 }, // bottom wall
-      { x: 550, y: 220, width: 20, height: 160 }, // left wall
-      { x: 710, y: 220, width: 20, height: 160 }, // right wall
-      // Pattern area boundary
-      { x: 200, y: 150, width: 300, height: 20 },
-      { x: 200, y: 450, width: 300, height: 20 },
-      { x: 200, y: 170, width: 20, height: 280 },
-      { x: 480, y: 170, width: 20, height: 280 },
+      // Key room walls (small chamber on the right, closer to key)
+      { x: 600, y: 270, width: 100, height: 20 }, // top wall
+      { x: 600, y: 330, width: 100, height: 20 }, // bottom wall
+      { x: 600, y: 290, width: 20, height: 40 }, // left wall
+      { x: 680, y: 290, width: 20, height: 40 }, // right wall
+      // Some obstacle walls scattered around
+      { x: 150, y: 100, width: 20, height: 80 },
+      { x: 300, y: 150, width: 80, height: 20 },
+      { x: 500, y: 100, width: 20, height: 100 },
+      { x: 100, y: 400, width: 100, height: 20 },
+      { x: 400, y: 450, width: 20, height: 100 },
     ],
     snakes: [], // No snakes in this puzzle level
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
-    key: { x: 630, y: 300, width: 20, height: 20, collected: false }, // Key in small chamber
+    key: { x: 640, y: 300, width: 20, height: 20, collected: false }, // Key in small chamber
     patternTiles: [
-      { id: 'tile1', x: 240, y: 200, width: 40, height: 40, isGlowing: false, sequenceIndex: 0, hasBeenActivated: false },
-      { id: 'tile2', x: 320, y: 200, width: 40, height: 40, isGlowing: false, sequenceIndex: 1, hasBeenActivated: false },
-      { id: 'tile3', x: 400, y: 200, width: 40, height: 40, isGlowing: false, sequenceIndex: 2, hasBeenActivated: false },
-      { id: 'tile4', x: 240, y: 280, width: 40, height: 40, isGlowing: false, sequenceIndex: 3, hasBeenActivated: false },
-      { id: 'tile5', x: 320, y: 280, width: 40, height: 40, isGlowing: false, sequenceIndex: 4, hasBeenActivated: false },
-      { id: 'tile6', x: 400, y: 280, width: 40, height: 40, isGlowing: false, sequenceIndex: 5, hasBeenActivated: false },
-      { id: 'tile7', x: 240, y: 360, width: 40, height: 40, isGlowing: false, sequenceIndex: 6, hasBeenActivated: false },
-      { id: 'tile8', x: 320, y: 360, width: 40, height: 40, isGlowing: false, sequenceIndex: 7, hasBeenActivated: false },
-      { id: 'tile9', x: 400, y: 360, width: 40, height: 40, isGlowing: false, sequenceIndex: 8, hasBeenActivated: false },
+      { id: 'tile1', x: 80, y: 50, width: 40, height: 40, isGlowing: false, sequenceIndex: 0, hasBeenActivated: false },
+      { id: 'tile2', x: 250, y: 80, width: 40, height: 40, isGlowing: false, sequenceIndex: 1, hasBeenActivated: false },
+      { id: 'tile3', x: 450, y: 60, width: 40, height: 40, isGlowing: false, sequenceIndex: 2, hasBeenActivated: false },
+      { id: 'tile4', x: 120, y: 250, width: 40, height: 40, isGlowing: false, sequenceIndex: 3, hasBeenActivated: false },
+      { id: 'tile5', x: 350, y: 220, width: 40, height: 40, isGlowing: false, sequenceIndex: 4, hasBeenActivated: false },
+      { id: 'tile6', x: 550, y: 250, width: 40, height: 40, isGlowing: false, sequenceIndex: 5, hasBeenActivated: false },
+      { id: 'tile7', x: 60, y: 480, width: 40, height: 40, isGlowing: false, sequenceIndex: 6, hasBeenActivated: false },
+      { id: 'tile8', x: 300, y: 500, width: 40, height: 40, isGlowing: false, sequenceIndex: 7, hasBeenActivated: false },
+      { id: 'tile9', x: 480, y: 380, width: 40, height: 40, isGlowing: false, sequenceIndex: 8, hasBeenActivated: false },
     ],
     patternSequence: [0, 2, 4, 6, 8, 7, 5, 3, 1], // Pattern: corners first, then reverse spiral
     throwableItems: []

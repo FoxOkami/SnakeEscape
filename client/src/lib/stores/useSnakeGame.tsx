@@ -508,7 +508,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (shouldOpenKeyRoom) {
         // Remove the left wall of the key room to allow access
         const keyRoomWalls = state.walls.filter(wall => 
-          !(wall.x === 550 && wall.y === 220 && wall.width === 20 && wall.height === 160)
+          !(wall.x === 600 && wall.y === 290 && wall.width === 20 && wall.height === 40)
         );
         set({ walls: keyRoomWalls });
       }
