@@ -19,7 +19,7 @@ export interface Player {
 
 export interface Snake {
   id: string;
-  type: 'stalker' | 'guard' | 'burster';
+  type: 'stalker' | 'guard' | 'burster' | 'screensaver';
   position: Position;
   size: Size;
   speed: number;

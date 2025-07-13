@@ -103,6 +103,20 @@ export const LEVELS: Level[] = [
         isDashing: false,
         dashDuration: 0.8,
         lostSightCooldown: 0
+      },
+      {
+        id: 'screensaver1',
+        type: 'screensaver' as const,
+        position: { x: 300, y: 100 },
+        size: { width: 25, height: 25 },
+        speed: 60,
+        direction: { x: 0, y: 0 }, // Will be randomly set on first update
+        patrolPoints: [], // Not used for screensaver
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0, // Never chases
+        sightRange: 0, // Doesn't care about player
+        isChasing: false
       }
     ],
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },

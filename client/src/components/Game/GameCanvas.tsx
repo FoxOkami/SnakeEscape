@@ -173,6 +173,11 @@ const GameCanvas: React.FC = () => {
           accentColor = snake.isDashing ? '#fbb6ce' : '#e53e3e';
           eyeColor = '#f6ad55'; // Orange eyes
           break;
+        case 'screensaver':
+          baseColor = '#38b2ac'; // Teal/cyan
+          accentColor = '#4fd1c7'; // Lighter teal
+          eyeColor = '#2d3748'; // Dark eyes
+          break;
       }
       
       // Main body
@@ -194,6 +199,12 @@ const GameCanvas: React.FC = () => {
         // Diamond shape for bursters (dash pattern)
         ctx.fillRect(snake.position.x + snake.size.width/2 - 4, snake.position.y + 2, 8, 8);
         ctx.fillRect(snake.position.x + snake.size.width/2 - 4, snake.position.y + snake.size.height - 10, 8, 8);
+      } else if (snake.type === 'screensaver') {
+        // Grid pattern for screensaver (screensaver-like pattern)
+        ctx.fillRect(snake.position.x + 3, snake.position.y + 3, 6, 6);
+        ctx.fillRect(snake.position.x + 15, snake.position.y + 3, 6, 6);
+        ctx.fillRect(snake.position.x + 3, snake.position.y + 15, 6, 6);
+        ctx.fillRect(snake.position.x + 15, snake.position.y + 15, 6, 6);
       }
       
       // Add snake eyes (stalkers have no visible eyes)

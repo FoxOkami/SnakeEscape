@@ -17,6 +17,8 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
       return updateGuardSnake(snake, walls, dt, player);
     case 'burster':
       return updateBursterSnake(snake, walls, dt, player, currentTime);
+    case 'screensaver':
+      return updateScreensaverSnake(snake, walls, dt);
     default:
       return snake;
   }
@@ -342,4 +344,54 @@ function checkWallCollision(snake: Snake, newPosition: Position, walls: Wall[]):
   }
   
   return false;
+}
+
+function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake {
+  // Eight cardinal directions: N, NE, E, SE, S, SW, W, NW
+  const cardinalDirections = [
+    { x: 0, y: -1 },   // North
+    { x: 1, y: -1 },   // Northeast
+    { x: 1, y: 0 },    // East
+    { x: 1, y: 1 },    // Southeast
+    { x: 0, y: 1 },    // South
+    { x: -1, y: 1 },   // Southwest
+    { x: -1, y: 0 },   // West
+    { x: -1, y: -1 }   // Northwest
+  ];
+
+  // If direction is not set or is zero, pick a random cardinal direction
+  if (!snake.direction || (snake.direction.x === 0 && snake.direction.y === 0)) {
+    const randomIndex = Math.floor(Math.random() * cardinalDirections.length);
+    snake.direction = { ...cardinalDirections[randomIndex] };
+  }
+
+  // Calculate new position based on current direction
+  const newPosition = {
+    x: snake.position.x + snake.direction.x * snake.speed * dt,
+    y: snake.position.y + snake.direction.y * snake.speed * dt
+  };
+
+  // Check for wall collision
+  if (checkWallCollision(snake, newPosition, walls)) {
+    // Hit a wall, pick a new random direction
+    const randomIndex = Math.floor(Math.random() * cardinalDirections.length);
+    snake.direction = { ...cardinalDirections[randomIndex] };
+    
+    // Try moving in the new direction
+    const retryPosition = {
+      x: snake.position.x + snake.direction.x * snake.speed * dt,
+      y: snake.position.y + snake.direction.y * snake.speed * dt
+    };
+    
+    // If the new direction is also blocked, stay in place for this frame
+    if (!checkWallCollision(snake, retryPosition, walls)) {
+      snake.position = retryPosition;
+    }
+  } else {
+    // No collision, move normally
+    snake.position = newPosition;
+  }
+
+  // Keep current direction for next frame
+  return snake;
 }
