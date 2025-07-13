@@ -25,7 +25,57 @@ export const LEVELS: Level[] = [
       { x: 100, y: 400, width: 100, height: 20 },
       { x: 400, y: 450, width: 20, height: 100 },
     ],
-    snakes: [], // No snakes in this puzzle level
+    snakes: [
+      {
+        id: 'screensaver1',
+        type: 'screensaver' as const,
+        position: { x: 650, y: 80 }, // Top right area
+        size: { width: 25, height: 25 },
+        speed: 50,
+        direction: { x: 0, y: 0 }, // Will be randomly set on first update
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false
+      },
+      {
+        id: 'screensaver2',
+        type: 'screensaver' as const,
+        position: { x: 350, y: 450 }, // Bottom middle area
+        size: { width: 25, height: 25 },
+        speed: 55,
+        direction: { x: 0, y: 0 }, // Will be randomly set on first update
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false
+      },
+      {
+        id: 'stalker1',
+        type: 'stalker' as const,
+        position: { x: 450, y: 360 }, // Near the 9th pattern tile (tile9 is at x: 480, y: 380)
+        size: { width: 28, height: 28 },
+        speed: 45,
+        direction: { x: 1, y: 0 },
+        patrolPoints: [
+          { x: 450, y: 360 },
+          { x: 520, y: 360 },
+          { x: 520, y: 420 },
+          { x: 450, y: 420 }
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 85,
+        sightRange: 0, // Stalkers are blind
+        hearingRange: 150,
+        isChasing: false,
+        soundCooldown: 0
+      }
+    ],
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
     key: { x: 640, y: 300, width: 20, height: 20, collected: false }, // Key in small chamber
     patternTiles: [
