@@ -110,18 +110,51 @@ const GameCanvas: React.FC = () => {
         ctx.beginPath();
         ctx.arc(item.x + item.width / 2, item.y + item.height / 2, item.width / 3, 0, 2 * Math.PI);
         ctx.fill();
+      } else if (item.type === 'chubbs_hand') {
+        // Draw Chubbs's hand as a flesh-colored hand shape
+        ctx.fillStyle = '#f4a460';
+        ctx.fillRect(item.x, item.y, item.width, item.height);
         
-        // Add pickup indicator if player is nearby and not carrying anything
-        if (!item.isPickedUp && !carriedItem) {
-          const distance = Math.sqrt(
-            Math.pow(player.position.x - item.x, 2) + 
-            Math.pow(player.position.y - item.y, 2)
-          );
-          if (distance < 50) {
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '12px Arial';
-            ctx.fillText('E', item.x + item.width / 2 - 4, item.y - 5);
-          }
+        // Add fingers
+        ctx.fillStyle = '#d2691e';
+        ctx.fillRect(item.x + 5, item.y, 3, 8);
+        ctx.fillRect(item.x + 10, item.y, 3, 10);
+        ctx.fillRect(item.x + 15, item.y, 3, 9);
+        ctx.fillRect(item.x + 20, item.y, 3, 7);
+      } else if (item.type === 'elis_hip') {
+        // Draw Eli's hip as a bone-like shape
+        ctx.fillStyle = '#f5f5dc';
+        ctx.fillRect(item.x, item.y, item.width, item.height);
+        
+        // Add bone joints
+        ctx.fillStyle = '#deb887';
+        ctx.fillRect(item.x, item.y + 5, 6, 15);
+        ctx.fillRect(item.x + 19, item.y + 5, 6, 15);
+        ctx.fillRect(item.x + 6, item.y + 8, 13, 9);
+      } else if (item.type === 'barbra_hat') {
+        // Draw Barbra Streisand hat as a fancy hat
+        ctx.fillStyle = '#8b4513';
+        ctx.fillRect(item.x, item.y + 10, item.width, 10);
+        
+        // Hat top
+        ctx.fillStyle = '#654321';
+        ctx.fillRect(item.x + 5, item.y, 15, 15);
+        
+        // Hat decoration
+        ctx.fillStyle = '#ffd700';
+        ctx.fillRect(item.x + 8, item.y + 3, 9, 3);
+      }
+      
+      // Add pickup indicator if player is nearby and not carrying anything
+      if (!item.isPickedUp && !carriedItem) {
+        const distance = Math.sqrt(
+          Math.pow(player.position.x - item.x, 2) + 
+          Math.pow(player.position.y - item.y, 2)
+        );
+        if (distance < 50) {
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '12px Arial';
+          ctx.fillText('E', item.x + item.width / 2 - 4, item.y - 5);
         }
       }
     });

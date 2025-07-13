@@ -271,6 +271,38 @@ export const LEVELS: Level[] = [
         id: "switch1",
       },
     ],
+    throwableItems: [
+      {
+        id: 'chubbshand1',
+        type: 'chubbs_hand' as const,
+        x: 250,
+        y: 100,
+        width: 25,
+        height: 25,
+        isPickedUp: false,
+        isThrown: false
+      },
+      {
+        id: 'eliship1',
+        type: 'elis_hip' as const,
+        x: 450,
+        y: 250,
+        width: 25,
+        height: 25,
+        isPickedUp: false,
+        isThrown: false
+      },
+      {
+        id: 'barbrahat1',
+        type: 'barbra_hat' as const,
+        x: 550,
+        y: 450,
+        width: 25,
+        height: 25,
+        isPickedUp: false,
+        isThrown: false
+      }
+    ]
   },
 
   // Level 3: Advanced challenge

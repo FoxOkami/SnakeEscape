@@ -574,6 +574,31 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (!state.carriedItem) return; // Not carrying anything
 
+      // Check if the carried item is one of the non-throwable items
+      const nonThrowableTypes = ['chubbs_hand', 'elis_hip', 'barbra_hat'];
+      if (nonThrowableTypes.includes(state.carriedItem.type)) {
+        // Instead of throwing, just drop the item at the player's position
+        const itemIndex = state.throwableItems.findIndex(
+          (item) => item.id === state.carriedItem!.id,
+        );
+        if (itemIndex === -1) return;
+
+        set({
+          throwableItems: state.throwableItems.map((item, index) =>
+            index === itemIndex
+              ? {
+                  ...item,
+                  isPickedUp: false,
+                  x: state.player.position.x,
+                  y: state.player.position.y,
+                }
+              : item,
+          ),
+          carriedItem: null,
+        });
+        return;
+      }
+
       const currentTime = performance.now() / 1000; // Convert to seconds
       const throwDuration = 1.0; // 1 second flight time
 

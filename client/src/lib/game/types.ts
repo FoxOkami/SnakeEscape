@@ -67,7 +67,7 @@ export interface PatternTile extends Rectangle {
 
 export interface ThrowableItem extends Rectangle {
   id: string;
-  type: 'rock' | 'bottle' | 'can';
+  type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat';
   isPickedUp: boolean;
   isThrown: boolean;
   velocity?: Position;
@@ -78,7 +78,7 @@ export interface ThrowableItem extends Rectangle {
 }
 
 export interface CarriedItem {
-  type: 'rock' | 'bottle' | 'can';
+  type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat';
   id: string;
 }
 
