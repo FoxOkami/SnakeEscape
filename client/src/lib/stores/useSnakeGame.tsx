@@ -38,6 +38,8 @@ interface SnakeGameState extends GameData {
   // Item actions
   pickupItem: (itemId: string) => void;
   throwItem: (targetPosition: Position) => void;
+  dropItem: () => void;
+  pickupNearestItem: () => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -625,6 +627,71 @@ export const useSnakeGame = create<SnakeGameState>()(
         ),
         carriedItem: null,
       });
+    },
+
+    dropItem: () => {
+      const state = get();
+      if (!state.carriedItem) return; // Not carrying anything
+
+      const itemIndex = state.throwableItems.findIndex(
+        (item) => item.id === state.carriedItem!.id,
+      );
+      if (itemIndex === -1) return;
+
+      set({
+        throwableItems: state.throwableItems.map((item, index) =>
+          index === itemIndex
+            ? {
+                ...item,
+                isPickedUp: false,
+                x: state.player.position.x,
+                y: state.player.position.y,
+              }
+            : item,
+        ),
+        carriedItem: null,
+      });
+    },
+
+    pickupNearestItem: () => {
+      const state = get();
+      if (state.carriedItem) return; // Already carrying something
+
+      const playerRect = {
+        x: state.player.position.x,
+        y: state.player.position.y,
+        width: state.player.size.width,
+        height: state.player.size.height,
+      };
+
+      // Find all items within pickup range
+      const nearbyItems = state.throwableItems.filter(item => {
+        if (item.isPickedUp) return false;
+        
+        const distance = Math.sqrt(
+          Math.pow(state.player.position.x - item.x, 2) + 
+          Math.pow(state.player.position.y - item.y, 2)
+        );
+        return distance < 50; // Pickup range
+      });
+
+      if (nearbyItems.length === 0) return;
+
+      // Find the closest item
+      const closestItem = nearbyItems.reduce((closest, item) => {
+        const closestDistance = Math.sqrt(
+          Math.pow(state.player.position.x - closest.x, 2) + 
+          Math.pow(state.player.position.y - closest.y, 2)
+        );
+        const itemDistance = Math.sqrt(
+          Math.pow(state.player.position.x - item.x, 2) + 
+          Math.pow(state.player.position.y - item.y, 2)
+        );
+        return itemDistance < closestDistance ? item : closest;
+      });
+
+      // Use the existing pickupItem function
+      get().pickupItem(closestItem.id);
     },
   })),
 );

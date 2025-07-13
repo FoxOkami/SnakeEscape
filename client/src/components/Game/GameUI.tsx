@@ -169,7 +169,7 @@ const GameUI: React.FC = () => {
         )}
         {carriedItem && (
           <Badge className="bg-purple-600 text-white">
-            🪨 Carrying {carriedItem.type} (Click to throw)
+            🪨 Carrying {carriedItem.type} (E to drop{['rock', 'bottle', 'can'].includes(carriedItem.type) ? ', Click to throw' : ''})
           </Badge>
         )}
       </div>

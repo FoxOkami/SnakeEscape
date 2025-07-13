@@ -5,7 +5,7 @@ import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
 
 const SnakeRoom: React.FC = () => {
-  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem } = useSnakeGame();
+  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } = useAudio();
 
 
@@ -38,15 +38,17 @@ const SnakeRoom: React.FC = () => {
         setKeyPressed(event.code, true);
       }
       
-      // Handle pickup with E key
+      // Handle pickup/drop with E key
       if (event.code === 'KeyE' && gameState === 'playing') {
         event.preventDefault();
-        // Try to pickup nearby items (this will be handled in the game logic)
-        // For now, we'll trigger pickup for the first available item
         const gameState_current = useSnakeGame.getState();
-        const nearbyItem = gameState_current.throwableItems.find(item => !item.isPickedUp);
-        if (nearbyItem && !gameState_current.carriedItem) {
-          pickupItem(nearbyItem.id);
+        
+        if (gameState_current.carriedItem) {
+          // If carrying something, drop it
+          dropItem();
+        } else {
+          // If not carrying anything, try to pick up the nearest item
+          pickupNearestItem();
         }
       }
     };
@@ -67,10 +69,16 @@ const SnakeRoom: React.FC = () => {
     };
   }, [setKeyPressed, gameState, pickupItem]);
 
-  // Handle mouse events for throwing
+  // Handle mouse events for throwing (only for throwable items)
   useEffect(() => {
     const handleMouseClick = (event: MouseEvent) => {
       if (gameState !== 'playing' || !carriedItem) return;
+      
+      // Only allow clicking to throw for throwable items (not chubbs_hand, elis_hip, barbra_hat)
+      const nonThrowableTypes = ['chubbs_hand', 'elis_hip', 'barbra_hat'];
+      if (nonThrowableTypes.includes(carriedItem.type)) {
+        return; // Don't allow clicking to throw non-throwable items
+      }
       
       // Get canvas element to calculate relative coordinates
       const canvas = document.querySelector('canvas');
