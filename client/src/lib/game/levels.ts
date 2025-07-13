@@ -1,4 +1,13 @@
-import { Level, Snake, Wall, Door, Key, Switch, ThrowableItem, PatternTile } from './types';
+import {
+  Level,
+  Snake,
+  Wall,
+  Door,
+  Key,
+  Switch,
+  ThrowableItem,
+  PatternTile,
+} from "./types";
 
 export const LEVELS: Level[] = [
   // Level 1: Pattern-matching puzzle
@@ -27,36 +36,36 @@ export const LEVELS: Level[] = [
     ],
     snakes: [
       {
-        id: 'screensaver1',
-        type: 'screensaver' as const,
+        id: "screensaver1",
+        type: "screensaver" as const,
         position: { x: 650, y: 80 }, // Top right area
-        size: { width: 25, height: 25 },
-        speed: 50,
+        size: { width: 30, height: 30 },
+        speed: 125,
         direction: { x: 0, y: 0 }, // Will be randomly set on first update
         patrolPoints: [],
         currentPatrolIndex: 0,
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
-        isChasing: false
+        isChasing: false,
       },
       {
-        id: 'screensaver2',
-        type: 'screensaver' as const,
+        id: "screensaver2",
+        type: "screensaver" as const,
         position: { x: 350, y: 450 }, // Bottom middle area
-        size: { width: 25, height: 25 },
-        speed: 55,
+        size: { width: 30, height: 30 },
+        speed: 125,
         direction: { x: 0, y: 0 }, // Will be randomly set on first update
         patrolPoints: [],
         currentPatrolIndex: 0,
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
-        isChasing: false
+        isChasing: false,
       },
       {
-        id: 'stalker1',
-        type: 'stalker' as const,
+        id: "stalker1",
+        type: "stalker" as const,
         position: { x: 450, y: 360 }, // Near the 9th pattern tile (tile9 is at x: 480, y: 380)
         size: { width: 28, height: 28 },
         speed: 45,
@@ -65,7 +74,7 @@ export const LEVELS: Level[] = [
           { x: 450, y: 360 },
           { x: 520, y: 360 },
           { x: 520, y: 420 },
-          { x: 450, y: 420 }
+          { x: 450, y: 420 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -73,26 +82,107 @@ export const LEVELS: Level[] = [
         sightRange: 0, // Stalkers are blind
         hearingRange: 150,
         isChasing: false,
-        soundCooldown: 0
-      }
+        soundCooldown: 0,
+      },
     ],
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
     key: { x: 640, y: 300, width: 20, height: 20, collected: false }, // Key in small chamber
     patternTiles: [
-      { id: 'tile1', x: 80, y: 50, width: 40, height: 40, isGlowing: false, sequenceIndex: 0, hasBeenActivated: false },
-      { id: 'tile2', x: 250, y: 80, width: 40, height: 40, isGlowing: false, sequenceIndex: 1, hasBeenActivated: false },
-      { id: 'tile3', x: 450, y: 60, width: 40, height: 40, isGlowing: false, sequenceIndex: 2, hasBeenActivated: false },
-      { id: 'tile4', x: 120, y: 250, width: 40, height: 40, isGlowing: false, sequenceIndex: 3, hasBeenActivated: false },
-      { id: 'tile5', x: 350, y: 220, width: 40, height: 40, isGlowing: false, sequenceIndex: 4, hasBeenActivated: false },
-      { id: 'tile6', x: 550, y: 250, width: 40, height: 40, isGlowing: false, sequenceIndex: 5, hasBeenActivated: false },
-      { id: 'tile7', x: 60, y: 480, width: 40, height: 40, isGlowing: false, sequenceIndex: 6, hasBeenActivated: false },
-      { id: 'tile8', x: 300, y: 500, width: 40, height: 40, isGlowing: false, sequenceIndex: 7, hasBeenActivated: false },
-      { id: 'tile9', x: 480, y: 380, width: 40, height: 40, isGlowing: false, sequenceIndex: 8, hasBeenActivated: false },
+      {
+        id: "tile1",
+        x: 80,
+        y: 50,
+        width: 40,
+        height: 40,
+        isGlowing: false,
+        sequenceIndex: 0,
+        hasBeenActivated: false,
+      },
+      {
+        id: "tile2",
+        x: 250,
+        y: 80,
+        width: 40,
+        height: 40,
+        isGlowing: false,
+        sequenceIndex: 1,
+        hasBeenActivated: false,
+      },
+      {
+        id: "tile3",
+        x: 450,
+        y: 60,
+        width: 40,
+        height: 40,
+        isGlowing: false,
+        sequenceIndex: 2,
+        hasBeenActivated: false,
+      },
+      {
+        id: "tile4",
+        x: 120,
+        y: 250,
+        width: 40,
+        height: 40,
+        isGlowing: false,
+        sequenceIndex: 3,
+        hasBeenActivated: false,
+      },
+      {
+        id: "tile5",
+        x: 350,
+        y: 220,
+        width: 40,
+        height: 40,
+        isGlowing: false,
+        sequenceIndex: 4,
+        hasBeenActivated: false,
+      },
+      {
+        id: "tile6",
+        x: 550,
+        y: 250,
+        width: 40,
+        height: 40,
+        isGlowing: false,
+        sequenceIndex: 5,
+        hasBeenActivated: false,
+      },
+      {
+        id: "tile7",
+        x: 60,
+        y: 480,
+        width: 40,
+        height: 40,
+        isGlowing: false,
+        sequenceIndex: 6,
+        hasBeenActivated: false,
+      },
+      {
+        id: "tile8",
+        x: 300,
+        y: 500,
+        width: 40,
+        height: 40,
+        isGlowing: false,
+        sequenceIndex: 7,
+        hasBeenActivated: false,
+      },
+      {
+        id: "tile9",
+        x: 480,
+        y: 380,
+        width: 40,
+        height: 40,
+        isGlowing: false,
+        sequenceIndex: 8,
+        hasBeenActivated: false,
+      },
     ],
     patternSequence: [0, 2, 4, 6, 8, 7, 5, 3, 1], // Pattern: corners first, then reverse spiral
-    throwableItems: []
+    throwableItems: [],
   },
-  
+
   // Level 2: More complex with switches
   {
     id: 2,
@@ -113,8 +203,8 @@ export const LEVELS: Level[] = [
     ],
     snakes: [
       {
-        id: 'stalker1',
-        type: 'stalker' as const,
+        id: "stalker1",
+        type: "stalker" as const,
         position: { x: 200, y: 400 },
         size: { width: 30, height: 30 },
         speed: 75,
@@ -123,7 +213,7 @@ export const LEVELS: Level[] = [
           { x: 200, y: 400 },
           { x: 200, y: 500 },
           { x: 350, y: 500 },
-          { x: 350, y: 400 }
+          { x: 350, y: 400 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -131,18 +221,18 @@ export const LEVELS: Level[] = [
         sightRange: 0, // Stalkers are blind
         hearingRange: 200,
         isChasing: false,
-        soundCooldown: 0
+        soundCooldown: 0,
       },
       {
-        id: 'burster1',
-        type: 'burster' as const,
+        id: "burster1",
+        type: "burster" as const,
         position: { x: 600, y: 200 },
         size: { width: 30, height: 30 },
         speed: 50,
         direction: { x: 1, y: 0 },
         patrolPoints: [
           { x: 600, y: 200 },
-          { x: 700, y: 200 }
+          { x: 700, y: 200 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -152,11 +242,11 @@ export const LEVELS: Level[] = [
         dashSpeed: 200,
         isDashing: false,
         dashDuration: 0.8,
-        lostSightCooldown: 0
+        lostSightCooldown: 0,
       },
       {
-        id: 'screensaver1',
-        type: 'screensaver' as const,
+        id: "screensaver1",
+        type: "screensaver" as const,
         position: { x: 300, y: 100 },
         size: { width: 25, height: 25 },
         speed: 60,
@@ -166,14 +256,21 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0, // Never chases
         sightRange: 0, // Doesn't care about player
-        isChasing: false
-      }
+        isChasing: false,
+      },
     ],
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 650, y: 350, width: 20, height: 20, collected: false },
     switches: [
-      { x: 100, y: 300, width: 30, height: 30, isPressed: false, id: 'switch1' }
-    ]
+      {
+        x: 100,
+        y: 300,
+        width: 30,
+        height: 30,
+        isPressed: false,
+        id: "switch1",
+      },
+    ],
   },
 
   // Level 3: Advanced challenge
@@ -199,8 +296,8 @@ export const LEVELS: Level[] = [
     ],
     snakes: [
       {
-        id: 'guard1',
-        type: 'guard' as const,
+        id: "guard1",
+        type: "guard" as const,
         position: { x: 150, y: 200 },
         size: { width: 30, height: 30 },
         speed: 100,
@@ -209,18 +306,18 @@ export const LEVELS: Level[] = [
           { x: 150, y: 200 },
           { x: 220, y: 200 },
           { x: 220, y: 280 },
-          { x: 150, y: 280 }
+          { x: 150, y: 280 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
         chaseSpeed: 150,
         sightRange: 200,
         isChasing: false,
-        lostSightCooldown: 0
+        lostSightCooldown: 0,
       },
       {
-        id: 'stalker1',
-        type: 'stalker' as const,
+        id: "stalker1",
+        type: "stalker" as const,
         position: { x: 400, y: 300 },
         size: { width: 30, height: 30 },
         speed: 75,
@@ -229,7 +326,7 @@ export const LEVELS: Level[] = [
           { x: 400, y: 300 },
           { x: 400, y: 400 },
           { x: 500, y: 400 },
-          { x: 500, y: 300 }
+          { x: 500, y: 300 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -237,11 +334,11 @@ export const LEVELS: Level[] = [
         sightRange: 0, // Stalkers are blind
         hearingRange: 220,
         isChasing: false,
-        soundCooldown: 0
+        soundCooldown: 0,
       },
       {
-        id: 'burster1',
-        type: 'burster' as const,
+        id: "burster1",
+        type: "burster" as const,
         position: { x: 600, y: 150 },
         size: { width: 30, height: 30 },
         speed: 50,
@@ -250,7 +347,7 @@ export const LEVELS: Level[] = [
           { x: 600, y: 150 },
           { x: 700, y: 150 },
           { x: 700, y: 250 },
-          { x: 600, y: 250 }
+          { x: 600, y: 250 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -260,14 +357,28 @@ export const LEVELS: Level[] = [
         dashSpeed: 250,
         isDashing: false,
         dashDuration: 1.0,
-        lostSightCooldown: 0
-      }
+        lostSightCooldown: 0,
+      },
     ],
     door: { x: 750, y: 500, width: 30, height: 40, isOpen: false },
     key: { x: 650, y: 50, width: 20, height: 20, collected: false },
     switches: [
-      { x: 380, y: 380, width: 30, height: 30, isPressed: false, id: 'switch1' },
-      { x: 120, y: 500, width: 30, height: 30, isPressed: false, id: 'switch2' }
-    ]
-  }
+      {
+        x: 380,
+        y: 380,
+        width: 30,
+        height: 30,
+        isPressed: false,
+        id: "switch1",
+      },
+      {
+        x: 120,
+        y: 500,
+        width: 30,
+        height: 30,
+        isPressed: false,
+        id: "switch2",
+      },
+    ],
+  },
 ];
