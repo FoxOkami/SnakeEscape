@@ -58,6 +58,13 @@ export interface Switch extends Rectangle {
   id: string;
 }
 
+export interface PatternTile extends Rectangle {
+  id: string;
+  isGlowing: boolean;
+  sequenceIndex: number; // The order in which this tile should be stepped on
+  hasBeenActivated: boolean;
+}
+
 export interface ThrowableItem extends Rectangle {
   id: string;
   type: 'rock' | 'bottle' | 'can';
@@ -85,6 +92,8 @@ export interface Level {
   key: Key;
   switches?: Switch[];
   throwableItems?: ThrowableItem[];
+  patternTiles?: PatternTile[];
+  patternSequence?: number[]; // The correct sequence to step on tiles
   size: Size;
 }
 
@@ -100,6 +109,9 @@ export interface GameData {
   key: Key;
   switches: Switch[];
   throwableItems: ThrowableItem[];
+  patternTiles: PatternTile[];
+  patternSequence: number[];
+  currentPatternStep: number;
   carriedItem: CarriedItem | null;
   levelSize: Size;
 }

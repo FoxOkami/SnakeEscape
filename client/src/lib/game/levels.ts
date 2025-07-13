@@ -1,10 +1,10 @@
-import { Level, Snake, Wall, Door, Key, Switch, ThrowableItem } from './types';
+import { Level, Snake, Wall, Door, Key, Switch, ThrowableItem, PatternTile } from './types';
 
 export const LEVELS: Level[] = [
-  // Level 1: Simple introduction
+  // Level 1: Pattern-matching puzzle
   {
     id: 1,
-    name: "First Steps",
+    name: "Pattern Memory",
     player: { x: 50, y: 350 },
     size: { width: 800, height: 600 },
     walls: [
@@ -13,44 +13,33 @@ export const LEVELS: Level[] = [
       { x: 0, y: 580, width: 800, height: 20 },
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
-      // Inner walls
-      { x: 200, y: 200, width: 20, height: 200 },
-      { x: 400, y: 100, width: 20, height: 300 },
+      // Key room walls (small chamber on the right)
+      { x: 550, y: 200, width: 180, height: 20 }, // top wall
+      { x: 550, y: 380, width: 180, height: 20 }, // bottom wall
+      { x: 550, y: 220, width: 20, height: 160 }, // left wall
+      { x: 710, y: 220, width: 20, height: 160 }, // right wall
+      // Pattern area boundary
+      { x: 200, y: 150, width: 300, height: 20 },
+      { x: 200, y: 450, width: 300, height: 20 },
+      { x: 200, y: 170, width: 20, height: 280 },
+      { x: 480, y: 170, width: 20, height: 280 },
     ],
-    snakes: [
-      {
-        id: 'guard1',
-        type: 'guard' as const,
-        position: { x: 300, y: 300 },
-        size: { width: 30, height: 30 },
-        speed: 120,
-        direction: { x: 1, y: 0 },
-        patrolPoints: [
-          { x: 300, y: 300 },
-          { x: 500, y: 300 }
-        ],
-        currentPatrolIndex: 0,
-        patrolDirection: 1,
-        chaseSpeed: 80,
-        sightRange: 150,
-        isChasing: false,
-        lostSightCooldown: 0
-      }
-    ],
+    snakes: [], // No snakes in this puzzle level
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
-    key: { x: 100, y: 100, width: 20, height: 20, collected: false },
-    throwableItems: [
-      {
-        id: 'rock1',
-        type: 'rock' as const,
-        x: 150, 
-        y: 450, 
-        width: 15, 
-        height: 15,
-        isPickedUp: false,
-        isThrown: false
-      }
-    ]
+    key: { x: 630, y: 300, width: 20, height: 20, collected: false }, // Key in small chamber
+    patternTiles: [
+      { id: 'tile1', x: 240, y: 200, width: 40, height: 40, isGlowing: false, sequenceIndex: 0, hasBeenActivated: false },
+      { id: 'tile2', x: 320, y: 200, width: 40, height: 40, isGlowing: false, sequenceIndex: 1, hasBeenActivated: false },
+      { id: 'tile3', x: 400, y: 200, width: 40, height: 40, isGlowing: false, sequenceIndex: 2, hasBeenActivated: false },
+      { id: 'tile4', x: 240, y: 280, width: 40, height: 40, isGlowing: false, sequenceIndex: 3, hasBeenActivated: false },
+      { id: 'tile5', x: 320, y: 280, width: 40, height: 40, isGlowing: false, sequenceIndex: 4, hasBeenActivated: false },
+      { id: 'tile6', x: 400, y: 280, width: 40, height: 40, isGlowing: false, sequenceIndex: 5, hasBeenActivated: false },
+      { id: 'tile7', x: 240, y: 360, width: 40, height: 40, isGlowing: false, sequenceIndex: 6, hasBeenActivated: false },
+      { id: 'tile8', x: 320, y: 360, width: 40, height: 40, isGlowing: false, sequenceIndex: 7, hasBeenActivated: false },
+      { id: 'tile9', x: 400, y: 360, width: 40, height: 40, isGlowing: false, sequenceIndex: 8, hasBeenActivated: false },
+    ],
+    patternSequence: [0, 2, 4, 6, 8, 7, 5, 3, 1], // Pattern: corners first, then reverse spiral
+    throwableItems: []
   },
   
   // Level 2: More complex with switches

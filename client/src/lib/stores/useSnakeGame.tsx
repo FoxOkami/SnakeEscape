@@ -10,6 +10,7 @@ import {
   Door,
   Key,
   Switch,
+  PatternTile,
 } from "../game/types";
 import { LEVELS } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
@@ -60,6 +61,9 @@ export const useSnakeGame = create<SnakeGameState>()(
     key: { x: 0, y: 0, width: 20, height: 20, collected: false },
     switches: [],
     throwableItems: [],
+    patternTiles: [],
+    patternSequence: [],
+    currentPatternStep: 0,
     carriedItem: null,
     levelSize: { width: 800, height: 600 },
     keysPressed: new Set(),
@@ -131,6 +135,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         throwableItems: level.throwableItems
           ? level.throwableItems.map((item) => ({ ...item }))
           : [],
+        patternTiles: level.patternTiles ? level.patternTiles.map((tile) => ({ ...tile })) : [],
+        patternSequence: level.patternSequence ? [...level.patternSequence] : [],
+        currentPatternStep: 0,
         carriedItem: null,
         levelSize: { ...level.size },
         currentVelocity: { x: 0, y: 0 },
@@ -195,6 +202,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         throwableItems: level.throwableItems
           ? level.throwableItems.map((item) => ({ ...item }))
           : [],
+        patternTiles: level.patternTiles ? level.patternTiles.map((tile) => ({ ...tile })) : [],
+        patternSequence: level.patternSequence ? [...level.patternSequence] : [],
+        currentPatternStep: 0,
         carriedItem: null,
         levelSize: { ...level.size },
         currentVelocity: { x: 0, y: 0 },
@@ -435,6 +445,74 @@ export const useSnakeGame = create<SnakeGameState>()(
         return switchObj;
       });
 
+      // Check pattern tile interactions
+      let updatedPatternTiles = [...state.patternTiles];
+      let updatedCurrentPatternStep = state.currentPatternStep;
+      let shouldOpenKeyRoom = false;
+
+      // Check if player is stepping on any pattern tile
+      for (const tile of updatedPatternTiles) {
+        if (checkAABBCollision(playerRect, tile) && !tile.hasBeenActivated) {
+          // Mark this tile as activated
+          const tileIndex = updatedPatternTiles.findIndex(t => t.id === tile.id);
+          updatedPatternTiles[tileIndex] = { ...tile, hasBeenActivated: true };
+          
+          // Check if this is the correct next tile in the sequence
+          if (state.patternSequence[updatedCurrentPatternStep] === tile.sequenceIndex) {
+            updatedCurrentPatternStep++;
+            
+            // If we've completed the sequence, open the key room
+            if (updatedCurrentPatternStep >= state.patternSequence.length) {
+              shouldOpenKeyRoom = true;
+              // Start the pattern demonstration again
+              updatedPatternTiles = updatedPatternTiles.map(t => ({ ...t, isGlowing: false }));
+            }
+          } else {
+            // Wrong tile pressed, reset the pattern
+            updatedCurrentPatternStep = 0;
+            updatedPatternTiles = updatedPatternTiles.map(t => ({ 
+              ...t, 
+              hasBeenActivated: false,
+              isGlowing: false 
+            }));
+          }
+          break;
+        }
+      }
+
+      // Handle pattern demonstration (make tiles glow in sequence)
+      if (state.patternTiles.length > 0 && !shouldOpenKeyRoom) {
+        const currentTime = Date.now();
+        const demonstrationInterval = 1000; // 1 second between each tile
+        const cycleTime = state.patternSequence.length * demonstrationInterval + 2000; // 2 second pause
+        const timeInCycle = currentTime % cycleTime;
+        
+        if (timeInCycle < state.patternSequence.length * demonstrationInterval) {
+          const currentDemoStep = Math.floor(timeInCycle / demonstrationInterval);
+          const targetSequenceIndex = state.patternSequence[currentDemoStep];
+          
+          updatedPatternTiles = updatedPatternTiles.map(tile => ({
+            ...tile,
+            isGlowing: tile.sequenceIndex === targetSequenceIndex
+          }));
+        } else {
+          // Pause period - no tiles glowing
+          updatedPatternTiles = updatedPatternTiles.map(tile => ({
+            ...tile,
+            isGlowing: false
+          }));
+        }
+      }
+
+      // Open key room if pattern completed
+      if (shouldOpenKeyRoom) {
+        // Remove the left wall of the key room to allow access
+        const keyRoomWalls = state.walls.filter(wall => 
+          !(wall.x === 550 && wall.y === 220 && wall.width === 20 && wall.height === 160)
+        );
+        set({ walls: keyRoomWalls });
+      }
+
       // Check door interaction
       let updatedDoor = state.door;
       const allSwitchesPressed =
@@ -460,6 +538,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         switches: updatedSwitches,
         door: updatedDoor,
         throwableItems: updatedThrowableItems,
+        patternTiles: updatedPatternTiles,
+        currentPatternStep: updatedCurrentPatternStep,
       });
     },
 

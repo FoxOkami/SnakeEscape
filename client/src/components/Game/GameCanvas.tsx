@@ -20,6 +20,7 @@ const GameCanvas: React.FC = () => {
     key,
     switches,
     throwableItems,
+    patternTiles,
     carriedItem,
     levelSize,
     updateGame,
@@ -53,6 +54,44 @@ const GameCanvas: React.FC = () => {
       ctx.strokeStyle = '#2d3748';
       ctx.lineWidth = 2;
       ctx.strokeRect(switchObj.x, switchObj.y, switchObj.width, switchObj.height);
+    });
+
+    // Draw pattern tiles
+    patternTiles.forEach(tile => {
+      // Base tile color
+      if (tile.isGlowing) {
+        ctx.fillStyle = '#ffd700'; // Gold when glowing
+      } else if (tile.hasBeenActivated) {
+        ctx.fillStyle = '#48bb78'; // Green when activated correctly
+      } else {
+        ctx.fillStyle = '#4a5568'; // Gray when inactive
+      }
+      
+      ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+      
+      // Add border
+      ctx.strokeStyle = '#2d3748';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(tile.x, tile.y, tile.width, tile.height);
+      
+      // Add glow effect when tile is glowing
+      if (tile.isGlowing) {
+        ctx.shadowColor = '#ffd700';
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = '#ffeb3b';
+        ctx.fillRect(tile.x + 5, tile.y + 5, tile.width - 10, tile.height - 10);
+        ctx.shadowBlur = 0;
+      }
+      
+      // Add sequence number for debugging (optional)
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        (tile.sequenceIndex + 1).toString(),
+        tile.x + tile.width / 2,
+        tile.y + tile.height / 2 + 4
+      );
     });
 
     // Draw throwable items
