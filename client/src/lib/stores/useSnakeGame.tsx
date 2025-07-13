@@ -11,10 +11,14 @@ import {
   Key,
   Switch,
   PatternTile,
+  Mirror,
+  Crystal,
+  LightBeam,
 } from "../game/types";
 import { LEVELS } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
 import { updateSnake } from "../game/entities";
+import { calculateLightBeam } from "../game/lightBeam";
 import { useAudio } from "./useAudio";
 
 interface SnakeGameState extends GameData {
@@ -46,6 +50,43 @@ const PLAYER_SPEED = 0.2; // pixels per second
 const WALKING_SPEED = 0.1; // pixels per second when walking (shift held)
 const ACCELERATION = 1; // pixels per second squared
 
+// Helper function for line-rectangle intersection
+function lineIntersectsRect(
+  start: Position,
+  end: Position,
+  rect: { x: number; y: number; width: number; height: number }
+): boolean {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  
+  if (dx === 0 && dy === 0) return false;
+
+  let tMin = 0;
+  let tMax = 1;
+
+  // Check X bounds
+  if (dx !== 0) {
+    const t1 = (rect.x - start.x) / dx;
+    const t2 = (rect.x + rect.width - start.x) / dx;
+    tMin = Math.max(tMin, Math.min(t1, t2));
+    tMax = Math.min(tMax, Math.max(t1, t2));
+  } else {
+    if (start.x < rect.x || start.x > rect.x + rect.width) return false;
+  }
+
+  // Check Y bounds
+  if (dy !== 0) {
+    const t1 = (rect.y - start.y) / dy;
+    const t2 = (rect.y + rect.height - start.y) / dy;
+    tMin = Math.max(tMin, Math.min(t1, t2));
+    tMax = Math.min(tMax, Math.max(t1, t2));
+  } else {
+    if (start.y < rect.y || start.y > rect.y + rect.height) return false;
+  }
+
+  return tMin <= tMax;
+}
+
 export const useSnakeGame = create<SnakeGameState>()(
   subscribeWithSelector((set, get) => ({
     // Initial state
@@ -68,6 +109,10 @@ export const useSnakeGame = create<SnakeGameState>()(
     currentPatternStep: 0,
     carriedItem: null,
     levelSize: { width: 800, height: 600 },
+    mirrors: [],
+    crystal: null,
+    lightSource: null,
+    lightBeam: null,
     keysPressed: new Set(),
     currentVelocity: { x: 0, y: 0 },
     targetVelocity: { x: 0, y: 0 },
@@ -170,6 +215,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           : [],
         carriedItem: null,
         levelSize: { ...level.size },
+        mirrors: level.mirrors ? level.mirrors.map((mirror) => ({ ...mirror })) : [],
+        crystal: level.crystal ? { ...level.crystal } : null,
+        lightSource: level.lightSource ? { ...level.lightSource } : null,
+        lightBeam: null,
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
@@ -209,6 +258,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         currentPatternStep: 0,
         carriedItem: null,
         levelSize: { ...level.size },
+        mirrors: level.mirrors ? level.mirrors.map((mirror) => ({ ...mirror })) : [],
+        crystal: level.crystal ? { ...level.crystal } : null,
+        lightSource: level.lightSource ? { ...level.lightSource } : null,
+        lightBeam: null,
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
@@ -573,7 +626,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         updatedSwitches.length === 0 ||
         updatedSwitches.every((s) => s.isPressed);
 
-      if (updatedPlayer.hasKey && allSwitchesPressed) {
+      // Level 3 (light reflection puzzle) - crystal must be activated
+      if (state.currentLevel === 2 && updatedCrystal && updatedCrystal.isActivated) {
+        updatedDoor = { ...state.door, isOpen: true };
+      } else if (state.currentLevel !== 2 && updatedPlayer.hasKey && allSwitchesPressed) {
         updatedDoor = { ...state.door, isOpen: true };
       }
 
@@ -581,6 +637,42 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (updatedDoor.isOpen && checkAABBCollision(playerRect, updatedDoor)) {
         set({ gameState: "levelComplete" });
         return;
+      }
+
+      // --- LIGHT BEAM CALCULATION ---
+      let updatedLightBeam = state.lightBeam;
+      let updatedMirrors = state.mirrors;
+      let updatedCrystal = state.crystal;
+      
+      if (state.lightSource && state.crystal) {
+        updatedLightBeam = calculateLightBeam(
+          state.lightSource,
+          state.mirrors,
+          state.crystal,
+          state.walls
+        );
+        
+        // Update mirrors based on light beam
+        updatedMirrors = state.mirrors.map(mirror => ({
+          ...mirror,
+          isReflecting: updatedLightBeam ? 
+            updatedLightBeam.segments.some((segment, index) => {
+              if (index === 0) return false; // Skip first segment (light source)
+              const prevSegment = updatedLightBeam.segments[index - 1];
+              return lineIntersectsRect(prevSegment, segment, mirror);
+            }) : false
+        }));
+        
+        // Update crystal based on light beam
+        if (updatedLightBeam) {
+          const crystalHit = updatedLightBeam.segments.some((segment, index) => {
+            if (index === 0) return false; // Skip first segment (light source)
+            const prevSegment = updatedLightBeam.segments[index - 1];
+            return lineIntersectsRect(prevSegment, segment, state.crystal!);
+          });
+          
+          updatedCrystal = { ...state.crystal, isActivated: crystalHit };
+        }
       }
 
       // --- UPDATE STATE ---
@@ -594,6 +686,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         throwableItems: updatedThrowableItems,
         patternTiles: updatedPatternTiles,
         currentPatternStep: updatedCurrentPatternStep,
+        lightBeam: updatedLightBeam,
+        mirrors: updatedMirrors,
+        crystal: updatedCrystal,
       });
     },
 

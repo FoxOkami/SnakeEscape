@@ -77,6 +77,23 @@ export interface ThrowableItem extends Rectangle {
   throwTargetPos?: Position;
 }
 
+export interface Mirror extends Rectangle {
+  id: string;
+  rotation: number; // 0-360 degrees
+  isReflecting: boolean; // true if light is hitting it
+}
+
+export interface LightBeam {
+  start: Position;
+  end: Position;
+  segments: Position[]; // Array of points for the light path
+}
+
+export interface Crystal extends Rectangle {
+  id: string;
+  isActivated: boolean; // true if light is hitting it
+}
+
 export interface CarriedItem {
   type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat';
   id: string;
@@ -94,6 +111,9 @@ export interface Level {
   throwableItems?: ThrowableItem[];
   patternTiles?: PatternTile[];
   patternSequence?: number[]; // The correct sequence to step on tiles
+  mirrors?: Mirror[];
+  crystal?: Crystal;
+  lightSource?: Position;
   size: Size;
 }
 
@@ -114,4 +134,8 @@ export interface GameData {
   currentPatternStep: number;
   carriedItem: CarriedItem | null;
   levelSize: Size;
+  mirrors: Mirror[];
+  crystal: Crystal | null;
+  lightSource: Position | null;
+  lightBeam: LightBeam | null;
 }

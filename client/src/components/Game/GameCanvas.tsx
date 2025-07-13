@@ -26,7 +26,11 @@ const GameCanvas: React.FC = () => {
     updateGame,
     isWalking,
     currentVelocity,
-    targetVelocity
+    targetVelocity,
+    mirrors,
+    crystal,
+    lightSource,
+    lightBeam
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -322,6 +326,110 @@ const GameCanvas: React.FC = () => {
       ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
     }
 
+    // Draw light reflection elements (mirrors, crystal, light beam)
+    
+    // Draw light source
+    if (lightSource) {
+      ctx.fillStyle = '#ffff00';
+      ctx.beginPath();
+      ctx.arc(lightSource.x, lightSource.y, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      // Add glow effect
+      ctx.fillStyle = '#ffff80';
+      ctx.beginPath();
+      ctx.arc(lightSource.x, lightSource.y, 12, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      // Core light
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(lightSource.x, lightSource.y, 4, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+    // Draw mirrors
+    mirrors.forEach(mirror => {
+      ctx.fillStyle = mirror.isReflecting ? '#e6f3ff' : '#c0c0c0';
+      ctx.fillRect(mirror.x, mirror.y, mirror.width, mirror.height);
+      
+      // Add mirror frame
+      ctx.strokeStyle = '#666666';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(mirror.x, mirror.y, mirror.width, mirror.height);
+      
+      // Add rotation indicator
+      ctx.save();
+      ctx.translate(mirror.x + mirror.width / 2, mirror.y + mirror.height / 2);
+      ctx.rotate((mirror.rotation * Math.PI) / 180);
+      ctx.strokeStyle = '#333333';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-mirror.width / 2, 0);
+      ctx.lineTo(mirror.width / 2, 0);
+      ctx.stroke();
+      ctx.restore();
+      
+      // Add reflection glow if reflecting
+      if (mirror.isReflecting) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.fillRect(mirror.x - 2, mirror.y - 2, mirror.width + 4, mirror.height + 4);
+      }
+    });
+
+    // Draw crystal
+    if (crystal) {
+      ctx.fillStyle = crystal.isActivated ? '#ff6b6b' : '#9f7aea';
+      ctx.fillRect(crystal.x, crystal.y, crystal.width, crystal.height);
+      
+      // Add crystal facets
+      ctx.fillStyle = crystal.isActivated ? '#ff9999' : '#b794f6';
+      ctx.fillRect(crystal.x + 2, crystal.y + 2, crystal.width - 4, crystal.height - 4);
+      
+      // Add crystal glow when activated
+      if (crystal.isActivated) {
+        ctx.fillStyle = 'rgba(255, 107, 107, 0.4)';
+        ctx.fillRect(crystal.x - 3, crystal.y - 3, crystal.width + 6, crystal.height + 6);
+        
+        // Add sparkle effect
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(crystal.x + crystal.width / 2 - 1, crystal.y + crystal.height / 2 - 1, 2, 2);
+      }
+    }
+
+    // Draw light beam
+    if (lightBeam && lightBeam.segments.length > 1) {
+      ctx.strokeStyle = '#ffff00';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      
+      // Draw beam segments
+      for (let i = 0; i < lightBeam.segments.length - 1; i++) {
+        const start = lightBeam.segments[i];
+        const end = lightBeam.segments[i + 1];
+        
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+      }
+      
+      ctx.stroke();
+      
+      // Add glow effect
+      ctx.strokeStyle = 'rgba(255, 255, 0, 0.3)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      
+      for (let i = 0; i < lightBeam.segments.length - 1; i++) {
+        const start = lightBeam.segments[i];
+        const end = lightBeam.segments[i + 1];
+        
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+      }
+      
+      ctx.stroke();
+    }
+
     // Debug Display - FPS Counter (bottom left)
     ctx.fillStyle = '#00ff00';
     ctx.font = '16px Arial';
@@ -346,7 +454,7 @@ const GameCanvas: React.FC = () => {
     ctx.fillText(debugText2, levelSize.width - 150, levelSize.height - 30);
     ctx.fillText(debugText3, levelSize.width - 150, levelSize.height - 10);
 
-  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity]);
+  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam]);
 
   const gameLoop = useCallback((currentTime: number) => {
     const canvas = canvasRef.current;

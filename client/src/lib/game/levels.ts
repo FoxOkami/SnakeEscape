@@ -23,7 +23,7 @@ export const LEVELS: Level[] = [
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
       // Key room walls (small chamber on the right, closer to key)
-      { x: 600, y: 270, width: 100, height: 20 }, // top wall
+      //{ x: 600, y: 270, width: 100, height: 20 }, // top wall
       { x: 600, y: 330, width: 100, height: 20 }, // bottom wall
       { x: 600, y: 290, width: 20, height: 40 }, // left wall
       { x: 680, y: 290, width: 20, height: 40 }, // right wall
@@ -229,6 +229,27 @@ export const LEVELS: Level[] = [
         soundCooldown: 0,
       },
       {
+        id: "stalker2",
+        type: "stalker" as const,
+        position: { x: 500, y: 100 },
+        size: { width: 30, height: 30 },
+        speed: 75,
+        direction: { x: 0, y: 1 },
+        patrolPoints: [
+          { x: 500, y: 100 },
+          { x: 400, y: 200 },
+          { x: 500, y: 200 },
+          { x: 400, y: 100 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 120,
+        sightRange: 0, // Stalkers are blind
+        hearingRange: 200,
+        isChasing: false,
+        soundCooldown: 0,
+      },
+      {
         id: "burster1",
         type: "burster" as const,
         position: { x: 600, y: 200 },
@@ -253,8 +274,8 @@ export const LEVELS: Level[] = [
         id: "screensaver1",
         type: "screensaver" as const,
         position: { x: 300, y: 100 },
-        size: { width: 25, height: 25 },
-        speed: 60,
+        size: { width: 30, height: 30 },
+        speed: 135,
         direction: { x: 0, y: 0 }, // Will be randomly set on first update
         patrolPoints: [], // Not used for screensaver
         currentPatrolIndex: 0,
@@ -267,14 +288,6 @@ export const LEVELS: Level[] = [
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 650, y: 350, width: 20, height: 20, collected: false },
     switches: [
-      {
-        x: 100,
-        y: 300,
-        width: 30,
-        height: 30,
-        isPressed: false,
-        id: "switch1",
-      },
       {
         x: 200,
         y: 500,
@@ -302,43 +315,43 @@ export const LEVELS: Level[] = [
     ],
     throwableItems: [
       {
-        id: 'chubbshand1',
-        type: 'chubbs_hand' as const,
+        id: "chubbshand1",
+        type: "chubbs_hand" as const,
         x: 250,
         y: 100,
         width: 25,
         height: 25,
         isPickedUp: false,
-        isThrown: false
+        isThrown: false,
       },
       {
-        id: 'eliship1',
-        type: 'elis_hip' as const,
+        id: "eliship1",
+        type: "elis_hip" as const,
         x: 450,
         y: 250,
         width: 25,
         height: 25,
         isPickedUp: false,
-        isThrown: false
+        isThrown: false,
       },
       {
-        id: 'barbrahat1',
-        type: 'barbra_hat' as const,
+        id: "barbrahat1",
+        type: "barbra_hat" as const,
         x: 550,
         y: 450,
         width: 25,
         height: 25,
         isPickedUp: false,
-        isThrown: false
-      }
-    ]
+        isThrown: false,
+      },
+    ],
   },
 
-  // Level 3: Advanced challenge
+  // Level 3: Light Reflection Puzzle
   {
     id: 3,
-    name: "Snake Maze",
-    player: { x: 50, y: 50 },
+    name: "Light Reflection",
+    player: { x: 50, y: 550 },
     size: { width: 800, height: 600 },
     walls: [
       // Outer walls
@@ -346,99 +359,77 @@ export const LEVELS: Level[] = [
       { x: 0, y: 580, width: 800, height: 20 },
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
-      // Complex maze structure
-      { x: 100, y: 100, width: 100, height: 20 },
-      { x: 250, y: 150, width: 20, height: 150 },
-      { x: 350, y: 200, width: 150, height: 20 },
-      { x: 150, y: 350, width: 200, height: 20 },
-      { x: 450, y: 100, width: 20, height: 200 },
-      { x: 550, y: 350, width: 20, height: 200 },
-      { x: 300, y: 450, width: 200, height: 20 },
+      // Key room walls (enclose the key)
+      { x: 650, y: 250, width: 100, height: 20 }, // Top wall
+      { x: 650, y: 350, width: 100, height: 20 }, // Bottom wall
+      { x: 650, y: 250, width: 20, height: 120 }, // Left wall (removable)
+      { x: 730, y: 250, width: 20, height: 120 }, // Right wall
+      // Some internal walls for layout
+      { x: 200, y: 300, width: 300, height: 20 },
+      { x: 400, y: 150, width: 20, height: 150 },
     ],
     snakes: [
       {
         id: "guard1",
         type: "guard" as const,
-        position: { x: 150, y: 200 },
+        position: { x: 300, y: 450 },
         size: { width: 30, height: 30 },
-        speed: 100,
+        speed: 80,
         direction: { x: 1, y: 0 },
         patrolPoints: [
-          { x: 150, y: 200 },
-          { x: 220, y: 200 },
-          { x: 220, y: 280 },
-          { x: 150, y: 280 },
+          { x: 300, y: 450 },
+          { x: 450, y: 450 },
+          { x: 450, y: 520 },
+          { x: 300, y: 520 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
-        chaseSpeed: 150,
-        sightRange: 200,
+        chaseSpeed: 120,
+        sightRange: 150,
         isChasing: false,
-        lostSightCooldown: 0,
-      },
-      {
-        id: "stalker1",
-        type: "stalker" as const,
-        position: { x: 400, y: 300 },
-        size: { width: 30, height: 30 },
-        speed: 75,
-        direction: { x: 0, y: 1 },
-        patrolPoints: [
-          { x: 400, y: 300 },
-          { x: 400, y: 400 },
-          { x: 500, y: 400 },
-          { x: 500, y: 300 },
-        ],
-        currentPatrolIndex: 0,
-        patrolDirection: 1,
-        chaseSpeed: 130,
-        sightRange: 0, // Stalkers are blind
-        hearingRange: 220,
-        isChasing: false,
-        soundCooldown: 0,
-      },
-      {
-        id: "burster1",
-        type: "burster" as const,
-        position: { x: 600, y: 150 },
-        size: { width: 30, height: 30 },
-        speed: 50,
-        direction: { x: 1, y: 0 },
-        patrolPoints: [
-          { x: 600, y: 150 },
-          { x: 700, y: 150 },
-          { x: 700, y: 250 },
-          { x: 600, y: 250 },
-        ],
-        currentPatrolIndex: 0,
-        patrolDirection: 1,
-        chaseSpeed: 100,
-        sightRange: 160,
-        isChasing: false,
-        dashSpeed: 250,
-        isDashing: false,
-        dashDuration: 1.0,
         lostSightCooldown: 0,
       },
     ],
-    door: { x: 750, y: 500, width: 30, height: 40, isOpen: false },
-    key: { x: 650, y: 50, width: 20, height: 20, collected: false },
-    switches: [
+    door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
+    key: { x: 690, y: 300, width: 20, height: 20, collected: false },
+    lightSource: { x: 100, y: 50 },
+    crystal: { x: 620, y: 300, width: 20, height: 20, id: "crystal1", isActivated: false },
+    mirrors: [
       {
-        x: 380,
-        y: 380,
-        width: 30,
-        height: 30,
-        isPressed: false,
-        id: "switch1",
+        id: "mirror1",
+        x: 150,
+        y: 100,
+        width: 20,
+        height: 20,
+        rotation: 45,
+        isReflecting: false,
       },
       {
-        x: 120,
-        y: 500,
-        width: 30,
-        height: 30,
-        isPressed: false,
-        id: "switch2",
+        id: "mirror2",
+        x: 300,
+        y: 180,
+        width: 20,
+        height: 20,
+        rotation: 135,
+        isReflecting: false,
+      },
+      {
+        id: "mirror3",
+        x: 500,
+        y: 120,
+        width: 20,
+        height: 20,
+        rotation: 225,
+        isReflecting: false,
+      },
+      {
+        id: "mirror4",
+        x: 580,
+        y: 250,
+        width: 20,
+        height: 20,
+        rotation: 315,
+        isReflecting: false,
       },
     ],
   },
