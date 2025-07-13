@@ -441,9 +441,38 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Check switch interactions
       let updatedSwitches = state.switches.map((switchObj) => {
-        if (checkAABBCollision(playerRect, switchObj)) {
-          return { ...switchObj, isPressed: true };
+        // Regular switch logic (for switch1)
+        if (switchObj.id === 'switch1') {
+          if (checkAABBCollision(playerRect, switchObj)) {
+            return { ...switchObj, isPressed: true };
+          }
+          return switchObj;
         }
+
+        // Pressure plate logic (for pressure1, pressure2, pressure3)
+        if (switchObj.id.startsWith('pressure')) {
+          let isPressed = false;
+          
+          // Check if player is on the pressure plate
+          if (checkAABBCollision(playerRect, switchObj)) {
+            isPressed = true;
+          }
+          
+          // Check if any of the special items are on the pressure plate
+          for (const item of updatedThrowableItems) {
+            if (!item.isPickedUp && !item.isThrown && 
+                ['chubbs_hand', 'elis_hip', 'barbra_hat'].includes(item.type)) {
+              const itemRect = { x: item.x, y: item.y, width: item.width, height: item.height };
+              if (checkAABBCollision(itemRect, switchObj)) {
+                isPressed = true;
+                break;
+              }
+            }
+          }
+          
+          return { ...switchObj, isPressed };
+        }
+        
         return switchObj;
       });
 
@@ -513,6 +542,29 @@ export const useSnakeGame = create<SnakeGameState>()(
           !(wall.x === 600 && wall.y === 290 && wall.width === 20 && wall.height === 40)
         );
         set({ walls: keyRoomWalls });
+      }
+
+      // Handle key room wall for level 2 pressure plates
+      if (state.currentLevel === 1) { // Level 2 (0-indexed)
+        const pressurePlates = updatedSwitches.filter(s => s.id.startsWith('pressure'));
+        const allPressurePlatesActive = pressurePlates.length === 3 && pressurePlates.every(p => p.isPressed);
+        
+        // Check if the key room wall exists
+        const keyRoomWallExists = state.walls.some(wall => 
+          wall.x === 620 && wall.y === 320 && wall.width === 20 && wall.height === 80
+        );
+        
+        if (allPressurePlatesActive && keyRoomWallExists) {
+          // Remove the left wall of the key room
+          const newWalls = state.walls.filter(wall => 
+            !(wall.x === 620 && wall.y === 320 && wall.width === 20 && wall.height === 80)
+          );
+          set({ walls: newWalls });
+        } else if (!allPressurePlatesActive && !keyRoomWallExists) {
+          // Add the left wall back if not all pressure plates are active
+          const newWalls = [...state.walls, { x: 620, y: 320, width: 20, height: 80 }];
+          set({ walls: newWalls });
+        }
       }
 
       // Check door interaction

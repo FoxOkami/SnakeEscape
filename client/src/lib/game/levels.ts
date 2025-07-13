@@ -200,6 +200,11 @@ export const LEVELS: Level[] = [
       { x: 300, y: 300, width: 200, height: 20 },
       { x: 550, y: 150, width: 20, height: 200 },
       { x: 400, y: 450, width: 20, height: 130 },
+      // Key room walls (enclose the key)
+      { x: 620, y: 320, width: 80, height: 20 }, // Top wall
+      { x: 620, y: 380, width: 80, height: 20 }, // Bottom wall
+      { x: 620, y: 320, width: 20, height: 80 }, // Left wall (removable)
+      { x: 680, y: 320, width: 20, height: 80 }, // Right wall
     ],
     snakes: [
       {
@@ -269,6 +274,30 @@ export const LEVELS: Level[] = [
         height: 30,
         isPressed: false,
         id: "switch1",
+      },
+      {
+        x: 200,
+        y: 500,
+        width: 30,
+        height: 30,
+        isPressed: false,
+        id: "pressure1",
+      },
+      {
+        x: 500,
+        y: 100,
+        width: 30,
+        height: 30,
+        isPressed: false,
+        id: "pressure2",
+      },
+      {
+        x: 680,
+        y: 450,
+        width: 30,
+        height: 30,
+        isPressed: false,
+        id: "pressure3",
       },
     ],
     throwableItems: [

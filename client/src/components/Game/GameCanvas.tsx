@@ -45,15 +45,39 @@ const GameCanvas: React.FC = () => {
       ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
     });
 
-    // Draw switches
+    // Draw switches and pressure plates
     switches.forEach(switchObj => {
-      ctx.fillStyle = switchObj.isPressed ? '#48bb78' : '#ed8936';
-      ctx.fillRect(switchObj.x, switchObj.y, switchObj.width, switchObj.height);
-      
-      // Add a small border
-      ctx.strokeStyle = '#2d3748';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(switchObj.x, switchObj.y, switchObj.width, switchObj.height);
+      if (switchObj.id.startsWith('pressure')) {
+        // Draw pressure plate as a flat circular platform
+        ctx.fillStyle = switchObj.isPressed ? '#48bb78' : '#a0aec0';
+        ctx.beginPath();
+        ctx.arc(switchObj.x + switchObj.width / 2, switchObj.y + switchObj.height / 2, switchObj.width / 2, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Add inner circle for pressed state
+        if (switchObj.isPressed) {
+          ctx.fillStyle = '#2f855a';
+          ctx.beginPath();
+          ctx.arc(switchObj.x + switchObj.width / 2, switchObj.y + switchObj.height / 2, switchObj.width / 3, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+        
+        // Add border
+        ctx.strokeStyle = '#2d3748';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(switchObj.x + switchObj.width / 2, switchObj.y + switchObj.height / 2, switchObj.width / 2, 0, 2 * Math.PI);
+        ctx.stroke();
+      } else {
+        // Draw regular switch as a rectangle
+        ctx.fillStyle = switchObj.isPressed ? '#48bb78' : '#ed8936';
+        ctx.fillRect(switchObj.x, switchObj.y, switchObj.width, switchObj.height);
+        
+        // Add a small border
+        ctx.strokeStyle = '#2d3748';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(switchObj.x, switchObj.y, switchObj.width, switchObj.height);
+      }
     });
 
     // Draw pattern tiles
