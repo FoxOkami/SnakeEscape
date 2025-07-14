@@ -703,14 +703,30 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
 
+      // Handle Level 3 crystal activation - remove key room wall
+      if (state.currentLevel === 2 && updatedCrystal && updatedCrystal.isActivated) {
+        // Check if the key room wall still exists
+        const keyRoomWallExists = state.walls.some(wall => 
+          wall.x === 650 && wall.y === 250 && wall.width === 20 && wall.height === 120
+        );
+        
+        if (keyRoomWallExists) {
+          // Remove the left wall of the key room (x: 650, y: 250, width: 20, height: 120)
+          const newWalls = state.walls.filter(wall => 
+            !(wall.x === 650 && wall.y === 250 && wall.width === 20 && wall.height === 120)
+          );
+          set({ walls: newWalls });
+        }
+      }
+
       // Check door interaction
       let updatedDoor = state.door;
       const allSwitchesPressed =
         updatedSwitches.length === 0 ||
         updatedSwitches.every((s) => s.isPressed);
 
-      // Level 3 (light reflection puzzle) - crystal must be activated
-      if (state.currentLevel === 2 && updatedCrystal && updatedCrystal.isActivated) {
+      // Level 3 (light reflection puzzle) - player must have key and crystal must be activated
+      if (state.currentLevel === 2 && updatedPlayer.hasKey && updatedCrystal && updatedCrystal.isActivated) {
         updatedDoor = { ...state.door, isOpen: true };
       } else if (state.currentLevel !== 2 && updatedPlayer.hasKey && allSwitchesPressed) {
         updatedDoor = { ...state.door, isOpen: true };

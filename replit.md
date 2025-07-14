@@ -118,6 +118,9 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
+- July 14, 2025. Enhanced Level 3 mirror rotation with 1-degree precision controls (Q/E keys)
+- July 14, 2025. Added level selection feature with difficulty indicators
+- July 14, 2025. Implemented key room wall removal mechanic for Level 3 light puzzle
 - June 28, 2025. Initial setup
 
 ## User Preferences
