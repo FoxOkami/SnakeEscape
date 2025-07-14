@@ -24,6 +24,7 @@ import { useAudio } from "./useAudio";
 interface SnakeGameState extends GameData {
   // Actions
   startGame: () => void;
+  startFromLevel: (levelIndex: number) => void;
   resetGame: () => void;
   movePlayer: (direction: Position) => void;
   updateGame: (deltaTime: number) => void;
@@ -190,6 +191,49 @@ export const useSnakeGame = create<SnakeGameState>()(
         currentPatternStep: 0,
         carriedItem: null,
         levelSize: { ...level.size },
+        mirrors: level.mirrors ? level.mirrors.map((mirror) => ({ ...mirror })) : [],
+        crystal: level.crystal ? { ...level.crystal } : null,
+        lightSource: level.lightSource ? { ...level.lightSource } : null,
+        lightBeam: null,
+        currentVelocity: { x: 0, y: 0 },
+        targetVelocity: { x: 0, y: 0 },
+        keysPressed: new Set(),
+        isWalking: false,
+      });
+    },
+
+    startFromLevel: (levelIndex: number) => {
+      if (levelIndex < 0 || levelIndex >= LEVELS.length) {
+        return; // Invalid level index
+      }
+      
+      const level = LEVELS[levelIndex];
+      set({
+        currentLevel: levelIndex,
+        gameState: "playing",
+        player: {
+          position: { ...level.player },
+          size: { width: 25, height: 25 },
+          speed: PLAYER_SPEED,
+          hasKey: false,
+        },
+        snakes: level.snakes.map((snake) => ({ ...snake })),
+        walls: level.walls.map((wall) => ({ ...wall })),
+        door: { ...level.door },
+        key: { ...level.key },
+        switches: level.switches ? level.switches.map((s) => ({ ...s })) : [],
+        throwableItems: level.throwableItems
+          ? level.throwableItems.map((item) => ({ ...item }))
+          : [],
+        patternTiles: level.patternTiles ? level.patternTiles.map((tile) => ({ ...tile })) : [],
+        patternSequence: level.patternSequence ? [...level.patternSequence] : [],
+        currentPatternStep: 0,
+        carriedItem: null,
+        levelSize: { ...level.size },
+        mirrors: level.mirrors ? level.mirrors.map((mirror) => ({ ...mirror })) : [],
+        crystal: level.crystal ? { ...level.crystal } : null,
+        lightSource: level.lightSource ? { ...level.lightSource } : null,
+        lightBeam: null,
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),

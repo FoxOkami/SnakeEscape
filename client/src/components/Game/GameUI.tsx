@@ -12,6 +12,7 @@ const GameUI: React.FC = () => {
     currentLevel,
     player,
     startGame,
+    startFromLevel,
     resetGame,
     nextLevel,
     returnToMenu,
@@ -20,6 +21,8 @@ const GameUI: React.FC = () => {
   } = useSnakeGame();
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
+  
+  const [showLevelSelect, setShowLevelSelect] = React.useState(false);
 
 
 
@@ -34,12 +37,87 @@ const GameUI: React.FC = () => {
     }
   }, [gameState, backgroundMusic, isMuted]);
 
+  // Reset level select when returning to menu
+  React.useEffect(() => {
+    if (gameState === 'menu') {
+      setShowLevelSelect(false);
+    }
+  }, [gameState]);
+
   // Play success sound on level complete or victory
   React.useEffect(() => {
     if (gameState === 'levelComplete' || gameState === 'victory') {
       playSuccess();
     }
   }, [gameState, playSuccess]);
+
+  const renderLevelSelect = () => (
+    <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+      <Card className="w-[600px] max-h-[80vh] overflow-y-auto bg-gray-800 text-white border-gray-600 shadow-2xl">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-green-400">Level Select</CardTitle>
+          <CardDescription className="text-gray-300">
+            Choose which level to start from
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="text-xs text-gray-400 mb-3 flex items-center justify-center gap-4">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+              <span>Easy</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
+              <span>Medium</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+              <span>Hard</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {LEVELS.map((level, index) => {
+              // Count different elements to give difficulty indication
+              const snakeCount = level.snakes.length;
+              const hasSpecialFeatures = level.switches || level.throwableItems || level.mirrors;
+              
+              let difficultyColor = "bg-green-600"; // Easy
+              if (snakeCount > 2 || hasSpecialFeatures) difficultyColor = "bg-yellow-600"; // Medium
+              if (snakeCount > 3 || (hasSpecialFeatures && snakeCount > 1)) difficultyColor = "bg-red-600"; // Hard
+              
+              return (
+                <Button
+                  key={level.id}
+                  onClick={() => {
+                    startFromLevel(index);
+                    setShowLevelSelect(false);
+                  }}
+                  className="h-20 flex flex-col items-center justify-center bg-gray-700 hover:bg-gray-600 text-white border border-gray-600 relative"
+                >
+                  <div className="text-sm font-semibold">Level {index + 1}</div>
+                  <div className="text-xs text-gray-300 text-center">{level.name}</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {snakeCount} snake{snakeCount !== 1 ? 's' : ''}
+                    {hasSpecialFeatures && ' + puzzles'}
+                  </div>
+                  <div className={`absolute top-1 right-1 w-2 h-2 rounded-full ${difficultyColor}`} title="Difficulty indicator"></div>
+                </Button>
+              );
+            })}
+          </div>
+          <div className="flex justify-center pt-4">
+            <Button 
+              onClick={() => setShowLevelSelect(false)} 
+              variant="outline" 
+              className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+            >
+              Back to Menu
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 
   const renderMenu = () => (
     <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
@@ -66,6 +144,9 @@ const GameUI: React.FC = () => {
           <div className="flex flex-col gap-2">
             <Button onClick={startGame} className="w-full bg-blue-600 hover:bg-blue-700">
               Start Game
+            </Button>
+            <Button onClick={() => setShowLevelSelect(true)} className="w-full bg-green-600 hover:bg-green-700">
+              Level Select
             </Button>
             <Button onClick={toggleMute} variant="outline" className="w-full">
               Sound: {isMuted ? 'Off' : 'On'}
@@ -197,7 +278,8 @@ const GameUI: React.FC = () => {
 
   return (
     <>
-      {gameState === 'menu' && renderMenu()}
+      {gameState === 'menu' && !showLevelSelect && renderMenu()}
+      {gameState === 'menu' && showLevelSelect && renderLevelSelect()}
       {gameState === 'gameOver' && renderGameOver()}
       {gameState === 'levelComplete' && renderLevelComplete()}
       {gameState === 'victory' && renderVictory()}
