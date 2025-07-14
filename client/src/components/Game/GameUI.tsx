@@ -51,9 +51,11 @@ const GameUI: React.FC = () => {
     }
   }, [gameState, playSuccess]);
 
-  const renderLevelSelect = () => (
-    <div className="absolute inset-0 bg-black bg-opacity-90 flex justify-center pt-8 z-50 p-4">
-      <Card className="w-[600px] max-h-[80vh] overflow-y-auto bg-gray-800 text-white border-gray-600 shadow-2xl">
+  const renderLevelSelect = () => {
+    console.log('Level select rendering');
+    return (
+      <div className="absolute inset-0 bg-black bg-opacity-90 flex justify-center pt-8 z-[100] p-4">
+        <Card className="w-[600px] max-h-[80vh] overflow-y-auto bg-gray-800 text-white border-gray-600 shadow-2xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-green-400">Level Select</CardTitle>
           <CardDescription className="text-gray-300">
@@ -117,10 +119,11 @@ const GameUI: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+    );
+  };
 
   const renderMenu = () => (
-    <div className="absolute inset-0 bg-black bg-opacity-90 flex justify-center pt-8 z-50 p-4">
+    <div className="absolute inset-0 bg-black bg-opacity-90 flex justify-center pt-8 z-[100] p-4">
       <Card className="w-96 bg-gray-800 text-white border-gray-600 shadow-2xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-blue-400">Snake Room</CardTitle>
