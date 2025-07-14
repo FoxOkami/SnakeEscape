@@ -392,7 +392,7 @@ export const LEVELS: Level[] = [
     ],
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 690, y: 300, width: 20, height: 20, collected: false },
-    lightSource: { x: 100, y: 50 },
+    lightSource: { x: 100, y: 50, rotation: 180 }, // Initially pointing south
     crystal: {
       x: 620,
       y: 300,

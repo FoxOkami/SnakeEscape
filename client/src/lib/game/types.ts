@@ -94,6 +94,10 @@ export interface Crystal extends Rectangle {
   isActivated: boolean; // true if light is hitting it
 }
 
+export interface LightSource extends Position {
+  rotation: number; // 0-360 degrees, 0 = north, 90 = east, 180 = south, 270 = west
+}
+
 export interface CarriedItem {
   type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat';
   id: string;
@@ -113,7 +117,7 @@ export interface Level {
   patternSequence?: number[]; // The correct sequence to step on tiles
   mirrors?: Mirror[];
   crystal?: Crystal;
-  lightSource?: Position;
+  lightSource?: LightSource;
   size: Size;
 }
 
@@ -136,6 +140,6 @@ export interface GameData {
   levelSize: Size;
   mirrors: Mirror[];
   crystal: Crystal | null;
-  lightSource: Position | null;
+  lightSource: LightSource | null;
   lightBeam: LightBeam | null;
 }

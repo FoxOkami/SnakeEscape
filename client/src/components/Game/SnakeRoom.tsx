@@ -5,7 +5,7 @@ import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
 
 const SnakeRoom: React.FC = () => {
-  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror } = useSnakeGame();
+  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } = useAudio();
 
 
@@ -33,25 +33,29 @@ const SnakeRoom: React.FC = () => {
   // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Handle Q key for counterclockwise mirror rotation
+      // Handle Q key for counterclockwise rotation (mirrors and light source)
       if (event.code === 'KeyQ' && gameState === 'playing') {
         event.preventDefault();
         const gameState_current = useSnakeGame.getState();
         if (gameState_current.currentLevel === 2) {
+          // Try to rotate mirror first, then light source
           rotateMirror('counterclockwise');
+          rotateLightSource('counterclockwise');
           return;
         }
       }
       
-      // Handle E key for clockwise mirror rotation or item interaction
+      // Handle E key for clockwise rotation (mirrors and light source) or item interaction
       if (event.code === 'KeyE' && gameState === 'playing') {
         event.preventDefault();
         setKeyPressed(event.code, true);
         
-        // Check if we're on level 3 (mirror rotation level)
+        // Check if we're on level 3 (mirror/light source rotation level)
         const gameState_current = useSnakeGame.getState();
         if (gameState_current.currentLevel === 2) {
+          // Try to rotate mirror first, then light source
           rotateMirror('clockwise');
+          rotateLightSource('clockwise');
           return;
         }
         

@@ -1,32 +1,24 @@
-import { Position, Mirror, Crystal, Wall, LightBeam } from './types';
+import { Position, Mirror, Crystal, Wall, LightBeam, LightSource } from './types';
 
 export function calculateLightBeam(
-  lightSource: Position,
+  lightSource: LightSource,
   mirrors: Mirror[],
   crystal: Crystal,
   walls: Wall[]
 ): LightBeam | null {
   const segments: Position[] = [];
-  let currentStart = lightSource;
+  let currentStart = { x: lightSource.x, y: lightSource.y };
   
-  // Calculate direction to point directly at the first mirror (mirror1)
-  const firstMirror = mirrors.find(m => m.id === 'mirror1');
-  let direction = { x: 0.5, y: 0.8 }; // Default direction
+  // Calculate direction based on rotation (0 = north, 90 = east, 180 = south, 270 = west)
+  const radians = (lightSource.rotation * Math.PI) / 180;
+  let direction = {
+    x: Math.sin(radians),
+    y: Math.cos(radians)
+  };
   
-  if (firstMirror) {
-    // Calculate direction vector to center of first mirror
-    const mirrorCenter = {
-      x: firstMirror.x + firstMirror.width / 2,
-      y: firstMirror.y + firstMirror.height / 2
-    };
-    
-    const dx = mirrorCenter.x - lightSource.x;
-    const dy = mirrorCenter.y - lightSource.y;
-    const length = Math.sqrt(dx * dx + dy * dy);
-    
-    if (length > 0) {
-      direction = { x: dx / length, y: dy / length };
-    }
+  // For north (0°), we want negative y direction
+  if (lightSource.rotation === 0) {
+    direction = { x: 0, y: -1 };
   }
   
   let reflectionCount = 0;
@@ -37,7 +29,7 @@ export function calculateLightBeam(
 
   while (reflectionCount < maxReflections) {
     // Cast ray and find the next intersection
-    const intersection = castRay(currentStart, direction, mirrors, walls, lastMirror);
+    const intersection = castRay(currentStart, direction, mirrors, walls, crystal, lastMirror);
     
     if (!intersection) {
       // No intersection found, ray goes to edge of screen
@@ -48,8 +40,8 @@ export function calculateLightBeam(
 
     segments.push(intersection.point);
 
-    if (intersection.type === 'wall') {
-      // Ray hits wall, stop
+    if (intersection.type === 'wall' || intersection.type === 'crystal') {
+      // Ray hits wall or crystal, stop
       break;
     }
 
@@ -90,11 +82,24 @@ function castRay(
   direction: Position,
   mirrors: Mirror[],
   walls: Wall[],
+  crystal: Crystal,
   excludeMirror?: Mirror
-): { point: Position; type: 'mirror' | 'wall'; mirror?: Mirror } | null {
+): { point: Position; type: 'mirror' | 'wall' | 'crystal'; mirror?: Mirror } | null {
   let closestDistance = Infinity;
-  let closestIntersection: { point: Position; type: 'mirror' | 'wall'; mirror?: Mirror } | null = null;
+  let closestIntersection: { point: Position; type: 'mirror' | 'wall' | 'crystal'; mirror?: Mirror } | null = null;
   const minDistance = 0.1; // Minimum distance to avoid immediate re-intersection
+
+  // Check intersections with crystal first (highest priority)
+  const crystalIntersection = rayRectIntersection(start, direction, crystal);
+  if (crystalIntersection) {
+    const distance = Math.sqrt(
+      Math.pow(crystalIntersection.x - start.x, 2) + Math.pow(crystalIntersection.y - start.y, 2)
+    );
+    if (distance > minDistance && distance < closestDistance) {
+      closestDistance = distance;
+      closestIntersection = { point: crystalIntersection, type: 'crystal' };
+    }
+  }
 
   // Check intersections with mirrors
   mirrors.forEach(mirror => {

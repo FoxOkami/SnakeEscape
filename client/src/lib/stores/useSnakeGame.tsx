@@ -48,6 +48,9 @@ interface SnakeGameState extends GameData {
   
   // Mirror rotation actions
   rotateMirror: (direction: 'clockwise' | 'counterclockwise') => void;
+  
+  // Light source rotation actions
+  rotateLightSource: (direction: 'clockwise' | 'counterclockwise') => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -929,6 +932,30 @@ export const useSnakeGame = create<SnakeGameState>()(
             ? { ...mirror, rotation: (mirror.rotation + rotationChange + 360) % 360 }
             : mirror
         )
+      });
+    },
+
+    rotateLightSource: (direction: 'clockwise' | 'counterclockwise') => {
+      const state = get();
+      if (state.gameState !== 'playing' || state.currentLevel !== 2 || !state.lightSource) return; // Only on level 3 (0-indexed)
+
+      // Check if player is near light source
+      const distance = Math.sqrt(
+        Math.pow(state.player.position.x - state.lightSource.x, 2) + 
+        Math.pow(state.player.position.y - state.lightSource.y, 2)
+      );
+
+      if (distance > 60) return; // Must be within interaction range
+
+      // Calculate rotation change based on direction (1-degree increments)
+      const rotationChange = direction === 'clockwise' ? 1 : -1;
+
+      // Update light source rotation
+      set({
+        lightSource: {
+          ...state.lightSource,
+          rotation: (state.lightSource.rotation + rotationChange + 360) % 360
+        }
       });
     },
   })),

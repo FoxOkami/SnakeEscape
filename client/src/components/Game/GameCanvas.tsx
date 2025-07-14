@@ -346,6 +346,40 @@ const GameCanvas: React.FC = () => {
       ctx.beginPath();
       ctx.arc(lightSource.x, lightSource.y, 4, 0, 2 * Math.PI);
       ctx.fill();
+      
+      // Draw direction indicator
+      ctx.save();
+      ctx.translate(lightSource.x, lightSource.y);
+      ctx.rotate((lightSource.rotation * Math.PI) / 180);
+      ctx.strokeStyle = '#ff0000';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, 20);
+      ctx.stroke();
+      
+      // Arrow tip
+      ctx.beginPath();
+      ctx.moveTo(-3, 17);
+      ctx.lineTo(0, 20);
+      ctx.lineTo(3, 17);
+      ctx.stroke();
+      ctx.restore();
+      
+      // Show interaction hint if player is nearby
+      const distance = Math.sqrt(
+        Math.pow(player.position.x - lightSource.x, 2) + 
+        Math.pow(player.position.y - lightSource.y, 2)
+      );
+      
+      if (distance < 60) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Q/E to rotate', lightSource.x, lightSource.y - 25);
+        ctx.fillText('(1° increments)', lightSource.x, lightSource.y + 35);
+        ctx.textAlign = 'left';
+      }
     }
 
     // Draw mirrors
