@@ -38,10 +38,17 @@ export function calculateLightBeam(
     // Cast ray and find the next intersection
     const intersection = castRay(currentStart, direction, mirrors, walls);
     
+    console.log(`Reflection ${reflectionCount}:`, {
+      start: currentStart,
+      direction: direction,
+      intersection: intersection
+    });
+    
     if (!intersection) {
       // No intersection found, ray goes to edge of screen
       const edge = findScreenEdge(currentStart, direction);
       segments.push(edge);
+      console.log('No intersection found, going to screen edge:', edge);
       break;
     }
 
@@ -49,15 +56,25 @@ export function calculateLightBeam(
 
     if (intersection.type === 'wall') {
       // Ray hits wall, stop
+      console.log('Ray hit wall, stopping');
       break;
     }
 
     if (intersection.type === 'mirror') {
       // Ray hits mirror, reflect
       const mirror = intersection.mirror!;
+      const oldDirection = { ...direction };
       direction = reflectDirection(direction, mirror.rotation);
       currentStart = intersection.point;
       reflectionCount++;
+      
+      console.log(`Mirror reflection ${reflectionCount}:`, {
+        mirror: mirror.id,
+        mirrorRotation: mirror.rotation,
+        oldDirection,
+        newDirection: direction,
+        newStart: currentStart
+      });
     }
   }
 
