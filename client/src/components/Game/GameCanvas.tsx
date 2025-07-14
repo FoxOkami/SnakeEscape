@@ -386,8 +386,8 @@ const GameCanvas: React.FC = () => {
         ctx.fillStyle = '#ffffff';
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('Hold E + Arrow Keys', mirror.x + mirror.width / 2, mirror.y - 10);
-        ctx.fillText('to rotate', mirror.x + mirror.width / 2, mirror.y + mirror.height + 15);
+        ctx.fillText('Q/E to rotate', mirror.x + mirror.width / 2, mirror.y - 10);
+        ctx.fillText('(1° increments)', mirror.x + mirror.width / 2, mirror.y + mirror.height + 15);
         ctx.textAlign = 'left';
       }
       

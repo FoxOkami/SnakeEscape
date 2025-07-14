@@ -47,7 +47,7 @@ interface SnakeGameState extends GameData {
   pickupNearestItem: () => void;
   
   // Mirror rotation actions
-  rotateMirror: (direction: 'up' | 'down' | 'left' | 'right') => void;
+  rotateMirror: (direction: 'clockwise' | 'counterclockwise') => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -888,16 +888,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       get().pickupItem(closestItem.id);
     },
 
-    rotateMirror: (direction: 'up' | 'down' | 'left' | 'right') => {
+    rotateMirror: (direction: 'clockwise' | 'counterclockwise') => {
       const state = get();
       if (state.gameState !== 'playing' || state.currentLevel !== 2) return; // Only on level 3 (0-indexed)
-
-      const playerRect = {
-        x: state.player.position.x,
-        y: state.player.position.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
-      };
 
       // Find mirror within interaction range
       const nearbyMirror = state.mirrors.find(mirror => {
@@ -910,28 +903,14 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       if (!nearbyMirror) return;
 
-      // Calculate rotation change based on direction
-      let rotationChange = 0;
-      switch (direction) {
-        case 'up':
-          rotationChange = -15; // Rotate counter-clockwise
-          break;
-        case 'down':
-          rotationChange = 15; // Rotate clockwise
-          break;
-        case 'left':
-          rotationChange = -15; // Rotate counter-clockwise
-          break;
-        case 'right':
-          rotationChange = 15; // Rotate clockwise
-          break;
-      }
+      // Calculate rotation change based on direction (1-degree increments)
+      const rotationChange = direction === 'clockwise' ? 1 : -1;
 
       // Update mirror rotation
       set({
         mirrors: state.mirrors.map(mirror => 
           mirror.id === nearbyMirror.id 
-            ? { ...mirror, rotation: (mirror.rotation + rotationChange) % 360 }
+            ? { ...mirror, rotation: (mirror.rotation + rotationChange + 360) % 360 }
             : mirror
         )
       });

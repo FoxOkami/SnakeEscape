@@ -134,6 +134,7 @@ const GameUI: React.FC = () => {
           <div className="text-sm text-gray-400 space-y-2">
             <p><strong>Controls:</strong> WASD/Arrow Keys: Move, Shift: Walk silently</p>
             <p><strong>Items:</strong> E: Pick up, Mouse Click: Throw items</p>
+            <p><strong>Mirrors:</strong> Q/E: Rotate mirrors (Level 3 only)</p>
             <p><strong>Goal:</strong> Collect the key, activate switches, and escape!</p>
             
             <div className="mt-3 pt-2 border-t border-gray-600">
