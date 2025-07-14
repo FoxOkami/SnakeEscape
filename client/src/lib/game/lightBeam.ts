@@ -30,25 +30,19 @@ export function calculateLightBeam(
   }
   
   let reflectionCount = 0;
+  let lastMirror: Mirror | undefined = undefined;
   const maxReflections = 10; // Prevent infinite loops
 
   segments.push(currentStart);
 
   while (reflectionCount < maxReflections) {
     // Cast ray and find the next intersection
-    const intersection = castRay(currentStart, direction, mirrors, walls);
-    
-    console.log(`Reflection ${reflectionCount}:`, {
-      start: currentStart,
-      direction: direction,
-      intersection: intersection
-    });
+    const intersection = castRay(currentStart, direction, mirrors, walls, lastMirror);
     
     if (!intersection) {
       // No intersection found, ray goes to edge of screen
       const edge = findScreenEdge(currentStart, direction);
       segments.push(edge);
-      console.log('No intersection found, going to screen edge:', edge);
       break;
     }
 
@@ -56,25 +50,23 @@ export function calculateLightBeam(
 
     if (intersection.type === 'wall') {
       // Ray hits wall, stop
-      console.log('Ray hit wall, stopping');
       break;
     }
 
     if (intersection.type === 'mirror') {
       // Ray hits mirror, reflect
       const mirror = intersection.mirror!;
-      const oldDirection = { ...direction };
       direction = reflectDirection(direction, mirror.rotation);
-      currentStart = intersection.point;
-      reflectionCount++;
       
-      console.log(`Mirror reflection ${reflectionCount}:`, {
-        mirror: mirror.id,
-        mirrorRotation: mirror.rotation,
-        oldDirection,
-        newDirection: direction,
-        newStart: currentStart
-      });
+      // Move the start point slightly away from the mirror surface to avoid re-intersection
+      const offset = 0.1;
+      currentStart = {
+        x: intersection.point.x + direction.x * offset,
+        y: intersection.point.y + direction.y * offset
+      };
+      
+      lastMirror = mirror;
+      reflectionCount++;
     }
   }
 
@@ -97,19 +89,24 @@ function castRay(
   start: Position,
   direction: Position,
   mirrors: Mirror[],
-  walls: Wall[]
+  walls: Wall[],
+  excludeMirror?: Mirror
 ): { point: Position; type: 'mirror' | 'wall'; mirror?: Mirror } | null {
   let closestDistance = Infinity;
   let closestIntersection: { point: Position; type: 'mirror' | 'wall'; mirror?: Mirror } | null = null;
+  const minDistance = 0.1; // Minimum distance to avoid immediate re-intersection
 
   // Check intersections with mirrors
   mirrors.forEach(mirror => {
+    // Skip the mirror we just reflected from
+    if (excludeMirror && mirror.id === excludeMirror.id) return;
+    
     const intersection = rayRectIntersection(start, direction, mirror);
     if (intersection) {
       const distance = Math.sqrt(
         Math.pow(intersection.x - start.x, 2) + Math.pow(intersection.y - start.y, 2)
       );
-      if (distance < closestDistance) {
+      if (distance > minDistance && distance < closestDistance) {
         closestDistance = distance;
         closestIntersection = { point: intersection, type: 'mirror', mirror };
       }
@@ -123,7 +120,7 @@ function castRay(
       const distance = Math.sqrt(
         Math.pow(intersection.x - start.x, 2) + Math.pow(intersection.y - start.y, 2)
       );
-      if (distance < closestDistance) {
+      if (distance > minDistance && distance < closestDistance) {
         closestDistance = distance;
         closestIntersection = { point: intersection, type: 'wall' };
       }
