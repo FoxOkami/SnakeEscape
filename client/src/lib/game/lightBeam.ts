@@ -8,7 +8,27 @@ export function calculateLightBeam(
 ): LightBeam | null {
   const segments: Position[] = [];
   let currentStart = lightSource;
-  let direction = { x: 0.5, y: 0.8 }; // Initial direction from top-left downwards
+  
+  // Calculate direction to point directly at the first mirror (mirror1)
+  const firstMirror = mirrors.find(m => m.id === 'mirror1');
+  let direction = { x: 0.5, y: 0.8 }; // Default direction
+  
+  if (firstMirror) {
+    // Calculate direction vector to center of first mirror
+    const mirrorCenter = {
+      x: firstMirror.x + firstMirror.width / 2,
+      y: firstMirror.y + firstMirror.height / 2
+    };
+    
+    const dx = mirrorCenter.x - lightSource.x;
+    const dy = mirrorCenter.y - lightSource.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    
+    if (length > 0) {
+      direction = { x: dx / length, y: dy / length };
+    }
+  }
+  
   let reflectionCount = 0;
   const maxReflections = 10; // Prevent infinite loops
 
