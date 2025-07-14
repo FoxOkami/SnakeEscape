@@ -23,6 +23,7 @@ export const LEVELS: Level[] = [
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
       // Key room walls (small chamber on the right, closer to key)
+      // TODO: add top wall back in after testing
       //{ x: 600, y: 270, width: 100, height: 20 }, // top wall
       { x: 600, y: 330, width: 100, height: 20 }, // bottom wall
       { x: 600, y: 290, width: 20, height: 40 }, // left wall
@@ -201,7 +202,8 @@ export const LEVELS: Level[] = [
       { x: 550, y: 150, width: 20, height: 200 },
       { x: 400, y: 450, width: 20, height: 130 },
       // Key room walls (enclose the key)
-      { x: 620, y: 320, width: 80, height: 20 }, // Top wall
+      // TODO: add top wall back in after testing
+      //{ x: 620, y: 320, width: 80, height: 20 }, // Top wall
       { x: 620, y: 380, width: 80, height: 20 }, // Bottom wall
       { x: 620, y: 320, width: 20, height: 80 }, // Left wall (removable)
       { x: 680, y: 320, width: 20, height: 80 }, // Right wall
@@ -393,7 +395,14 @@ export const LEVELS: Level[] = [
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 690, y: 300, width: 20, height: 20, collected: false },
     lightSource: { x: 100, y: 50 },
-    crystal: { x: 620, y: 300, width: 20, height: 20, id: "crystal1", isActivated: false },
+    crystal: {
+      x: 620,
+      y: 300,
+      width: 20,
+      height: 20,
+      id: "crystal1",
+      isActivated: false,
+    },
     mirrors: [
       {
         id: "mirror1",

@@ -5,7 +5,7 @@ import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
 
 const SnakeRoom: React.FC = () => {
-  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem } = useSnakeGame();
+  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } = useAudio();
 
 
@@ -33,16 +33,19 @@ const SnakeRoom: React.FC = () => {
   // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
-        event.preventDefault();
-        setKeyPressed(event.code, true);
-      }
-      
-      // Handle pickup/drop with E key
+      // Handle E key press for mirror rotation or item interaction
       if (event.code === 'KeyE' && gameState === 'playing') {
         event.preventDefault();
-        const gameState_current = useSnakeGame.getState();
+        setKeyPressed(event.code, true);
         
+        // Check if we're on level 3 (mirror rotation level)
+        const gameState_current = useSnakeGame.getState();
+        if (gameState_current.currentLevel === 2) {
+          // On level 3, E key enables mirror rotation mode
+          return;
+        }
+        
+        // On other levels, E key does item pickup/drop
         if (gameState_current.carriedItem) {
           // If carrying something, drop it
           dropItem();
@@ -51,10 +54,45 @@ const SnakeRoom: React.FC = () => {
           pickupNearestItem();
         }
       }
+      
+      // Handle arrow keys for movement or mirror rotation
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
+        event.preventDefault();
+        
+        const gameState_current = useSnakeGame.getState();
+        const eKeyPressed = gameState_current.keysPressed.has('KeyE');
+        
+        // If E is held and we're on level 3, rotate mirrors
+        if (eKeyPressed && gameState_current.currentLevel === 2) {
+          switch (event.code) {
+            case 'ArrowUp':
+              rotateMirror('up');
+              break;
+            case 'ArrowDown':
+              rotateMirror('down');
+              break;
+            case 'ArrowLeft':
+              rotateMirror('left');
+              break;
+            case 'ArrowRight':
+              rotateMirror('right');
+              break;
+          }
+        } else {
+          // Otherwise, use for normal movement
+          setKeyPressed(event.code, true);
+        }
+      }
+      
+      // Handle other movement keys (WASD and Shift)
+      if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
+        event.preventDefault();
+        setKeyPressed(event.code, true);
+      }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'ShiftLeft', 'ShiftRight', 'KeyE'].includes(event.code)) {
         event.preventDefault();
         setKeyPressed(event.code, false);
       }

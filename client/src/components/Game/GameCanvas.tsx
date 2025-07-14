@@ -375,6 +375,21 @@ const GameCanvas: React.FC = () => {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.fillRect(mirror.x - 2, mirror.y - 2, mirror.width + 4, mirror.height + 4);
       }
+      
+      // Show interaction hint if player is nearby
+      const distance = Math.sqrt(
+        Math.pow(player.position.x - (mirror.x + mirror.width / 2), 2) + 
+        Math.pow(player.position.y - (mirror.y + mirror.height / 2), 2)
+      );
+      
+      if (distance < 60) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Hold E + Arrow Keys', mirror.x + mirror.width / 2, mirror.y - 10);
+        ctx.fillText('to rotate', mirror.x + mirror.width / 2, mirror.y + mirror.height + 15);
+        ctx.textAlign = 'left';
+      }
     });
 
     // Draw crystal

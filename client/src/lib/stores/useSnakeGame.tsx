@@ -44,6 +44,9 @@ interface SnakeGameState extends GameData {
   throwItem: (targetPosition: Position) => void;
   dropItem: () => void;
   pickupNearestItem: () => void;
+  
+  // Mirror rotation actions
+  rotateMirror: (direction: 'up' | 'down' | 'left' | 'right') => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -839,6 +842,55 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Use the existing pickupItem function
       get().pickupItem(closestItem.id);
+    },
+
+    rotateMirror: (direction: 'up' | 'down' | 'left' | 'right') => {
+      const state = get();
+      if (state.gameState !== 'playing' || state.currentLevel !== 2) return; // Only on level 3 (0-indexed)
+
+      const playerRect = {
+        x: state.player.position.x,
+        y: state.player.position.y,
+        width: state.player.size.width,
+        height: state.player.size.height,
+      };
+
+      // Find mirror within interaction range
+      const nearbyMirror = state.mirrors.find(mirror => {
+        const distance = Math.sqrt(
+          Math.pow(state.player.position.x - (mirror.x + mirror.width / 2), 2) + 
+          Math.pow(state.player.position.y - (mirror.y + mirror.height / 2), 2)
+        );
+        return distance < 60; // Interaction range
+      });
+
+      if (!nearbyMirror) return;
+
+      // Calculate rotation change based on direction
+      let rotationChange = 0;
+      switch (direction) {
+        case 'up':
+          rotationChange = -15; // Rotate counter-clockwise
+          break;
+        case 'down':
+          rotationChange = 15; // Rotate clockwise
+          break;
+        case 'left':
+          rotationChange = -15; // Rotate counter-clockwise
+          break;
+        case 'right':
+          rotationChange = 15; // Rotate clockwise
+          break;
+      }
+
+      // Update mirror rotation
+      set({
+        mirrors: state.mirrors.map(mirror => 
+          mirror.id === nearbyMirror.id 
+            ? { ...mirror, rotation: (mirror.rotation + rotationChange) % 360 }
+            : mirror
+        )
+      });
     },
   })),
 );
