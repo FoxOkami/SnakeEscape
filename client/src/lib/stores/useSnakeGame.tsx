@@ -620,25 +620,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
 
-      // Check door interaction
-      let updatedDoor = state.door;
-      const allSwitchesPressed =
-        updatedSwitches.length === 0 ||
-        updatedSwitches.every((s) => s.isPressed);
-
-      // Level 3 (light reflection puzzle) - crystal must be activated
-      if (state.currentLevel === 2 && updatedCrystal && updatedCrystal.isActivated) {
-        updatedDoor = { ...state.door, isOpen: true };
-      } else if (state.currentLevel !== 2 && updatedPlayer.hasKey && allSwitchesPressed) {
-        updatedDoor = { ...state.door, isOpen: true };
-      }
-
-      // Check exit
-      if (updatedDoor.isOpen && checkAABBCollision(playerRect, updatedDoor)) {
-        set({ gameState: "levelComplete" });
-        return;
-      }
-
       // --- LIGHT BEAM CALCULATION ---
       let updatedLightBeam = state.lightBeam;
       let updatedMirrors = state.mirrors;
@@ -673,6 +654,25 @@ export const useSnakeGame = create<SnakeGameState>()(
           
           updatedCrystal = { ...state.crystal, isActivated: crystalHit };
         }
+      }
+
+      // Check door interaction
+      let updatedDoor = state.door;
+      const allSwitchesPressed =
+        updatedSwitches.length === 0 ||
+        updatedSwitches.every((s) => s.isPressed);
+
+      // Level 3 (light reflection puzzle) - crystal must be activated
+      if (state.currentLevel === 2 && updatedCrystal && updatedCrystal.isActivated) {
+        updatedDoor = { ...state.door, isOpen: true };
+      } else if (state.currentLevel !== 2 && updatedPlayer.hasKey && allSwitchesPressed) {
+        updatedDoor = { ...state.door, isOpen: true };
+      }
+
+      // Check exit
+      if (updatedDoor.isOpen && checkAABBCollision(playerRect, updatedDoor)) {
+        set({ gameState: "levelComplete" });
+        return;
       }
 
       // --- UPDATE STATE ---
