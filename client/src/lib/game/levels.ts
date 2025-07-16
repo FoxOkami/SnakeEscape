@@ -440,4 +440,30 @@ export const LEVELS: Level[] = [
       },
     ],
   },
+
+  // Level 4: Simple level - just player, key, and exit door
+  {
+    id: 4,
+    name: "Simple Escape",
+    player: { x: 50, y: 300 },
+    size: { width: 800, height: 600 },
+    walls: [
+      // Only outer walls - no inner walls
+      { x: 0, y: 0, width: 800, height: 20 },
+      { x: 0, y: 580, width: 800, height: 20 },
+      { x: 0, y: 0, width: 20, height: 600 },
+      { x: 780, y: 0, width: 20, height: 600 },
+    ],
+    snakes: [], // No snakes
+    door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
+    key: { x: 400, y: 300, width: 20, height: 20, collected: false },
+    // No puzzle elements
+    switches: [],
+    throwableItems: [],
+    patternTiles: [],
+    patternSequence: [],
+    mirrors: [],
+    crystal: null,
+    lightSource: null,
+  },
 ];
