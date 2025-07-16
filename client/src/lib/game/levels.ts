@@ -457,31 +457,35 @@ export const LEVELS: Level[] = [
     snakes: [], // No snakes
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
     key: { x: 400, y: 300, width: 20, height: 20, collected: false },
-    // 16x16 tile grid for visual appeal (non-interactive)
+    // 8x8 centered tile grid for visual appeal (non-interactive)
     patternTiles: (() => {
       const tiles: PatternTile[] = [];
-      const tileSize = 35; // Each tile is 35x35 pixels
-      const startX = 30; // Start after left wall
-      const startY = 30; // Start after top wall
+      const tileSize = 60; // Each tile is 60x60 pixels
+      const gridSize = 8; // 8x8 grid
+      const totalGridWidth = gridSize * tileSize;
+      const totalGridHeight = gridSize * tileSize;
       
-      for (let row = 0; row < 16; row++) {
-        for (let col = 0; col < 16; col++) {
+      // Center the grid in the playable area
+      const playableWidth = 760; // 800 - 40 (walls)
+      const playableHeight = 560; // 600 - 40 (walls)
+      const startX = 20 + (playableWidth - totalGridWidth) / 2;
+      const startY = 20 + (playableHeight - totalGridHeight) / 2;
+      
+      for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
           const x = startX + col * tileSize;
           const y = startY + row * tileSize;
           
-          // Only add tiles that fit within the playable area
-          if (x + tileSize < 770 && y + tileSize < 570) {
-            tiles.push({
-              id: `grid_tile_${row}_${col}`,
-              x,
-              y,
-              width: tileSize,
-              height: tileSize,
-              isGlowing: false,
-              sequenceIndex: -1, // Not part of any sequence
-              hasBeenActivated: false,
-            });
-          }
+          tiles.push({
+            id: `grid_tile_${row}_${col}`,
+            x,
+            y,
+            width: tileSize,
+            height: tileSize,
+            isGlowing: false,
+            sequenceIndex: -1, // Not part of any sequence
+            hasBeenActivated: false,
+          });
         }
       }
       
