@@ -441,7 +441,7 @@ export const LEVELS: Level[] = [
     ],
   },
 
-  // Level 4: Simple level - just player, key, and exit door
+  // Level 4: Simple level - just player, key, and exit door with 16x16 tile grid
   {
     id: 4,
     name: "Simple Escape",
@@ -457,11 +457,39 @@ export const LEVELS: Level[] = [
     snakes: [], // No snakes
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
     key: { x: 400, y: 300, width: 20, height: 20, collected: false },
-    // No puzzle elements
+    // 16x16 tile grid for visual appeal (non-interactive)
+    patternTiles: (() => {
+      const tiles: PatternTile[] = [];
+      const tileSize = 35; // Each tile is 35x35 pixels
+      const startX = 30; // Start after left wall
+      const startY = 30; // Start after top wall
+      
+      for (let row = 0; row < 16; row++) {
+        for (let col = 0; col < 16; col++) {
+          const x = startX + col * tileSize;
+          const y = startY + row * tileSize;
+          
+          // Only add tiles that fit within the playable area
+          if (x + tileSize < 770 && y + tileSize < 570) {
+            tiles.push({
+              id: `grid_tile_${row}_${col}`,
+              x,
+              y,
+              width: tileSize,
+              height: tileSize,
+              isGlowing: false,
+              sequenceIndex: -1, // Not part of any sequence
+              hasBeenActivated: false,
+            });
+          }
+        }
+      }
+      
+      return tiles;
+    })(),
+    patternSequence: [], // No pattern sequence needed
     switches: [],
     throwableItems: [],
-    patternTiles: [],
-    patternSequence: [],
     mirrors: [],
     crystal: null,
     lightSource: null,
