@@ -529,7 +529,7 @@ export const LEVELS: Level[] = [
               line: {
                 startX: centerX,
                 startY: centerY,
-                endX: x + (originalRadius * 2) + 2, // Account for line thickness and border to stay within bounds
+                endX: x + originalRadius, // Extend to left edge accounting for half the line thickness
                 endY: centerY,
                 thickness: originalRadius * 2, // Keep original line thickness
                 color: '#FF00FF', // Inverted color (magenta)
