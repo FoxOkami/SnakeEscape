@@ -116,13 +116,17 @@ const GameCanvas: React.FC = () => {
         ctx.fillStyle = '#ffd700'; // Gold when glowing
       } else if (tile.hasBeenActivated) {
         ctx.fillStyle = '#48bb78'; // Green when activated correctly
-      } else if (currentTile && currentTile.id === tile.id && currentTile.id !== 'grid_tile_3_0' && currentTile.id !== 'grid_tile_6_7') {
-        ctx.fillStyle = '#ffff99'; // Light yellow when player is standing on rotatable tile
       } else {
         ctx.fillStyle = '#4a5568'; // Gray when inactive
       }
       
       ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+      
+      // Add highlight overlay for rotatable tiles with 20% opacity
+      if (currentTile && currentTile.id === tile.id && currentTile.id !== 'grid_tile_3_0' && currentTile.id !== 'grid_tile_6_7') {
+        ctx.fillStyle = 'rgba(255, 255, 153, 0.2)'; // Light yellow with 20% opacity
+        ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+      }
       
       // Add border
       ctx.strokeStyle = '#2d3748';
