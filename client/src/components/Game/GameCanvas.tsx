@@ -147,6 +147,27 @@ const GameCanvas: React.FC = () => {
         );
       }
       
+      // Add directional markers for Level 4 grid tiles
+      if (tile.id.startsWith('grid_tile_')) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '10px Arial';
+        
+        // North marker - top center
+        ctx.textAlign = 'center';
+        ctx.fillText('N', tile.x + tile.width / 2, tile.y + 12);
+        
+        // South marker - bottom center
+        ctx.textAlign = 'center';
+        ctx.fillText('S', tile.x + tile.width / 2, tile.y + tile.height - 4);
+        
+        // West marker - left center
+        ctx.textAlign = 'center';
+        ctx.fillText('W', tile.x + 8, tile.y + tile.height / 2 + 4);
+        
+        // East marker - right center
+        ctx.textAlign = 'center';
+        ctx.fillText('E', tile.x + tile.width - 8, tile.y + tile.height / 2 + 4);
+      }
 
     });
 
