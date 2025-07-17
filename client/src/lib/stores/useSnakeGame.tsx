@@ -964,5 +964,167 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
     },
+
+    startFlow: () => {
+      const state = get();
+      if (state.currentLevel !== 3) return; // Only on level 4 (0-indexed)
+      
+      set({
+        flowState: {
+          isActive: true,
+          currentTile: 'grid_tile_3_0',
+          currentPhase: 'entry-to-center',
+          entryDirection: null,
+          exitDirection: 'east',
+          progress: 0,
+          phaseStartTime: Date.now(),
+          phaseDuration: 1000 // 1 second per phase
+        }
+      });
+    },
+
+    updateFlow: (deltaTime: number) => {
+      const state = get();
+      if (!state.flowState || !state.flowState.isActive) return;
+      
+      const currentTime = Date.now();
+      const elapsedTime = currentTime - state.flowState.phaseStartTime;
+      const progress = Math.min(elapsedTime / state.flowState.phaseDuration, 1);
+      
+      // Update progress
+      set({
+        flowState: {
+          ...state.flowState,
+          progress
+        }
+      });
+      
+      // Check if phase is complete
+      if (progress >= 1) {
+        if (state.flowState.currentPhase === 'entry-to-center') {
+          // Move to center-to-exit phase
+          set({
+            flowState: {
+              ...state.flowState,
+              currentPhase: 'center-to-exit',
+              progress: 0,
+              phaseStartTime: currentTime
+            }
+          });
+        } else if (state.flowState.currentPhase === 'center-to-exit') {
+          // Move to next tile
+          const nextTile = get().getNextTile(state.flowState.currentTile, state.flowState.exitDirection!);
+          if (nextTile) {
+            const newEntryDirection = get().getOppositeDirection(state.flowState.exitDirection!);
+            const newExitDirection = get().calculateExitDirection(nextTile.id, newEntryDirection);
+            
+            set({
+              flowState: {
+                ...state.flowState,
+                currentTile: nextTile.id,
+                currentPhase: 'entry-to-center',
+                entryDirection: newEntryDirection,
+                exitDirection: newExitDirection,
+                progress: 0,
+                phaseStartTime: currentTime
+              }
+            });
+          } else {
+            // Flow ended
+            set({
+              flowState: {
+                ...state.flowState,
+                isActive: false
+              }
+            });
+          }
+        }
+      }
+    },
+
+    getNextTile: (currentTileId: string, exitDirection: 'north' | 'south' | 'east' | 'west') => {
+      const state = get();
+      const match = currentTileId.match(/grid_tile_(\d+)_(\d+)/);
+      if (!match) return null;
+      
+      const row = parseInt(match[1]);
+      const col = parseInt(match[2]);
+      
+      let nextRow = row;
+      let nextCol = col;
+      
+      switch (exitDirection) {
+        case 'north': nextRow--; break;
+        case 'south': nextRow++; break;
+        case 'east': nextCol++; break;
+        case 'west': nextCol--; break;
+      }
+      
+      // Check bounds
+      if (nextRow < 0 || nextRow >= 8 || nextCol < 0 || nextCol >= 8) return null;
+      
+      const nextTileId = `grid_tile_${nextRow}_${nextCol}`;
+      return state.patternTiles.find(tile => tile.id === nextTileId) || null;
+    },
+
+    getOppositeDirection: (direction: 'north' | 'south' | 'east' | 'west') => {
+      const opposites = {
+        north: 'south' as const,
+        south: 'north' as const,
+        east: 'west' as const,
+        west: 'east' as const
+      };
+      return opposites[direction];
+    },
+
+    calculateExitDirection: (tileId: string, entryDirection: 'north' | 'south' | 'east' | 'west') => {
+      // For now, simple logic - if tile has opposite direction, flow to opposite
+      // Otherwise, flow to first available direction that's not the entry
+      const availableDirections = get().getTileDirections(tileId);
+      const opposite = get().getOppositeDirection(entryDirection);
+      
+      if (availableDirections.includes(opposite)) {
+        return opposite;
+      }
+      
+      // Find first available direction that's not the entry
+      return availableDirections.find(dir => dir !== entryDirection) || null;
+    },
+
+    getTileDirections: (tileId: string) => {
+      // Extract tile position and determine available directions based on game logic
+      const match = tileId.match(/grid_tile_(\d+)_(\d+)/);
+      if (!match) return [];
+      
+      const row = parseInt(match[1]);
+      const col = parseInt(match[2]);
+      
+      // Starting square (3,0) only has east
+      if (row === 3 && col === 0) {
+        return ['east' as const];
+      }
+      
+      // Ending square (6,7) only has west
+      if (row === 6 && col === 7) {
+        return ['west' as const];
+      }
+      
+      // For other squares, simulate the random removal system
+      const seed = row * 8 + col;
+      const random1 = ((seed * 31) % 100) / 100;
+      const removeCount = Math.floor(random1 * 3); // 0, 1, or 2
+      
+      let directions: Array<'north' | 'south' | 'east' | 'west'> = ['north', 'south', 'east', 'west'];
+      
+      if (removeCount > 0) {
+        // Remove directions deterministically
+        for (let i = 0; i < removeCount; i++) {
+          const removeIndex = Math.floor(((seed * (i + 13)) % 100) / 100 * directions.length);
+          directions.splice(removeIndex, 1);
+        }
+      }
+      
+      return directions;
+    },
   })),
 );
