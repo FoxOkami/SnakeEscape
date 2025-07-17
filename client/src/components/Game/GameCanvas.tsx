@@ -124,7 +124,7 @@ const GameCanvas: React.FC = () => {
       
       // Add highlight overlay for rotatable tiles with 20% opacity
       if (currentTile && currentTile.id === tile.id && currentTile.id !== 'grid_tile_3_0' && currentTile.id !== 'grid_tile_6_7') {
-        ctx.fillStyle = 'rgba(255, 255, 153, 0.2)'; // Light yellow with 20% opacity
+        ctx.fillStyle = 'rgba(173, 216, 230, 0.2)'; // Light blue with 20% opacity
         ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
       }
       
