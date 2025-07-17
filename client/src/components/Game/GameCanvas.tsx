@@ -184,7 +184,7 @@ const GameCanvas: React.FC = () => {
           ctx.lineTo(tile.x, centerY);
           ctx.stroke();
         }
-        // All other squares - randomly remove 0, 1, or 2 markers
+        // All other squares - show exactly 2 markers
         else {
           // Extract row and column from tile ID for consistent randomization
           const match = tile.id.match(/grid_tile_(\d+)_(\d+)/);
@@ -194,8 +194,6 @@ const GameCanvas: React.FC = () => {
             
             // Create a deterministic but pseudo-random pattern based on row/col
             const seed = row * 8 + col;
-            const random1 = ((seed * 31) % 100) / 100;
-            const random2 = ((seed * 37) % 100) / 100;
             
             // Define all markers
             const markers = [
@@ -205,26 +203,15 @@ const GameCanvas: React.FC = () => {
               { letter: 'E', x: tile.x + tile.width - 8, y: tile.y + tile.height / 2 + 4 }
             ];
             
-            // Randomly remove 0, 1, or 2 markers
-            const removeCount = Math.floor(random1 * 3); // 0, 1, or 2
-            
-            let visibleMarkers = [];
-            
-            if (removeCount > 0) {
-              // Shuffle and remove markers
-              const shuffled = [...markers];
-              for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(((seed * (i + 13)) % 100) / 100 * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-              }
-              
-              // Remove the first removeCount markers
-              shuffled.splice(0, removeCount);
-              visibleMarkers = shuffled;
-            } else {
-              // Show all markers
-              visibleMarkers = markers;
+            // Shuffle markers deterministically
+            const shuffled = [...markers];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+              const j = Math.floor(((seed * (i + 13)) % 100) / 100 * (i + 1));
+              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
+            
+            // Take exactly 2 markers
+            const visibleMarkers = shuffled.slice(0, 2);
             
             // Draw white lines from center to each visible marker
             ctx.strokeStyle = '#ffffff';

@@ -1113,20 +1113,19 @@ export const useSnakeGame = create<SnakeGameState>()(
         return ['west' as const];
       }
       
-      // For other squares, simulate the random removal system
+      // For other squares, show exactly 2 directions
       const seed = row * 8 + col;
-      const random1 = ((seed * 31) % 100) / 100;
-      const removeCount = Math.floor(random1 * 3); // 0, 1, or 2
       
       let directions: Array<'north' | 'south' | 'east' | 'west'> = ['north', 'south', 'east', 'west'];
       
-      if (removeCount > 0) {
-        // Remove directions deterministically
-        for (let i = 0; i < removeCount; i++) {
-          const removeIndex = Math.floor(((seed * (i + 13)) % 100) / 100 * directions.length);
-          directions.splice(removeIndex, 1);
-        }
+      // Shuffle directions deterministically
+      for (let i = directions.length - 1; i > 0; i--) {
+        const j = Math.floor(((seed * (i + 13)) % 100) / 100 * (i + 1));
+        [directions[i], directions[j]] = [directions[j], directions[i]];
       }
+      
+      // Take exactly 2 directions
+      directions = directions.slice(0, 2);
       
       return directions;
     },

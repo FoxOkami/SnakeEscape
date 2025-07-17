@@ -118,6 +118,7 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
+- July 17, 2025. Modified Level 4 grid tiles to show exactly 2 cardinal directions each (except start/end tiles)
 - July 16, 2025. Added white lines from center to each directional marker with same thickness as custom graphics
 - July 16, 2025. Added random removal system for directional markers (0-2 markers removed per square except start/end)
 - July 16, 2025. Added directional markers (N, S, E, W) to all grid squares in Level 4
