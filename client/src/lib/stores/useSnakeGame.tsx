@@ -63,6 +63,10 @@ interface SnakeGameState extends GameData {
   
   // Tile rotation actions
   rotateTile: (direction: 'left' | 'right') => void;
+  
+  // Path connection detection
+  checkPathConnection: () => boolean;
+  removeKeyWalls: () => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -255,6 +259,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         keysPressed: new Set(),
         isWalking: false,
       });
+      
+      // Check path connection for Level 4 on start
+      if (levelIndex === 3) {
+        setTimeout(() => {
+          if (get().checkPathConnection()) {
+            get().removeKeyWalls();
+          }
+        }, 100);
+      }
     },
 
     resetGame: () => {
@@ -1187,6 +1200,84 @@ export const useSnakeGame = create<SnakeGameState>()(
             : tile
         )
       });
+      
+      // Check if path is now connected after rotation
+      if (get().checkPathConnection()) {
+        get().removeKeyWalls();
+      }
+    },
+
+    checkPathConnection: () => {
+      const state = get();
+      if (state.currentLevel !== 3) return false; // Only on level 4 (0-indexed)
+      
+      // Use BFS to find path from start (3,0) to end (6,7)
+      const startTileId = 'grid_tile_3_0';
+      const endTileId = 'grid_tile_6_7';
+      
+      const visited = new Set<string>();
+      const queue = [{ tileId: startTileId, entryDirection: null as null | 'north' | 'south' | 'east' | 'west' }];
+      
+      while (queue.length > 0) {
+        const { tileId, entryDirection } = queue.shift()!;
+        
+        if (visited.has(tileId)) continue;
+        visited.add(tileId);
+        
+        // Check if we reached the end
+        if (tileId === endTileId) {
+          return true;
+        }
+        
+        // Get available directions for this tile
+        const directions = state.getTileDirections(tileId);
+        
+        // For each direction, try to move to the next tile
+        for (const direction of directions) {
+          // Skip if this is the entry direction (can't go back)
+          if (entryDirection && direction === entryDirection) continue;
+          
+          // Get the next tile in this direction
+          const nextTile = state.getNextTile(tileId, direction);
+          if (!nextTile) continue;
+          
+          // Check if the next tile has a compatible direction
+          const nextTileDirections = state.getTileDirections(nextTile.id);
+          const requiredDirection = state.getOppositeDirection(direction);
+          
+          if (nextTileDirections.includes(requiredDirection)) {
+            queue.push({ tileId: nextTile.id, entryDirection: requiredDirection });
+          }
+        }
+      }
+      
+      return false;
+    },
+
+    removeKeyWalls: () => {
+      const state = get();
+      if (state.currentLevel !== 3) return; // Only on level 4 (0-indexed)
+      
+      // Remove the key chamber walls
+      const keyWallIds = [
+        { x: 660, y: 40, width: 100, height: 20 }, // top wall
+        { x: 660, y: 120, width: 100, height: 20 }, // bottom wall
+        { x: 660, y: 50, width: 20, height: 70 }, // left wall
+        { x: 740, y: 50, width: 20, height: 70 }, // right wall
+      ];
+      
+      set({
+        walls: state.walls.filter(wall => 
+          !keyWallIds.some(keyWall => 
+            wall.x === keyWall.x && 
+            wall.y === keyWall.y && 
+            wall.width === keyWall.width && 
+            wall.height === keyWall.height
+          )
+        )
+      });
+      
+      console.log("Key chamber walls removed! Path connected from start to end.");
     },
   })),
 );
