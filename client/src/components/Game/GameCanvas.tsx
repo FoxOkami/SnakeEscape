@@ -153,15 +153,36 @@ const GameCanvas: React.FC = () => {
         ctx.font = '10px Arial';
         ctx.textAlign = 'center';
         
+        const centerX = tile.x + tile.width / 2;
+        const centerY = tile.y + tile.height / 2;
+        
         // Special handling for starting square (3,0) - remove N, S, W
         if (tile.id === 'grid_tile_3_0') {
           // Only show East marker
           ctx.fillText('E', tile.x + tile.width - 8, tile.y + tile.height / 2 + 4);
+          
+          // Draw line from center to East edge
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 3;
+          ctx.lineCap = 'square';
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.lineTo(tile.x + tile.width, centerY);
+          ctx.stroke();
         }
         // Special handling for ending square (6,7) - remove N, E, S
         else if (tile.id === 'grid_tile_6_7') {
           // Only show West marker
           ctx.fillText('W', tile.x + 8, tile.y + tile.height / 2 + 4);
+          
+          // Draw line from center to West edge
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 3;
+          ctx.lineCap = 'square';
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.lineTo(tile.x, centerY);
+          ctx.stroke();
         }
         // All other squares - randomly remove 0, 1, or 2 markers
         else {
@@ -187,6 +208,8 @@ const GameCanvas: React.FC = () => {
             // Randomly remove 0, 1, or 2 markers
             const removeCount = Math.floor(random1 * 3); // 0, 1, or 2
             
+            let visibleMarkers = [];
+            
             if (removeCount > 0) {
               // Shuffle and remove markers
               const shuffled = [...markers];
@@ -197,17 +220,39 @@ const GameCanvas: React.FC = () => {
               
               // Remove the first removeCount markers
               shuffled.splice(0, removeCount);
-              
-              // Draw remaining markers
-              shuffled.forEach(marker => {
-                ctx.fillText(marker.letter, marker.x, marker.y);
-              });
+              visibleMarkers = shuffled;
             } else {
               // Show all markers
-              markers.forEach(marker => {
-                ctx.fillText(marker.letter, marker.x, marker.y);
-              });
+              visibleMarkers = markers;
             }
+            
+            // Draw white lines from center to each visible marker
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'square';
+            
+            visibleMarkers.forEach(marker => {
+              ctx.beginPath();
+              ctx.moveTo(centerX, centerY);
+              
+              // Draw line to the appropriate edge based on marker direction
+              if (marker.letter === 'N') {
+                ctx.lineTo(centerX, tile.y);
+              } else if (marker.letter === 'S') {
+                ctx.lineTo(centerX, tile.y + tile.height);
+              } else if (marker.letter === 'W') {
+                ctx.lineTo(tile.x, centerY);
+              } else if (marker.letter === 'E') {
+                ctx.lineTo(tile.x + tile.width, centerY);
+              }
+              
+              ctx.stroke();
+            });
+            
+            // Draw remaining markers
+            visibleMarkers.forEach(marker => {
+              ctx.fillText(marker.letter, marker.x, marker.y);
+            });
           }
         }
       }
