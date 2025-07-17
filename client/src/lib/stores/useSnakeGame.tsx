@@ -52,6 +52,10 @@ interface SnakeGameState extends GameData {
   
   // Light source rotation actions
   rotateLightSource: (direction: 'clockwise' | 'counterclockwise') => void;
+  
+  // Flow system actions
+  startFlow: () => void;
+  updateFlow: (deltaTime: number) => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -121,6 +125,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     crystal: null,
     lightSource: null,
     lightBeam: null,
+    flowState: null,
     keysPressed: new Set(),
     currentVelocity: { x: 0, y: 0 },
     targetVelocity: { x: 0, y: 0 },
