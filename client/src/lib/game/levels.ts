@@ -512,6 +512,31 @@ export const LEVELS: Level[] = [
             };
           }
           
+          // Add custom graphics to row 7, column 6 (flipped Y axis and inverted colors)
+          if (row === 7 && col === 6) {
+            const originalRadius = tileSize / 8; // Original radius for line thickness
+            const circleRadius = (tileSize / 8) * 2; // Double the radius of the circle
+            const centerX = x + tileSize / 2;
+            const centerY = y + tileSize / 2;
+            
+            tile.customGraphics = {
+              circle: {
+                radius: circleRadius,
+                color: '#FF00FF', // Inverted color (magenta)
+                centerX: centerX,
+                centerY: centerY,
+              },
+              line: {
+                startX: centerX,
+                startY: centerY,
+                endX: x, // Extend to the left edge (flipped Y axis)
+                endY: centerY,
+                thickness: originalRadius * 2, // Keep original line thickness
+                color: '#FF00FF', // Inverted color (magenta)
+              },
+            };
+          }
+          
           tiles.push(tile);
         }
       }

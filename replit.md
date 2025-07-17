@@ -118,7 +118,7 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
-- July 16, 2025. Added custom graphics system to pattern tiles with neon green circle and line in Level 4 grid position (row 3, column 0)
+- July 16, 2025. Added custom graphics system to pattern tiles with graphics at (3,0) neon green and (7,6) magenta with flipped line direction
 - July 16, 2025. Updated Level 4 to use centered 8x8 tile grid (60x60 pixel tiles)
 - July 16, 2025. Added Level 4 "Simple Escape" - basic level with only player, key, and exit door (no snakes, puzzles, or inner walls)
 - July 14, 2025. Enhanced Level 3 mirror rotation with 1-degree precision controls (Q/E keys)
