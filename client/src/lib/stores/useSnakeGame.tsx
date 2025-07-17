@@ -56,6 +56,10 @@ interface SnakeGameState extends GameData {
   // Flow system actions
   startFlow: () => void;
   updateFlow: (deltaTime: number) => void;
+  getNextTile: (currentTileId: string, exitDirection: 'north' | 'south' | 'east' | 'west') => any;
+  getOppositeDirection: (direction: 'north' | 'south' | 'east' | 'west') => 'north' | 'south' | 'east' | 'west';
+  calculateExitDirection: (tileId: string, entryDirection: 'north' | 'south' | 'east' | 'west') => 'north' | 'south' | 'east' | 'west' | null;
+  getTileDirections: (tileId: string) => Array<'north' | 'south' | 'east' | 'west'>;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
