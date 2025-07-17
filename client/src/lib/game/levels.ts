@@ -448,15 +448,20 @@ export const LEVELS: Level[] = [
     player: { x: 50, y: 300 },
     size: { width: 800, height: 600 },
     walls: [
-      // Only outer walls - no inner walls
+      // Outer walls
       { x: 0, y: 0, width: 800, height: 20 },
       { x: 0, y: 580, width: 800, height: 20 },
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
+      // Key chamber walls (similar to level 1)
+      { x: 680, y: 60, width: 60, height: 20 }, // top wall
+      { x: 680, y: 120, width: 60, height: 20 }, // bottom wall
+      { x: 680, y: 80, width: 20, height: 40 }, // left wall
+      { x: 720, y: 80, width: 20, height: 40 }, // right wall
     ],
     snakes: [], // No snakes
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
-    key: { x: 400, y: 300, width: 20, height: 20, collected: false },
+    key: { x: 700, y: 80, width: 20, height: 20, collected: false },
     // 8x8 centered tile grid for visual appeal (non-interactive)
     patternTiles: (() => {
       const tiles: PatternTile[] = [];
