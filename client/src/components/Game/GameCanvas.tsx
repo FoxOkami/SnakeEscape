@@ -118,7 +118,7 @@ const GameCanvas: React.FC = () => {
           const line = tile.customGraphics.line;
           ctx.strokeStyle = line.color;
           ctx.lineWidth = line.thickness;
-          ctx.lineCap = 'round';
+          ctx.lineCap = 'square'; // Flat line endings
           ctx.beginPath();
           ctx.moveTo(line.startX, line.startY);
           ctx.lineTo(line.endX, line.endY);
