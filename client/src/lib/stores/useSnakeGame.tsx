@@ -1070,7 +1070,10 @@ export const useSnakeGame = create<SnakeGameState>()(
     getNextTile: (currentTileId: string, exitDirection: 'north' | 'south' | 'east' | 'west') => {
       const state = get();
       const match = currentTileId.match(/grid_tile_(\d+)_(\d+)/);
-      if (!match) return null;
+      if (!match) {
+        console.log(`Invalid tile ID: ${currentTileId}`);
+        return null;
+      }
       
       const row = parseInt(match[1]);
       const col = parseInt(match[2]);
@@ -1085,11 +1088,22 @@ export const useSnakeGame = create<SnakeGameState>()(
         case 'west': nextCol--; break;
       }
       
+      console.log(`  From ${currentTileId} (${row},${col}) going ${exitDirection} to (${nextRow},${nextCol})`);
+      
       // Check bounds
-      if (nextRow < 0 || nextRow >= 8 || nextCol < 0 || nextCol >= 8) return null;
+      if (nextRow < 0 || nextRow >= 8 || nextCol < 0 || nextCol >= 8) {
+        console.log(`  Out of bounds: (${nextRow},${nextCol})`);
+        return null;
+      }
       
       const nextTileId = `grid_tile_${nextRow}_${nextCol}`;
-      return state.patternTiles.find(tile => tile.id === nextTileId) || null;
+      const nextTile = state.patternTiles.find(tile => tile.id === nextTileId) || null;
+      
+      if (!nextTile) {
+        console.log(`  No tile found for ${nextTileId}`);
+      }
+      
+      return nextTile;
     },
 
     getOppositeDirection: (direction: 'north' | 'south' | 'east' | 'west') => {
@@ -1220,6 +1234,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       const startTileId = 'grid_tile_3_0';
       const endTileId = 'grid_tile_6_7';
       
+      console.log("=== Starting Path Connection Check ===");
+      console.log("Start tile:", startTileId);
+      console.log("End tile:", endTileId);
+      
       const visited = new Set<string>();
       const queue = [{ tileId: startTileId, entryDirection: null as null | 'north' | 'south' | 'east' | 'west' }];
       
@@ -1229,33 +1247,52 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (visited.has(tileId)) continue;
         visited.add(tileId);
         
+        console.log(`Processing tile: ${tileId}, entry: ${entryDirection}`);
+        
         // Check if we reached the end
         if (tileId === endTileId) {
+          console.log("✓ Path found! Connected successfully!");
           return true;
         }
         
         // Get available directions for this tile
         const directions = state.getTileDirections(tileId);
+        console.log(`  Available directions for ${tileId}:`, directions);
         
         // For each direction, try to move to the next tile
         for (const direction of directions) {
           // Skip if this is the entry direction (can't go back)
-          if (entryDirection && direction === entryDirection) continue;
+          if (entryDirection && direction === entryDirection) {
+            console.log(`  Skipping ${direction} (entry direction)`);
+            continue;
+          }
           
           // Get the next tile in this direction
           const nextTile = state.getNextTile(tileId, direction);
-          if (!nextTile) continue;
+          if (!nextTile) {
+            console.log(`  No tile found in ${direction} direction`);
+            continue;
+          }
+          
+          console.log(`  Found next tile: ${nextTile.id} in ${direction} direction`);
           
           // Check if the next tile has a compatible direction
           const nextTileDirections = state.getTileDirections(nextTile.id);
           const requiredDirection = state.getOppositeDirection(direction);
           
+          console.log(`  Next tile directions:`, nextTileDirections);
+          console.log(`  Required direction: ${requiredDirection}`);
+          
           if (nextTileDirections.includes(requiredDirection)) {
+            console.log(`  ✓ Compatible! Adding ${nextTile.id} to queue`);
             queue.push({ tileId: nextTile.id, entryDirection: requiredDirection });
+          } else {
+            console.log(`  ✗ Not compatible, skipping`);
           }
         }
       }
       
+      console.log("✗ No path found");
       return false;
     },
 
