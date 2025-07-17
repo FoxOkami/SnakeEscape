@@ -147,28 +147,7 @@ const GameCanvas: React.FC = () => {
         );
       }
       
-      // Add START and END labels for special tiles
-      if (tile.id === 'grid_tile_3_0') {
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 14px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(
-          'START',
-          tile.x + tile.width / 2,
-          tile.y + tile.height / 2 + 4
-        );
-      }
-      
-      if (tile.id === 'grid_tile_6_7') {
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 14px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(
-          'END',
-          tile.x + tile.width / 2,
-          tile.y + tile.height / 2 + 4
-        );
-      }
+
     });
 
     // Draw throwable items

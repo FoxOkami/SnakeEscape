@@ -454,10 +454,10 @@ export const LEVELS: Level[] = [
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
       // Key chamber walls (similar to level 1)
-      { x: 680, y: 60, width: 60, height: 20 }, // top wall
-      { x: 680, y: 120, width: 60, height: 20 }, // bottom wall
-      { x: 680, y: 80, width: 20, height: 40 }, // left wall
-      { x: 720, y: 80, width: 20, height: 40 }, // right wall
+      { x: 660, y: 40, width: 100, height: 20 }, // top wall
+      { x: 660, y: 120, width: 100, height: 20 }, // bottom wall
+      { x: 660, y: 50, width: 20, height: 70 }, // left wall
+      { x: 740, y: 50, width: 20, height: 70 }, // right wall
     ],
     snakes: [], // No snakes
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
@@ -469,18 +469,18 @@ export const LEVELS: Level[] = [
       const gridSize = 8; // 8x8 grid
       const totalGridWidth = gridSize * tileSize;
       const totalGridHeight = gridSize * tileSize;
-      
+
       // Center the grid in the playable area
       const playableWidth = 760; // 800 - 40 (walls)
       const playableHeight = 560; // 600 - 40 (walls)
       const startX = 20 + (playableWidth - totalGridWidth) / 2;
       const startY = 20 + (playableHeight - totalGridHeight) / 2;
-      
+
       for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
           const x = startX + col * tileSize;
           const y = startY + row * tileSize;
-          
+
           const tile: PatternTile = {
             id: `grid_tile_${row}_${col}`,
             x,
@@ -491,18 +491,18 @@ export const LEVELS: Level[] = [
             sequenceIndex: -1, // Not part of any sequence
             hasBeenActivated: false,
           };
-          
+
           // Add custom graphics to row 3, column 0
           if (row === 3 && col === 0) {
             const originalRadius = tileSize / 8; // Original radius for line thickness
             const circleRadius = (tileSize / 8) * 2; // Double the radius of the circle
             const centerX = x + tileSize / 2;
             const centerY = y + tileSize / 2;
-            
+
             tile.customGraphics = {
               circle: {
                 radius: circleRadius,
-                color: '#00FF00', // Neon green
+                color: "#00FF00", // Neon green
                 centerX: centerX,
                 centerY: centerY,
               },
@@ -512,22 +512,22 @@ export const LEVELS: Level[] = [
                 endX: x + tileSize, // Extend to the right edge of the grid square
                 endY: centerY,
                 thickness: originalRadius * 2, // Keep original line thickness
-                color: '#00FF00', // Neon green
+                color: "#00FF00", // Neon green
               },
             };
           }
-          
+
           // Add custom graphics to row 6, column 7 (flipped Y axis and inverted colors)
           if (row === 6 && col === 7) {
             const originalRadius = tileSize / 8; // Original radius for line thickness
             const circleRadius = (tileSize / 8) * 2; // Double the radius of the circle
             const centerX = x + tileSize / 2;
             const centerY = y + tileSize / 2;
-            
+
             tile.customGraphics = {
               circle: {
                 radius: circleRadius,
-                color: '#FF00FF', // Inverted color (magenta)
+                color: "#FF00FF", // Inverted color (magenta)
                 centerX: centerX,
                 centerY: centerY,
               },
@@ -537,15 +537,15 @@ export const LEVELS: Level[] = [
                 endX: x + originalRadius, // Extend to left edge accounting for half the line thickness
                 endY: centerY,
                 thickness: originalRadius * 2, // Keep original line thickness
-                color: '#FF00FF', // Inverted color (magenta)
+                color: "#FF00FF", // Inverted color (magenta)
               },
             };
           }
-          
+
           tiles.push(tile);
         }
       }
-      
+
       return tiles;
     })(),
     patternSequence: [], // No pattern sequence needed
