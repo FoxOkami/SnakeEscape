@@ -63,6 +63,22 @@ export interface PatternTile extends Rectangle {
   isGlowing: boolean;
   sequenceIndex: number; // The order in which this tile should be stepped on
   hasBeenActivated: boolean;
+  customGraphics?: {
+    circle?: {
+      radius: number;
+      color: string;
+      centerX: number;
+      centerY: number;
+    };
+    line?: {
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
+      thickness: number;
+      color: string;
+    };
+  };
 }
 
 export interface ThrowableItem extends Rectangle {

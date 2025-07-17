@@ -476,7 +476,7 @@ export const LEVELS: Level[] = [
           const x = startX + col * tileSize;
           const y = startY + row * tileSize;
           
-          tiles.push({
+          const tile: PatternTile = {
             id: `grid_tile_${row}_${col}`,
             x,
             y,
@@ -485,7 +485,33 @@ export const LEVELS: Level[] = [
             isGlowing: false,
             sequenceIndex: -1, // Not part of any sequence
             hasBeenActivated: false,
-          });
+          };
+          
+          // Add custom graphics to row 3, column 1
+          if (row === 3 && col === 1) {
+            const circleRadius = tileSize / 8; // 1/4 the size means 1/4 diameter, so 1/8 radius
+            const centerX = x + tileSize / 2;
+            const centerY = y + tileSize / 2;
+            
+            tile.customGraphics = {
+              circle: {
+                radius: circleRadius,
+                color: '#00FF00', // Neon green
+                centerX: centerX,
+                centerY: centerY,
+              },
+              line: {
+                startX: centerX,
+                startY: centerY,
+                endX: x + tileSize, // Extend to the right edge of the grid square
+                endY: centerY,
+                thickness: circleRadius * 2, // Same thickness as circle diameter
+                color: '#00FF00', // Neon green
+              },
+            };
+          }
+          
+          tiles.push(tile);
         }
       }
       

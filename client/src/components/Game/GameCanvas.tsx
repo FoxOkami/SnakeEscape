@@ -111,15 +111,41 @@ const GameCanvas: React.FC = () => {
         ctx.shadowBlur = 0;
       }
       
-      // Add sequence number for debugging (optional)
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(
-        (tile.sequenceIndex + 1).toString(),
-        tile.x + tile.width / 2,
-        tile.y + tile.height / 2 + 4
-      );
+      // Draw custom graphics if they exist
+      if (tile.customGraphics) {
+        // Draw line first (so it appears behind the circle)
+        if (tile.customGraphics.line) {
+          const line = tile.customGraphics.line;
+          ctx.strokeStyle = line.color;
+          ctx.lineWidth = line.thickness;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(line.startX, line.startY);
+          ctx.lineTo(line.endX, line.endY);
+          ctx.stroke();
+        }
+        
+        // Draw circle
+        if (tile.customGraphics.circle) {
+          const circle = tile.customGraphics.circle;
+          ctx.fillStyle = circle.color;
+          ctx.beginPath();
+          ctx.arc(circle.centerX, circle.centerY, circle.radius, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+      }
+      
+      // Add sequence number for debugging (optional) - only if sequenceIndex >= 0
+      if (tile.sequenceIndex >= 0) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(
+          (tile.sequenceIndex + 1).toString(),
+          tile.x + tile.width / 2,
+          tile.y + tile.height / 2 + 4
+        );
+      }
     });
 
     // Draw throwable items
