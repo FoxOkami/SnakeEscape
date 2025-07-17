@@ -163,19 +163,52 @@ const GameCanvas: React.FC = () => {
           // Only show West marker
           ctx.fillText('W', tile.x + 8, tile.y + tile.height / 2 + 4);
         }
-        // All other squares show all four markers
+        // All other squares - randomly remove 0, 1, or 2 markers
         else {
-          // North marker - top center
-          ctx.fillText('N', tile.x + tile.width / 2, tile.y + 12);
-          
-          // South marker - bottom center
-          ctx.fillText('S', tile.x + tile.width / 2, tile.y + tile.height - 4);
-          
-          // West marker - left center
-          ctx.fillText('W', tile.x + 8, tile.y + tile.height / 2 + 4);
-          
-          // East marker - right center
-          ctx.fillText('E', tile.x + tile.width - 8, tile.y + tile.height / 2 + 4);
+          // Extract row and column from tile ID for consistent randomization
+          const match = tile.id.match(/grid_tile_(\d+)_(\d+)/);
+          if (match) {
+            const row = parseInt(match[1]);
+            const col = parseInt(match[2]);
+            
+            // Create a deterministic but pseudo-random pattern based on row/col
+            const seed = row * 8 + col;
+            const random1 = ((seed * 31) % 100) / 100;
+            const random2 = ((seed * 37) % 100) / 100;
+            
+            // Define all markers
+            const markers = [
+              { letter: 'N', x: tile.x + tile.width / 2, y: tile.y + 12 },
+              { letter: 'S', x: tile.x + tile.width / 2, y: tile.y + tile.height - 4 },
+              { letter: 'W', x: tile.x + 8, y: tile.y + tile.height / 2 + 4 },
+              { letter: 'E', x: tile.x + tile.width - 8, y: tile.y + tile.height / 2 + 4 }
+            ];
+            
+            // Randomly remove 0, 1, or 2 markers
+            const removeCount = Math.floor(random1 * 3); // 0, 1, or 2
+            
+            if (removeCount > 0) {
+              // Shuffle and remove markers
+              const shuffled = [...markers];
+              for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(((seed * (i + 13)) % 100) / 100 * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+              }
+              
+              // Remove the first removeCount markers
+              shuffled.splice(0, removeCount);
+              
+              // Draw remaining markers
+              shuffled.forEach(marker => {
+                ctx.fillText(marker.letter, marker.x, marker.y);
+              });
+            } else {
+              // Show all markers
+              markers.forEach(marker => {
+                ctx.fillText(marker.letter, marker.x, marker.y);
+              });
+            }
+          }
         }
       }
 
