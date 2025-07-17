@@ -14,6 +14,7 @@ import {
   Mirror,
   Crystal,
   LightBeam,
+  FlowState,
 } from "../game/types";
 import { LEVELS } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
