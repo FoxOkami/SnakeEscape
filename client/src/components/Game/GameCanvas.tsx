@@ -155,7 +155,7 @@ const GameCanvas: React.FC = () => {
         ctx.fillText(
           'START',
           tile.x + tile.width / 2,
-          tile.y - 8
+          tile.y - 2
         );
       }
       
@@ -166,7 +166,7 @@ const GameCanvas: React.FC = () => {
         ctx.fillText(
           'END',
           tile.x + tile.width / 2,
-          tile.y - 8
+          tile.y - 2
         );
       }
     });
