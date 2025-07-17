@@ -30,7 +30,8 @@ const GameCanvas: React.FC = () => {
     mirrors,
     crystal,
     lightSource,
-    lightBeam
+    lightBeam,
+    currentLevel
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -42,6 +43,30 @@ const GameCanvas: React.FC = () => {
     ctx.strokeStyle = '#ff0000';
     ctx.lineWidth = 5;
     ctx.strokeRect(5, 5, levelSize.width - 10, levelSize.height - 10);
+
+    // Helper function to check if player is on a tile
+    const getPlayerCurrentTile = () => {
+      if (currentLevel !== 3) return null; // Only on Level 4
+      
+      const playerRect = {
+        x: player.position.x,
+        y: player.position.y,
+        width: player.size.width,
+        height: player.size.height,
+      };
+      
+      return patternTiles.find(tile => {
+        return (
+          tile.id.startsWith('grid_tile_') &&
+          playerRect.x < tile.x + tile.width &&
+          playerRect.x + playerRect.width > tile.x &&
+          playerRect.y < tile.y + tile.height &&
+          playerRect.y + playerRect.height > tile.y
+        );
+      });
+    };
+
+    const currentTile = getPlayerCurrentTile();
 
     // Draw walls
     ctx.fillStyle = '#4a5568';
@@ -91,6 +116,8 @@ const GameCanvas: React.FC = () => {
         ctx.fillStyle = '#ffd700'; // Gold when glowing
       } else if (tile.hasBeenActivated) {
         ctx.fillStyle = '#48bb78'; // Green when activated correctly
+      } else if (currentTile && currentTile.id === tile.id && currentTile.id !== 'grid_tile_3_0' && currentTile.id !== 'grid_tile_6_7') {
+        ctx.fillStyle = '#ffff99'; // Light yellow when player is standing on rotatable tile
       } else {
         ctx.fillStyle = '#4a5568'; // Gray when inactive
       }
@@ -472,6 +499,15 @@ const GameCanvas: React.FC = () => {
       ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
     }
 
+    // Show tile rotation message if player is on a rotatable tile in Level 4
+    if (currentTile && currentTile.id !== 'grid_tile_3_0' && currentTile.id !== 'grid_tile_6_7') {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Q/E to rotate', player.position.x + player.size.width / 2, player.position.y - 10);
+      ctx.textAlign = 'left';
+    }
+
     // Draw light reflection elements (mirrors, crystal, light beam)
     
     // Draw light source
@@ -666,7 +702,7 @@ const GameCanvas: React.FC = () => {
     ctx.fillText(debugText2, levelSize.width - 150, levelSize.height - 30);
     ctx.fillText(debugText3, levelSize.width - 150, levelSize.height - 10);
 
-  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam]);
+  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam, currentLevel, patternTiles]);
 
   const gameLoop = useCallback((currentTime: number) => {
     const canvas = canvasRef.current;
