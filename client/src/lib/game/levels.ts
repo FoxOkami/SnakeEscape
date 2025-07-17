@@ -490,6 +490,7 @@ export const LEVELS: Level[] = [
             isGlowing: false,
             sequenceIndex: -1, // Not part of any sequence
             hasBeenActivated: false,
+            rotation: 0, // Initial rotation
           };
 
           // Add custom graphics to row 3, column 0

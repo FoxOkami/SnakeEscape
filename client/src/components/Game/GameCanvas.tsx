@@ -195,23 +195,45 @@ const GameCanvas: React.FC = () => {
             // Create a deterministic but pseudo-random pattern based on row/col
             const seed = row * 8 + col;
             
-            // Define all markers
-            const markers = [
-              { letter: 'N', x: tile.x + tile.width / 2, y: tile.y + 12 },
-              { letter: 'S', x: tile.x + tile.width / 2, y: tile.y + tile.height - 4 },
-              { letter: 'W', x: tile.x + 8, y: tile.y + tile.height / 2 + 4 },
-              { letter: 'E', x: tile.x + tile.width - 8, y: tile.y + tile.height / 2 + 4 }
+            // Define all markers (base directions)
+            const baseMarkers = [
+              { letter: 'N', direction: 'north' },
+              { letter: 'S', direction: 'south' },
+              { letter: 'W', direction: 'west' },
+              { letter: 'E', direction: 'east' }
             ];
             
             // Shuffle markers deterministically
-            const shuffled = [...markers];
+            const shuffled = [...baseMarkers];
             for (let i = shuffled.length - 1; i > 0; i--) {
               const j = Math.floor(((seed * (i + 13)) % 100) / 100 * (i + 1));
               [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
             
             // Take exactly 2 markers
-            const visibleMarkers = shuffled.slice(0, 2);
+            const selectedMarkers = shuffled.slice(0, 2);
+            
+            // Apply tile rotation to the selected markers
+            const rotation = tile.rotation || 0;
+            const rotationSteps = rotation / 90;
+            
+            const visibleMarkers = selectedMarkers.map(marker => {
+              // Rotate the direction based on tile rotation
+              const directions = ['north', 'east', 'south', 'west'];
+              const currentIndex = directions.indexOf(marker.direction);
+              const newIndex = (currentIndex + rotationSteps + 4) % 4;
+              const newDirection = directions[newIndex];
+              
+              // Map direction to display letter and position
+              const directionMap = {
+                north: { letter: 'N', x: tile.x + tile.width / 2, y: tile.y + 12 },
+                south: { letter: 'S', x: tile.x + tile.width / 2, y: tile.y + tile.height - 4 },
+                west: { letter: 'W', x: tile.x + 8, y: tile.y + tile.height / 2 + 4 },
+                east: { letter: 'E', x: tile.x + tile.width - 8, y: tile.y + tile.height / 2 + 4 }
+              };
+              
+              return directionMap[newDirection];
+            });
             
             // Draw white lines from center to each visible marker
             ctx.strokeStyle = '#ffffff';

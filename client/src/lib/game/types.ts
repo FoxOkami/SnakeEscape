@@ -86,6 +86,8 @@ export interface PatternTile extends Rectangle {
     east: boolean;
     west: boolean;
   };
+  // Rotation for tiles (0, 90, 180, 270 degrees)
+  rotation?: number;
 }
 
 export interface FlowState {

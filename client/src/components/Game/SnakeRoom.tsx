@@ -5,7 +5,7 @@ import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
 
 const SnakeRoom: React.FC = () => {
-  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource } = useSnakeGame();
+  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource, rotateTile } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } = useAudio();
 
 
@@ -33,7 +33,7 @@ const SnakeRoom: React.FC = () => {
   // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Handle Q key for counterclockwise rotation (mirrors and light source)
+      // Handle Q key for counterclockwise rotation (mirrors, light source, and tiles)
       if (event.code === 'KeyQ' && gameState === 'playing') {
         event.preventDefault();
         const gameState_current = useSnakeGame.getState();
@@ -41,6 +41,11 @@ const SnakeRoom: React.FC = () => {
           // Try to rotate mirror first, then light source
           rotateMirror('counterclockwise');
           rotateLightSource('counterclockwise');
+          return;
+        }
+        if (gameState_current.currentLevel === 3) {
+          // Rotate tile left on level 4
+          rotateTile('left');
           return;
         }
       }
@@ -56,6 +61,11 @@ const SnakeRoom: React.FC = () => {
           // Try to rotate mirror first, then light source
           rotateMirror('clockwise');
           rotateLightSource('clockwise');
+          return;
+        }
+        if (gameState_current.currentLevel === 3) {
+          // Rotate tile right on level 4
+          rotateTile('right');
           return;
         }
         
@@ -96,7 +106,7 @@ const SnakeRoom: React.FC = () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [setKeyPressed, gameState, pickupItem]);
+  }, [setKeyPressed, gameState, pickupItem, rotateTile]);
 
   // Handle mouse events for throwing (only for throwable items)
   useEffect(() => {

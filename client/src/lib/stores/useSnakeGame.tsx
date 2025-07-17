@@ -60,6 +60,9 @@ interface SnakeGameState extends GameData {
   getOppositeDirection: (direction: 'north' | 'south' | 'east' | 'west') => 'north' | 'south' | 'east' | 'west';
   calculateExitDirection: (tileId: string, entryDirection: 'north' | 'south' | 'east' | 'west') => 'north' | 'south' | 'east' | 'west' | null;
   getTileDirections: (tileId: string) => Array<'north' | 'south' | 'east' | 'west'>;
+  
+  // Tile rotation actions
+  rotateTile: (direction: 'left' | 'right') => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -1096,6 +1099,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     getTileDirections: (tileId: string) => {
+      const state = get();
       // Extract tile position and determine available directions based on game logic
       const match = tileId.match(/grid_tile_(\d+)_(\d+)/);
       if (!match) return [];
@@ -1127,7 +1131,62 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Take exactly 2 directions
       directions = directions.slice(0, 2);
       
+      // Apply tile rotation
+      const tile = state.patternTiles.find(t => t.id === tileId);
+      if (tile && tile.rotation) {
+        const rotationSteps = tile.rotation / 90;
+        const rotatedDirections = directions.map(dir => {
+          const directionOrder = ['north', 'east', 'south', 'west'] as const;
+          const currentIndex = directionOrder.indexOf(dir);
+          const newIndex = (currentIndex + rotationSteps + 4) % 4;
+          return directionOrder[newIndex];
+        });
+        return rotatedDirections;
+      }
+      
       return directions;
+    },
+
+    rotateTile: (direction: 'left' | 'right') => {
+      const state = get();
+      if (state.currentLevel !== 3) return; // Only on level 4 (0-indexed)
+      
+      // Find the tile the player is standing on
+      const playerRect = {
+        x: state.player.position.x,
+        y: state.player.position.y,
+        width: state.player.size.width,
+        height: state.player.size.height,
+      };
+      
+      const currentTile = state.patternTiles.find(tile => {
+        return (
+          playerRect.x < tile.x + tile.width &&
+          playerRect.x + playerRect.width > tile.x &&
+          playerRect.y < tile.y + tile.height &&
+          playerRect.y + playerRect.height > tile.y
+        );
+      });
+      
+      if (!currentTile) return; // Player not on a tile
+      
+      // Don't rotate starting and ending tiles
+      if (currentTile.id === 'grid_tile_3_0' || currentTile.id === 'grid_tile_6_7') {
+        return;
+      }
+      
+      // Calculate new rotation
+      const rotationChange = direction === 'left' ? -90 : 90;
+      const newRotation = ((currentTile.rotation || 0) + rotationChange + 360) % 360;
+      
+      // Update tile rotation
+      set({
+        patternTiles: state.patternTiles.map(tile => 
+          tile.id === currentTile.id 
+            ? { ...tile, rotation: newRotation }
+            : tile
+        )
+      });
     },
   })),
 );
