@@ -5,7 +5,7 @@ import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
 
 const SnakeRoom: React.FC = () => {
-  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource, rotateTile } = useSnakeGame();
+  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource, rotateTile, checkPathConnection, setConnectionStatus } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } = useAudio();
 
 
@@ -64,6 +64,34 @@ const SnakeRoom: React.FC = () => {
           return;
         }
         if (gameState_current.currentLevel === 3) {
+          // Check if we're on the start tile for connection checking
+          const playerRect = {
+            x: gameState_current.player.position.x,
+            y: gameState_current.player.position.y,
+            width: gameState_current.player.size.width,
+            height: gameState_current.player.size.height,
+          };
+          
+          const currentTile = gameState_current.patternTiles.find(tile => {
+            return (
+              playerRect.x < tile.x + tile.width &&
+              playerRect.x + playerRect.width > tile.x &&
+              playerRect.y < tile.y + tile.height &&
+              playerRect.y + playerRect.height > tile.y
+            );
+          });
+          
+          // If on start tile, check connection instead of rotating
+          if (currentTile && currentTile.id === 'grid_tile_3_0') {
+            const isConnected = checkPathConnection();
+            if (isConnected) {
+              setConnectionStatus("✓ Path is connected! Start and end tiles are linked.");
+            } else {
+              setConnectionStatus("✗ Path is not connected. Keep rotating tiles to create a connection.");
+            }
+            return; // Don't rotate the start tile
+          }
+          
           // Rotate tile right on level 4
           rotateTile('right');
           return;

@@ -31,6 +31,10 @@ interface SnakeGameState extends GameData {
   updateGame: (deltaTime: number) => void;
   nextLevel: () => void;
   returnToMenu: () => void;
+  
+  // Connection status display
+  connectionStatus: string | null;
+  setConnectionStatus: (status: string | null) => void;
 
   // Input state
   keysPressed: Set<string>;
@@ -141,6 +145,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     currentVelocity: { x: 0, y: 0 },
     targetVelocity: { x: 0, y: 0 },
     isWalking: false,
+    connectionStatus: null,
 
     setKeyPressed: (key: string, pressed: boolean) => {
       set((state) => {
@@ -1278,6 +1283,17 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       
       console.log("Key chamber walls removed! Path connected from start to end.");
+    },
+
+    setConnectionStatus: (status: string | null) => {
+      set({ connectionStatus: status });
+      
+      // Auto-clear status after 3 seconds
+      if (status) {
+        setTimeout(() => {
+          set({ connectionStatus: null });
+        }, 3000);
+      }
     },
   })),
 );
