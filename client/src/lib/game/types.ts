@@ -79,6 +79,24 @@ export interface PatternTile extends Rectangle {
       color: string;
     };
   };
+  // Cardinal directions available for flow
+  cardinalDirections?: {
+    north: boolean;
+    south: boolean;
+    east: boolean;
+    west: boolean;
+  };
+}
+
+export interface FlowState {
+  isActive: boolean;
+  currentTile: string; // tile ID
+  currentPhase: 'entry-to-center' | 'center-to-exit'; // Flow phase
+  entryDirection: 'north' | 'south' | 'east' | 'west' | null; // Where flow entered from
+  exitDirection: 'north' | 'south' | 'east' | 'west' | null; // Where flow is heading
+  progress: number; // 0 to 1, progress through current phase
+  phaseStartTime: number; // When current phase started
+  phaseDuration: number; // 1000ms per phase
 }
 
 export interface ThrowableItem extends Rectangle {
@@ -158,4 +176,5 @@ export interface GameData {
   crystal: Crystal | null;
   lightSource: LightSource | null;
   lightBeam: LightBeam | null;
+  flowState: FlowState | null;
 }
