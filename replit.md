@@ -118,6 +118,7 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
+- July 18, 2025. Implemented gradual emptying animation - flow gradually fades from tiles during emptying, similar to filling animation but in reverse
 - July 18, 2025. Enhanced blocked flow indicator to persist during emptying - red X and pulsing circle remain visible until all tiles are unlocked and emptying completes
 - July 18, 2025. Added flow emptying animation for both successful and failed connections - flow empties backward from start tile and unlocks tiles for both completed paths and blocked flows
 - July 18, 2025. Separated pipe locking from visual flow completion - tiles lock when flow enters them but green visualization only shows when flow completes through them

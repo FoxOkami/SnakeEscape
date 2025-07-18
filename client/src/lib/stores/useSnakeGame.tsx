@@ -1244,60 +1244,73 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
         } else if (state.flowState.currentPhase === 'emptying') {
           console.log("Processing emptying phase...");
-          // Handle emptying phase - remove flow from tiles starting from the beginning
+          // Handle emptying phase with gradual flow animation like filling
           const currentEmptyingTile = state.flowState.emptyingFromTile;
           console.log("Current emptying tile:", currentEmptyingTile);
           
           if (currentEmptyingTile) {
-            // Remove the current tile from completed paths
-            const updatedCompletedPaths = state.flowState.completedPaths.filter(path => path.tileId !== currentEmptyingTile);
-            
-            // Remove the current tile from locked tiles to unlock it
-            const updatedLockedTiles = state.flowState.lockedTiles.filter(tileId => tileId !== currentEmptyingTile);
-            
-            console.log(`Emptying ${currentEmptyingTile}, unlocking it. Remaining locked:`, updatedLockedTiles);
-            
-            // Find the next tile in the flow sequence to empty
             const currentPath = state.flowState.emptyingPaths.find(path => path.tileId === currentEmptyingTile);
-            let nextEmptyingTile = null;
             
-            if (currentPath && currentPath.exitDirection) {
-              const nextTile = get().getNextTile(currentEmptyingTile, currentPath.exitDirection);
-              if (nextTile && state.flowState.emptyingPaths.some(path => path.tileId === nextTile.id)) {
-                nextEmptyingTile = nextTile.id;
+            if (currentPath) {
+              // Similar to filling animation, but in reverse
+              // Progress from 1.0 (full) to 0.0 (empty)
+              const reverseProgress = 1.0 - state.flowState.progress;
+              
+              // When progress reaches 1.0 (tile fully emptied)
+              if (state.flowState.progress >= 1.0) {
+                // Remove the current tile from completed paths
+                const updatedCompletedPaths = state.flowState.completedPaths.filter(path => path.tileId !== currentEmptyingTile);
+                
+                // Remove the current tile from locked tiles to unlock it
+                const updatedLockedTiles = state.flowState.lockedTiles.filter(tileId => tileId !== currentEmptyingTile);
+                
+                console.log(`Emptying ${currentEmptyingTile}, unlocking it. Remaining locked:`, updatedLockedTiles);
+                
+                // Find the next tile in the flow sequence to empty
+                let nextEmptyingTile = null;
+                
+                if (currentPath.exitDirection) {
+                  const nextTile = get().getNextTile(currentEmptyingTile, currentPath.exitDirection);
+                  if (nextTile && state.flowState.emptyingPaths.some(path => path.tileId === nextTile.id)) {
+                    nextEmptyingTile = nextTile.id;
+                  }
+                }
+                
+                console.log("Next emptying tile:", nextEmptyingTile);
+                
+                if (nextEmptyingTile) {
+                  // Continue emptying to next tile
+                  set({
+                    flowState: {
+                      ...state.flowState,
+                      emptyingFromTile: nextEmptyingTile,
+                      lockedTiles: updatedLockedTiles,
+                      completedPaths: updatedCompletedPaths,
+                      progress: 0,
+                      phaseStartTime: currentTime,
+                      currentTile: nextEmptyingTile,
+                      entryDirection: get().getOppositeDirection(currentPath.exitDirection!),
+                      exitDirection: null // Will be calculated if needed
+                    }
+                  });
+                } else {
+                  // Emptying complete - reset flow state and clear blocked indicator
+                  console.log("Emptying complete! Resetting flow state and clearing blocked indicator.");
+                  set({
+                    flowState: {
+                      ...state.flowState,
+                      isActive: false,
+                      isEmptying: false,
+                      emptyingFromTile: undefined,
+                      lockedTiles: [],
+                      completedPaths: [],
+                      emptyingPaths: [],
+                      isBlocked: false, // Clear blocked indicator when emptying is complete
+                      lastPosition: undefined
+                    }
+                  });
+                }
               }
-            }
-            
-            console.log("Next emptying tile:", nextEmptyingTile);
-            
-            if (nextEmptyingTile) {
-              // Continue emptying to next tile
-              set({
-                flowState: {
-                  ...state.flowState,
-                  emptyingFromTile: nextEmptyingTile,
-                  lockedTiles: updatedLockedTiles,
-                  completedPaths: updatedCompletedPaths,
-                  progress: 0,
-                  phaseStartTime: currentTime
-                }
-              });
-            } else {
-              // Emptying complete - reset flow state and clear blocked indicator
-              console.log("Emptying complete! Resetting flow state and clearing blocked indicator.");
-              set({
-                flowState: {
-                  ...state.flowState,
-                  isActive: false,
-                  isEmptying: false,
-                  emptyingFromTile: undefined,
-                  lockedTiles: [],
-                  completedPaths: [],
-                  emptyingPaths: [],
-                  isBlocked: false, // Clear blocked indicator when emptying is complete
-                  lastPosition: undefined
-                }
-              });
             }
           }
         }

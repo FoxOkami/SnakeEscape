@@ -276,10 +276,15 @@ const GameCanvas: React.FC = () => {
         }
       };
       
-      // Draw all completed paths
+      // Draw all completed paths (excluding currently emptying tile during emptying phase)
       flowState.completedPaths.forEach(path => {
         const tile = patternTiles.find(t => t.id === path.tileId);
         if (!tile) return;
+        
+        // Skip drawing this tile if it's currently being emptied
+        if (flowState.currentPhase === 'emptying' && path.tileId === flowState.emptyingFromTile) {
+          return; // The emptying animation will handle this tile
+        }
         
         const centerX = tile.x + tile.width / 2;
         const centerY = tile.y + tile.height / 2;
@@ -361,6 +366,42 @@ const GameCanvas: React.FC = () => {
             ctx.beginPath();
             ctx.arc(currentX, currentY, 3, 0, 2 * Math.PI);
             ctx.fill();
+          } else if (flowState.currentPhase === 'emptying') {
+            // Emptying animation - flow gradually disappears from exit to entry
+            const reverseProgress = 1.0 - flowState.progress; // 1.0 = full, 0.0 = empty
+            
+            // Draw entry line (fading based on progress)
+            const entryOpacity = reverseProgress;
+            ctx.strokeStyle = `rgba(0, 255, 0, ${entryOpacity})`;
+            ctx.shadowColor = `rgba(0, 255, 0, ${entryOpacity})`;
+            
+            if (reverseProgress > 0) {
+              ctx.beginPath();
+              ctx.moveTo(entryPoint.x, entryPoint.y);
+              ctx.lineTo(centerX, centerY);
+              ctx.stroke();
+            }
+            
+            // Draw exit line (fading based on progress)
+            const exitOpacity = Math.max(0, reverseProgress);
+            ctx.strokeStyle = `rgba(0, 255, 0, ${exitOpacity})`;
+            ctx.shadowColor = `rgba(0, 255, 0, ${exitOpacity})`;
+            
+            if (reverseProgress > 0) {
+              ctx.beginPath();
+              ctx.moveTo(centerX, centerY);
+              ctx.lineTo(exitPoint.x, exitPoint.y);
+              ctx.stroke();
+            }
+            
+            // Draw fading glowing dot at center
+            if (reverseProgress > 0) {
+              ctx.fillStyle = `rgba(0, 255, 0, ${reverseProgress})`;
+              ctx.shadowBlur = 12 * reverseProgress;
+              ctx.beginPath();
+              ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
+              ctx.fill();
+            }
           }
         }
       }
