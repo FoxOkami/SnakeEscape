@@ -1049,10 +1049,16 @@ export const useSnakeGame = create<SnakeGameState>()(
             // Flow completed successfully - remove key walls and start emptying
             get().removeKeyWalls();
             
+            console.log("Flow reached end tile! Starting emptying process in 2 seconds...");
+            
             // Wait 2 seconds before starting emptying process
             setTimeout(() => {
+              console.log("Starting emptying process now!");
               const currentState = get();
               if (currentState.flowState) {
+                const allPaths = [...currentState.flowState.completedPaths, finalPath];
+                console.log("Emptying paths:", allPaths);
+                
                 set({
                   flowState: {
                     ...currentState.flowState,
@@ -1063,8 +1069,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                     progress: 0,
                     phaseStartTime: Date.now(),
                     phaseDuration: 800, // Faster emptying animation
-                    emptyingPaths: [...currentState.flowState.completedPaths, finalPath],
-                    completedPaths: [...currentState.flowState.completedPaths, finalPath]
+                    emptyingPaths: allPaths,
+                    completedPaths: allPaths
                   }
                 });
               }
@@ -1181,14 +1187,19 @@ export const useSnakeGame = create<SnakeGameState>()(
             }
           }
         } else if (state.flowState.currentPhase === 'emptying') {
+          console.log("Processing emptying phase...");
           // Handle emptying phase - remove flow from tiles starting from the beginning
           const currentEmptyingTile = state.flowState.emptyingFromTile;
+          console.log("Current emptying tile:", currentEmptyingTile);
+          
           if (currentEmptyingTile) {
             // Remove the current tile from completed paths
             const updatedCompletedPaths = state.flowState.completedPaths.filter(path => path.tileId !== currentEmptyingTile);
             
             // Remove the current tile from locked tiles to unlock it
             const updatedLockedTiles = state.flowState.lockedTiles.filter(tileId => tileId !== currentEmptyingTile);
+            
+            console.log(`Emptying ${currentEmptyingTile}, unlocking it. Remaining locked:`, updatedLockedTiles);
             
             // Find the next tile in the flow sequence to empty
             const currentPath = state.flowState.emptyingPaths.find(path => path.tileId === currentEmptyingTile);
@@ -1200,6 +1211,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                 nextEmptyingTile = nextTile.id;
               }
             }
+            
+            console.log("Next emptying tile:", nextEmptyingTile);
             
             if (nextEmptyingTile) {
               // Continue emptying to next tile
@@ -1215,6 +1228,7 @@ export const useSnakeGame = create<SnakeGameState>()(
               });
             } else {
               // Emptying complete - reset flow state
+              console.log("Emptying complete! Resetting flow state.");
               set({
                 flowState: {
                   ...state.flowState,
