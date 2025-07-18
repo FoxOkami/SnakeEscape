@@ -1458,14 +1458,19 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (!currentTile) return; // Player not on a tile
       
       // Don't rotate starting and ending tiles
-      if (currentTile.id === 'grid_tile_3_0' || currentTile.id === 'grid_tile_6_7') {
+      const currentLevel = state.levels[state.currentLevel];
+      const startTilePos = currentLevel.startTilePos;
+      const endTilePos = currentLevel.endTilePos;
+      const startTileId = startTilePos ? `grid_tile_${startTilePos.row}_${startTilePos.col}` : 'grid_tile_3_0';
+      const endTileId = endTilePos ? `grid_tile_${endTilePos.row}_${endTilePos.col}` : 'grid_tile_6_7';
+      
+      if (currentTile.id === startTileId || currentTile.id === endTileId) {
         return;
       }
       
       // Check if this tile is locked (flow has entered it)
       if (state.flowState && state.flowState.lockedTiles.includes(currentTile.id)) {
         console.log(`Tile ${currentTile.id} is locked - flow has passed through it`);
-        get().setConnectionStatus("⚠️ Tile is locked! Flow has already passed through this pipe.");
         return; // Tile is locked, cannot rotate
       }
       
