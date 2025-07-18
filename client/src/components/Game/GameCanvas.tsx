@@ -221,15 +221,16 @@ const GameCanvas: React.FC = () => {
           ctx.beginPath();
           ctx.moveTo(centerX, centerY);
           
-          // Draw line to the appropriate edge based on marker direction
+          // Draw line to near the edge but not past the tile boundary
+          const edgeOffset = 3; // Keep lines 3 pixels from tile edge
           if (marker.letter === 'N') {
-            ctx.lineTo(centerX, tile.y);
+            ctx.lineTo(centerX, tile.y + edgeOffset);
           } else if (marker.letter === 'S') {
-            ctx.lineTo(centerX, tile.y + tile.height);
+            ctx.lineTo(centerX, tile.y + tile.height - edgeOffset);
           } else if (marker.letter === 'W') {
-            ctx.lineTo(tile.x, centerY);
+            ctx.lineTo(tile.x + edgeOffset, centerY);
           } else if (marker.letter === 'E') {
-            ctx.lineTo(tile.x + tile.width, centerY);
+            ctx.lineTo(tile.x + tile.width - edgeOffset, centerY);
           }
           
           ctx.stroke();
