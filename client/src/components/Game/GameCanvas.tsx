@@ -222,7 +222,7 @@ const GameCanvas: React.FC = () => {
           ctx.moveTo(centerX, centerY);
           
           // Draw line to near the edge but not past the tile boundary
-          const edgeOffset = 3; // Keep lines 3 pixels from tile edge
+          const edgeOffset = 2; // Keep lines 2 pixels from tile edge
           if (marker.letter === 'N') {
             ctx.lineTo(centerX, tile.y + edgeOffset);
           } else if (marker.letter === 'S') {
