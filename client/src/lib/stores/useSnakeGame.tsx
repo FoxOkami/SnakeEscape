@@ -1037,8 +1037,65 @@ export const useSnakeGame = create<SnakeGameState>()(
             }
           });
         } else if (state.flowState.currentPhase === 'center-to-exit') {
-          // Check if we're at the end tile
-          if (state.flowState.currentTile === 'grid_tile_6_7') {
+          // Handle emptying mode or regular flow
+          if (state.flowState.isEmptying) {
+            // Emptying mode: unlock the current tile and move to next
+            const currentTile = state.level.entities.find(e => e.id === state.flowState.currentTile);
+            if (currentTile && currentTile.locked) {
+              set({
+                level: {
+                  ...state.level,
+                  entities: state.level.entities.map(entity => 
+                    entity.id === state.flowState.currentTile 
+                      ? { ...entity, locked: false }
+                      : entity
+                  )
+                }
+              });
+            }
+            
+            // Find next tile in emptying path
+            const currentPath = state.flowState.emptyingPaths.find(path => path.tileId === state.flowState.currentTile);
+            if (currentPath && currentPath.exitDirection) {
+              const nextTile = get().getNextTile(state.flowState.currentTile, currentPath.exitDirection);
+              const nextPath = state.flowState.emptyingPaths.find(path => path.tileId === nextTile?.id);
+              
+              if (nextTile && nextPath) {
+                // Move to next tile
+                set({
+                  flowState: {
+                    ...state.flowState,
+                    currentTile: nextTile.id,
+                    entryDirection: nextPath.entryDirection,
+                    exitDirection: nextPath.exitDirection,
+                    currentPhase: 'entry-to-center',
+                    progress: 0,
+                    phaseStartTime: currentTime
+                  }
+                });
+              } else {
+                // Emptying complete
+                set({
+                  flowState: {
+                    isActive: false,
+                    currentPhase: 'entry-to-center',
+                    isEmptying: false,
+                    currentTile: '',
+                    entryDirection: null,
+                    exitDirection: null,
+                    progress: 0,
+                    phaseStartTime: 0,
+                    phaseDuration: 800,
+                    completedPaths: [],
+                    emptyingPaths: [],
+                    lastPosition: undefined,
+                    isBlocked: false,
+                    lockedTiles: []
+                  }
+                });
+              }
+            }
+          } else if (state.flowState.currentTile === 'grid_tile_6_7') {
             // Add final tile to completed paths
             const finalPath = {
               tileId: state.flowState.currentTile,
@@ -1063,14 +1120,16 @@ export const useSnakeGame = create<SnakeGameState>()(
                   flowState: {
                     ...currentState.flowState,
                     isActive: true,
-                    currentPhase: 'emptying',
+                    currentPhase: 'entry-to-center', // Reuse filling animation
                     isEmptying: true,
-                    emptyingFromTile: 'grid_tile_3_0', // Start emptying from the beginning
+                    currentTile: 'grid_tile_3_0', // Start from beginning
+                    entryDirection: null,
+                    exitDirection: 'east',
                     progress: 0,
                     phaseStartTime: Date.now(),
-                    phaseDuration: 800, // Faster emptying animation
+                    phaseDuration: 800,
                     emptyingPaths: allPaths,
-                    completedPaths: allPaths
+                    completedPaths: []
                   }
                 });
               }
@@ -1148,14 +1207,16 @@ export const useSnakeGame = create<SnakeGameState>()(
                       flowState: {
                         ...currentState.flowState,
                         isActive: true,
-                        currentPhase: 'emptying',
+                        currentPhase: 'entry-to-center', // Reuse filling animation
                         isEmptying: true,
-                        emptyingFromTile: 'grid_tile_3_0', // Start emptying from the beginning
+                        currentTile: 'grid_tile_3_0', // Start from beginning
+                        entryDirection: null,
+                        exitDirection: 'east',
                         progress: 0,
                         phaseStartTime: Date.now(),
-                        phaseDuration: 1200, // Slower emptying animation to match filling speed
+                        phaseDuration: 800,
                         emptyingPaths: allPaths,
-                        completedPaths: allPaths
+                        completedPaths: []
                         // Keep isBlocked and lastPosition to show indicator during emptying
                       }
                     });
@@ -1217,14 +1278,16 @@ export const useSnakeGame = create<SnakeGameState>()(
                     flowState: {
                       ...currentState.flowState,
                       isActive: true,
-                      currentPhase: 'emptying',
+                      currentPhase: 'entry-to-center', // Reuse filling animation
                       isEmptying: true,
-                      emptyingFromTile: 'grid_tile_3_0', // Start emptying from the beginning
+                      currentTile: 'grid_tile_3_0', // Start from beginning
+                      entryDirection: null,
+                      exitDirection: 'east',
                       progress: 0,
                       phaseStartTime: Date.now(),
-                      phaseDuration: 1200, // Slower emptying animation to match filling speed
+                      phaseDuration: 800,
                       emptyingPaths: allPaths,
-                      completedPaths: allPaths
+                      completedPaths: []
                       // Keep isBlocked and lastPosition to show indicator during emptying
                     }
                   });
@@ -1240,77 +1303,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                   completedPaths: [...state.flowState.completedPaths, completedPath]
                 }
               });
-            }
-          }
-        } else if (state.flowState.currentPhase === 'emptying') {
-          console.log("Processing emptying phase...");
-          // Handle emptying phase with gradual flow animation like filling
-          const currentEmptyingTile = state.flowState.emptyingFromTile;
-          console.log("Current emptying tile:", currentEmptyingTile);
-          
-          if (currentEmptyingTile) {
-            const currentPath = state.flowState.emptyingPaths.find(path => path.tileId === currentEmptyingTile);
-            
-            if (currentPath) {
-              // Similar to filling animation, but in reverse
-              // Progress from 1.0 (full) to 0.0 (empty)
-              const reverseProgress = 1.0 - state.flowState.progress;
-              
-              // When progress reaches 1.0 (tile fully emptied)
-              if (state.flowState.progress >= 1.0) {
-                // Remove the current tile from completed paths
-                const updatedCompletedPaths = state.flowState.completedPaths.filter(path => path.tileId !== currentEmptyingTile);
-                
-                // Remove the current tile from locked tiles to unlock it
-                const updatedLockedTiles = state.flowState.lockedTiles.filter(tileId => tileId !== currentEmptyingTile);
-                
-                console.log(`Emptying ${currentEmptyingTile}, unlocking it. Remaining locked:`, updatedLockedTiles);
-                
-                // Find the next tile in the flow sequence to empty
-                let nextEmptyingTile = null;
-                
-                if (currentPath.exitDirection) {
-                  const nextTile = get().getNextTile(currentEmptyingTile, currentPath.exitDirection);
-                  if (nextTile && state.flowState.emptyingPaths.some(path => path.tileId === nextTile.id)) {
-                    nextEmptyingTile = nextTile.id;
-                  }
-                }
-                
-                console.log("Next emptying tile:", nextEmptyingTile);
-                
-                if (nextEmptyingTile) {
-                  // Continue emptying to next tile
-                  set({
-                    flowState: {
-                      ...state.flowState,
-                      emptyingFromTile: nextEmptyingTile,
-                      lockedTiles: updatedLockedTiles,
-                      completedPaths: updatedCompletedPaths,
-                      progress: 0,
-                      phaseStartTime: currentTime,
-                      currentTile: nextEmptyingTile,
-                      entryDirection: get().getOppositeDirection(currentPath.exitDirection!),
-                      exitDirection: null // Will be calculated if needed
-                    }
-                  });
-                } else {
-                  // Emptying complete - reset flow state and clear blocked indicator
-                  console.log("Emptying complete! Resetting flow state and clearing blocked indicator.");
-                  set({
-                    flowState: {
-                      ...state.flowState,
-                      isActive: false,
-                      isEmptying: false,
-                      emptyingFromTile: undefined,
-                      lockedTiles: [],
-                      completedPaths: [],
-                      emptyingPaths: [],
-                      isBlocked: false, // Clear blocked indicator when emptying is complete
-                      lastPosition: undefined
-                    }
-                  });
-                }
-              }
             }
           }
         }
