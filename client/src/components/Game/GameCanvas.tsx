@@ -236,19 +236,7 @@ const GameCanvas: React.FC = () => {
           ctx.stroke();
         });
         
-        // Draw remaining markers
-        visibleMarkers.forEach(marker => {
-          ctx.fillText(marker.letter, marker.x, marker.y);
-        });
-        
-        // Draw lock icon for locked tiles
-        if (isLockedTile) {
-          ctx.fillStyle = '#ff6666';
-          ctx.font = '16px Arial';
-          ctx.textAlign = 'center';
-          // Draw lock emoji/symbol
-          ctx.fillText('🔒', centerX, tile.y + 15);
-        }
+        // Letters and lock icons removed
       }
 
     });
@@ -620,12 +608,12 @@ const GameCanvas: React.FC = () => {
       ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
     }
 
-    // Show tile rotation message if player is on a rotatable tile in Level 4
-    if (currentTile && currentTile.id !== 'grid_tile_3_0' && currentTile.id !== 'grid_tile_6_7') {
+    // Show "E to start" message if player is on the start tile in Level 4
+    if (currentLevel === 3 && currentTile && currentTile.id === 'grid_tile_3_0') {
       ctx.fillStyle = '#ffffff';
       ctx.font = '12px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('Q/E to rotate', player.position.x + player.size.width / 2, player.position.y - 10);
+      ctx.fillText('E to start', player.position.x + player.size.width / 2, player.position.y - 10);
       ctx.textAlign = 'left';
     }
 

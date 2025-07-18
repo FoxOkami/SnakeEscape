@@ -1117,15 +1117,11 @@ export const useSnakeGame = create<SnakeGameState>()(
             // Flow completed successfully - remove key walls and start emptying
             get().removeKeyWalls();
             
-            console.log("Flow reached end tile! Starting emptying process in 2 seconds...");
-            
             // Wait 2 seconds before starting emptying process
             setTimeout(() => {
-              console.log("Starting emptying process now!");
               const currentState = get();
               if (currentState.flowState) {
                 const allPaths = [...currentState.flowState.completedPaths, finalPath];
-                console.log("Emptying paths:", allPaths);
                 
                 set({
                   flowState: {
@@ -1190,7 +1186,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                 });
               } else {
                 // Flow blocked - incompatible connection
-                console.log("Flow blocked: next tile doesn't have compatible direction");
                 // Add current tile to completed paths before blocking
                 const completedPath = {
                   tileId: state.flowState.currentTile,
@@ -1204,15 +1199,11 @@ export const useSnakeGame = create<SnakeGameState>()(
                   y: nextTile.y + nextTile.height / 2
                 } : undefined;
                 
-                console.log("Flow blocked! Starting emptying process in 2 seconds...");
-                
                 // Wait 2 seconds before starting emptying process for blocked flow
                 setTimeout(() => {
-                  console.log("Starting emptying process for blocked flow!");
                   const currentState = get();
                   if (currentState.flowState) {
                     const allPaths = [...currentState.flowState.completedPaths, completedPath];
-                    console.log("Emptying blocked flow paths:", allPaths);
                     
                     set({
                       flowState: {
@@ -1248,7 +1239,6 @@ export const useSnakeGame = create<SnakeGameState>()(
               }
             } else {
               // Flow ended unexpectedly - no tile found (edge of grid)
-              console.log("Flow ended: no next tile found");
               // Add current tile to completed paths before ending
               const completedPath = {
                 tileId: state.flowState.currentTile,
@@ -1277,15 +1267,11 @@ export const useSnakeGame = create<SnakeGameState>()(
                 };
               }
               
-              console.log("Flow ended at grid edge! Starting emptying process in 2 seconds...");
-              
               // Wait 2 seconds before starting emptying process for edge-blocked flow
               setTimeout(() => {
-                console.log("Starting emptying process for edge-blocked flow!");
                 const currentState = get();
                 if (currentState.flowState) {
                   const allPaths = [...currentState.flowState.completedPaths, completedPath];
-                  console.log("Emptying edge-blocked flow paths:", allPaths);
                   
                   set({
                     flowState: {
@@ -1328,7 +1314,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       const match = currentTileId.match(/grid_tile_(\d+)_(\d+)/);
       if (!match) {
-        console.log(`Invalid tile ID: ${currentTileId}`);
         return null;
       }
       
@@ -1345,20 +1330,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         case 'west': nextCol--; break;
       }
       
-      console.log(`  From ${currentTileId} (${row},${col}) going ${exitDirection} to (${nextRow},${nextCol})`);
-      
       // Check bounds
       if (nextRow < 0 || nextRow >= 8 || nextCol < 0 || nextCol >= 8) {
-        console.log(`  Out of bounds: (${nextRow},${nextCol})`);
         return null;
       }
       
       const nextTileId = `grid_tile_${nextRow}_${nextCol}`;
       const nextTile = state.patternTiles.find(tile => tile.id === nextTileId) || null;
-      
-      if (!nextTile) {
-        console.log(`  No tile found for ${nextTileId}`);
-      }
       
       return nextTile;
     },
@@ -1493,9 +1471,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       const startTileId = 'grid_tile_3_0';
       const endTileId = 'grid_tile_6_7';
       
-      console.log("=== Starting Path Connection Check ===");
-      console.log("Start tile:", startTileId);
-      console.log("End tile:", endTileId);
+      // Path connection check started
       
       // Always start flow visualization to show the attempted path
       get().startFlow();
@@ -1509,52 +1485,37 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (visited.has(tileId)) continue;
         visited.add(tileId);
         
-        console.log(`Processing tile: ${tileId}, entry: ${entryDirection}`);
-        
         // Check if we reached the end
         if (tileId === endTileId) {
-          console.log("✓ Path found! Connected successfully!");
           return true;
         }
         
         // Get available directions for this tile
         const directions = state.getTileDirections(tileId);
-        console.log(`  Available directions for ${tileId}:`, directions);
         
         // For each direction, try to move to the next tile
         for (const direction of directions) {
           // Skip if this is the entry direction (can't go back)
           if (entryDirection && direction === entryDirection) {
-            console.log(`  Skipping ${direction} (entry direction)`);
             continue;
           }
           
           // Get the next tile in this direction
           const nextTile = state.getNextTile(tileId, direction);
           if (!nextTile) {
-            console.log(`  No tile found in ${direction} direction`);
             continue;
           }
-          
-          console.log(`  Found next tile: ${nextTile.id} in ${direction} direction`);
           
           // Check if the next tile has a compatible direction
           const nextTileDirections = state.getTileDirections(nextTile.id);
           const requiredDirection = state.getOppositeDirection(direction);
           
-          console.log(`  Next tile directions:`, nextTileDirections);
-          console.log(`  Required direction: ${requiredDirection}`);
-          
           if (nextTileDirections.includes(requiredDirection)) {
-            console.log(`  ✓ Compatible! Adding ${nextTile.id} to queue`);
             queue.push({ tileId: nextTile.id, entryDirection: requiredDirection });
-          } else {
-            console.log(`  ✗ Not compatible, skipping`);
           }
         }
       }
       
-      console.log("✗ No path found");
       return false;
     },
 
@@ -1581,7 +1542,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         )
       });
       
-      console.log("Key chamber walls removed! Path connected from start to end.");
+      // Key chamber walls removed - path connected from start to end
     },
 
     setConnectionStatus: (status: string | null) => {
