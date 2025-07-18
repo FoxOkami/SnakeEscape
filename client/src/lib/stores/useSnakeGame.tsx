@@ -1039,20 +1039,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         } else if (state.flowState.currentPhase === 'center-to-exit') {
           // Handle emptying mode or regular flow
           if (state.flowState.isEmptying) {
-            // Emptying mode: unlock the current tile and move to next
-            const currentTile = state.level.entities.find(e => e.id === state.flowState.currentTile);
-            if (currentTile && currentTile.locked) {
-              set({
-                level: {
-                  ...state.level,
-                  entities: state.level.entities.map(entity => 
-                    entity.id === state.flowState.currentTile 
-                      ? { ...entity, locked: false }
-                      : entity
-                  )
-                }
-              });
-            }
+            // Emptying mode: remove the current tile from locked tiles and move to next
+            const newLockedTiles = state.flowState.lockedTiles.filter(tileId => tileId !== state.flowState.currentTile);
             
             // Find next tile in emptying path
             const currentPath = state.flowState.emptyingPaths.find(path => path.tileId === state.flowState.currentTile);
@@ -1070,7 +1058,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                     exitDirection: nextPath.exitDirection,
                     currentPhase: 'entry-to-center',
                     progress: 0,
-                    phaseStartTime: currentTime
+                    phaseStartTime: currentTime,
+                    lockedTiles: newLockedTiles
                   }
                 });
               } else {
@@ -1094,6 +1083,26 @@ export const useSnakeGame = create<SnakeGameState>()(
                   }
                 });
               }
+            } else {
+              // No more emptying paths - complete the emptying process
+              set({
+                flowState: {
+                  isActive: false,
+                  currentPhase: 'entry-to-center',
+                  isEmptying: false,
+                  currentTile: '',
+                  entryDirection: null,
+                  exitDirection: null,
+                  progress: 0,
+                  phaseStartTime: 0,
+                  phaseDuration: 800,
+                  completedPaths: [],
+                  emptyingPaths: [],
+                  lastPosition: undefined,
+                  isBlocked: false,
+                  lockedTiles: []
+                }
+              });
             }
           } else if (state.flowState.currentTile === 'grid_tile_6_7') {
             // Add final tile to completed paths
