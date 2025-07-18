@@ -521,6 +521,11 @@ const GameCanvas: React.FC = () => {
           accentColor = '#4fd1c7'; // Lighter teal
           eyeColor = '#2d3748'; // Dark eyes
           break;
+        case 'plumber':
+          baseColor = '#8b4513'; // Brown/copper color for plumber
+          accentColor = '#ffd700'; // Gold accent for pipe-like appearance
+          eyeColor = '#4682b4'; // Steel blue eyes
+          break;
       }
       
       // Main body
@@ -548,6 +553,14 @@ const GameCanvas: React.FC = () => {
         ctx.fillRect(snake.position.x + 15, snake.position.y + 3, 6, 6);
         ctx.fillRect(snake.position.x + 3, snake.position.y + 15, 6, 6);
         ctx.fillRect(snake.position.x + 15, snake.position.y + 15, 6, 6);
+      } else if (snake.type === 'plumber') {
+        // Pipe junction pattern for plumber (cross shape like pipe fittings)
+        const centerX = snake.position.x + snake.size.width / 2;
+        const centerY = snake.position.y + snake.size.height / 2;
+        // Horizontal pipe
+        ctx.fillRect(snake.position.x + 2, centerY - 2, snake.size.width - 4, 4);
+        // Vertical pipe
+        ctx.fillRect(centerX - 2, snake.position.y + 2, 4, snake.size.height - 4);
       }
       
       // Add snake eyes (stalkers have no visible eyes)

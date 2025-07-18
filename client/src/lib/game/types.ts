@@ -19,7 +19,7 @@ export interface Player {
 
 export interface Snake {
   id: string;
-  type: 'stalker' | 'guard' | 'burster' | 'screensaver';
+  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber';
   position: Position;
   size: Size;
   speed: number;
@@ -41,6 +41,9 @@ export interface Snake {
   dashTarget?: Position;
   lastSeenPlayer?: Position;
   lostSightCooldown?: number;
+  // Plumber-specific properties
+  currentTileId?: string; // Current tile the plumber is on
+  entryDirection?: 'north' | 'south' | 'east' | 'west'; // Direction plumber entered current tile from
 }
 
 export interface Wall extends Rectangle {}

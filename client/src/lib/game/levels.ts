@@ -483,6 +483,22 @@ export const LEVELS: Level[] = [
           sightRange: 0,
           isChasing: false,
         },
+        {
+          id: "plumber1",
+          type: "plumber" as const,
+          position: { x: 140, y: 140 }, // Start near the pipe tiles
+          size: { width: 25, height: 25 },
+          speed: 80,
+          direction: { x: 1, y: 0 }, // Start moving east
+          patrolPoints: [],
+          currentPatrolIndex: 0,
+          patrolDirection: 1,
+          chaseSpeed: 0,
+          sightRange: 0,
+          isChasing: false,
+          currentTileId: undefined,
+          entryDirection: undefined,
+        },
       ],
       door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
       key: { x: 700, y: 80, width: 20, height: 20, collected: false },

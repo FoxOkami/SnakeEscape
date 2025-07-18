@@ -486,7 +486,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
       
       const updatedSnakes = state.snakes.map((snake) =>
-        updateSnake(snake, state.walls, deltaTime, updatedPlayer, playerSounds),
+        updateSnake(snake, state.walls, deltaTime, updatedPlayer, playerSounds, state),
       );
 
       // --- COLLISION DETECTION ---

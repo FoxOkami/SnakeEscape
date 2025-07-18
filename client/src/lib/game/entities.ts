@@ -1,7 +1,7 @@
 import { Snake, Player, Wall, Position } from "./types";
 import { checkAABBCollision, getDistance, moveTowards, hasLineOfSight, getDirectionVector, findPathAroundWalls, slideAlongWall } from "./collision";
 
-export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[]): Snake {
+export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[], gameState?: any): Snake {
   const currentTime = Date.now();
   
   // Convert deltaTime from milliseconds to seconds for calculations
@@ -19,6 +19,8 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
       return updateBursterSnake(snake, walls, dt, player, currentTime);
     case 'screensaver':
       return updateScreensaverSnake(snake, walls, dt);
+    case 'plumber':
+      return updatePlumberSnake(snake, walls, dt, player, gameState);
     default:
       return snake;
   }
@@ -393,5 +395,159 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
   }
 
   // Keep current direction for next frame
+  return snake;
+}
+
+function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, gameState?: any): Snake {
+  // Check if we have the required game state
+  if (!gameState || !gameState.patternTiles || !gameState.getTileDirections) {
+    return snake; // No game state available
+  }
+  
+  // Only move on pipe tiles in level 4
+  if (gameState.currentLevel !== 3) return snake; // Level 4 is 0-indexed as 3
+  
+  // Find current tile the snake is on
+  const currentTile = gameState.patternTiles.find(tile => {
+    const snakeCenter = {
+      x: snake.position.x + snake.size.width / 2,
+      y: snake.position.y + snake.size.height / 2
+    };
+    return (
+      snakeCenter.x >= tile.x &&
+      snakeCenter.x <= tile.x + tile.width &&
+      snakeCenter.y >= tile.y &&
+      snakeCenter.y <= tile.y + tile.height
+    );
+  });
+  
+  // If not on a tile, find the nearest tile and move toward it
+  if (!currentTile) {
+    const nearestTile = gameState.patternTiles.reduce((nearest, tile) => {
+      const snakeCenter = {
+        x: snake.position.x + snake.size.width / 2,
+        y: snake.position.y + snake.size.height / 2
+      };
+      const tileCenterDistance = getDistance(snakeCenter, {
+        x: tile.x + tile.width / 2,
+        y: tile.y + tile.height / 2
+      });
+      const nearestDistance = getDistance(snakeCenter, {
+        x: nearest.x + nearest.width / 2,
+        y: nearest.y + nearest.height / 2
+      });
+      return tileCenterDistance < nearestDistance ? tile : nearest;
+    }, gameState.patternTiles[0]);
+    
+    if (nearestTile) {
+      const targetPosition = {
+        x: nearestTile.x + nearestTile.width / 2 - snake.size.width / 2,
+        y: nearestTile.y + nearestTile.height / 2 - snake.size.height / 2
+      };
+      const newPosition = moveTowards(snake.position, targetPosition, snake.speed * dt);
+      snake.position = newPosition;
+      snake.direction = getDirectionVector(snake.position, targetPosition);
+    }
+    return snake;
+  }
+  
+  // Update current tile tracking
+  if (snake.currentTileId !== currentTile.id) {
+    snake.currentTileId = currentTile.id;
+    
+    // Determine entry direction based on previous position
+    const tileCenter = {
+      x: currentTile.x + currentTile.width / 2,
+      y: currentTile.y + currentTile.height / 2
+    };
+    const snakeCenter = {
+      x: snake.position.x + snake.size.width / 2,
+      y: snake.position.y + snake.size.height / 2
+    };
+    
+    // Calculate which edge the snake entered from
+    const dx = snakeCenter.x - tileCenter.x;
+    const dy = snakeCenter.y - tileCenter.y;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+    
+    if (absDx > absDy) {
+      snake.entryDirection = dx > 0 ? 'west' : 'east';
+    } else {
+      snake.entryDirection = dy > 0 ? 'north' : 'south';
+    }
+  }
+  
+  // Get available directions for current tile
+  const availableDirections = gameState.getTileDirections(currentTile.id);
+  
+  // Remove entry direction to prevent backtracking
+  const validDirections = availableDirections.filter(dir => dir !== snake.entryDirection);
+  
+  if (validDirections.length === 0) {
+    // No valid directions, stay in place
+    return snake;
+  }
+  
+  // Choose direction that gets snake closer to player
+  let bestDirection = validDirections[0];
+  let bestDistance = Infinity;
+  
+  if (player) {
+    for (const direction of validDirections) {
+      // Calculate where this direction would lead
+      const tileCenter = {
+        x: currentTile.x + currentTile.width / 2,
+        y: currentTile.y + currentTile.height / 2
+      };
+      
+      let targetX = tileCenter.x;
+      let targetY = tileCenter.y;
+      
+      switch (direction) {
+        case 'north': targetY -= 60; break; // Tile size is 60
+        case 'south': targetY += 60; break;
+        case 'east': targetX += 60; break;
+        case 'west': targetX -= 60; break;
+      }
+      
+      const distanceToPlayer = getDistance(
+        { x: targetX, y: targetY },
+        { x: player.position.x + player.size.width / 2, y: player.position.y + player.size.height / 2 }
+      );
+      
+      if (distanceToPlayer < bestDistance) {
+        bestDistance = distanceToPlayer;
+        bestDirection = direction;
+      }
+    }
+  }
+  
+  // Move toward the exit of the current tile in the chosen direction
+  const tileCenter = {
+    x: currentTile.x + currentTile.width / 2,
+    y: currentTile.y + currentTile.height / 2
+  };
+  
+  let targetX = tileCenter.x;
+  let targetY = tileCenter.y;
+  
+  switch (bestDirection) {
+    case 'north': targetY = currentTile.y; break;
+    case 'south': targetY = currentTile.y + currentTile.height; break;
+    case 'east': targetX = currentTile.x + currentTile.width; break;
+    case 'west': targetX = currentTile.x; break;
+  }
+  
+  const targetPosition = {
+    x: targetX - snake.size.width / 2,
+    y: targetY - snake.size.height / 2
+  };
+  
+  // Move toward target
+  const newPosition = moveTowards(snake.position, targetPosition, snake.speed * dt);
+  snake.position = newPosition;
+  snake.direction = getDirectionVector(snake.position, targetPosition);
+  
   return snake;
 }
