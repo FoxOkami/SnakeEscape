@@ -1155,9 +1155,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                         phaseStartTime: Date.now(),
                         phaseDuration: 800, // Faster emptying animation
                         emptyingPaths: allPaths,
-                        completedPaths: allPaths,
-                        isBlocked: false, // Clear blocked state during emptying
-                        lastPosition: undefined
+                        completedPaths: allPaths
+                        // Keep isBlocked and lastPosition to show indicator during emptying
                       }
                     });
                   }
@@ -1225,9 +1224,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                       phaseStartTime: Date.now(),
                       phaseDuration: 800, // Faster emptying animation
                       emptyingPaths: allPaths,
-                      completedPaths: allPaths,
-                      isBlocked: false, // Clear blocked state during emptying
-                      lastPosition: undefined
+                      completedPaths: allPaths
+                      // Keep isBlocked and lastPosition to show indicator during emptying
                     }
                   });
                 }
@@ -1285,8 +1283,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                 }
               });
             } else {
-              // Emptying complete - reset flow state
-              console.log("Emptying complete! Resetting flow state.");
+              // Emptying complete - reset flow state and clear blocked indicator
+              console.log("Emptying complete! Resetting flow state and clearing blocked indicator.");
               set({
                 flowState: {
                   ...state.flowState,
@@ -1295,7 +1293,9 @@ export const useSnakeGame = create<SnakeGameState>()(
                   emptyingFromTile: undefined,
                   lockedTiles: [],
                   completedPaths: [],
-                  emptyingPaths: []
+                  emptyingPaths: [],
+                  isBlocked: false, // Clear blocked indicator when emptying is complete
+                  lastPosition: undefined
                 }
               });
             }
