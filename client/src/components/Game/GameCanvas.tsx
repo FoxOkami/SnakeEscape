@@ -258,7 +258,7 @@ const GameCanvas: React.FC = () => {
       // Set up neon green flow line
       ctx.strokeStyle = '#00ff00';
       ctx.lineWidth = 8;
-      ctx.lineCap = 'round';
+      ctx.lineCap = 'butt';
       
       // Calculate entry and exit points for a tile
       const getEdgePoint = (tile: any, direction: 'north' | 'south' | 'east' | 'west' | null) => {
@@ -317,6 +317,7 @@ const GameCanvas: React.FC = () => {
           const flowColor = flowState.isEmptying ? '#ffffff' : '#00ff00';
           ctx.strokeStyle = flowColor;
           ctx.lineWidth = 6;
+          ctx.lineCap = 'butt';
 
           // Draw flow based on phase
           if (flowState.currentPhase === 'entry-to-center') {
@@ -385,7 +386,7 @@ const GameCanvas: React.FC = () => {
       // Draw neon green "X" to indicate blocked flow
       ctx.strokeStyle = '#00ff00';
       ctx.lineWidth = 4;
-      ctx.lineCap = 'round';
+      ctx.lineCap = 'butt';
       
       // Draw X
       ctx.beginPath();
