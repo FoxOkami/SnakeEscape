@@ -214,7 +214,7 @@ const GameCanvas: React.FC = () => {
         
         // Draw white lines from center to each visible marker
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 6;
         ctx.lineCap = 'square';
         
         visibleMarkers.forEach(marker => {
