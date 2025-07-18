@@ -370,7 +370,9 @@ const GameCanvas: React.FC = () => {
     }
     
     // Draw blocked flow indicator if flow stopped due to incompatible connection
-    if (flowState && !flowState.isActive && flowState.isBlocked && flowState.lastPosition) {
+    // Show during both inactive blocked state and emptying phase
+    if (flowState && flowState.isBlocked && flowState.lastPosition && 
+        (!flowState.isActive || flowState.currentPhase === 'emptying')) {
       const { x, y } = flowState.lastPosition;
       
       // Draw neon green "X" to indicate blocked flow
