@@ -257,7 +257,7 @@ const GameCanvas: React.FC = () => {
     if (flowState && currentLevel === 3) {
       // Set up neon green flow line
       ctx.strokeStyle = '#00ff00';
-      ctx.lineWidth = 8;
+      ctx.lineWidth = 6;
       ctx.lineCap = 'butt';
       
       // Calculate entry and exit points for a tile
