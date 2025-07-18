@@ -987,13 +987,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.currentLevel !== 3) return; // Only on level 4 (0-indexed)
       
-      // Immediately add the starting tile to completed paths to lock it
-      const startTilePath = {
-        tileId: 'grid_tile_3_0',
-        entryDirection: null,
-        exitDirection: 'east'
-      };
-      
       set({
         flowState: {
           isActive: true,
@@ -1006,7 +999,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           phaseDuration: 1000, // 1 second per phase
           lastPosition: undefined,
           isBlocked: false,
-          completedPaths: [startTilePath] // Start with the starting tile already locked
+          lockedTiles: ['grid_tile_3_0'], // Lock the starting tile immediately
+          completedPaths: [] // Clear previous paths when starting new flow
         }
       });
     },
@@ -1068,19 +1062,17 @@ export const useSnakeGame = create<SnakeGameState>()(
               // Check if the next tile actually has a compatible direction
               const nextTileDirections = get().getTileDirections(nextTile.id);
               if (nextTileDirections.includes(newEntryDirection)) {
-                // Add current tile to completed paths when exiting
+                // Add current tile to completed paths when exiting it
                 const currentCompletedPath = {
                   tileId: state.flowState.currentTile,
                   entryDirection: state.flowState.entryDirection,
                   exitDirection: state.flowState.exitDirection
                 };
                 
-                // Immediately add next tile to completed paths when entering it
-                const nextCompletedPath = {
-                  tileId: nextTile.id,
-                  entryDirection: newEntryDirection,
-                  exitDirection: newExitDirection
-                };
+                // Lock the next tile immediately when flow enters it
+                const newLockedTiles = state.flowState.lockedTiles.includes(nextTile.id) 
+                  ? state.flowState.lockedTiles 
+                  : [...state.flowState.lockedTiles, nextTile.id];
                 
                 set({
                   flowState: {
@@ -1091,7 +1083,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                     exitDirection: newExitDirection,
                     progress: 0,
                     phaseStartTime: currentTime,
-                    completedPaths: [...state.flowState.completedPaths, currentCompletedPath, nextCompletedPath]
+                    lockedTiles: newLockedTiles,
+                    completedPaths: [...state.flowState.completedPaths, currentCompletedPath]
                   }
                 });
               } else {
@@ -1306,8 +1299,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
       
-      // Check if this tile has been part of any flow path and lock it
-      if (state.flowState && state.flowState.completedPaths.some(path => path.tileId === currentTile.id)) {
+      // Check if this tile is locked (flow has entered it)
+      if (state.flowState && state.flowState.lockedTiles.includes(currentTile.id)) {
         console.log(`Tile ${currentTile.id} is locked - flow has passed through it`);
         get().setConnectionStatus("⚠️ Tile is locked! Flow has already passed through this pipe.");
         return; // Tile is locked, cannot rotate

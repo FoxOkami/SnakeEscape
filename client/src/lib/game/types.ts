@@ -101,11 +101,12 @@ export interface FlowState {
   phaseDuration: number; // 1000ms per phase
   lastPosition?: { x: number; y: number }; // Position where flow stopped (for blocked connections)
   isBlocked?: boolean; // True if flow stopped due to incompatible connection
+  lockedTiles: string[]; // Tiles that cannot be rotated (locked when flow enters them)
   completedPaths: Array<{
     tileId: string;
     entryDirection: 'north' | 'south' | 'east' | 'west' | null;
     exitDirection: 'north' | 'south' | 'east' | 'west' | null;
-  }>; // Track all completed tile paths for persistent visualization
+  }>; // Track all completed tile paths for persistent visualization (only when flow exits them)
 }
 
 export interface ThrowableItem extends Rectangle {

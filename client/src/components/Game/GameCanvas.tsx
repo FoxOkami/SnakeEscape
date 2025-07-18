@@ -125,8 +125,8 @@ const GameCanvas: React.FC = () => {
       
       ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
       
-      // Check if this tile is locked (has flow passed through it)
-      const isLockedTile = flowState && flowState.completedPaths.some(path => path.tileId === tile.id);
+      // Check if this tile is locked (has flow entered it)
+      const isLockedTile = flowState && flowState.lockedTiles.includes(tile.id);
       
       // Add highlight overlay for rotatable tiles with 20% opacity
       if (currentTile && currentTile.id === tile.id && currentTile.id !== 'grid_tile_3_0' && currentTile.id !== 'grid_tile_6_7') {
