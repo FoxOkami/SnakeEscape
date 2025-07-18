@@ -170,6 +170,8 @@ export interface Level {
   crystal?: Crystal;
   lightSource?: LightSource;
   size: Size;
+  startTilePos?: { row: number; col: number }; // For Level 4 randomization
+  endTilePos?: { row: number; col: number }; // For Level 4 randomization
 }
 
 export type GameState = 'menu' | 'playing' | 'gameOver' | 'victory' | 'levelComplete';

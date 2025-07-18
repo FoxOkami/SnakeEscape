@@ -82,7 +82,11 @@ const SnakeRoom: React.FC = () => {
           });
           
           // If on start tile, check connection instead of rotating
-          if (currentTile && currentTile.id === 'grid_tile_3_0') {
+          const currentLevel = useSnakeGame.getState().levels[useSnakeGame.getState().currentLevel];
+          const startTilePos = currentLevel.startTilePos;
+          const startTileId = startTilePos ? `grid_tile_${startTilePos.row}_${startTilePos.col}` : 'grid_tile_3_0';
+          
+          if (currentTile && currentTile.id === startTileId) {
             const isConnected = checkPathConnection();
             if (isConnected) {
               setConnectionStatus("✓ Path is connected! Start and end tiles are linked.");

@@ -987,10 +987,15 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.currentLevel !== 3) return; // Only on level 4 (0-indexed)
       
+      // Get dynamic start tile position
+      const currentLevel = state.levels[state.currentLevel];
+      const startTilePos = currentLevel.startTilePos;
+      const startTileId = startTilePos ? `grid_tile_${startTilePos.row}_${startTilePos.col}` : 'grid_tile_3_0';
+      
       set({
         flowState: {
           isActive: true,
-          currentTile: 'grid_tile_3_0',
+          currentTile: startTileId,
           currentPhase: 'entry-to-center',
           entryDirection: null,
           exitDirection: 'east',
@@ -999,7 +1004,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           phaseDuration: 1000, // 1 second per phase
           lastPosition: undefined,
           isBlocked: false,
-          lockedTiles: ['grid_tile_3_0'], // Lock the starting tile immediately
+          lockedTiles: [startTileId], // Lock the starting tile immediately
           completedPaths: [], // Clear previous paths when starting new flow
           emptyingPaths: [],
           isEmptying: false,
@@ -1106,7 +1111,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                 }
               });
             }
-          } else if (state.flowState.currentTile === 'grid_tile_6_7') {
+          } else if (state.flowState.currentTile === (state.levels[state.currentLevel].endTilePos ? `grid_tile_${state.levels[state.currentLevel].endTilePos!.row}_${state.levels[state.currentLevel].endTilePos!.col}` : 'grid_tile_6_7')) {
             // Add final tile to completed paths
             const finalPath = {
               tileId: state.flowState.currentTile,
@@ -1122,6 +1127,9 @@ export const useSnakeGame = create<SnakeGameState>()(
               const currentState = get();
               if (currentState.flowState) {
                 const allPaths = [...currentState.flowState.completedPaths, finalPath];
+                const currentLevel = currentState.levels[currentState.currentLevel];
+                const startTilePos = currentLevel.startTilePos;
+                const startTileId = startTilePos ? `grid_tile_${startTilePos.row}_${startTilePos.col}` : 'grid_tile_3_0';
                 
                 set({
                   flowState: {
@@ -1129,7 +1137,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                     isActive: true,
                     currentPhase: 'entry-to-center', // Reuse filling animation
                     isEmptying: true,
-                    currentTile: 'grid_tile_3_0', // Start from beginning
+                    currentTile: startTileId, // Start from beginning
                     entryDirection: null,
                     exitDirection: 'east',
                     progress: 0,
@@ -1204,6 +1212,9 @@ export const useSnakeGame = create<SnakeGameState>()(
                   const currentState = get();
                   if (currentState.flowState) {
                     const allPaths = [...currentState.flowState.completedPaths, completedPath];
+                    const currentLevel = currentState.levels[currentState.currentLevel];
+                    const startTilePos = currentLevel.startTilePos;
+                    const startTileId = startTilePos ? `grid_tile_${startTilePos.row}_${startTilePos.col}` : 'grid_tile_3_0';
                     
                     set({
                       flowState: {
@@ -1211,7 +1222,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                         isActive: true,
                         currentPhase: 'entry-to-center', // Reuse filling animation
                         isEmptying: true,
-                        currentTile: 'grid_tile_3_0', // Start from beginning
+                        currentTile: startTileId, // Start from beginning
                         entryDirection: null,
                         exitDirection: 'east',
                         progress: 0,
@@ -1272,6 +1283,9 @@ export const useSnakeGame = create<SnakeGameState>()(
                 const currentState = get();
                 if (currentState.flowState) {
                   const allPaths = [...currentState.flowState.completedPaths, completedPath];
+                  const currentLevel = currentState.levels[currentState.currentLevel];
+                  const startTilePos = currentLevel.startTilePos;
+                  const startTileId = startTilePos ? `grid_tile_${startTilePos.row}_${startTilePos.col}` : 'grid_tile_3_0';
                   
                   set({
                     flowState: {
@@ -1279,7 +1293,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                       isActive: true,
                       currentPhase: 'entry-to-center', // Reuse filling animation
                       isEmptying: true,
-                      currentTile: 'grid_tile_3_0', // Start from beginning
+                      currentTile: startTileId, // Start from beginning
                       entryDirection: null,
                       exitDirection: 'east',
                       progress: 0,
@@ -1374,13 +1388,18 @@ export const useSnakeGame = create<SnakeGameState>()(
       const row = parseInt(match[1]);
       const col = parseInt(match[2]);
       
-      // Starting square (3,0) only has east
-      if (row === 3 && col === 0) {
+      // Get the current level to access start and end positions
+      const currentLevel = state.levels[state.currentLevel];
+      const startTilePos = currentLevel.startTilePos;
+      const endTilePos = currentLevel.endTilePos;
+      
+      // Starting square (random row, column 0) only has east
+      if (startTilePos && row === startTilePos.row && col === startTilePos.col) {
         return ['east' as const];
       }
       
-      // Ending square (6,7) only has west
-      if (row === 6 && col === 7) {
+      // Ending square (random row, column 7) only has west
+      if (endTilePos && row === endTilePos.row && col === endTilePos.col) {
         return ['west' as const];
       }
       
@@ -1467,9 +1486,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.currentLevel !== 3) return false; // Only on level 4 (0-indexed)
       
-      // Use BFS to find path from start (3,0) to end (6,7)
-      const startTileId = 'grid_tile_3_0';
-      const endTileId = 'grid_tile_6_7';
+      // Get dynamic start and end tile positions
+      const currentLevel = state.levels[state.currentLevel];
+      const startTilePos = currentLevel.startTilePos;
+      const endTilePos = currentLevel.endTilePos;
+      const startTileId = startTilePos ? `grid_tile_${startTilePos.row}_${startTilePos.col}` : 'grid_tile_3_0';
+      const endTileId = endTilePos ? `grid_tile_${endTilePos.row}_${endTilePos.col}` : 'grid_tile_6_7';
       
       // Path connection check started
       

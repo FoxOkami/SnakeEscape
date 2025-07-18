@@ -442,117 +442,127 @@ export const LEVELS: Level[] = [
   },
 
   // Level 4: Simple level - just player, key, and exit door with 16x16 tile grid
-  {
-    id: 4,
-    name: "Venom Pipes",
-    player: { x: 50, y: 300 },
-    size: { width: 800, height: 600 },
-    walls: [
-      // Outer walls
-      { x: 0, y: 0, width: 800, height: 20 },
-      { x: 0, y: 580, width: 800, height: 20 },
-      { x: 0, y: 0, width: 20, height: 600 },
-      { x: 780, y: 0, width: 20, height: 600 },
-      // Key chamber walls (similar to level 1)
-      { x: 660, y: 40, width: 100, height: 20 }, // top wall
-      { x: 660, y: 120, width: 100, height: 20 }, // bottom wall
-      { x: 660, y: 50, width: 20, height: 70 }, // left wall
-      { x: 740, y: 50, width: 20, height: 70 }, // right wall
-    ],
-    snakes: [
-      {
-        id: "screensaver1",
-        type: "screensaver" as const,
-        position: { x: 200, y: 150 }, // Position in the open area
-        size: { width: 30, height: 30 },
-        speed: 100,
-        direction: { x: 1, y: 0 }, // Start moving east
-        patrolPoints: [],
-        currentPatrolIndex: 0,
-        patrolDirection: 1,
-        chaseSpeed: 0,
-        sightRange: 0,
-        isChasing: false,
-      },
-    ],
-    door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
-    key: { x: 700, y: 80, width: 20, height: 20, collected: false },
-    // 8x8 centered tile grid for visual appeal (non-interactive)
-    patternTiles: (() => {
-      const tiles: PatternTile[] = [];
-      const tileSize = 60; // Each tile is 60x60 pixels
-      const gridSize = 8; // 8x8 grid
-      const totalGridWidth = gridSize * tileSize;
-      const totalGridHeight = gridSize * tileSize;
+  (() => {
+    // Generate random start and end positions once for this level
+    const startRow = Math.floor(Math.random() * 8); // Random row from 0-7
+    const endRow = Math.floor(Math.random() * 8); // Random row from 0-7
+    const startCol = 0; // Always first column
+    const endCol = 7; // Always last column
 
-      // Center the grid in the playable area
-      const playableWidth = 760; // 800 - 40 (walls)
-      const playableHeight = 560; // 600 - 40 (walls)
-      const startX = 20 + (playableWidth - totalGridWidth) / 2;
-      const startY = 20 + (playableHeight - totalGridHeight) / 2;
+    return {
+      id: 4,
+      name: "Venom Pipes",
+      player: { x: 50, y: 300 },
+      size: { width: 800, height: 600 },
+      startTilePos: { row: startRow, col: startCol },
+      endTilePos: { row: endRow, col: endCol },
+      walls: [
+        // Outer walls
+        { x: 0, y: 0, width: 800, height: 20 },
+        { x: 0, y: 580, width: 800, height: 20 },
+        { x: 0, y: 0, width: 20, height: 600 },
+        { x: 780, y: 0, width: 20, height: 600 },
+        // Key chamber walls (similar to level 1)
+        { x: 660, y: 40, width: 100, height: 20 }, // top wall
+        { x: 660, y: 120, width: 100, height: 20 }, // bottom wall
+        { x: 660, y: 50, width: 20, height: 70 }, // left wall
+        { x: 740, y: 50, width: 20, height: 70 }, // right wall
+      ],
+      snakes: [
+        {
+          id: "screensaver1",
+          type: "screensaver" as const,
+          position: { x: 200, y: 150 }, // Position in the open area
+          size: { width: 30, height: 30 },
+          speed: 100,
+          direction: { x: 1, y: 0 }, // Start moving east
+          patrolPoints: [],
+          currentPatrolIndex: 0,
+          patrolDirection: 1,
+          chaseSpeed: 0,
+          sightRange: 0,
+          isChasing: false,
+        },
+      ],
+      door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
+      key: { x: 700, y: 80, width: 20, height: 20, collected: false },
+      // 8x8 centered tile grid with randomized start and end positions
+      patternTiles: (() => {
+        const tiles: PatternTile[] = [];
+        const tileSize = 60; // Each tile is 60x60 pixels
+        const gridSize = 8; // 8x8 grid
+        const totalGridWidth = gridSize * tileSize;
+        const totalGridHeight = gridSize * tileSize;
 
-      for (let row = 0; row < gridSize; row++) {
-        for (let col = 0; col < gridSize; col++) {
-          const x = startX + col * tileSize;
-          const y = startY + row * tileSize;
+        // Center the grid in the playable area
+        const playableWidth = 760; // 800 - 40 (walls)
+        const playableHeight = 560; // 600 - 40 (walls)
+        const startX = 20 + (playableWidth - totalGridWidth) / 2;
+        const startY = 20 + (playableHeight - totalGridHeight) / 2;
 
-          const tile: PatternTile = {
-            id: `grid_tile_${row}_${col}`,
-            x,
-            y,
-            width: tileSize,
-            height: tileSize,
-            isGlowing: false,
-            sequenceIndex: -1, // Not part of any sequence
-            hasBeenActivated: false,
-            rotation: 0, // Initial rotation
-          };
+        for (let row = 0; row < gridSize; row++) {
+          for (let col = 0; col < gridSize; col++) {
+            const x = startX + col * tileSize;
+            const y = startY + row * tileSize;
 
-          // Add custom graphics to row 3, column 0
-          if (row === 3 && col === 0) {
-            const circleRadius = (tileSize / 8) * 2; // Double the radius of the circle
-            const centerX = x + tileSize / 2;
-            const centerY = y + tileSize / 2;
-
-            tile.customGraphics = {
-              circle: {
-                radius: circleRadius,
-                color: "#00FF00", // Neon green
-                centerX: centerX,
-                centerY: centerY,
-              },
-              // Removed line graphics
+            const tile: PatternTile = {
+              id: `grid_tile_${row}_${col}`,
+              x,
+              y,
+              width: tileSize,
+              height: tileSize,
+              isGlowing: false,
+              sequenceIndex: -1, // Not part of any sequence
+              hasBeenActivated: false,
+              rotation: 0, // Initial rotation
             };
+
+            // Add custom graphics to starting tile (random row, column 0)
+            if (row === startRow && col === startCol) {
+              const circleRadius = (tileSize / 8) * 2; // Double the radius of the circle
+              const centerX = x + tileSize / 2;
+              const centerY = y + tileSize / 2;
+
+              tile.customGraphics = {
+                circle: {
+                  radius: circleRadius,
+                  color: "#00FF00", // Neon green
+                  centerX: centerX,
+                  centerY: centerY,
+                },
+                // Removed line graphics
+              };
+            }
+
+            // Add custom graphics to ending tile (random row, column 7)
+            if (row === endRow && col === endCol) {
+              const circleRadius = (tileSize / 8) * 2; // Double the radius of the circle
+              const centerX = x + tileSize / 2;
+              const centerY = y + tileSize / 2;
+
+              tile.customGraphics = {
+                circle: {
+                  radius: circleRadius,
+                  color: "#FF00FF", // Inverted color (magenta)
+                  centerX: centerX,
+                  centerY: centerY,
+                },
+                // Removed line graphics
+              };
+            }
+
+            tiles.push(tile);
           }
-
-          // Add custom graphics to row 6, column 7 (flipped Y axis and inverted colors)
-          if (row === 6 && col === 7) {
-            const circleRadius = (tileSize / 8) * 2; // Double the radius of the circle
-            const centerX = x + tileSize / 2;
-            const centerY = y + tileSize / 2;
-
-            tile.customGraphics = {
-              circle: {
-                radius: circleRadius,
-                color: "#FF00FF", // Inverted color (magenta)
-                centerX: centerX,
-                centerY: centerY,
-              },
-              // Removed line graphics
-            };
-          }
-
-          tiles.push(tile);
         }
-      }
 
-      return tiles;
-    })(),
-    patternSequence: [], // No pattern sequence needed
-    switches: [],
-    throwableItems: [],
-    mirrors: [],
-    crystal: null,
-    lightSource: null,
-  },
+        return tiles;
+      })(),
+      patternSequence: [], // No pattern sequence needed
+      switches: [],
+      throwableItems: [],
+      mirrors: [],
+      crystal: null,
+      lightSource: null,
+    };
+  })(),
 ];
