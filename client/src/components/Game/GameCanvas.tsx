@@ -327,11 +327,11 @@ const GameCanvas: React.FC = () => {
     if (flowState && !flowState.isActive && flowState.isBlocked && flowState.lastPosition) {
       const { x, y } = flowState.lastPosition;
       
-      // Draw red "X" to indicate blocked flow
-      ctx.strokeStyle = '#ff0000';
+      // Draw neon green "X" to indicate blocked flow
+      ctx.strokeStyle = '#00ff00';
       ctx.lineWidth = 4;
       ctx.lineCap = 'round';
-      ctx.shadowColor = '#ff0000';
+      ctx.shadowColor = '#00ff00';
       ctx.shadowBlur = 8;
       
       // Draw X
@@ -342,11 +342,17 @@ const GameCanvas: React.FC = () => {
       ctx.lineTo(x - 8, y + 8);
       ctx.stroke();
       
-      // Draw pulsing circle around blocked position
+      // Draw pulsing filled circle around blocked position
       const pulseTime = (Date.now() % 1000) / 1000; // 1-second pulse cycle
       const pulseRadius = 15 + Math.sin(pulseTime * Math.PI * 2) * 5;
       
-      ctx.strokeStyle = '#ff4444';
+      ctx.fillStyle = 'rgba(0, 255, 0, 0.3)'; // Semi-transparent neon green fill
+      ctx.beginPath();
+      ctx.arc(x, y, pulseRadius, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      // Add neon green stroke outline
+      ctx.strokeStyle = '#00ff00';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(x, y, pulseRadius, 0, 2 * Math.PI);
