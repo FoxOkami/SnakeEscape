@@ -444,7 +444,7 @@ export const LEVELS: Level[] = [
   // Level 4: Simple level - just player, key, and exit door with 16x16 tile grid
   {
     id: 4,
-    name: "Simple Escape",
+    name: "Venom Pipes",
     player: { x: 50, y: 300 },
     size: { width: 800, height: 600 },
     walls: [

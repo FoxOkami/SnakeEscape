@@ -31,7 +31,8 @@ const GameCanvas: React.FC = () => {
     crystal,
     lightSource,
     lightBeam,
-    currentLevel
+    currentLevel,
+    getTileDirections
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -187,114 +188,46 @@ const GameCanvas: React.FC = () => {
         const centerX = tile.x + tile.width / 2;
         const centerY = tile.y + tile.height / 2;
         
-        // Special handling for starting square (3,0) - remove N, S, W
-        if (tile.id === 'grid_tile_3_0') {
-          // Only show East marker
-          ctx.fillText('E', tile.x + tile.width - 8, tile.y + tile.height / 2 + 4);
-          
-          // Draw line from center to East edge
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 3;
-          ctx.lineCap = 'square';
+        // Get the actual tile directions from the game state
+        const tileDirections = getTileDirections(tile.id);
+        
+        // Map directions to display letters and positions
+        const directionMap = {
+          north: { letter: 'N', x: tile.x + tile.width / 2, y: tile.y + 12 },
+          south: { letter: 'S', x: tile.x + tile.width / 2, y: tile.y + tile.height - 4 },
+          west: { letter: 'W', x: tile.x + 8, y: tile.y + tile.height / 2 + 4 },
+          east: { letter: 'E', x: tile.x + tile.width - 8, y: tile.y + tile.height / 2 + 4 }
+        };
+        
+        const visibleMarkers = tileDirections.map(direction => directionMap[direction]);
+        
+        // Draw white lines from center to each visible marker
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'square';
+        
+        visibleMarkers.forEach(marker => {
           ctx.beginPath();
           ctx.moveTo(centerX, centerY);
-          ctx.lineTo(tile.x + tile.width, centerY);
-          ctx.stroke();
-        }
-        // Special handling for ending square (6,7) - remove N, E, S
-        else if (tile.id === 'grid_tile_6_7') {
-          // Only show West marker
-          ctx.fillText('W', tile.x + 8, tile.y + tile.height / 2 + 4);
           
-          // Draw line from center to West edge
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 3;
-          ctx.lineCap = 'square';
-          ctx.beginPath();
-          ctx.moveTo(centerX, centerY);
-          ctx.lineTo(tile.x, centerY);
-          ctx.stroke();
-        }
-        // All other squares - show exactly 2 markers
-        else {
-          // Extract row and column from tile ID for consistent randomization
-          const match = tile.id.match(/grid_tile_(\d+)_(\d+)/);
-          if (match) {
-            const row = parseInt(match[1]);
-            const col = parseInt(match[2]);
-            
-            // Create a deterministic but pseudo-random pattern based on row/col
-            const seed = row * 8 + col;
-            
-            // Define all markers (base directions)
-            const baseMarkers = [
-              { letter: 'N', direction: 'north' },
-              { letter: 'S', direction: 'south' },
-              { letter: 'W', direction: 'west' },
-              { letter: 'E', direction: 'east' }
-            ];
-            
-            // Shuffle markers deterministically
-            const shuffled = [...baseMarkers];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-              const j = Math.floor(((seed * (i + 13)) % 100) / 100 * (i + 1));
-              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            
-            // Take exactly 2 markers
-            const selectedMarkers = shuffled.slice(0, 2);
-            
-            // Apply tile rotation to the selected markers
-            const rotation = tile.rotation || 0;
-            const rotationSteps = rotation / 90;
-            
-            const visibleMarkers = selectedMarkers.map(marker => {
-              // Rotate the direction based on tile rotation
-              const directions = ['north', 'east', 'south', 'west'];
-              const currentIndex = directions.indexOf(marker.direction);
-              const newIndex = (currentIndex + rotationSteps + 4) % 4;
-              const newDirection = directions[newIndex];
-              
-              // Map direction to display letter and position
-              const directionMap = {
-                north: { letter: 'N', x: tile.x + tile.width / 2, y: tile.y + 12 },
-                south: { letter: 'S', x: tile.x + tile.width / 2, y: tile.y + tile.height - 4 },
-                west: { letter: 'W', x: tile.x + 8, y: tile.y + tile.height / 2 + 4 },
-                east: { letter: 'E', x: tile.x + tile.width - 8, y: tile.y + tile.height / 2 + 4 }
-              };
-              
-              return directionMap[newDirection];
-            });
-            
-            // Draw white lines from center to each visible marker
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 3;
-            ctx.lineCap = 'square';
-            
-            visibleMarkers.forEach(marker => {
-              ctx.beginPath();
-              ctx.moveTo(centerX, centerY);
-              
-              // Draw line to the appropriate edge based on marker direction
-              if (marker.letter === 'N') {
-                ctx.lineTo(centerX, tile.y);
-              } else if (marker.letter === 'S') {
-                ctx.lineTo(centerX, tile.y + tile.height);
-              } else if (marker.letter === 'W') {
-                ctx.lineTo(tile.x, centerY);
-              } else if (marker.letter === 'E') {
-                ctx.lineTo(tile.x + tile.width, centerY);
-              }
-              
-              ctx.stroke();
-            });
-            
-            // Draw remaining markers
-            visibleMarkers.forEach(marker => {
-              ctx.fillText(marker.letter, marker.x, marker.y);
-            });
+          // Draw line to the appropriate edge based on marker direction
+          if (marker.letter === 'N') {
+            ctx.lineTo(centerX, tile.y);
+          } else if (marker.letter === 'S') {
+            ctx.lineTo(centerX, tile.y + tile.height);
+          } else if (marker.letter === 'W') {
+            ctx.lineTo(tile.x, centerY);
+          } else if (marker.letter === 'E') {
+            ctx.lineTo(tile.x + tile.width, centerY);
           }
-        }
+          
+          ctx.stroke();
+        });
+        
+        // Draw remaining markers
+        visibleMarkers.forEach(marker => {
+          ctx.fillText(marker.letter, marker.x, marker.y);
+        });
       }
 
     });
