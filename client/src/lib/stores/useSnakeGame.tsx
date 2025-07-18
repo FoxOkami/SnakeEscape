@@ -1030,31 +1030,43 @@ export const useSnakeGame = create<SnakeGameState>()(
             }
           });
         } else if (state.flowState.currentPhase === 'center-to-exit') {
-          // Move to next tile
-          const nextTile = get().getNextTile(state.flowState.currentTile, state.flowState.exitDirection!);
-          if (nextTile) {
-            const newEntryDirection = get().getOppositeDirection(state.flowState.exitDirection!);
-            const newExitDirection = get().calculateExitDirection(nextTile.id, newEntryDirection);
-            
-            set({
-              flowState: {
-                ...state.flowState,
-                currentTile: nextTile.id,
-                currentPhase: 'entry-to-center',
-                entryDirection: newEntryDirection,
-                exitDirection: newExitDirection,
-                progress: 0,
-                phaseStartTime: currentTime
-              }
-            });
-          } else {
-            // Flow ended
+          // Check if we're at the end tile
+          if (state.flowState.currentTile === 'grid_tile_6_7') {
+            // Flow completed successfully - remove key walls
+            get().removeKeyWalls();
             set({
               flowState: {
                 ...state.flowState,
                 isActive: false
               }
             });
+          } else {
+            // Move to next tile
+            const nextTile = get().getNextTile(state.flowState.currentTile, state.flowState.exitDirection!);
+            if (nextTile) {
+              const newEntryDirection = get().getOppositeDirection(state.flowState.exitDirection!);
+              const newExitDirection = get().calculateExitDirection(nextTile.id, newEntryDirection);
+              
+              set({
+                flowState: {
+                  ...state.flowState,
+                  currentTile: nextTile.id,
+                  currentPhase: 'entry-to-center',
+                  entryDirection: newEntryDirection,
+                  exitDirection: newExitDirection,
+                  progress: 0,
+                  phaseStartTime: currentTime
+                }
+              });
+            } else {
+              // Flow ended unexpectedly
+              set({
+                flowState: {
+                  ...state.flowState,
+                  isActive: false
+                }
+              });
+            }
           }
         }
       }
@@ -1240,6 +1252,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Check if we reached the end
         if (tileId === endTileId) {
           console.log("✓ Path found! Connected successfully!");
+          // Start flow visualization
+          get().startFlow();
           return true;
         }
         
