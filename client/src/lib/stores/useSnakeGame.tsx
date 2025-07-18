@@ -23,6 +23,9 @@ import { calculateLightBeam } from "../game/lightBeam";
 import { useAudio } from "./useAudio";
 
 interface SnakeGameState extends GameData {
+  // Levels data
+  levels: any[];
+  
   // Actions
   startGame: () => void;
   startFromLevel: (levelIndex: number) => void;
@@ -119,6 +122,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     // Initial state
     currentLevel: 0,
     gameState: "menu",
+    levels: LEVELS, // Add levels to store
     player: {
       position: { x: 50, y: 350 },
       size: { width: 25, height: 25 },
