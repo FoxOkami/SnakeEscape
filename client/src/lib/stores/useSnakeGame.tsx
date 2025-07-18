@@ -1134,6 +1134,35 @@ export const useSnakeGame = create<SnakeGameState>()(
                   y: nextTile.y + nextTile.height / 2
                 } : undefined;
                 
+                console.log("Flow blocked! Starting emptying process in 2 seconds...");
+                
+                // Wait 2 seconds before starting emptying process for blocked flow
+                setTimeout(() => {
+                  console.log("Starting emptying process for blocked flow!");
+                  const currentState = get();
+                  if (currentState.flowState) {
+                    const allPaths = [...currentState.flowState.completedPaths, completedPath];
+                    console.log("Emptying blocked flow paths:", allPaths);
+                    
+                    set({
+                      flowState: {
+                        ...currentState.flowState,
+                        isActive: true,
+                        currentPhase: 'emptying',
+                        isEmptying: true,
+                        emptyingFromTile: 'grid_tile_3_0', // Start emptying from the beginning
+                        progress: 0,
+                        phaseStartTime: Date.now(),
+                        phaseDuration: 800, // Faster emptying animation
+                        emptyingPaths: allPaths,
+                        completedPaths: allPaths,
+                        isBlocked: false, // Clear blocked state during emptying
+                        lastPosition: undefined
+                      }
+                    });
+                  }
+                }, 2000);
+                
                 set({
                   flowState: {
                     ...state.flowState,
@@ -1174,6 +1203,35 @@ export const useSnakeGame = create<SnakeGameState>()(
                   y: currentTileObj.y + currentTileObj.height / 2 + offsetY
                 };
               }
+              
+              console.log("Flow ended at grid edge! Starting emptying process in 2 seconds...");
+              
+              // Wait 2 seconds before starting emptying process for edge-blocked flow
+              setTimeout(() => {
+                console.log("Starting emptying process for edge-blocked flow!");
+                const currentState = get();
+                if (currentState.flowState) {
+                  const allPaths = [...currentState.flowState.completedPaths, completedPath];
+                  console.log("Emptying edge-blocked flow paths:", allPaths);
+                  
+                  set({
+                    flowState: {
+                      ...currentState.flowState,
+                      isActive: true,
+                      currentPhase: 'emptying',
+                      isEmptying: true,
+                      emptyingFromTile: 'grid_tile_3_0', // Start emptying from the beginning
+                      progress: 0,
+                      phaseStartTime: Date.now(),
+                      phaseDuration: 800, // Faster emptying animation
+                      emptyingPaths: allPaths,
+                      completedPaths: allPaths,
+                      isBlocked: false, // Clear blocked state during emptying
+                      lastPosition: undefined
+                    }
+                  });
+                }
+              }, 2000);
               
               set({
                 flowState: {
