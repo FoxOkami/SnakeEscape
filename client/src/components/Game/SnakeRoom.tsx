@@ -5,7 +5,7 @@ import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
 
 const SnakeRoom: React.FC = () => {
-  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource, rotateTile, checkPathConnection, setConnectionStatus } = useSnakeGame();
+  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource, rotateTile, checkPathConnection, setConnectionStatus, removeKeyWalls } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } = useAudio();
 
 
@@ -86,6 +86,7 @@ const SnakeRoom: React.FC = () => {
             const isConnected = checkPathConnection();
             if (isConnected) {
               setConnectionStatus("✓ Path is connected! Start and end tiles are linked.");
+              removeKeyWalls(); // Remove walls when path is connected
             } else {
               setConnectionStatus("✗ Path is not connected. Keep rotating tiles to create a connection.");
             }

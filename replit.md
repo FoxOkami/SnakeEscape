@@ -118,6 +118,9 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
+- July 18, 2025. Changed Level 4 name from "Simple Escape" to "Venom Pipes"
+- July 18, 2025. Fixed visual display mismatch - tile directional markers now use the same logic as the connection system
+- July 18, 2025. Removed automatic connection checking - now only happens when user presses E on start tile
 - July 17, 2025. Added manual connection checking for Level 4 - press E on start tile to check path status with visual feedback
 - July 17, 2025. Implemented pipe puzzle path connection system for Level 4 - when path connects start to end, key chamber walls disappear
 - July 17, 2025. Added visual feedback for tile rotation - tiles highlight in light blue and show "Q/E to rotate" message when player stands on them

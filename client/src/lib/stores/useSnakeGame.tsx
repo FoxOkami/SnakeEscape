@@ -265,14 +265,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         isWalking: false,
       });
       
-      // Check path connection for Level 4 on start
-      if (levelIndex === 3) {
-        setTimeout(() => {
-          if (get().checkPathConnection()) {
-            get().removeKeyWalls();
-          }
-        }, 100);
-      }
+
     },
 
     resetGame: () => {
@@ -1219,11 +1212,6 @@ export const useSnakeGame = create<SnakeGameState>()(
             : tile
         )
       });
-      
-      // Check if path is now connected after rotation
-      if (get().checkPathConnection()) {
-        get().removeKeyWalls();
-      }
     },
 
     checkPathConnection: () => {
