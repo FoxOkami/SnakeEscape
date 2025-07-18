@@ -93,7 +93,7 @@ export interface PatternTile extends Rectangle {
 export interface FlowState {
   isActive: boolean;
   currentTile: string; // tile ID
-  currentPhase: 'entry-to-center' | 'center-to-exit'; // Flow phase
+  currentPhase: 'entry-to-center' | 'center-to-exit' | 'emptying'; // Flow phase
   entryDirection: 'north' | 'south' | 'east' | 'west' | null; // Where flow entered from
   exitDirection: 'north' | 'south' | 'east' | 'west' | null; // Where flow is heading
   progress: number; // 0 to 1, progress through current phase
@@ -107,6 +107,13 @@ export interface FlowState {
     entryDirection: 'north' | 'south' | 'east' | 'west' | null;
     exitDirection: 'north' | 'south' | 'east' | 'west' | null;
   }>; // Track all completed tile paths for persistent visualization (only when flow exits them)
+  emptyingPaths: Array<{
+    tileId: string;
+    entryDirection: 'north' | 'south' | 'east' | 'west' | null;
+    exitDirection: 'north' | 'south' | 'east' | 'west' | null;
+  }>; // Paths that are being emptied (removed from completedPaths as they empty)
+  isEmptying?: boolean; // True when flow is emptying backward
+  emptyingFromTile?: string; // Current tile being emptied from
 }
 
 export interface ThrowableItem extends Rectangle {

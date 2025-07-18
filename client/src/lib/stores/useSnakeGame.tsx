@@ -1000,7 +1000,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           lastPosition: undefined,
           isBlocked: false,
           lockedTiles: ['grid_tile_3_0'], // Lock the starting tile immediately
-          completedPaths: [] // Clear previous paths when starting new flow
+          completedPaths: [], // Clear previous paths when starting new flow
+          emptyingPaths: [],
+          isEmptying: false,
+          emptyingFromTile: undefined
         }
       });
     },
@@ -1043,8 +1046,30 @@ export const useSnakeGame = create<SnakeGameState>()(
               exitDirection: state.flowState.exitDirection
             };
             
-            // Flow completed successfully - remove key walls
+            // Flow completed successfully - remove key walls and start emptying
             get().removeKeyWalls();
+            
+            // Wait 2 seconds before starting emptying process
+            setTimeout(() => {
+              const currentState = get();
+              if (currentState.flowState) {
+                set({
+                  flowState: {
+                    ...currentState.flowState,
+                    isActive: true,
+                    currentPhase: 'emptying',
+                    isEmptying: true,
+                    emptyingFromTile: 'grid_tile_3_0', // Start emptying from the beginning
+                    progress: 0,
+                    phaseStartTime: Date.now(),
+                    phaseDuration: 800, // Faster emptying animation
+                    emptyingPaths: [...currentState.flowState.completedPaths, finalPath],
+                    completedPaths: [...currentState.flowState.completedPaths, finalPath]
+                  }
+                });
+              }
+            }, 2000);
+            
             set({
               flowState: {
                 ...state.flowState,
@@ -1151,6 +1176,54 @@ export const useSnakeGame = create<SnakeGameState>()(
                   lastPosition: blockedPosition,
                   isBlocked: true,
                   completedPaths: [...state.flowState.completedPaths, completedPath]
+                }
+              });
+            }
+          }
+        } else if (state.flowState.currentPhase === 'emptying') {
+          // Handle emptying phase - remove flow from tiles starting from the beginning
+          const currentEmptyingTile = state.flowState.emptyingFromTile;
+          if (currentEmptyingTile) {
+            // Remove the current tile from completed paths
+            const updatedCompletedPaths = state.flowState.completedPaths.filter(path => path.tileId !== currentEmptyingTile);
+            
+            // Remove the current tile from locked tiles to unlock it
+            const updatedLockedTiles = state.flowState.lockedTiles.filter(tileId => tileId !== currentEmptyingTile);
+            
+            // Find the next tile in the flow sequence to empty
+            const currentPath = state.flowState.emptyingPaths.find(path => path.tileId === currentEmptyingTile);
+            let nextEmptyingTile = null;
+            
+            if (currentPath && currentPath.exitDirection) {
+              const nextTile = get().getNextTile(currentEmptyingTile, currentPath.exitDirection);
+              if (nextTile && state.flowState.emptyingPaths.some(path => path.tileId === nextTile.id)) {
+                nextEmptyingTile = nextTile.id;
+              }
+            }
+            
+            if (nextEmptyingTile) {
+              // Continue emptying to next tile
+              set({
+                flowState: {
+                  ...state.flowState,
+                  emptyingFromTile: nextEmptyingTile,
+                  lockedTiles: updatedLockedTiles,
+                  completedPaths: updatedCompletedPaths,
+                  progress: 0,
+                  phaseStartTime: currentTime
+                }
+              });
+            } else {
+              // Emptying complete - reset flow state
+              set({
+                flowState: {
+                  ...state.flowState,
+                  isActive: false,
+                  isEmptying: false,
+                  emptyingFromTile: undefined,
+                  lockedTiles: [],
+                  completedPaths: [],
+                  emptyingPaths: []
                 }
               });
             }
