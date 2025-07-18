@@ -99,6 +99,8 @@ export interface FlowState {
   progress: number; // 0 to 1, progress through current phase
   phaseStartTime: number; // When current phase started
   phaseDuration: number; // 1000ms per phase
+  lastPosition?: { x: number; y: number }; // Position where flow stopped (for blocked connections)
+  isBlocked?: boolean; // True if flow stopped due to incompatible connection
 }
 
 export interface ThrowableItem extends Rectangle {

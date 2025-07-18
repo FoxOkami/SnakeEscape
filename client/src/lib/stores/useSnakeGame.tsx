@@ -996,7 +996,9 @@ export const useSnakeGame = create<SnakeGameState>()(
           exitDirection: 'east',
           progress: 0,
           phaseStartTime: Date.now(),
-          phaseDuration: 1000 // 1 second per phase
+          phaseDuration: 1000, // 1 second per phase
+          lastPosition: undefined,
+          isBlocked: false
         }
       });
     },
@@ -1047,23 +1049,53 @@ export const useSnakeGame = create<SnakeGameState>()(
               const newEntryDirection = get().getOppositeDirection(state.flowState.exitDirection!);
               const newExitDirection = get().calculateExitDirection(nextTile.id, newEntryDirection);
               
-              set({
-                flowState: {
-                  ...state.flowState,
-                  currentTile: nextTile.id,
-                  currentPhase: 'entry-to-center',
-                  entryDirection: newEntryDirection,
-                  exitDirection: newExitDirection,
-                  progress: 0,
-                  phaseStartTime: currentTime
-                }
-              });
+              // Check if the next tile actually has a compatible direction
+              const nextTileDirections = get().getTileDirections(nextTile.id);
+              if (nextTileDirections.includes(newEntryDirection)) {
+                set({
+                  flowState: {
+                    ...state.flowState,
+                    currentTile: nextTile.id,
+                    currentPhase: 'entry-to-center',
+                    entryDirection: newEntryDirection,
+                    exitDirection: newExitDirection,
+                    progress: 0,
+                    phaseStartTime: currentTime
+                  }
+                });
+              } else {
+                // Flow blocked - incompatible connection
+                console.log("Flow blocked: next tile doesn't have compatible direction");
+                const currentTileObj = state.patternTiles.find(tile => tile.id === state.flowState.currentTile);
+                const lastPosition = currentTileObj ? {
+                  x: currentTileObj.x + currentTileObj.width / 2,
+                  y: currentTileObj.y + currentTileObj.height / 2
+                } : undefined;
+                
+                set({
+                  flowState: {
+                    ...state.flowState,
+                    isActive: false,
+                    lastPosition,
+                    isBlocked: true
+                  }
+                });
+              }
             } else {
-              // Flow ended unexpectedly
+              // Flow ended unexpectedly - no tile found
+              console.log("Flow ended: no next tile found");
+              const currentTileObj = state.patternTiles.find(tile => tile.id === state.flowState.currentTile);
+              const lastPosition = currentTileObj ? {
+                x: currentTileObj.x + currentTileObj.width / 2,
+                y: currentTileObj.y + currentTileObj.height / 2
+              } : undefined;
+              
               set({
                 flowState: {
                   ...state.flowState,
-                  isActive: false
+                  isActive: false,
+                  lastPosition,
+                  isBlocked: true
                 }
               });
             }
@@ -1238,6 +1270,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       console.log("Start tile:", startTileId);
       console.log("End tile:", endTileId);
       
+      // Always start flow visualization to show the attempted path
+      get().startFlow();
+      
       const visited = new Set<string>();
       const queue = [{ tileId: startTileId, entryDirection: null as null | 'north' | 'south' | 'east' | 'west' }];
       
@@ -1252,8 +1287,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Check if we reached the end
         if (tileId === endTileId) {
           console.log("✓ Path found! Connected successfully!");
-          // Start flow visualization
-          get().startFlow();
           return true;
         }
         

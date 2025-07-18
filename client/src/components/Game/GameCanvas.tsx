@@ -322,6 +322,39 @@ const GameCanvas: React.FC = () => {
         ctx.shadowBlur = 0;
       }
     }
+    
+    // Draw blocked flow indicator if flow stopped due to incompatible connection
+    if (flowState && !flowState.isActive && flowState.isBlocked && flowState.lastPosition) {
+      const { x, y } = flowState.lastPosition;
+      
+      // Draw red "X" to indicate blocked flow
+      ctx.strokeStyle = '#ff0000';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = '#ff0000';
+      ctx.shadowBlur = 8;
+      
+      // Draw X
+      ctx.beginPath();
+      ctx.moveTo(x - 8, y - 8);
+      ctx.lineTo(x + 8, y + 8);
+      ctx.moveTo(x + 8, y - 8);
+      ctx.lineTo(x - 8, y + 8);
+      ctx.stroke();
+      
+      // Draw pulsing circle around blocked position
+      const pulseTime = (Date.now() % 1000) / 1000; // 1-second pulse cycle
+      const pulseRadius = 15 + Math.sin(pulseTime * Math.PI * 2) * 5;
+      
+      ctx.strokeStyle = '#ff4444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, pulseRadius, 0, 2 * Math.PI);
+      ctx.stroke();
+      
+      // Reset shadow
+      ctx.shadowBlur = 0;
+    }
 
     // Draw throwable items
     throwableItems.forEach(item => {
