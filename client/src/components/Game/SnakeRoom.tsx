@@ -86,7 +86,7 @@ const SnakeRoom: React.FC = () => {
             const isConnected = checkPathConnection();
             if (isConnected) {
               setConnectionStatus("✓ Path is connected! Start and end tiles are linked.");
-              removeKeyWalls(); // Remove walls when path is connected
+              // Wall removal will happen when flow animation reaches the ending tile
             } else {
               setConnectionStatus("✗ Path is not connected. Keep rotating tiles to create a connection.");
             }
