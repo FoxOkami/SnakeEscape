@@ -256,7 +256,7 @@ const GameCanvas: React.FC = () => {
     if (flowState && currentLevel === 3) {
       // Set up neon green flow line
       ctx.strokeStyle = '#00ff00';
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 8;
       ctx.lineCap = 'round';
       ctx.shadowColor = '#00ff00';
       ctx.shadowBlur = 8;
@@ -317,7 +317,7 @@ const GameCanvas: React.FC = () => {
               // Use different colors for emptying vs filling
           const flowColor = flowState.isEmptying ? '#ffffff' : '#00ff00';
           ctx.strokeStyle = flowColor;
-          ctx.lineWidth = 3;
+          ctx.lineWidth = 6;
           ctx.shadowColor = flowColor;
           ctx.shadowBlur = 8;
 
@@ -342,7 +342,7 @@ const GameCanvas: React.FC = () => {
             ctx.fillStyle = flowColor;
             ctx.shadowBlur = 12;
             ctx.beginPath();
-            ctx.arc(currentX, currentY, 3, 0, 2 * Math.PI);
+            ctx.arc(currentX, currentY, 6, 0, 2 * Math.PI);
             ctx.fill();
             
           } else if (flowState.currentPhase === 'center-to-exit') {
@@ -371,7 +371,7 @@ const GameCanvas: React.FC = () => {
             ctx.fillStyle = flowColor;
             ctx.shadowBlur = 12;
             ctx.beginPath();
-            ctx.arc(currentX, currentY, 3, 0, 2 * Math.PI);
+            ctx.arc(currentX, currentY, 6, 0, 2 * Math.PI);
             ctx.fill();
           }
         }

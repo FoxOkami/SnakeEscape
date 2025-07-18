@@ -118,6 +118,7 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
+- July 18, 2025. Doubled pipe thickness in Level 4 - increased flow line width from 4px to 8px and active flow line width from 3px to 6px, plus enlarged glowing dots from 3px to 6px radius
 - July 18, 2025. Removed large green lines from start and end tiles in Level 4 - tiles now only show identifying circles (green for start, magenta for end)
 - July 18, 2025. Fixed blocked flow indicator to persist during emptying - pulsing circle and X now remain visible until emptying process is completely finished
 - July 18, 2025. Fixed emptying animation to preserve green pipes initially - pipes now remain visible when emptying starts and are gradually removed as animation progresses through each tile
