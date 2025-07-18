@@ -495,7 +495,6 @@ export const LEVELS: Level[] = [
 
           // Add custom graphics to row 3, column 0
           if (row === 3 && col === 0) {
-            const originalRadius = tileSize / 8; // Original radius for line thickness
             const circleRadius = (tileSize / 8) * 2; // Double the radius of the circle
             const centerX = x + tileSize / 2;
             const centerY = y + tileSize / 2;
@@ -507,20 +506,12 @@ export const LEVELS: Level[] = [
                 centerX: centerX,
                 centerY: centerY,
               },
-              line: {
-                startX: centerX,
-                startY: centerY,
-                endX: x + tileSize, // Extend to the right edge of the grid square
-                endY: centerY,
-                thickness: originalRadius * 2, // Keep original line thickness
-                color: "#00FF00", // Neon green
-              },
+              // Removed line graphics
             };
           }
 
           // Add custom graphics to row 6, column 7 (flipped Y axis and inverted colors)
           if (row === 6 && col === 7) {
-            const originalRadius = tileSize / 8; // Original radius for line thickness
             const circleRadius = (tileSize / 8) * 2; // Double the radius of the circle
             const centerX = x + tileSize / 2;
             const centerY = y + tileSize / 2;
@@ -532,14 +523,7 @@ export const LEVELS: Level[] = [
                 centerX: centerX,
                 centerY: centerY,
               },
-              line: {
-                startX: centerX,
-                startY: centerY,
-                endX: x + originalRadius, // Extend to left edge accounting for half the line thickness
-                endY: centerY,
-                thickness: originalRadius * 2, // Keep original line thickness
-                color: "#FF00FF", // Inverted color (magenta)
-              },
+              // Removed line graphics
             };
           }
 
