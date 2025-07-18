@@ -998,7 +998,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           phaseStartTime: Date.now(),
           phaseDuration: 1000, // 1 second per phase
           lastPosition: undefined,
-          isBlocked: false
+          isBlocked: false,
+          completedPaths: [] // Clear previous paths when starting new flow
         }
       });
     },
@@ -1034,12 +1035,20 @@ export const useSnakeGame = create<SnakeGameState>()(
         } else if (state.flowState.currentPhase === 'center-to-exit') {
           // Check if we're at the end tile
           if (state.flowState.currentTile === 'grid_tile_6_7') {
+            // Add final tile to completed paths
+            const finalPath = {
+              tileId: state.flowState.currentTile,
+              entryDirection: state.flowState.entryDirection,
+              exitDirection: state.flowState.exitDirection
+            };
+            
             // Flow completed successfully - remove key walls
             get().removeKeyWalls();
             set({
               flowState: {
                 ...state.flowState,
-                isActive: false
+                isActive: false,
+                completedPaths: [...state.flowState.completedPaths, finalPath]
               }
             });
           } else {
@@ -1052,6 +1061,13 @@ export const useSnakeGame = create<SnakeGameState>()(
               // Check if the next tile actually has a compatible direction
               const nextTileDirections = get().getTileDirections(nextTile.id);
               if (nextTileDirections.includes(newEntryDirection)) {
+                // Add current tile to completed paths
+                const completedPath = {
+                  tileId: state.flowState.currentTile,
+                  entryDirection: state.flowState.entryDirection,
+                  exitDirection: state.flowState.exitDirection
+                };
+                
                 set({
                   flowState: {
                     ...state.flowState,
@@ -1060,12 +1076,20 @@ export const useSnakeGame = create<SnakeGameState>()(
                     entryDirection: newEntryDirection,
                     exitDirection: newExitDirection,
                     progress: 0,
-                    phaseStartTime: currentTime
+                    phaseStartTime: currentTime,
+                    completedPaths: [...state.flowState.completedPaths, completedPath]
                   }
                 });
               } else {
                 // Flow blocked - incompatible connection
                 console.log("Flow blocked: next tile doesn't have compatible direction");
+                // Add current tile to completed paths before blocking
+                const completedPath = {
+                  tileId: state.flowState.currentTile,
+                  entryDirection: state.flowState.entryDirection,
+                  exitDirection: state.flowState.exitDirection
+                };
+                
                 // Show blocked indicator on the tile we couldn't reach
                 const blockedPosition = nextTile ? {
                   x: nextTile.x + nextTile.width / 2,
@@ -1077,13 +1101,21 @@ export const useSnakeGame = create<SnakeGameState>()(
                     ...state.flowState,
                     isActive: false,
                     lastPosition: blockedPosition,
-                    isBlocked: true
+                    isBlocked: true,
+                    completedPaths: [...state.flowState.completedPaths, completedPath]
                   }
                 });
               }
             } else {
               // Flow ended unexpectedly - no tile found (edge of grid)
               console.log("Flow ended: no next tile found");
+              // Add current tile to completed paths before ending
+              const completedPath = {
+                tileId: state.flowState.currentTile,
+                entryDirection: state.flowState.entryDirection,
+                exitDirection: state.flowState.exitDirection
+              };
+              
               // Calculate where the blocked tile would be based on exit direction
               const currentTileObj = state.patternTiles.find(tile => tile.id === state.flowState.currentTile);
               let blockedPosition;
@@ -1110,7 +1142,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                   ...state.flowState,
                   isActive: false,
                   lastPosition: blockedPosition,
-                  isBlocked: true
+                  isBlocked: true,
+                  completedPaths: [...state.flowState.completedPaths, completedPath]
                 }
               });
             }

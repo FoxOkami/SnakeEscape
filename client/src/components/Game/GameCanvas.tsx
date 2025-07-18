@@ -235,92 +235,120 @@ const GameCanvas: React.FC = () => {
     });
 
     // Draw flow visualization for Level 4
-    if (flowState && flowState.isActive && currentLevel === 3) {
-      // Find the current tile
-      const currentTile = patternTiles.find(tile => tile.id === flowState.currentTile);
-      if (currentTile) {
-        const centerX = currentTile.x + currentTile.width / 2;
-        const centerY = currentTile.y + currentTile.height / 2;
+    if (flowState && currentLevel === 3) {
+      // Set up neon green flow line
+      ctx.strokeStyle = '#00ff00';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = '#00ff00';
+      ctx.shadowBlur = 8;
+      
+      // Calculate entry and exit points for a tile
+      const getEdgePoint = (tile: any, direction: 'north' | 'south' | 'east' | 'west' | null) => {
+        if (!direction) return { x: tile.x + tile.width / 2, y: tile.y + tile.height / 2 };
         
-        // Set up neon green flow line
-        ctx.strokeStyle = '#00ff00';
-        ctx.lineWidth = 4;
-        ctx.lineCap = 'round';
-        ctx.shadowColor = '#00ff00';
-        ctx.shadowBlur = 8;
+        const centerX = tile.x + tile.width / 2;
+        const centerY = tile.y + tile.height / 2;
         
-        // Calculate entry and exit points
-        const getEdgePoint = (direction: 'north' | 'south' | 'east' | 'west' | null) => {
-          if (!direction) return { x: centerX, y: centerY };
-          
-          switch (direction) {
-            case 'north': return { x: centerX, y: currentTile.y };
-            case 'south': return { x: centerX, y: currentTile.y + currentTile.height };
-            case 'east': return { x: currentTile.x + currentTile.width, y: centerY };
-            case 'west': return { x: currentTile.x, y: centerY };
-          }
-        };
-        
-        const entryPoint = getEdgePoint(flowState.entryDirection);
-        const exitPoint = getEdgePoint(flowState.exitDirection);
-        
-        // Draw flow based on phase
-        if (flowState.currentPhase === 'entry-to-center') {
-          // Flow from entry to center
-          const startX = entryPoint.x;
-          const startY = entryPoint.y;
-          const endX = centerX;
-          const endY = centerY;
-          
-          // Interpolate position based on progress
-          const currentX = startX + (endX - startX) * flowState.progress;
-          const currentY = startY + (endY - startY) * flowState.progress;
-          
-          ctx.beginPath();
-          ctx.moveTo(startX, startY);
-          ctx.lineTo(currentX, currentY);
-          ctx.stroke();
-          
-          // Draw glowing dot at current position
-          ctx.fillStyle = '#00ff00';
-          ctx.shadowBlur = 12;
-          ctx.beginPath();
-          ctx.arc(currentX, currentY, 3, 0, 2 * Math.PI);
-          ctx.fill();
-          
-        } else if (flowState.currentPhase === 'center-to-exit') {
-          // Flow from center to exit
-          const startX = centerX;
-          const startY = centerY;
-          const endX = exitPoint.x;
-          const endY = exitPoint.y;
-          
-          // Draw entry line (already completed)
-          ctx.beginPath();
-          ctx.moveTo(entryPoint.x, entryPoint.y);
-          ctx.lineTo(centerX, centerY);
-          ctx.stroke();
-          
-          // Interpolate position based on progress
-          const currentX = startX + (endX - startX) * flowState.progress;
-          const currentY = startY + (endY - startY) * flowState.progress;
-          
-          ctx.beginPath();
-          ctx.moveTo(startX, startY);
-          ctx.lineTo(currentX, currentY);
-          ctx.stroke();
-          
-          // Draw glowing dot at current position
-          ctx.fillStyle = '#00ff00';
-          ctx.shadowBlur = 12;
-          ctx.beginPath();
-          ctx.arc(currentX, currentY, 3, 0, 2 * Math.PI);
-          ctx.fill();
+        switch (direction) {
+          case 'north': return { x: centerX, y: tile.y };
+          case 'south': return { x: centerX, y: tile.y + tile.height };
+          case 'east': return { x: tile.x + tile.width, y: centerY };
+          case 'west': return { x: tile.x, y: centerY };
         }
+      };
+      
+      // Draw all completed paths
+      flowState.completedPaths.forEach(path => {
+        const tile = patternTiles.find(t => t.id === path.tileId);
+        if (!tile) return;
         
-        // Reset shadow
-        ctx.shadowBlur = 0;
+        const centerX = tile.x + tile.width / 2;
+        const centerY = tile.y + tile.height / 2;
+        const entryPoint = getEdgePoint(tile, path.entryDirection);
+        const exitPoint = getEdgePoint(tile, path.exitDirection);
+        
+        // Draw entry to center
+        ctx.beginPath();
+        ctx.moveTo(entryPoint.x, entryPoint.y);
+        ctx.lineTo(centerX, centerY);
+        ctx.stroke();
+        
+        // Draw center to exit
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(exitPoint.x, exitPoint.y);
+        ctx.stroke();
+      });
+      
+      // Draw current active flow if still flowing
+      if (flowState.isActive) {
+        const currentTile = patternTiles.find(tile => tile.id === flowState.currentTile);
+        if (currentTile) {
+          const centerX = currentTile.x + currentTile.width / 2;
+          const centerY = currentTile.y + currentTile.height / 2;
+          
+          const entryPoint = getEdgePoint(currentTile, flowState.entryDirection);
+          const exitPoint = getEdgePoint(currentTile, flowState.exitDirection);
+          
+          // Draw flow based on phase
+          if (flowState.currentPhase === 'entry-to-center') {
+            // Flow from entry to center
+            const startX = entryPoint.x;
+            const startY = entryPoint.y;
+            const endX = centerX;
+            const endY = centerY;
+            
+            // Interpolate position based on progress
+            const currentX = startX + (endX - startX) * flowState.progress;
+            const currentY = startY + (endY - startY) * flowState.progress;
+            
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(currentX, currentY);
+            ctx.stroke();
+            
+            // Draw glowing dot at current position
+            ctx.fillStyle = '#00ff00';
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(currentX, currentY, 3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+          } else if (flowState.currentPhase === 'center-to-exit') {
+            // Flow from center to exit
+            const startX = centerX;
+            const startY = centerY;
+            const endX = exitPoint.x;
+            const endY = exitPoint.y;
+            
+            // Draw entry line (already completed)
+            ctx.beginPath();
+            ctx.moveTo(entryPoint.x, entryPoint.y);
+            ctx.lineTo(centerX, centerY);
+            ctx.stroke();
+            
+            // Interpolate position based on progress
+            const currentX = startX + (endX - startX) * flowState.progress;
+            const currentY = startY + (endY - startY) * flowState.progress;
+            
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(currentX, currentY);
+            ctx.stroke();
+            
+            // Draw glowing dot at current position
+            ctx.fillStyle = '#00ff00';
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(currentX, currentY, 3, 0, 2 * Math.PI);
+            ctx.fill();
+          }
+        }
       }
+      
+      // Reset shadow
+      ctx.shadowBlur = 0;
     }
     
     // Draw blocked flow indicator if flow stopped due to incompatible connection
