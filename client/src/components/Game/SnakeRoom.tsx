@@ -5,7 +5,7 @@ import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
 
 const SnakeRoom: React.FC = () => {
-  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource, rotateTile, checkPathConnection, setConnectionStatus, removeKeyWalls } = useSnakeGame();
+  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource, rotateTile, checkPathConnection, removeKeyWalls } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } = useAudio();
 
 
@@ -87,13 +87,7 @@ const SnakeRoom: React.FC = () => {
           const startTileId = startTilePos ? `grid_tile_${startTilePos.row}_${startTilePos.col}` : 'grid_tile_3_0';
           
           if (currentTile && currentTile.id === startTileId) {
-            const isConnected = checkPathConnection();
-            if (isConnected) {
-              setConnectionStatus("✓ Path is connected! Start and end tiles are linked.");
-              // Wall removal will happen when flow animation reaches the ending tile
-            } else {
-              setConnectionStatus("✗ Path is not connected. Keep rotating tiles to create a connection.");
-            }
+            checkPathConnection();
             return; // Don't rotate the start tile
           }
           

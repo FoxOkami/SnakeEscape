@@ -17,8 +17,7 @@ const GameUI: React.FC = () => {
     nextLevel,
     returnToMenu,
     isWalking,
-    carriedItem,
-    connectionStatus
+    carriedItem
   } = useSnakeGame();
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
@@ -289,17 +288,6 @@ const GameUI: React.FC = () => {
       {gameState === 'levelComplete' && renderLevelComplete()}
       {gameState === 'victory' && renderVictory()}
       {gameState === 'playing' && renderGameHUD()}
-      
-      {/* Connection Status Display */}
-      {connectionStatus && gameState === 'playing' && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-20">
-          <div className={`px-4 py-2 rounded-lg text-white text-center font-semibold shadow-lg ${
-            connectionStatus.startsWith('✓') ? 'bg-green-600' : 'bg-red-600'
-          }`}>
-            {connectionStatus}
-          </div>
-        </div>
-      )}
     </>
   );
 };

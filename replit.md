@@ -118,6 +118,7 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
+- July 18, 2025. Removed connection status banner from Level 4 - no more pop-up message appears after initiating pipe flow
 - July 18, 2025. Added screensaver snake to Level 4 - snake moves randomly in cardinal directions, bounces off walls, and has teal appearance with grid pattern
 - July 18, 2025. Added randomization to Level 4 start and end tile positions - tiles now spawn on random rows but stay in first and last columns
 - July 18, 2025. Removed 500ms delay from wall removal after flow completion on Level 4 - walls now removed immediately when animation reaches ending tile
