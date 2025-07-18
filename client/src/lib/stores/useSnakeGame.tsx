@@ -1039,8 +1039,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         } else if (state.flowState.currentPhase === 'center-to-exit') {
           // Handle emptying mode or regular flow
           if (state.flowState.isEmptying) {
-            // Emptying mode: remove the current tile from locked tiles and move to next
+            // Emptying mode: remove the current tile from locked tiles and completed paths
             const newLockedTiles = state.flowState.lockedTiles.filter(tileId => tileId !== state.flowState.currentTile);
+            const newCompletedPaths = state.flowState.completedPaths.filter(path => path.tileId !== state.flowState.currentTile);
             
             // Find next tile in emptying path
             const currentPath = state.flowState.emptyingPaths.find(path => path.tileId === state.flowState.currentTile);
@@ -1059,7 +1060,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                     currentPhase: 'entry-to-center',
                     progress: 0,
                     phaseStartTime: currentTime,
-                    lockedTiles: newLockedTiles
+                    lockedTiles: newLockedTiles,
+                    completedPaths: newCompletedPaths
                   }
                 });
               } else {
@@ -1138,7 +1140,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                     phaseStartTime: Date.now(),
                     phaseDuration: 800,
                     emptyingPaths: allPaths,
-                    completedPaths: []
+                    completedPaths: allPaths // Keep completed paths initially, remove as emptying progresses
                   }
                 });
               }
@@ -1225,7 +1227,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                         phaseStartTime: Date.now(),
                         phaseDuration: 800,
                         emptyingPaths: allPaths,
-                        completedPaths: []
+                        completedPaths: allPaths // Keep completed paths initially, remove as emptying progresses
                         // Keep isBlocked and lastPosition to show indicator during emptying
                       }
                     });
@@ -1296,7 +1298,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                       phaseStartTime: Date.now(),
                       phaseDuration: 800,
                       emptyingPaths: allPaths,
-                      completedPaths: []
+                      completedPaths: allPaths // Keep completed paths initially, remove as emptying progresses
                       // Keep isBlocked and lastPosition to show indicator during emptying
                     }
                   });
