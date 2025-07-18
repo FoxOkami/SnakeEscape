@@ -987,6 +987,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.currentLevel !== 3) return; // Only on level 4 (0-indexed)
       
+      // Immediately add the starting tile to completed paths to lock it
+      const startTilePath = {
+        tileId: 'grid_tile_3_0',
+        entryDirection: null,
+        exitDirection: 'east'
+      };
+      
       set({
         flowState: {
           isActive: true,
@@ -999,7 +1006,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           phaseDuration: 1000, // 1 second per phase
           lastPosition: undefined,
           isBlocked: false,
-          completedPaths: [] // Clear previous paths when starting new flow
+          completedPaths: [startTilePath] // Start with the starting tile already locked
         }
       });
     },
@@ -1061,11 +1068,18 @@ export const useSnakeGame = create<SnakeGameState>()(
               // Check if the next tile actually has a compatible direction
               const nextTileDirections = get().getTileDirections(nextTile.id);
               if (nextTileDirections.includes(newEntryDirection)) {
-                // Add current tile to completed paths
-                const completedPath = {
+                // Add current tile to completed paths when exiting
+                const currentCompletedPath = {
                   tileId: state.flowState.currentTile,
                   entryDirection: state.flowState.entryDirection,
                   exitDirection: state.flowState.exitDirection
+                };
+                
+                // Immediately add next tile to completed paths when entering it
+                const nextCompletedPath = {
+                  tileId: nextTile.id,
+                  entryDirection: newEntryDirection,
+                  exitDirection: newExitDirection
                 };
                 
                 set({
@@ -1077,7 +1091,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                     exitDirection: newExitDirection,
                     progress: 0,
                     phaseStartTime: currentTime,
-                    completedPaths: [...state.flowState.completedPaths, completedPath]
+                    completedPaths: [...state.flowState.completedPaths, currentCompletedPath, nextCompletedPath]
                   }
                 });
               } else {
