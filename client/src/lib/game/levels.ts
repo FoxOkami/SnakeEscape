@@ -459,7 +459,22 @@ export const LEVELS: Level[] = [
       { x: 660, y: 50, width: 20, height: 70 }, // left wall
       { x: 740, y: 50, width: 20, height: 70 }, // right wall
     ],
-    snakes: [], // No snakes
+    snakes: [
+      {
+        id: "screensaver1",
+        type: "screensaver" as const,
+        position: { x: 200, y: 150 }, // Position in the open area
+        size: { width: 30, height: 30 },
+        speed: 100,
+        direction: { x: 1, y: 0 }, // Start moving east
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+      },
+    ],
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
     key: { x: 700, y: 80, width: 20, height: 20, collected: false },
     // 8x8 centered tile grid for visual appeal (non-interactive)
