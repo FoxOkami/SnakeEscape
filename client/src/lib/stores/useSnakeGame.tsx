@@ -1066,35 +1066,50 @@ export const useSnakeGame = create<SnakeGameState>()(
               } else {
                 // Flow blocked - incompatible connection
                 console.log("Flow blocked: next tile doesn't have compatible direction");
-                const currentTileObj = state.patternTiles.find(tile => tile.id === state.flowState.currentTile);
-                const lastPosition = currentTileObj ? {
-                  x: currentTileObj.x + currentTileObj.width / 2,
-                  y: currentTileObj.y + currentTileObj.height / 2
+                // Show blocked indicator on the tile we couldn't reach
+                const blockedPosition = nextTile ? {
+                  x: nextTile.x + nextTile.width / 2,
+                  y: nextTile.y + nextTile.height / 2
                 } : undefined;
                 
                 set({
                   flowState: {
                     ...state.flowState,
                     isActive: false,
-                    lastPosition,
+                    lastPosition: blockedPosition,
                     isBlocked: true
                   }
                 });
               }
             } else {
-              // Flow ended unexpectedly - no tile found
+              // Flow ended unexpectedly - no tile found (edge of grid)
               console.log("Flow ended: no next tile found");
+              // Calculate where the blocked tile would be based on exit direction
               const currentTileObj = state.patternTiles.find(tile => tile.id === state.flowState.currentTile);
-              const lastPosition = currentTileObj ? {
-                x: currentTileObj.x + currentTileObj.width / 2,
-                y: currentTileObj.y + currentTileObj.height / 2
-              } : undefined;
+              let blockedPosition;
+              
+              if (currentTileObj && state.flowState.exitDirection) {
+                const tileSize = 60; // Based on Level 4 tile size
+                let offsetX = 0, offsetY = 0;
+                
+                switch (state.flowState.exitDirection) {
+                  case 'north': offsetY = -tileSize; break;
+                  case 'south': offsetY = tileSize; break;
+                  case 'east': offsetX = tileSize; break;
+                  case 'west': offsetX = -tileSize; break;
+                }
+                
+                blockedPosition = {
+                  x: currentTileObj.x + currentTileObj.width / 2 + offsetX,
+                  y: currentTileObj.y + currentTileObj.height / 2 + offsetY
+                };
+              }
               
               set({
                 flowState: {
                   ...state.flowState,
                   isActive: false,
-                  lastPosition,
+                  lastPosition: blockedPosition,
                   isBlocked: true
                 }
               });
