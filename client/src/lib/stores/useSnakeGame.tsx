@@ -1153,7 +1153,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                         emptyingFromTile: 'grid_tile_3_0', // Start emptying from the beginning
                         progress: 0,
                         phaseStartTime: Date.now(),
-                        phaseDuration: 800, // Faster emptying animation
+                        phaseDuration: 1200, // Slower emptying animation to match filling speed
                         emptyingPaths: allPaths,
                         completedPaths: allPaths
                         // Keep isBlocked and lastPosition to show indicator during emptying
@@ -1222,7 +1222,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                       emptyingFromTile: 'grid_tile_3_0', // Start emptying from the beginning
                       progress: 0,
                       phaseStartTime: Date.now(),
-                      phaseDuration: 800, // Faster emptying animation
+                      phaseDuration: 1200, // Slower emptying animation to match filling speed
                       emptyingPaths: allPaths,
                       completedPaths: allPaths
                       // Keep isBlocked and lastPosition to show indicator during emptying

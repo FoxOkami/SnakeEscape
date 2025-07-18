@@ -367,37 +367,69 @@ const GameCanvas: React.FC = () => {
             ctx.arc(currentX, currentY, 3, 0, 2 * Math.PI);
             ctx.fill();
           } else if (flowState.currentPhase === 'emptying') {
-            // Emptying animation - flow gradually disappears from exit to entry
-            const reverseProgress = 1.0 - flowState.progress; // 1.0 = full, 0.0 = empty
+            // Emptying animation - flow gradually drains from exit back to entry
+            const emptyProgress = flowState.progress; // 0.0 = full, 1.0 = empty
             
-            // Draw entry line (fading based on progress)
-            const entryOpacity = reverseProgress;
-            ctx.strokeStyle = `rgba(0, 255, 0, ${entryOpacity})`;
-            ctx.shadowColor = `rgba(0, 255, 0, ${entryOpacity})`;
-            
-            if (reverseProgress > 0) {
+            // Phase 1: Drain exit line first (0.0 to 0.5)
+            if (emptyProgress < 0.5) {
+              const exitDrainProgress = emptyProgress * 2; // 0 to 1 over first half
+              
+              // Draw full entry line
+              ctx.strokeStyle = '#00ff00';
+              ctx.shadowColor = '#00ff00';
               ctx.beginPath();
               ctx.moveTo(entryPoint.x, entryPoint.y);
               ctx.lineTo(centerX, centerY);
               ctx.stroke();
+              
+              // Draw partially draining exit line
+              const startX = centerX;
+              const startY = centerY;
+              const endX = exitPoint.x;
+              const endY = exitPoint.y;
+              
+              // Draw remaining part of exit line (shrinking from exit toward center)
+              const remainingProgress = 1.0 - exitDrainProgress;
+              const currentX = endX - (endX - startX) * (1.0 - remainingProgress);
+              const currentY = endY - (endY - startY) * (1.0 - remainingProgress);
+              
+              if (remainingProgress > 0) {
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+              }
+            } 
+            // Phase 2: Drain entry line (0.5 to 1.0)
+            else {
+              const entryDrainProgress = (emptyProgress - 0.5) * 2; // 0 to 1 over second half
+              
+              // Draw partially draining entry line
+              const startX = entryPoint.x;
+              const startY = entryPoint.y;
+              const endX = centerX;
+              const endY = centerY;
+              
+              // Draw remaining part of entry line (shrinking from entry toward center)
+              const remainingProgress = 1.0 - entryDrainProgress;
+              const currentX = startX + (endX - startX) * remainingProgress;
+              const currentY = startY + (endY - startY) * remainingProgress;
+              
+              if (remainingProgress > 0) {
+                ctx.strokeStyle = '#00ff00';
+                ctx.shadowColor = '#00ff00';
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+              }
             }
             
-            // Draw exit line (fading based on progress)
-            const exitOpacity = Math.max(0, reverseProgress);
-            ctx.strokeStyle = `rgba(0, 255, 0, ${exitOpacity})`;
-            ctx.shadowColor = `rgba(0, 255, 0, ${exitOpacity})`;
-            
-            if (reverseProgress > 0) {
-              ctx.beginPath();
-              ctx.moveTo(centerX, centerY);
-              ctx.lineTo(exitPoint.x, exitPoint.y);
-              ctx.stroke();
-            }
-            
-            // Draw fading glowing dot at center
-            if (reverseProgress > 0) {
-              ctx.fillStyle = `rgba(0, 255, 0, ${reverseProgress})`;
-              ctx.shadowBlur = 12 * reverseProgress;
+            // Draw fading glowing dot at center (fades out completely)
+            const centerOpacity = Math.max(0, 1.0 - emptyProgress);
+            if (centerOpacity > 0) {
+              ctx.fillStyle = `rgba(0, 255, 0, ${centerOpacity})`;
+              ctx.shadowBlur = 12 * centerOpacity;
               ctx.beginPath();
               ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
               ctx.fill();
