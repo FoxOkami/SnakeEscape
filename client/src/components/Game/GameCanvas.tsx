@@ -125,9 +125,18 @@ const GameCanvas: React.FC = () => {
       
       ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
       
+      // Check if this tile is locked (has flow passed through it)
+      const isLockedTile = flowState && flowState.completedPaths.some(path => path.tileId === tile.id);
+      
       // Add highlight overlay for rotatable tiles with 20% opacity
       if (currentTile && currentTile.id === tile.id && currentTile.id !== 'grid_tile_3_0' && currentTile.id !== 'grid_tile_6_7') {
-        ctx.fillStyle = 'rgba(173, 216, 230, 0.2)'; // Light blue with 20% opacity
+        if (isLockedTile) {
+          // Red overlay for locked tiles
+          ctx.fillStyle = 'rgba(255, 99, 99, 0.3)'; // Light red with 30% opacity
+        } else {
+          // Light blue overlay for rotatable tiles
+          ctx.fillStyle = 'rgba(173, 216, 230, 0.2)'; // Light blue with 20% opacity
+        }
         ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
       }
       
@@ -230,6 +239,15 @@ const GameCanvas: React.FC = () => {
         visibleMarkers.forEach(marker => {
           ctx.fillText(marker.letter, marker.x, marker.y);
         });
+        
+        // Draw lock icon for locked tiles
+        if (isLockedTile) {
+          ctx.fillStyle = '#ff6666';
+          ctx.font = '16px Arial';
+          ctx.textAlign = 'center';
+          // Draw lock emoji/symbol
+          ctx.fillText('🔒', centerX, tile.y + 15);
+        }
       }
 
     });

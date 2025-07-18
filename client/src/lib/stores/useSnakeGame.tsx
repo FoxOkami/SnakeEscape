@@ -1292,6 +1292,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
       
+      // Check if this tile has been part of any flow path and lock it
+      if (state.flowState && state.flowState.completedPaths.some(path => path.tileId === currentTile.id)) {
+        console.log(`Tile ${currentTile.id} is locked - flow has passed through it`);
+        get().setConnectionStatus("⚠️ Tile is locked! Flow has already passed through this pipe.");
+        return; // Tile is locked, cannot rotate
+      }
+      
       // Calculate new rotation
       const rotationChange = direction === 'left' ? -90 : 90;
       const newRotation = ((currentTile.rotation || 0) + rotationChange + 360) % 360;
