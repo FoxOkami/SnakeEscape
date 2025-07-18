@@ -1227,8 +1227,10 @@ export const useSnakeGame = create<SnakeGameState>()(
                         phaseStartTime: Date.now(),
                         phaseDuration: 800,
                         emptyingPaths: allPaths,
-                        completedPaths: allPaths // Keep completed paths initially, remove as emptying progresses
-                        // Keep isBlocked and lastPosition to show indicator during emptying
+                        completedPaths: allPaths, // Keep completed paths initially, remove as emptying progresses
+                        // Preserve blocked state during emptying
+                        isBlocked: currentState.flowState.isBlocked,
+                        lastPosition: currentState.flowState.lastPosition
                       }
                     });
                   }
@@ -1298,8 +1300,10 @@ export const useSnakeGame = create<SnakeGameState>()(
                       phaseStartTime: Date.now(),
                       phaseDuration: 800,
                       emptyingPaths: allPaths,
-                      completedPaths: allPaths // Keep completed paths initially, remove as emptying progresses
-                      // Keep isBlocked and lastPosition to show indicator during emptying
+                      completedPaths: allPaths, // Keep completed paths initially, remove as emptying progresses
+                      // Preserve blocked state during emptying
+                      isBlocked: currentState.flowState.isBlocked,
+                      lastPosition: currentState.flowState.lastPosition
                     }
                   });
                 }
