@@ -1114,7 +1114,8 @@ export const useSnakeGame = create<SnakeGameState>()(
               exitDirection: state.flowState.exitDirection
             };
             
-            // Flow completed successfully - remove key walls and start emptying
+            // Flow completed successfully - the fill animation has now completed at the ending tile
+            // Remove key walls now that the animation has fully filled the ending tile
             get().removeKeyWalls();
             
             // Wait 2 seconds before starting emptying process

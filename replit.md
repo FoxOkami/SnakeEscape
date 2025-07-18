@@ -118,6 +118,8 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
+- July 18, 2025. Added screensaver snake to Level 4 - snake moves randomly in cardinal directions, bounces off walls, and has teal appearance with grid pattern
+- July 18, 2025. Fixed key chamber wall removal timing - walls now only removed when fill animation completes at ending tile, not when flow logic reaches ending tile
 - July 18, 2025. Cleaned up Level 4 interface - removed letters from tiles (N, S, E, W), removed lock icons from locked tiles, removed all console.log statements, and added "E to start" tip that appears over player when positioned on start tile
 - July 18, 2025. Reverted filled pipes to use rounded line endings - changed lineCap back to 'round' for flow lines, active flow, and blocked flow indicators
 - July 18, 2025. Made filled pipes same size as unfilled pipes - reduced main flow line width from 8px to 6px to match tile directional lines
