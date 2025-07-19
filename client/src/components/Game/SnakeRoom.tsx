@@ -89,8 +89,8 @@ const SnakeRoom: React.FC = () => {
           if (currentTile && currentTile.id === startTileId) {
             // Check if flow is already active (filling or emptying)
             const currentFlowState = gameState_current.flowState;
-            if (currentFlowState && currentFlowState.isActive) {
-              return; // Don't start new flow while current one is active
+            if (currentFlowState && (currentFlowState.isActive || currentFlowState.isEmptying)) {
+              return; // Don't start new flow while current one is active or emptying
             }
             
             checkPathConnection();
