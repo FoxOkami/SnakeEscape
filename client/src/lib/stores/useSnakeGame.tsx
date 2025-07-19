@@ -1627,6 +1627,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       const currentTime = Date.now();
       
+      // Debug: log projectile count at start
+      if (state.projectiles.length > 0) {
+        console.log(`Updating ${state.projectiles.length} projectiles`);
+      }
+      
       // Update projectile positions and remove expired ones
       const updatedProjectiles = state.projectiles.filter(projectile => {
         const age = currentTime - projectile.createdAt;
@@ -1654,6 +1659,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             { ...projectile.position, ...projectile.size },
             wall
           )) {
+            console.log(`Projectile ${projectile.id} hit wall at (${wall.x}, ${wall.y})`);
             return false; // Remove projectile on wall collision
           }
         }
@@ -1665,7 +1671,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       const updatedSnakes = state.snakes.map(snake => {
         if (snake.type === 'spitter' && snake.lastFireTime && snake.fireInterval) {
           const timeSinceLastFire = currentTime - snake.lastFireTime;
-          console.log(`Spitter snake ${snake.id}: timeSinceLastFire=${timeSinceLastFire}, fireInterval=${snake.fireInterval}`);
+          
+          // Only log every second to avoid spam
+          if (Math.floor(timeSinceLastFire / 1000) !== Math.floor((timeSinceLastFire - 100) / 1000)) {
+            console.log(`Spitter snake ${snake.id}: timeSinceLastFire=${timeSinceLastFire}ms, fireInterval=${snake.fireInterval}ms`);
+          }
           
           if (timeSinceLastFire >= snake.fireInterval) {
             console.log(`Spitter snake ${snake.id} firing projectiles!`);
@@ -1718,7 +1728,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       console.log(`fireProjectiles called for ${snakeId}, snake found:`, !!snake, snake?.type);
       if (!snake || snake.type !== 'spitter') return;
       
-      const projectileSpeed = 0.15; // pixels per ms
+      const projectileSpeed = 0.3; // pixels per ms - increased from 0.15
       const projectileSize = { width: 6, height: 6 };
       const lifespan = 5000; // 5 seconds
       
