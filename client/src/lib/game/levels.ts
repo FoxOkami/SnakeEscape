@@ -505,24 +505,6 @@ export const LEVELS: Level[] = [
           
           return [
             {
-              id: "plumber1",
-              type: "plumber" as const,
-              position: calculateTileCenter(endRow, endCol), // Ending tile
-              size: { width: 25, height: 25 },
-              speed: 80,
-              direction: { x: -1, y: 0 }, // Start moving west
-              patrolPoints: [],
-              currentPatrolIndex: 0,
-              patrolDirection: 1,
-              chaseSpeed: 0,
-              sightRange: 0,
-              isChasing: false,
-              currentTileId: undefined,
-              entryDirection: undefined,
-              tilesEntered: 0,
-              tileToRotate: undefined,
-            },
-            {
               id: "plumber2",
               type: "plumber" as const,
               position: calculateTileCenter(1, 1), // Grid position (1,1)
@@ -537,7 +519,7 @@ export const LEVELS: Level[] = [
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
-              tilesEntered: 0,
+              nextRotationTime: performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
               tileToRotate: undefined,
             },
             {
@@ -555,7 +537,7 @@ export const LEVELS: Level[] = [
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
-              tilesEntered: 0,
+              nextRotationTime: performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
               tileToRotate: undefined,
             },
             {
@@ -573,7 +555,7 @@ export const LEVELS: Level[] = [
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
-              tilesEntered: 0,
+              nextRotationTime: performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
               tileToRotate: undefined,
             },
             {
@@ -591,7 +573,7 @@ export const LEVELS: Level[] = [
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
-              tilesEntered: 0,
+              nextRotationTime: performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
               tileToRotate: undefined,
             },
           ];

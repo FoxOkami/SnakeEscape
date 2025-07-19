@@ -469,15 +469,13 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   const shouldPickNewDirection = snake.currentTileId !== currentTile.id || distanceToCenter < 10;
   
   if (shouldPickNewDirection) {
-    // Track tiles entered for rotation trigger
-    if (snake.currentTileId !== currentTile.id) {
-      snake.tilesEntered = (snake.tilesEntered || 0) + 1;
-      
-      // Rotate tile every 5th entry
-      if (snake.tilesEntered % 5 === 0) {
-        // Mark the tile for rotation (will be handled by game store)
-        snake.tileToRotate = currentTile.id;
-      }
+    // Check for time-based rotation trigger
+    const currentTime = performance.now() / 1000;
+    if (snake.nextRotationTime && currentTime >= snake.nextRotationTime) {
+      // Mark the current tile for rotation
+      snake.tileToRotate = currentTile.id;
+      // Set next rotation time (4-6 seconds from now)
+      snake.nextRotationTime = currentTime + 4 + Math.random() * 2;
     }
     
     snake.currentTileId = currentTile.id;
