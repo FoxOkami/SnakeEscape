@@ -455,7 +455,7 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     return snake;
   }
   
-  // Check if we need to pick a new direction (first time on tile or reached center)
+  // Check if we need to pick a new direction (reached center or no direction set)
   const tileCenter = {
     x: currentTile.x + currentTile.width / 2,
     y: currentTile.y + currentTile.height / 2
@@ -467,6 +467,9 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   
   const distanceToCenter = getDistance(snakeCenter, tileCenter);
   const hasEnteredNewTile = snake.currentTileId !== currentTile.id;
+  
+  // Check if snake has reached the center of the tile (within a small threshold)
+  const hasReachedCenter = distanceToCenter < 5; // 5 pixel threshold
   
   // Check if current direction has an available outlet
   const currentDirectionBlocked = (() => {
@@ -483,9 +486,17 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     return !availableDirections.includes(currentDirectionName);
   })();
   
-  const shouldPickNewDirection = hasEnteredNewTile || currentDirectionBlocked;
+  // Only pick new direction when reached center, not immediately upon entering tile
+  const shouldPickNewDirection = (hasEnteredNewTile && hasReachedCenter) || currentDirectionBlocked;
   
-  if (shouldPickNewDirection) {
+  // If we've entered a new tile but haven't reached center, head to center first
+  if (hasEnteredNewTile && !hasReachedCenter) {
+    snake.currentTileId = currentTile.id;
+    snake.chaseTarget = {
+      x: tileCenter.x - snake.size.width / 2,
+      y: tileCenter.y - snake.size.height / 2
+    };
+  } else if (shouldPickNewDirection) {
     // Check for time-based rotation trigger
     const currentTime = performance.now() / 1000;
     if (snake.nextRotationTime && currentTime >= snake.nextRotationTime) {
