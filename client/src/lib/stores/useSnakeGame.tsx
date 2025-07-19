@@ -1145,7 +1145,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             // Flow completed successfully - remove key walls immediately when animation reaches ending tile
             get().removeKeyWalls();
             
-            // Wait 2 seconds before starting emptying process
+            // Wait 500ms before starting emptying process
             setTimeout(() => {
               const currentState = get();
               if (currentState.flowState) {
@@ -1171,7 +1171,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                   }
                 });
               }
-            }, 2000);
+            }, 500);
             
             set({
               flowState: {
@@ -1231,7 +1231,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                   y: nextTile.y + nextTile.height / 2
                 } : undefined;
                 
-                // Wait 2 seconds before starting emptying process for blocked flow
+                // Wait 500ms before starting emptying process for blocked flow
                 setTimeout(() => {
                   const currentState = get();
                   if (currentState.flowState) {
@@ -1260,7 +1260,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                       }
                     });
                   }
-                }, 2000);
+                }, 500);
                 
                 set({
                   flowState: {
@@ -1303,7 +1303,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                 };
               }
               
-              // Wait 2 seconds before starting emptying process for edge-blocked flow
+              // Wait 500ms before starting emptying process for edge-blocked flow
               setTimeout(() => {
                 const currentState = get();
                 if (currentState.flowState) {
@@ -1332,7 +1332,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                     }
                   });
                 }
-              }, 2000);
+              }, 500);
               
               set({
                 flowState: {
