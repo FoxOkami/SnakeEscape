@@ -489,8 +489,8 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   const currentTime = performance.now() / 1000;
   
   // Handle pause logic when reaching center
-  if (hasReachedCenter && !snake.isPaused && !currentDirectionBlocked) {
-    // Start pause when reaching center
+  if (hasReachedCenter && !snake.isPaused && hasEnteredNewTile) {
+    // Start pause when reaching center of a new tile
     snake.isPaused = true;
     snake.pauseStartTime = currentTime;
     snake.chaseTarget = undefined; // Stop moving
@@ -500,8 +500,8 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   // Check if pause is complete
   const pauseComplete = snake.isPaused && snake.pauseStartTime && (currentTime - snake.pauseStartTime >= 0.1); // 100ms pause
   
-  // Only pick new direction when pause is complete or direction is blocked
-  const shouldPickNewDirection = (hasEnteredNewTile && pauseComplete) || currentDirectionBlocked;
+  // Pick new direction when pause is complete or when direction is blocked (initial state)
+  const shouldPickNewDirection = pauseComplete || currentDirectionBlocked;
   
   // If we've entered a new tile but haven't reached center, head to center first
   if (hasEnteredNewTile && !hasReachedCenter) {
