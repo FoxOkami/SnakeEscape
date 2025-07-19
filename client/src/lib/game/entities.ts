@@ -401,17 +401,15 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
 function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, gameState?: any): Snake {
   // Check if we have the required game state
   if (!gameState || !gameState.patternTiles || !gameState.getTileDirections) {
-    console.log('Plumber: Missing game state', { gameState: !!gameState, patternTiles: !!gameState?.patternTiles, getTileDirections: !!gameState?.getTileDirections });
     return snake; // No game state available
   }
   
   // Only move on pipe tiles in level 4
   if (gameState.currentLevel !== 3) {
-    console.log('Plumber: Not on level 4, current level:', gameState.currentLevel);
     return snake; // Level 4 is 0-indexed as 3
   }
   
-  console.log('Plumber: Starting update, position:', snake.position);
+
   
   // Find current tile the snake is on
   const currentTile = gameState.patternTiles.find(tile => {
@@ -457,103 +455,98 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     return snake;
   }
   
-  // Update current tile tracking
-  if (snake.currentTileId !== currentTile.id) {
-    snake.currentTileId = currentTile.id;
-    
-    // Determine entry direction based on previous position
-    const tileCenter = {
-      x: currentTile.x + currentTile.width / 2,
-      y: currentTile.y + currentTile.height / 2
-    };
-    const snakeCenter = {
-      x: snake.position.x + snake.size.width / 2,
-      y: snake.position.y + snake.size.height / 2
-    };
-    
-    // Calculate which edge the snake entered from
-    const dx = snakeCenter.x - tileCenter.x;
-    const dy = snakeCenter.y - tileCenter.y;
-    const absDx = Math.abs(dx);
-    const absDy = Math.abs(dy);
-    
-    if (absDx > absDy) {
-      snake.entryDirection = dx > 0 ? 'west' : 'east';
-    } else {
-      snake.entryDirection = dy > 0 ? 'north' : 'south';
-    }
-  }
-  
-  // Get available directions for current tile
-  const availableDirections = gameState.getTileDirections(currentTile.id);
-  
-  // Remove entry direction to prevent backtracking
-  const validDirections = availableDirections.filter(dir => dir !== snake.entryDirection);
-  
-  if (validDirections.length === 0) {
-    // No valid directions, stay in place
-    return snake;
-  }
-  
-  // Choose direction that gets snake closer to player
-  let bestDirection = validDirections[0];
-  let bestDistance = Infinity;
-  
-  if (player) {
-    for (const direction of validDirections) {
-      // Calculate where this direction would lead
-      const tileCenter = {
-        x: currentTile.x + currentTile.width / 2,
-        y: currentTile.y + currentTile.height / 2
-      };
-      
-      let targetX = tileCenter.x;
-      let targetY = tileCenter.y;
-      
-      switch (direction) {
-        case 'north': targetY -= 60; break; // Tile size is 60
-        case 'south': targetY += 60; break;
-        case 'east': targetX += 60; break;
-        case 'west': targetX -= 60; break;
-      }
-      
-      const distanceToPlayer = getDistance(
-        { x: targetX, y: targetY },
-        { x: player.position.x + player.size.width / 2, y: player.position.y + player.size.height / 2 }
-      );
-      
-      if (distanceToPlayer < bestDistance) {
-        bestDistance = distanceToPlayer;
-        bestDirection = direction;
-      }
-    }
-  }
-  
-  // Move toward the exit of the current tile in the chosen direction
+  // Check if we need to pick a new direction (first time on tile or reached center)
   const tileCenter = {
     x: currentTile.x + currentTile.width / 2,
     y: currentTile.y + currentTile.height / 2
   };
-  
-  let targetX = tileCenter.x;
-  let targetY = tileCenter.y;
-  
-  switch (bestDirection) {
-    case 'north': targetY = currentTile.y; break;
-    case 'south': targetY = currentTile.y + currentTile.height; break;
-    case 'east': targetX = currentTile.x + currentTile.width; break;
-    case 'west': targetX = currentTile.x; break;
-  }
-  
-  const targetPosition = {
-    x: targetX - snake.size.width / 2,
-    y: targetY - snake.size.height / 2
+  const snakeCenter = {
+    x: snake.position.x + snake.size.width / 2,
+    y: snake.position.y + snake.size.height / 2
   };
   
-  // Move toward target
-  const newPosition = moveTowards(snake.position, targetPosition, snake.speed * dt);
-  snake.position = newPosition;
-  snake.direction = getDirectionVector(snake.position, targetPosition);
+  const distanceToCenter = getDistance(snakeCenter, tileCenter);
+  const shouldPickNewDirection = snake.currentTileId !== currentTile.id || distanceToCenter < 10;
+  
+  if (shouldPickNewDirection) {
+    snake.currentTileId = currentTile.id;
+    
+    // Get available directions for current tile
+    const availableDirections = gameState.getTileDirections(currentTile.id);
+    
+    if (availableDirections.length === 0) {
+      // No directions available, stay in place
+      return snake;
+    }
+    
+    // Choose direction that gets snake closer to player
+    let bestDirection = availableDirections[0];
+    let bestDistance = Infinity;
+    
+    if (player) {
+      for (const direction of availableDirections) {
+        // Calculate where this direction would lead (next tile center)
+        let targetRow = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[1] || '0');
+        let targetCol = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[2] || '0');
+        
+        switch (direction) {
+          case 'north': targetRow--; break;
+          case 'south': targetRow++; break;
+          case 'east': targetCol++; break;
+          case 'west': targetCol--; break;
+        }
+        
+        // Check if target tile exists
+        const targetTileId = `grid_tile_${targetRow}_${targetCol}`;
+        const targetTile = gameState.patternTiles.find(t => t.id === targetTileId);
+        
+        if (targetTile) {
+          const targetPosition = {
+            x: targetTile.x + targetTile.width / 2,
+            y: targetTile.y + targetTile.height / 2
+          };
+          
+          const distanceToPlayer = getDistance(
+            targetPosition,
+            { x: player.position.x + player.size.width / 2, y: player.position.y + player.size.height / 2 }
+          );
+          
+          if (distanceToPlayer < bestDistance) {
+            bestDistance = distanceToPlayer;
+            bestDirection = direction;
+          }
+        }
+      }
+    }
+    
+    // Set target position for chosen direction
+    let targetRow = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[1] || '0');
+    let targetCol = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[2] || '0');
+    
+    switch (bestDirection) {
+      case 'north': targetRow--; break;
+      case 'south': targetRow++; break;
+      case 'east': targetCol++; break;
+      case 'west': targetCol--; break;
+    }
+    
+    const targetTileId = `grid_tile_${targetRow}_${targetCol}`;
+    const targetTile = gameState.patternTiles.find(t => t.id === targetTileId);
+    
+    if (targetTile) {
+      snake.chaseTarget = {
+        x: targetTile.x + targetTile.width / 2 - snake.size.width / 2,
+        y: targetTile.y + targetTile.height / 2 - snake.size.height / 2
+      };
+    }
+  }
+  
+  // Move toward current target
+  if (snake.chaseTarget) {
+    const newPosition = moveTowards(snake.position, snake.chaseTarget, snake.speed * dt);
+    snake.position = newPosition;
+    snake.direction = getDirectionVector(snake.position, snake.chaseTarget);
+  }
   
   return snake;
 }
