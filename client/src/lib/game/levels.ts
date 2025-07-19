@@ -483,42 +483,119 @@ export const LEVELS: Level[] = [
           sightRange: 0,
           isChasing: false,
         },
-        {
-          id: "plumber1",
-          type: "plumber" as const,
-          position: (() => {
-            // Calculate ending tile center position
-            const tileSize = 60;
-            const gridSize = 8;
-            const totalGridWidth = gridSize * tileSize;
-            const totalGridHeight = gridSize * tileSize;
-            const playableWidth = 760;
-            const playableHeight = 560;
-            const startX = 20 + (playableWidth - totalGridWidth) / 2;
-            const startY = 20 + (playableHeight - totalGridHeight) / 2;
-            
-            const endTileX = startX + endCol * tileSize;
-            const endTileY = startY + endRow * tileSize;
-            
+        // Helper function to calculate tile center position
+        ...(() => {
+          const tileSize = 60;
+          const gridSize = 8;
+          const totalGridWidth = gridSize * tileSize;
+          const totalGridHeight = gridSize * tileSize;
+          const playableWidth = 760;
+          const playableHeight = 560;
+          const startX = 20 + (playableWidth - totalGridWidth) / 2;
+          const startY = 20 + (playableHeight - totalGridHeight) / 2;
+          
+          const calculateTileCenter = (row: number, col: number) => {
+            const tileX = startX + col * tileSize;
+            const tileY = startY + row * tileSize;
             return {
-              x: endTileX + tileSize / 2 - 12.5, // Center minus half snake size
-              y: endTileY + tileSize / 2 - 12.5
+              x: tileX + tileSize / 2 - 12.5, // Center minus half snake size
+              y: tileY + tileSize / 2 - 12.5
             };
-          })(),
-          size: { width: 25, height: 25 },
-          speed: 80,
-          direction: { x: -1, y: 0 }, // Start moving west from end tile
-          patrolPoints: [],
-          currentPatrolIndex: 0,
-          patrolDirection: 1,
-          chaseSpeed: 0,
-          sightRange: 0,
-          isChasing: false,
-          currentTileId: undefined,
-          entryDirection: undefined,
-          tilesEntered: 0,
-          tileToRotate: undefined,
-        },
+          };
+          
+          return [
+            {
+              id: "plumber1",
+              type: "plumber" as const,
+              position: calculateTileCenter(endRow, endCol), // Ending tile
+              size: { width: 25, height: 25 },
+              speed: 80,
+              direction: { x: -1, y: 0 }, // Start moving west
+              patrolPoints: [],
+              currentPatrolIndex: 0,
+              patrolDirection: 1,
+              chaseSpeed: 0,
+              sightRange: 0,
+              isChasing: false,
+              currentTileId: undefined,
+              entryDirection: undefined,
+              tilesEntered: 0,
+              tileToRotate: undefined,
+            },
+            {
+              id: "plumber2",
+              type: "plumber" as const,
+              position: calculateTileCenter(1, 1), // Grid position (1,1)
+              size: { width: 25, height: 25 },
+              speed: 80,
+              direction: { x: 1, y: 0 }, // Start moving east
+              patrolPoints: [],
+              currentPatrolIndex: 0,
+              patrolDirection: 1,
+              chaseSpeed: 0,
+              sightRange: 0,
+              isChasing: false,
+              currentTileId: undefined,
+              entryDirection: undefined,
+              tilesEntered: 0,
+              tileToRotate: undefined,
+            },
+            {
+              id: "plumber3",
+              type: "plumber" as const,
+              position: calculateTileCenter(1, 6), // Grid position (1,6)
+              size: { width: 25, height: 25 },
+              speed: 80,
+              direction: { x: 0, y: 1 }, // Start moving south
+              patrolPoints: [],
+              currentPatrolIndex: 0,
+              patrolDirection: 1,
+              chaseSpeed: 0,
+              sightRange: 0,
+              isChasing: false,
+              currentTileId: undefined,
+              entryDirection: undefined,
+              tilesEntered: 0,
+              tileToRotate: undefined,
+            },
+            {
+              id: "plumber4",
+              type: "plumber" as const,
+              position: calculateTileCenter(6, 1), // Grid position (6,1)
+              size: { width: 25, height: 25 },
+              speed: 80,
+              direction: { x: 0, y: -1 }, // Start moving north
+              patrolPoints: [],
+              currentPatrolIndex: 0,
+              patrolDirection: 1,
+              chaseSpeed: 0,
+              sightRange: 0,
+              isChasing: false,
+              currentTileId: undefined,
+              entryDirection: undefined,
+              tilesEntered: 0,
+              tileToRotate: undefined,
+            },
+            {
+              id: "plumber5",
+              type: "plumber" as const,
+              position: calculateTileCenter(6, 6), // Grid position (6,6)
+              size: { width: 25, height: 25 },
+              speed: 80,
+              direction: { x: -1, y: 0 }, // Start moving west
+              patrolPoints: [],
+              currentPatrolIndex: 0,
+              patrolDirection: 1,
+              chaseSpeed: 0,
+              sightRange: 0,
+              isChasing: false,
+              currentTileId: undefined,
+              entryDirection: undefined,
+              tilesEntered: 0,
+              tileToRotate: undefined,
+            },
+          ];
+        })(),
       ],
       door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
       key: { x: 700, y: 80, width: 20, height: 20, collected: false },

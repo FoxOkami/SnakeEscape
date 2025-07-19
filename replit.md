@@ -118,6 +118,7 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
+- July 19, 2025. Added 4 additional plumber snakes to Level 4 spawning at grid positions (1,1), (1,6), (6,1), and (6,6) for increased challenge
 - July 19, 2025. Moved plumber snake spawn to center of ending tile to prevent getting stuck at level start
 - July 19, 2025. Added locked tile protection to plumber snake - cannot rotate tiles that are locked by pipe flow
 - July 19, 2025. Added tile rotation mechanic to plumber snake - rotates current tile 90 degrees clockwise every 5th tile entered
