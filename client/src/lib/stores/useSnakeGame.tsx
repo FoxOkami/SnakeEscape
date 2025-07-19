@@ -1664,7 +1664,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Update spitter snakes firing
       const updatedSnakes = state.snakes.map(snake => {
         if (snake.type === 'spitter' && snake.lastFireTime && snake.fireInterval) {
-          if (currentTime - snake.lastFireTime >= snake.fireInterval) {
+          const timeSinceLastFire = currentTime - snake.lastFireTime;
+          console.log(`Spitter snake ${snake.id}: timeSinceLastFire=${timeSinceLastFire}, fireInterval=${snake.fireInterval}`);
+          
+          if (timeSinceLastFire >= snake.fireInterval) {
+            console.log(`Spitter snake ${snake.id} firing projectiles!`);
             // Fire projectiles
             get().fireProjectiles(snake.id);
             return {
@@ -1711,6 +1715,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     fireProjectiles: (snakeId: string) => {
       const state = get();
       const snake = state.snakes.find(s => s.id === snakeId);
+      console.log(`fireProjectiles called for ${snakeId}, snake found:`, !!snake, snake?.type);
       if (!snake || snake.type !== 'spitter') return;
       
       const projectileSpeed = 0.15; // pixels per ms
@@ -1745,6 +1750,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         color: '#00ff41' // Neon green
       }));
       
+      console.log(`Creating ${newProjectiles.length} projectiles for snake ${snakeId}:`, newProjectiles.map(p => ({ id: p.id, pos: p.position })));
       set({
         projectiles: [...state.projectiles, ...newProjectiles]
       });
