@@ -798,6 +798,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
 
+      // --- PROJECTILE SYSTEM ---
+      // Update projectiles and spitter snake firing
+      get().updateProjectiles(deltaTime);
+
       // --- UPDATE STATE ---
       set({
         currentVelocity: newVelocity, // Use the updated velocity that includes wall collision resets
