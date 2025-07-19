@@ -1024,7 +1024,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           exitDirection: 'east',
           progress: 0,
           phaseStartTime: Date.now(),
-          phaseDuration: 1000, // 1 second per phase
+          phaseDuration: 500, // 0.5 second per phase (doubled speed)
           lastPosition: undefined,
           isBlocked: false,
           lockedTiles: [startTileId], // Lock the starting tile immediately
@@ -1104,7 +1104,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                     exitDirection: null,
                     progress: 0,
                     phaseStartTime: 0,
-                    phaseDuration: 800,
+                    phaseDuration: 400,
                     completedPaths: [],
                     emptyingPaths: [],
                     lastPosition: undefined,
@@ -1125,7 +1125,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                   exitDirection: null,
                   progress: 0,
                   phaseStartTime: 0,
-                  phaseDuration: 800,
+                  phaseDuration: 400,
                   completedPaths: [],
                   emptyingPaths: [],
                   lastPosition: undefined,
@@ -1165,7 +1165,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                     exitDirection: 'east',
                     progress: 0,
                     phaseStartTime: Date.now(),
-                    phaseDuration: 800,
+                    phaseDuration: 400,
                     emptyingPaths: allPaths,
                     completedPaths: allPaths // Keep completed paths initially, remove as emptying progresses
                   }
@@ -1250,7 +1250,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                         exitDirection: 'east',
                         progress: 0,
                         phaseStartTime: Date.now(),
-                        phaseDuration: 800,
+                        phaseDuration: 400,
                         emptyingPaths: allPaths,
                         completedPaths: allPaths, // Keep completed paths initially, remove as emptying progresses
                         // Preserve blocked state during emptying
@@ -1321,7 +1321,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                       exitDirection: 'east',
                       progress: 0,
                       phaseStartTime: Date.now(),
-                      phaseDuration: 800,
+                      phaseDuration: 400,
                       emptyingPaths: allPaths,
                       completedPaths: allPaths, // Keep completed paths initially, remove as emptying progresses
                       // Preserve blocked state during emptying
