@@ -1177,6 +1177,7 @@ export const useSnakeGame = create<SnakeGameState>()(
               flowState: {
                 ...state.flowState,
                 isActive: false,
+                isEmptying: true, // Set isEmptying immediately to prevent new flows during the 2-second delay
                 completedPaths: [...state.flowState.completedPaths, finalPath]
               }
             });
@@ -1265,6 +1266,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                   flowState: {
                     ...state.flowState,
                     isActive: false,
+                    isEmptying: true, // Set isEmptying immediately to prevent new flows during the 2-second delay
                     lastPosition: blockedPosition,
                     isBlocked: true,
                     completedPaths: [...state.flowState.completedPaths, completedPath]
@@ -1336,6 +1338,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                 flowState: {
                   ...state.flowState,
                   isActive: false,
+                  isEmptying: true, // Set isEmptying immediately to prevent new flows during the 2-second delay
                   lastPosition: blockedPosition,
                   isBlocked: true,
                   completedPaths: [...state.flowState.completedPaths, completedPath]
