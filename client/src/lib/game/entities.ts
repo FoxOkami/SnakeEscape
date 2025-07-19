@@ -427,6 +427,25 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   if (hasReachedTarget && !snake.isPaused) {
     snake.isPaused = true;
     snake.pauseStartTime = currentTime;
+    
+    // Find the tile the snake is on and mark it for rotation
+    const currentTile = gameState.patternTiles.find(tile => {
+      const snakeCenter = {
+        x: snake.position.x + snake.size.width / 2,
+        y: snake.position.y + snake.size.height / 2
+      };
+      return (
+        snakeCenter.x >= tile.x &&
+        snakeCenter.x <= tile.x + tile.width &&
+        snakeCenter.y >= tile.y &&
+        snakeCenter.y <= tile.y + tile.height
+      );
+    });
+    
+    if (currentTile) {
+      snake.tileToRotate = currentTile.id;
+    }
+    
     return snake;
   }
   
@@ -438,29 +457,6 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     // Reset pause state
     snake.isPaused = false;
     snake.pauseStartTime = undefined;
-    
-    // Check for time-based rotation trigger (keep this feature)
-    if (snake.nextRotationTime && currentTime >= snake.nextRotationTime) {
-      // Find current tile for rotation
-      const currentTile = gameState.patternTiles.find(tile => {
-        const snakeCenter = {
-          x: snake.position.x + snake.size.width / 2,
-          y: snake.position.y + snake.size.height / 2
-        };
-        return (
-          snakeCenter.x >= tile.x &&
-          snakeCenter.x <= tile.x + tile.width &&
-          snakeCenter.y >= tile.y &&
-          snakeCenter.y <= tile.y + tile.height
-        );
-      });
-      
-      if (currentTile) {
-        snake.tileToRotate = currentTile.id;
-      }
-      // Set next rotation time (4-6 seconds from now)
-      snake.nextRotationTime = currentTime + 4 + Math.random() * 2;
-    }
     
     // Pick a random tile from the grid
     const randomTileIndex = Math.floor(Math.random() * gameState.patternTiles.length);
