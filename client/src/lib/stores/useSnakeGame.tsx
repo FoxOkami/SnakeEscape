@@ -1636,6 +1636,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       const updatedProjectiles = state.projectiles.filter(projectile => {
         const age = currentTime - projectile.createdAt;
         if (age > projectile.lifespan) {
+          console.log(`Projectile ${projectile.id} expired - age: ${age}ms, lifespan: ${projectile.lifespan}ms`);
           return false; // Remove expired projectile
         }
         
@@ -1664,6 +1665,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
         }
         
+        console.log(`Projectile ${projectile.id} survived filtering - pos: (${projectile.position.x}, ${projectile.position.y})`);
         return true; // Keep projectile
       });
       
