@@ -118,6 +118,8 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
+- July 19, 2025. Added tile rotation mechanic to plumber snake - rotates current tile 90 degrees clockwise every 5th tile entered
+- July 19, 2025. Enhanced plumber snake tracking with tilesEntered counter and tileToRotate property for game state synchronization
 - July 18, 2025. Created Plumber snake type for Level 4 - brown/copper colored snake with pipe junction pattern that moves randomly on pipe tiles following available cardinal directions
 - July 18, 2025. Added plumber-specific properties to Snake interface: currentTileId and entryDirection for tracking tile-based movement
 - July 18, 2025. Implemented tile-to-tile movement system for plumber snake - moves between adjacent tiles based on available directional markers regardless of pipe connections

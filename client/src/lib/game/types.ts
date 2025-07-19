@@ -44,6 +44,8 @@ export interface Snake {
   // Plumber-specific properties
   currentTileId?: string; // Current tile the plumber is on
   entryDirection?: 'north' | 'south' | 'east' | 'west'; // Direction plumber entered current tile from
+  tilesEntered?: number; // Count of tiles entered for rotation trigger
+  tileToRotate?: string; // Tile ID that needs to be rotated
 }
 
 export interface Wall extends Rectangle {}

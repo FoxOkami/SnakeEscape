@@ -489,6 +489,23 @@ export const useSnakeGame = create<SnakeGameState>()(
         updateSnake(snake, state.walls, deltaTime, updatedPlayer, playerSounds, state),
       );
 
+      // Handle plumber snake tile rotations
+      let updatedPatternTilesFromRotation = state.patternTiles;
+      updatedSnakes.forEach(snake => {
+        if (snake.type === 'plumber' && snake.tileToRotate) {
+          const tileIndex = updatedPatternTilesFromRotation.findIndex(t => t.id === snake.tileToRotate);
+          if (tileIndex !== -1) {
+            const currentRotation = updatedPatternTilesFromRotation[tileIndex].rotation || 0;
+            const newRotation = (currentRotation + 90) % 360;
+            updatedPatternTilesFromRotation = updatedPatternTilesFromRotation.map((tile, index) =>
+              index === tileIndex ? { ...tile, rotation: newRotation } : tile
+            );
+          }
+          // Clear the rotation request
+          snake.tileToRotate = undefined;
+        }
+      });
+
       // --- COLLISION DETECTION ---
       const playerRect = {
         x: updatedPlayer.position.x,
@@ -604,8 +621,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         return switchObj;
       });
 
-      // Check pattern tile interactions
-      let updatedPatternTiles = [...state.patternTiles];
+      // Check pattern tile interactions (use tiles with rotations if available)
+      let updatedPatternTiles = updatedPatternTilesFromRotation.length > 0 ? [...updatedPatternTilesFromRotation] : [...state.patternTiles];
       let updatedCurrentPatternStep = state.currentPatternStep;
       let shouldOpenKeyRoom = false;
 

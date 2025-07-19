@@ -498,6 +498,8 @@ export const LEVELS: Level[] = [
           isChasing: false,
           currentTileId: undefined,
           entryDirection: undefined,
+          tilesEntered: 0,
+          tileToRotate: undefined,
         },
       ],
       door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
