@@ -401,11 +401,17 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
 function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, gameState?: any): Snake {
   // Check if we have the required game state
   if (!gameState || !gameState.patternTiles || !gameState.getTileDirections) {
+    console.log('Plumber: Missing game state', { gameState: !!gameState, patternTiles: !!gameState?.patternTiles, getTileDirections: !!gameState?.getTileDirections });
     return snake; // No game state available
   }
   
   // Only move on pipe tiles in level 4
-  if (gameState.currentLevel !== 3) return snake; // Level 4 is 0-indexed as 3
+  if (gameState.currentLevel !== 3) {
+    console.log('Plumber: Not on level 4, current level:', gameState.currentLevel);
+    return snake; // Level 4 is 0-indexed as 3
+  }
+  
+  console.log('Plumber: Starting update, position:', snake.position);
   
   // Find current tile the snake is on
   const currentTile = gameState.patternTiles.find(tile => {
