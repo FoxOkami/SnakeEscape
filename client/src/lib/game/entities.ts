@@ -400,164 +400,77 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
 
 function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, gameState?: any): Snake {
   // Check if we have the required game state
-  if (!gameState || !gameState.patternTiles || !gameState.getTileDirections) {
+  if (!gameState || !gameState.patternTiles) {
     return snake; // No game state available
   }
   
-  // Only move on pipe tiles in level 4
+  // Only move on level 4
   if (gameState.currentLevel !== 3) {
     return snake; // Level 4 is 0-indexed as 3
   }
-  
 
-  
-  // Find current tile the snake is on
-  const currentTile = gameState.patternTiles.find(tile => {
-    const snakeCenter = {
-      x: snake.position.x + snake.size.width / 2,
-      y: snake.position.y + snake.size.height / 2
-    };
-    return (
-      snakeCenter.x >= tile.x &&
-      snakeCenter.x <= tile.x + tile.width &&
-      snakeCenter.y >= tile.y &&
-      snakeCenter.y <= tile.y + tile.height
-    );
-  });
-  
-  // If not on a tile, find the nearest tile and move toward it
-  if (!currentTile) {
-    const nearestTile = gameState.patternTiles.reduce((nearest, tile) => {
-      const snakeCenter = {
-        x: snake.position.x + snake.size.width / 2,
-        y: snake.position.y + snake.size.height / 2
-      };
-      const tileCenterDistance = getDistance(snakeCenter, {
-        x: tile.x + tile.width / 2,
-        y: tile.y + tile.height / 2
-      });
-      const nearestDistance = getDistance(snakeCenter, {
-        x: nearest.x + nearest.width / 2,
-        y: nearest.y + nearest.height / 2
-      });
-      return tileCenterDistance < nearestDistance ? tile : nearest;
-    }, gameState.patternTiles[0]);
-    
-    if (nearestTile) {
-      const targetPosition = {
-        x: nearestTile.x + nearestTile.width / 2 - snake.size.width / 2,
-        y: nearestTile.y + nearestTile.height / 2 - snake.size.height / 2
-      };
-      const newPosition = moveTowards(snake.position, targetPosition, snake.speed * dt);
-      snake.position = newPosition;
-      snake.direction = getDirectionVector(snake.position, targetPosition);
-    }
-    return snake;
-  }
-  
-  // Check if we need to pick a new direction (reached center or no direction set)
-  const tileCenter = {
-    x: currentTile.x + currentTile.width / 2,
-    y: currentTile.y + currentTile.height / 2
-  };
-  const snakeCenter = {
-    x: snake.position.x + snake.size.width / 2,
-    y: snake.position.y + snake.size.height / 2
-  };
-  
-  const distanceToCenter = getDistance(snakeCenter, tileCenter);
-  const hasEnteredNewTile = snake.currentTileId !== currentTile.id;
-  
-  // Check if snake has reached the center of the tile (within a small threshold)
-  const hasReachedCenter = distanceToCenter < 5; // 5 pixel threshold
-  
-  // Check if current direction has an available outlet
-  const currentDirectionBlocked = (() => {
-    if (!snake.direction.x && !snake.direction.y) return true; // No direction set
-    
-    const availableDirections = gameState.getTileDirections(currentTile.id);
-    let currentDirectionName: 'north' | 'south' | 'east' | 'west';
-    
-    if (snake.direction.x > 0) currentDirectionName = 'east';
-    else if (snake.direction.x < 0) currentDirectionName = 'west';
-    else if (snake.direction.y > 0) currentDirectionName = 'south';
-    else currentDirectionName = 'north';
-    
-    return !availableDirections.includes(currentDirectionName);
-  })();
-  
   const currentTime = performance.now() / 1000;
   
-  // Handle pause logic when reaching center
-  if (hasReachedCenter && !snake.isPaused && hasEnteredNewTile) {
-    // Start pause when reaching center of a new tile
+  // Check if snake has reached its target
+  const hasReachedTarget = snake.chaseTarget && getDistance(
+    {
+      x: snake.position.x + snake.size.width / 2,
+      y: snake.position.y + snake.size.height / 2
+    },
+    {
+      x: snake.chaseTarget.x + snake.size.width / 2,
+      y: snake.chaseTarget.y + snake.size.height / 2
+    }
+  ) < 5; // 5 pixel threshold
+  
+  // Start pause when reaching target
+  if (hasReachedTarget && !snake.isPaused) {
     snake.isPaused = true;
     snake.pauseStartTime = currentTime;
-    snake.chaseTarget = undefined; // Stop moving
     return snake;
   }
   
-  // Check if pause is complete
-  const pauseComplete = snake.isPaused && snake.pauseStartTime && (currentTime - snake.pauseStartTime >= 0.1); // 100ms pause
+  // Check if pause is complete (1 second)
+  const pauseComplete = snake.isPaused && snake.pauseStartTime && (currentTime - snake.pauseStartTime >= 1.0);
   
-  // Pick new direction when pause is complete or when direction is blocked (initial state)
-  const shouldPickNewDirection = pauseComplete || currentDirectionBlocked;
-  
-  // If we've entered a new tile but haven't reached center, head to center first
-  if (hasEnteredNewTile && !hasReachedCenter) {
-    snake.currentTileId = currentTile.id;
-    snake.isPaused = false; // Reset pause state for new tile
-    snake.pauseStartTime = undefined;
-    snake.chaseTarget = {
-      x: tileCenter.x - snake.size.width / 2,
-      y: tileCenter.y - snake.size.height / 2
-    };
-  } else if (shouldPickNewDirection) {
-    // Reset pause state when picking new direction
+  // Pick new random target when pause is complete or no target set
+  if (pauseComplete || !snake.chaseTarget) {
+    // Reset pause state
     snake.isPaused = false;
     snake.pauseStartTime = undefined;
-    // Check for time-based rotation trigger
+    
+    // Check for time-based rotation trigger (keep this feature)
     if (snake.nextRotationTime && currentTime >= snake.nextRotationTime) {
-      // Mark the current tile for rotation
-      snake.tileToRotate = currentTile.id;
+      // Find current tile for rotation
+      const currentTile = gameState.patternTiles.find(tile => {
+        const snakeCenter = {
+          x: snake.position.x + snake.size.width / 2,
+          y: snake.position.y + snake.size.height / 2
+        };
+        return (
+          snakeCenter.x >= tile.x &&
+          snakeCenter.x <= tile.x + tile.width &&
+          snakeCenter.y >= tile.y &&
+          snakeCenter.y <= tile.y + tile.height
+        );
+      });
+      
+      if (currentTile) {
+        snake.tileToRotate = currentTile.id;
+      }
       // Set next rotation time (4-6 seconds from now)
       snake.nextRotationTime = currentTime + 4 + Math.random() * 2;
     }
     
-    snake.currentTileId = currentTile.id;
+    // Pick a random tile from the grid
+    const randomTileIndex = Math.floor(Math.random() * gameState.patternTiles.length);
+    const targetTile = gameState.patternTiles[randomTileIndex];
     
-    // Get available directions for current tile (after potential rotation)
-    const availableDirections = gameState.getTileDirections(currentTile.id);
-    
-    if (availableDirections.length === 0) {
-      // No directions available, stay in place
-      return snake;
-    }
-    
-    // Always choose a random available direction after pause
-    const randomIndex = Math.floor(Math.random() * availableDirections.length);
-    const bestDirection = availableDirections[randomIndex];
-    
-    // Set target position for chosen direction
-    let targetRow = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[1] || '0');
-    let targetCol = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[2] || '0');
-    
-    switch (bestDirection) {
-      case 'north': targetRow--; break;
-      case 'south': targetRow++; break;
-      case 'east': targetCol++; break;
-      case 'west': targetCol--; break;
-    }
-    
-    const targetTileId = `grid_tile_${targetRow}_${targetCol}`;
-    const targetTile = gameState.patternTiles.find(t => t.id === targetTileId);
-    
-    if (targetTile) {
-      snake.chaseTarget = {
-        x: targetTile.x + targetTile.width / 2 - snake.size.width / 2,
-        y: targetTile.y + targetTile.height / 2 - snake.size.height / 2
-      };
-    }
+    // Set target to center of the random tile
+    snake.chaseTarget = {
+      x: targetTile.x + targetTile.width / 2 - snake.size.width / 2,
+      y: targetTile.y + targetTile.height / 2 - snake.size.height / 2
+    };
   }
   
   // Move toward current target (but not if paused)
