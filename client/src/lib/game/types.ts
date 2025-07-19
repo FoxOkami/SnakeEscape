@@ -46,6 +46,8 @@ export interface Snake {
   entryDirection?: 'north' | 'south' | 'east' | 'west'; // Direction plumber entered current tile from
   nextRotationTime?: number; // Time when next rotation should occur
   tileToRotate?: string; // Tile ID that needs to be rotated
+  pauseStartTime?: number; // Time when pause at tile center started
+  isPaused?: boolean; // Whether the snake is currently paused at tile center
 }
 
 export interface Wall extends Rectangle {}

@@ -486,19 +486,37 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     return !availableDirections.includes(currentDirectionName);
   })();
   
-  // Only pick new direction when reached center, not immediately upon entering tile
-  const shouldPickNewDirection = (hasEnteredNewTile && hasReachedCenter) || currentDirectionBlocked;
+  const currentTime = performance.now() / 1000;
+  
+  // Handle pause logic when reaching center
+  if (hasReachedCenter && !snake.isPaused && !currentDirectionBlocked) {
+    // Start pause when reaching center
+    snake.isPaused = true;
+    snake.pauseStartTime = currentTime;
+    snake.chaseTarget = undefined; // Stop moving
+    return snake;
+  }
+  
+  // Check if pause is complete
+  const pauseComplete = snake.isPaused && snake.pauseStartTime && (currentTime - snake.pauseStartTime >= 0.1); // 100ms pause
+  
+  // Only pick new direction when pause is complete or direction is blocked
+  const shouldPickNewDirection = (hasEnteredNewTile && pauseComplete) || currentDirectionBlocked;
   
   // If we've entered a new tile but haven't reached center, head to center first
   if (hasEnteredNewTile && !hasReachedCenter) {
     snake.currentTileId = currentTile.id;
+    snake.isPaused = false; // Reset pause state for new tile
+    snake.pauseStartTime = undefined;
     snake.chaseTarget = {
       x: tileCenter.x - snake.size.width / 2,
       y: tileCenter.y - snake.size.height / 2
     };
   } else if (shouldPickNewDirection) {
+    // Reset pause state when picking new direction
+    snake.isPaused = false;
+    snake.pauseStartTime = undefined;
     // Check for time-based rotation trigger
-    const currentTime = performance.now() / 1000;
     if (snake.nextRotationTime && currentTime >= snake.nextRotationTime) {
       // Mark the current tile for rotation
       snake.tileToRotate = currentTile.id;
@@ -516,20 +534,9 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       return snake;
     }
     
-    // Determine best direction - prefer continuing current direction if possible
-    let bestDirection: 'north' | 'south' | 'east' | 'west';
-    
-    if (!hasEnteredNewTile && !currentDirectionBlocked) {
-      // Keep current direction if we haven't entered a new tile and direction isn't blocked
-      if (snake.direction.x > 0) bestDirection = 'east';
-      else if (snake.direction.x < 0) bestDirection = 'west';
-      else if (snake.direction.y > 0) bestDirection = 'south';
-      else bestDirection = 'north';
-    } else {
-      // Choose a random available direction when entering new tile or when blocked
-      const randomIndex = Math.floor(Math.random() * availableDirections.length);
-      bestDirection = availableDirections[randomIndex];
-    }
+    // Always choose a random available direction after pause
+    const randomIndex = Math.floor(Math.random() * availableDirections.length);
+    const bestDirection = availableDirections[randomIndex];
     
     // Set target position for chosen direction
     let targetRow = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[1] || '0');
@@ -553,8 +560,8 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     }
   }
   
-  // Move toward current target
-  if (snake.chaseTarget) {
+  // Move toward current target (but not if paused)
+  if (snake.chaseTarget && !snake.isPaused) {
     const newPosition = moveTowards(snake.position, snake.chaseTarget, snake.speed * dt);
     snake.position = newPosition;
     snake.direction = getDirectionVector(snake.position, snake.chaseTarget);
