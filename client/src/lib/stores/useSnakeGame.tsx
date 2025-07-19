@@ -1690,6 +1690,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         return snake;
       });
       
+      console.log(`Final projectile count: ${updatedProjectiles.length} (was ${state.projectiles.length})`);
       set({
         projectiles: updatedProjectiles,
         snakes: updatedSnakes
@@ -1761,8 +1762,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       }));
       
       console.log(`Creating ${newProjectiles.length} projectiles for snake ${snakeId}:`, newProjectiles.map(p => ({ id: p.id, pos: p.position })));
+      const newProjectileState = [...state.projectiles, ...newProjectiles];
+      console.log(`Total projectiles after creation: ${newProjectileState.length}`);
       set({
-        projectiles: [...state.projectiles, ...newProjectiles]
+        projectiles: newProjectileState
       });
     },
 
