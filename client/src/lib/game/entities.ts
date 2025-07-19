@@ -479,45 +479,9 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       return snake;
     }
     
-    // Choose direction that gets snake closer to player
-    let bestDirection = availableDirections[0];
-    let bestDistance = Infinity;
-    
-    if (player) {
-      for (const direction of availableDirections) {
-        // Calculate where this direction would lead (next tile center)
-        let targetRow = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[1] || '0');
-        let targetCol = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[2] || '0');
-        
-        switch (direction) {
-          case 'north': targetRow--; break;
-          case 'south': targetRow++; break;
-          case 'east': targetCol++; break;
-          case 'west': targetCol--; break;
-        }
-        
-        // Check if target tile exists
-        const targetTileId = `grid_tile_${targetRow}_${targetCol}`;
-        const targetTile = gameState.patternTiles.find(t => t.id === targetTileId);
-        
-        if (targetTile) {
-          const targetPosition = {
-            x: targetTile.x + targetTile.width / 2,
-            y: targetTile.y + targetTile.height / 2
-          };
-          
-          const distanceToPlayer = getDistance(
-            targetPosition,
-            { x: player.position.x + player.size.width / 2, y: player.position.y + player.size.height / 2 }
-          );
-          
-          if (distanceToPlayer < bestDistance) {
-            bestDistance = distanceToPlayer;
-            bestDirection = direction;
-          }
-        }
-      }
-    }
+    // Choose a random available direction
+    const randomIndex = Math.floor(Math.random() * availableDirections.length);
+    const bestDirection = availableDirections[randomIndex];
     
     // Set target position for chosen direction
     let targetRow = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[1] || '0');

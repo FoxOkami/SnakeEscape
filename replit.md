@@ -118,6 +118,11 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Changelog
+- July 18, 2025. Created Plumber snake type for Level 4 - brown/copper colored snake with pipe junction pattern that moves randomly on pipe tiles following available cardinal directions
+- July 18, 2025. Added plumber-specific properties to Snake interface: currentTileId and entryDirection for tracking tile-based movement
+- July 18, 2025. Implemented tile-to-tile movement system for plumber snake - moves between adjacent tiles based on available directional markers regardless of pipe connections
+
+## Changelog
 - July 18, 2025. Removed connection status banner from Level 4 - no more pop-up message appears after initiating pipe flow
 - July 18, 2025. Added screensaver snake to Level 4 - snake moves randomly in cardinal directions, bounces off walls, and has teal appearance with grid pattern
 - July 18, 2025. Added randomization to Level 4 start and end tile positions - tiles now spawn on random rows but stay in first and last columns
