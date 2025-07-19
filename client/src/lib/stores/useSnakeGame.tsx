@@ -493,15 +493,20 @@ export const useSnakeGame = create<SnakeGameState>()(
       let updatedPatternTilesFromRotation = state.patternTiles;
       updatedSnakes.forEach(snake => {
         if (snake.type === 'plumber' && snake.tileToRotate) {
-          const tileIndex = updatedPatternTilesFromRotation.findIndex(t => t.id === snake.tileToRotate);
-          if (tileIndex !== -1) {
-            const currentRotation = updatedPatternTilesFromRotation[tileIndex].rotation || 0;
-            const newRotation = (currentRotation + 90) % 360;
-            updatedPatternTilesFromRotation = updatedPatternTilesFromRotation.map((tile, index) =>
-              index === tileIndex ? { ...tile, rotation: newRotation } : tile
-            );
+          // Check if the tile is locked (flow has passed through it)
+          const isLocked = state.flowState && state.flowState.lockedTiles.includes(snake.tileToRotate);
+          
+          if (!isLocked) {
+            const tileIndex = updatedPatternTilesFromRotation.findIndex(t => t.id === snake.tileToRotate);
+            if (tileIndex !== -1) {
+              const currentRotation = updatedPatternTilesFromRotation[tileIndex].rotation || 0;
+              const newRotation = (currentRotation + 90) % 360;
+              updatedPatternTilesFromRotation = updatedPatternTilesFromRotation.map((tile, index) =>
+                index === tileIndex ? { ...tile, rotation: newRotation } : tile
+              );
+            }
           }
-          // Clear the rotation request
+          // Clear the rotation request regardless of whether rotation occurred
           snake.tileToRotate = undefined;
         }
       });
