@@ -466,7 +466,24 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   };
   
   const distanceToCenter = getDistance(snakeCenter, tileCenter);
-  const shouldPickNewDirection = snake.currentTileId !== currentTile.id || distanceToCenter < 10;
+  const hasEnteredNewTile = snake.currentTileId !== currentTile.id;
+  
+  // Check if current direction has an available outlet
+  const currentDirectionBlocked = (() => {
+    if (!snake.direction.x && !snake.direction.y) return true; // No direction set
+    
+    const availableDirections = gameState.getTileDirections(currentTile.id);
+    let currentDirectionName: 'north' | 'south' | 'east' | 'west';
+    
+    if (snake.direction.x > 0) currentDirectionName = 'east';
+    else if (snake.direction.x < 0) currentDirectionName = 'west';
+    else if (snake.direction.y > 0) currentDirectionName = 'south';
+    else currentDirectionName = 'north';
+    
+    return !availableDirections.includes(currentDirectionName);
+  })();
+  
+  const shouldPickNewDirection = hasEnteredNewTile || currentDirectionBlocked;
   
   if (shouldPickNewDirection) {
     // Check for time-based rotation trigger
@@ -488,9 +505,20 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       return snake;
     }
     
-    // Choose a random available direction
-    const randomIndex = Math.floor(Math.random() * availableDirections.length);
-    const bestDirection = availableDirections[randomIndex];
+    // Determine best direction - prefer continuing current direction if possible
+    let bestDirection: 'north' | 'south' | 'east' | 'west';
+    
+    if (!hasEnteredNewTile && !currentDirectionBlocked) {
+      // Keep current direction if we haven't entered a new tile and direction isn't blocked
+      if (snake.direction.x > 0) bestDirection = 'east';
+      else if (snake.direction.x < 0) bestDirection = 'west';
+      else if (snake.direction.y > 0) bestDirection = 'south';
+      else bestDirection = 'north';
+    } else {
+      // Choose a random available direction when entering new tile or when blocked
+      const randomIndex = Math.floor(Math.random() * availableDirections.length);
+      bestDirection = availableDirections[randomIndex];
+    }
     
     // Set target position for chosen direction
     let targetRow = parseInt(currentTile.id.match(/grid_tile_(\d+)_(\d+)/)?.[1] || '0');
