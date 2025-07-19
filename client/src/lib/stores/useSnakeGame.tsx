@@ -1669,7 +1669,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         return true; // Keep projectile
       });
       
-      // Update spitter snakes firing
+      // Check which spitter snakes need to fire
+      const snakesToFire: string[] = [];
       const updatedSnakes = state.snakes.map(snake => {
         if (snake.type === 'spitter' && snake.lastFireTime && snake.fireInterval) {
           const timeSinceLastFire = currentTime - snake.lastFireTime;
@@ -1680,9 +1681,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
           
           if (timeSinceLastFire >= snake.fireInterval) {
-            console.log(`Spitter snake ${snake.id} firing projectiles!`);
-            // Fire projectiles
-            get().fireProjectiles(snake.id);
+            console.log(`Spitter snake ${snake.id} needs to fire projectiles!`);
+            snakesToFire.push(snake.id);
             return {
               ...snake,
               lastFireTime: currentTime
@@ -1691,10 +1691,59 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
         return snake;
       });
+
+      // Fire projectiles for snakes that need it
+      let newProjectilesToAdd: any[] = [];
+      snakesToFire.forEach(snakeId => {
+        const snake = updatedSnakes.find(s => s.id === snakeId);
+        if (snake && snake.type === 'spitter') {
+          console.log(`Creating projectiles for snake ${snakeId}`);
+          
+          const projectileSpeed = 0.3; // pixels per ms
+          const projectileSize = { width: 6, height: 6 };
+          const lifespan = 5000; // 5 seconds
+          
+          // Create 8 projectiles in cardinal and diagonal directions
+          const directions = [
+            { x: 0, y: -1 },   // North
+            { x: 1, y: -1 },   // Northeast
+            { x: 1, y: 0 },    // East
+            { x: 1, y: 1 },    // Southeast
+            { x: 0, y: 1 },    // South
+            { x: -1, y: 1 },   // Southwest
+            { x: -1, y: 0 },   // West
+            { x: -1, y: -1 }   // Northwest
+          ];
+          
+          const newProjectiles = directions.map((dir, index) => ({
+            id: `${snakeId}_projectile_${Date.now()}_${index}`,
+            position: {
+              x: snake.position.x + snake.size.width / 2 - projectileSize.width / 2,
+              y: snake.position.y + snake.size.height / 2 - projectileSize.height / 2
+            },
+            velocity: {
+              x: dir.x * projectileSpeed,
+              y: dir.y * projectileSpeed
+            },
+            size: projectileSize,
+            createdAt: Date.now(),
+            lifespan,
+            color: '#00ff41' // Neon green
+          }));
+          
+          newProjectilesToAdd = [...newProjectilesToAdd, ...newProjectiles];
+        }
+      });
+
+      // Combine existing projectiles with new ones
+      const allProjectiles = [...updatedProjectiles, ...newProjectilesToAdd];
+      if (newProjectilesToAdd.length > 0) {
+        console.log(`Added ${newProjectilesToAdd.length} new projectiles. Total: ${allProjectiles.length}`);
+      }
       
-      console.log(`Final projectile count: ${updatedProjectiles.length} (was ${state.projectiles.length})`);
+      console.log(`Final projectile count: ${allProjectiles.length} (was ${state.projectiles.length})`);
       set({
-        projectiles: updatedProjectiles,
+        projectiles: allProjectiles,
         snakes: updatedSnakes
       });
     },
