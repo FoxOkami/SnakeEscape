@@ -87,6 +87,12 @@ const SnakeRoom: React.FC = () => {
           const startTileId = startTilePos ? `grid_tile_${startTilePos.row}_${startTilePos.col}` : 'grid_tile_3_0';
           
           if (currentTile && currentTile.id === startTileId) {
+            // Check if flow is already active (filling or emptying)
+            const currentFlowState = gameState_current.flowState;
+            if (currentFlowState && currentFlowState.isActive) {
+              return; // Don't start new flow while current one is active
+            }
+            
             checkPathConnection();
             return; // Don't rotate the start tile
           }
