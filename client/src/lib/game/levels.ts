@@ -483,6 +483,20 @@ export const LEVELS: Level[] = [
           sightRange: 0,
           isChasing: false,
         },
+        {
+          id: "screensaver2",
+          type: "screensaver" as const,
+          position: { x: 400, y: 300 }, // Different starting position
+          size: { width: 30, height: 30 },
+          speed: 150, // 1.5x faster than screensaver1
+          direction: { x: -1, y: 0 }, // Start moving west
+          patrolPoints: [],
+          currentPatrolIndex: 0,
+          patrolDirection: 1,
+          chaseSpeed: 0,
+          sightRange: 0,
+          isChasing: false,
+        },
         // Helper function to calculate tile center position
         ...(() => {
           const tileSize = 60;
