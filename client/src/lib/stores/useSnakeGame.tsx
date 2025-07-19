@@ -15,6 +15,7 @@ import {
   Crystal,
   LightBeam,
   FlowState,
+  Projectile,
 } from "../game/types";
 import { LEVELS } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
@@ -72,6 +73,11 @@ interface SnakeGameState extends GameData {
   // Path connection detection
   checkPathConnection: () => boolean;
   removeKeyWalls: () => void;
+  
+  // Projectile system actions
+  updateProjectiles: (deltaTime: number) => void;
+  spawnSpitterSnake: (position: Position) => void;
+  fireProjectiles: (snakeId: string) => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -143,6 +149,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     lightSource: null,
     lightBeam: null,
     flowState: null,
+    projectiles: [],
     keysPressed: new Set(),
     currentVelocity: { x: 0, y: 0 },
     targetVelocity: { x: 0, y: 0 },
@@ -221,6 +228,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         crystal: level.crystal ? { ...level.crystal } : null,
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
+        projectiles: [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
@@ -260,6 +268,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         crystal: level.crystal ? { ...level.crystal } : null,
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
+        projectiles: [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
@@ -294,6 +303,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         crystal: level.crystal ? { ...level.crystal } : null,
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
+        projectiles: [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
@@ -1231,6 +1241,11 @@ export const useSnakeGame = create<SnakeGameState>()(
                   y: nextTile.y + nextTile.height / 2
                 } : undefined;
                 
+                // Spawn spitter snake at blocked position
+                if (blockedPosition) {
+                  get().spawnSpitterSnake(blockedPosition);
+                }
+                
                 // Wait 500ms before starting emptying process for blocked flow
                 setTimeout(() => {
                   const currentState = get();
@@ -1301,6 +1316,11 @@ export const useSnakeGame = create<SnakeGameState>()(
                   x: currentTileObj.x + currentTileObj.width / 2 + offsetX,
                   y: currentTileObj.y + currentTileObj.height / 2 + offsetY
                 };
+              }
+              
+              // Spawn spitter snake at blocked position for edge-blocked flow
+              if (blockedPosition) {
+                get().spawnSpitterSnake(blockedPosition);
               }
               
               // Wait 500ms before starting emptying process for edge-blocked flow
@@ -1598,6 +1618,133 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Key chamber walls removed - path connected from start to end
     },
 
+    // Projectile system functions
+    updateProjectiles: (deltaTime: number) => {
+      const state = get();
+      const currentTime = Date.now();
+      
+      // Update projectile positions and remove expired ones
+      const updatedProjectiles = state.projectiles.filter(projectile => {
+        const age = currentTime - projectile.createdAt;
+        if (age > projectile.lifespan) {
+          return false; // Remove expired projectile
+        }
+        
+        // Update position
+        projectile.position.x += projectile.velocity.x * deltaTime;
+        projectile.position.y += projectile.velocity.y * deltaTime;
+        
+        // Check collision with player
+        if (checkAABBCollision(
+          { ...projectile.position, ...projectile.size },
+          { ...state.player.position, ...state.player.size }
+        )) {
+          // Player hit by projectile - game over
+          set({ gameState: 'gameOver' });
+          return false; // Remove projectile
+        }
+        
+        // Check collision with walls
+        for (const wall of state.walls) {
+          if (checkAABBCollision(
+            { ...projectile.position, ...projectile.size },
+            wall
+          )) {
+            return false; // Remove projectile on wall collision
+          }
+        }
+        
+        return true; // Keep projectile
+      });
+      
+      // Update spitter snakes firing
+      const updatedSnakes = state.snakes.map(snake => {
+        if (snake.type === 'spitter' && snake.lastFireTime && snake.fireInterval) {
+          if (currentTime - snake.lastFireTime >= snake.fireInterval) {
+            // Fire projectiles
+            get().fireProjectiles(snake.id);
+            return {
+              ...snake,
+              lastFireTime: currentTime
+            };
+          }
+        }
+        return snake;
+      });
+      
+      set({
+        projectiles: updatedProjectiles,
+        snakes: updatedSnakes
+      });
+    },
+
+    spawnSpitterSnake: (position: Position) => {
+      const state = get();
+      const spitterId = `spitter_${Date.now()}`;
+      
+      const spitterSnake: Snake = {
+        id: spitterId,
+        type: 'spitter',
+        position: { x: position.x - 12.5, y: position.y - 12.5 }, // Center the 25x25 snake
+        size: { width: 25, height: 25 },
+        speed: 0, // Stationary
+        direction: { x: 0, y: 0 },
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+        lastFireTime: Date.now(),
+        fireInterval: 3000 // 3 seconds
+      };
+      
+      set({
+        snakes: [...state.snakes, spitterSnake]
+      });
+    },
+
+    fireProjectiles: (snakeId: string) => {
+      const state = get();
+      const snake = state.snakes.find(s => s.id === snakeId);
+      if (!snake || snake.type !== 'spitter') return;
+      
+      const projectileSpeed = 0.15; // pixels per ms
+      const projectileSize = { width: 6, height: 6 };
+      const lifespan = 5000; // 5 seconds
+      
+      // Create 8 projectiles in cardinal and diagonal directions
+      const directions = [
+        { x: 0, y: -1 },   // North
+        { x: 1, y: -1 },   // Northeast
+        { x: 1, y: 0 },    // East
+        { x: 1, y: 1 },    // Southeast
+        { x: 0, y: 1 },    // South
+        { x: -1, y: 1 },   // Southwest
+        { x: -1, y: 0 },   // West
+        { x: -1, y: -1 }   // Northwest
+      ];
+      
+      const newProjectiles = directions.map((dir, index) => ({
+        id: `${snakeId}_projectile_${Date.now()}_${index}`,
+        position: {
+          x: snake.position.x + snake.size.width / 2 - projectileSize.width / 2,
+          y: snake.position.y + snake.size.height / 2 - projectileSize.height / 2
+        },
+        velocity: {
+          x: dir.x * projectileSpeed,
+          y: dir.y * projectileSpeed
+        },
+        size: projectileSize,
+        createdAt: Date.now(),
+        lifespan,
+        color: '#00ff41' // Neon green
+      }));
+      
+      set({
+        projectiles: [...state.projectiles, ...newProjectiles]
+      });
+    },
 
   })),
 );

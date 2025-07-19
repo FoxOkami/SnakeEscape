@@ -19,7 +19,7 @@ export interface Player {
 
 export interface Snake {
   id: string;
-  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber';
+  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter';
   position: Position;
   size: Size;
   speed: number;
@@ -48,6 +48,9 @@ export interface Snake {
   tileToRotate?: string; // Tile ID that needs to be rotated
   pauseStartTime?: number; // Time when pause at tile center started
   isPaused?: boolean; // Whether the snake is currently paused at tile center
+  // Spitter-specific properties
+  lastFireTime?: number; // Time when last projectile was fired
+  fireInterval?: number; // Time between shots (3000ms = 3 seconds)
 }
 
 export interface Wall extends Rectangle {}
@@ -156,6 +159,16 @@ export interface LightSource extends Position {
   rotation: number; // 0-360 degrees, 0 = north, 90 = east, 180 = south, 270 = west
 }
 
+export interface Projectile {
+  id: string;
+  position: Position;
+  velocity: Position;
+  size: Size;
+  createdAt: number;
+  lifespan: number; // How long projectile lives (ms)
+  color: string;
+}
+
 export interface CarriedItem {
   type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat';
   id: string;
@@ -203,4 +216,5 @@ export interface GameData {
   lightSource: LightSource | null;
   lightBeam: LightBeam | null;
   flowState: FlowState | null;
+  projectiles: Projectile[];
 }

@@ -34,7 +34,9 @@ const GameCanvas: React.FC = () => {
     currentLevel,
     getTileDirections,
     flowState,
-    updateFlow
+    updateFlow,
+    projectiles,
+    updateProjectiles
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -526,6 +528,11 @@ const GameCanvas: React.FC = () => {
           accentColor = '#ffd700'; // Gold accent for pipe-like appearance
           eyeColor = '#4682b4'; // Steel blue eyes
           break;
+        case 'spitter':
+          baseColor = '#2d7d32'; // Dark green for spitter
+          accentColor = '#00ff41'; // Neon green accent
+          eyeColor = '#00ff41'; // Neon green eyes
+          break;
       }
       
       // Main body
@@ -561,6 +568,16 @@ const GameCanvas: React.FC = () => {
         ctx.fillRect(snake.position.x + 2, centerY - 2, snake.size.width - 4, 4);
         // Vertical pipe
         ctx.fillRect(centerX - 2, snake.position.y + 2, 4, snake.size.height - 4);
+      } else if (snake.type === 'spitter') {
+        // Star/explosion pattern for spitter (represents projectile firing)
+        const centerX = snake.position.x + snake.size.width / 2;
+        const centerY = snake.position.y + snake.size.height / 2;
+        // 8-pointed star pattern
+        ctx.fillRect(centerX - 1, snake.position.y + 2, 2, snake.size.height - 4); // Vertical
+        ctx.fillRect(snake.position.x + 2, centerY - 1, snake.size.width - 4, 2); // Horizontal
+        // Diagonal lines
+        ctx.fillRect(centerX - 5, centerY - 1, 10, 2); // Diagonal 1
+        ctx.fillRect(centerX - 1, centerY - 5, 2, 10); // Diagonal 2
       }
       
       // Add snake eyes (stalkers have no visible eyes)
@@ -629,6 +646,20 @@ const GameCanvas: React.FC = () => {
       ctx.fillText('E to start', player.position.x + player.size.width / 2, player.position.y - 10);
       ctx.textAlign = 'left';
     }
+
+    // Draw projectiles
+    projectiles.forEach(projectile => {
+      ctx.fillStyle = projectile.color;
+      ctx.fillRect(projectile.position.x, projectile.position.y, projectile.size.width, projectile.size.height);
+      
+      // Add a small glow effect for neon green projectiles
+      if (projectile.color === '#00ff41') {
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = projectile.color;
+        ctx.fillRect(projectile.position.x, projectile.position.y, projectile.size.width, projectile.size.height);
+        ctx.shadowBlur = 0; // Reset shadow
+      }
+    });
 
     // Draw light reflection elements (mirrors, crystal, light beam)
     
@@ -869,6 +900,7 @@ const GameCanvas: React.FC = () => {
       if (clampedDeltaTime > 0) {
         updateGame(clampedDeltaTime);
         updateFlow(clampedDeltaTime);
+        updateProjectiles(clampedDeltaTime);
       }
     } else {
       lastTimeRef.current = currentTime;
