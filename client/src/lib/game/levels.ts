@@ -469,20 +469,20 @@ export const LEVELS: Level[] = [
         { x: 740, y: 50, width: 20, height: 70 }, // right wall
       ],
       snakes: [
-        {
-          id: "screensaver2",
-          type: "screensaver" as const,
-          position: { x: 400, y: 300 }, // Different starting position
-          size: { width: 30, height: 30 },
-          speed: 150, // 1.5x faster than screensaver1
-          direction: { x: -1, y: 0 }, // Start moving west
-          patrolPoints: [],
-          currentPatrolIndex: 0,
-          patrolDirection: 1,
-          chaseSpeed: 0,
-          sightRange: 0,
-          isChasing: false,
-        },
+        // {
+        //   id: "screensaver1",
+        //   type: "screensaver" as const,
+        //   position: calculateTileCenter(7, 0), // Grid position (7,0)
+        //   size: { width: 30, height: 30 },
+        //   speed: 150, // 1.5x faster than screensaver1
+        //   direction: { x: -1, y: 0 }, // Start moving west
+        //   patrolPoints: [],
+        //   currentPatrolIndex: 0,
+        //   patrolDirection: 1,
+        //   chaseSpeed: 0,
+        //   sightRange: 0,
+        //   isChasing: false,
+        // },
         // Helper function to calculate tile center position
         ...(() => {
           const tileSize = 60;
@@ -504,6 +504,20 @@ export const LEVELS: Level[] = [
           };
 
           return [
+            {
+              id: "screensaver1",
+              type: "screensaver" as const,
+              position: calculateTileCenter(0, 7), // Grid position (0,7)
+              size: { width: 30, height: 30 },
+              speed: 150, // 1.5x faster than screensaver1
+              direction: { x: -1, y: 0 }, // Start moving west
+              patrolPoints: [],
+              currentPatrolIndex: 0,
+              patrolDirection: 1,
+              chaseSpeed: 0,
+              sightRange: 0,
+              isChasing: false,
+            },
             {
               id: "plumber2",
               type: "plumber" as const,
