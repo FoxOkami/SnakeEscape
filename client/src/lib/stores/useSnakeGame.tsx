@@ -155,10 +155,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     lightBeam: null,
     flowState: null,
     projectiles: [],
-    // Phase system for Level 5
-    currentPhase: 'A',
-    phaseTimer: 0,
-    phaseDuration: 10000,
+
     puzzleShards: [],
     puzzlePedestal: null,
     phaseWalls: [],
@@ -436,9 +433,6 @@ export const useSnakeGame = create<SnakeGameState>()(
     updateGame: (deltaTime: number) => {
       const state = get();
       if (state.gameState !== "playing") return;
-
-      // Update phase system for Level 5
-      get().updatePhase(deltaTime);
 
       // --- SMOOTH PLAYER MOVEMENT ---
       // Smoothly interpolate current velocity toward target velocity
@@ -1904,32 +1898,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       set({
         projectiles: [...state.projectiles, ...newProjectiles]
       });
-    },
-
-    // Phase system functions
-    updatePhase: (deltaTime: number) => {
-      const state = get();
-      if (state.currentLevel !== 4) return; // Level 5 is 0-indexed as 4
-
-      const newPhaseTimer = state.phaseTimer + deltaTime;
-      
-      if (newPhaseTimer >= state.phaseDuration) {
-        // Switch to next phase
-        let nextPhase: 'A' | 'B' | 'C';
-        switch (state.currentPhase) {
-          case 'A': nextPhase = 'B'; break;
-          case 'B': nextPhase = 'C'; break;
-          case 'C': nextPhase = 'A'; break;
-          default: nextPhase = 'A';
-        }
-        
-        set({
-          currentPhase: nextPhase,
-          phaseTimer: 0
-        });
-      } else {
-        set({ phaseTimer: newPhaseTimer });
-      }
     },
 
     collectPuzzleShard: (shardId: string) => {

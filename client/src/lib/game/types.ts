@@ -241,10 +241,7 @@ export interface GameData {
   lightBeam: LightBeam | null;
   flowState: FlowState | null;
   projectiles: Projectile[];
-  // Phase-shifting level mechanics
-  currentPhase: 'A' | 'B' | 'C';
-  phaseTimer: number;
-  phaseDuration: number;
+
   puzzleShards: PuzzleShard[];
   puzzlePedestal: PuzzlePedestal | null;
   phaseWalls: PhaseWall[];
