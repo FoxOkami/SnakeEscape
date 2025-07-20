@@ -117,7 +117,8 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run start`: Start production server
 - `npm run db:push`: Apply database schema changes
 
-## Changelog
+## Recent Changes
+- July 19, 2025. Fixed spitter snake projectile system - resolved state synchronization issue that prevented projectiles from appearing, spitter snakes now properly fire 8-directional neon green projectiles every 3 seconds on Level 4
 - July 19, 2025. Fixed plumber snake oscillation - snakes now only change direction when entering new tiles or when current direction is blocked
 - July 19, 2025. Changed plumber snake rotation to time-based system (4-6 second intervals) instead of every 5th tile to prevent corner sticking
 - July 19, 2025. Removed Plumber 1 from Level 4, now has 4 plumber snakes at positions (1,1), (1,6), (6,1), and (6,6)

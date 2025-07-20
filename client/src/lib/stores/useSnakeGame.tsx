@@ -1627,16 +1627,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       const currentTime = Date.now();
       
-      // Debug: log projectile count at start
-      if (state.projectiles.length > 0) {
-        console.log(`Updating ${state.projectiles.length} projectiles`);
-      }
+
       
       // Update projectile positions and remove expired ones
       const updatedProjectiles = state.projectiles.filter(projectile => {
         const age = currentTime - projectile.createdAt;
         if (age > projectile.lifespan) {
-          console.log(`Projectile ${projectile.id} expired - age: ${age}ms, lifespan: ${projectile.lifespan}ms`);
           return false; // Remove expired projectile
         }
         
@@ -1660,12 +1656,10 @@ export const useSnakeGame = create<SnakeGameState>()(
             { ...projectile.position, ...projectile.size },
             wall
           )) {
-            console.log(`Projectile ${projectile.id} hit wall at (${wall.x}, ${wall.y})`);
             return false; // Remove projectile on wall collision
           }
         }
         
-        console.log(`Projectile ${projectile.id} survived filtering - pos: (${projectile.position.x}, ${projectile.position.y})`);
         return true; // Keep projectile
       });
       
@@ -1675,13 +1669,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (snake.type === 'spitter' && snake.lastFireTime && snake.fireInterval) {
           const timeSinceLastFire = currentTime - snake.lastFireTime;
           
-          // Only log every second to avoid spam
-          if (Math.floor(timeSinceLastFire / 1000) !== Math.floor((timeSinceLastFire - 100) / 1000)) {
-            console.log(`Spitter snake ${snake.id}: timeSinceLastFire=${timeSinceLastFire}ms, fireInterval=${snake.fireInterval}ms`);
-          }
-          
           if (timeSinceLastFire >= snake.fireInterval) {
-            console.log(`Spitter snake ${snake.id} needs to fire projectiles!`);
             snakesToFire.push(snake.id);
             return {
               ...snake,
@@ -1697,8 +1685,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       snakesToFire.forEach(snakeId => {
         const snake = updatedSnakes.find(s => s.id === snakeId);
         if (snake && snake.type === 'spitter') {
-          console.log(`Creating projectiles for snake ${snakeId}`);
-          
           const projectileSpeed = 0.3; // pixels per ms
           const projectileSize = { width: 6, height: 6 };
           const lifespan = 5000; // 5 seconds
@@ -1737,11 +1723,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Combine existing projectiles with new ones
       const allProjectiles = [...updatedProjectiles, ...newProjectilesToAdd];
-      if (newProjectilesToAdd.length > 0) {
-        console.log(`Added ${newProjectilesToAdd.length} new projectiles. Total: ${allProjectiles.length}`);
-      }
       
-      console.log(`Final projectile count: ${allProjectiles.length} (was ${state.projectiles.length})`);
       set({
         projectiles: allProjectiles,
         snakes: updatedSnakes
@@ -1777,7 +1759,6 @@ export const useSnakeGame = create<SnakeGameState>()(
     fireProjectiles: (snakeId: string) => {
       const state = get();
       const snake = state.snakes.find(s => s.id === snakeId);
-      console.log(`fireProjectiles called for ${snakeId}, snake found:`, !!snake, snake?.type);
       if (!snake || snake.type !== 'spitter') return;
       
       const projectileSpeed = 0.3; // pixels per ms - increased from 0.15
@@ -1812,11 +1793,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         color: '#00ff41' // Neon green
       }));
       
-      console.log(`Creating ${newProjectiles.length} projectiles for snake ${snakeId}:`, newProjectiles.map(p => ({ id: p.id, pos: p.position })));
-      const newProjectileState = [...state.projectiles, ...newProjectiles];
-      console.log(`Total projectiles after creation: ${newProjectileState.length}`);
       set({
-        projectiles: newProjectileState
+        projectiles: [...state.projectiles, ...newProjectiles]
       });
     },
 
