@@ -482,7 +482,7 @@ export const LEVELS: Level[] = [
           chaseSpeed: 0,
           sightRange: 0,
           isChasing: false,
-          lastFireTime: Date.now(),
+          lastFireTime: 0,
           fireInterval: 3000, // 3 seconds
           movementAxis: undefined // Will be randomly assigned on first update
         },
