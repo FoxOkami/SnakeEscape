@@ -470,18 +470,21 @@ export const LEVELS: Level[] = [
       ],
       snakes: [
         {
-          id: "screensaver1",
-          type: "screensaver" as const,
+          id: "spitter1",
+          type: "spitter" as const,
           position: { x: 200, y: 150 }, // Position in the open area
-          size: { width: 30, height: 30 },
-          speed: 100,
-          direction: { x: 1, y: 0 }, // Start moving east
+          size: { width: 25, height: 25 },
+          speed: 50,
+          direction: { x: 0, y: 0 }, // Will be set by movement logic
           patrolPoints: [],
           currentPatrolIndex: 0,
           patrolDirection: 1,
           chaseSpeed: 0,
           sightRange: 0,
           isChasing: false,
+          lastFireTime: Date.now(),
+          fireInterval: 3000, // 3 seconds
+          movementAxis: undefined // Will be randomly assigned on first update
         },
         {
           id: "screensaver2",
