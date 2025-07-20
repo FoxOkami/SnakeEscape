@@ -118,6 +118,7 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Recent Changes
+- July 20, 2025. Added Level 5 "Open Field" - blank level with player starting at far left near top, key in middle of screen, and exit door at bottom right
 - July 20, 2025. Modified spitter snake shooting pattern on Level 4 - now alternates between cardinal directions (N/S/E/W) on odd shots and diagonal directions (NE/NW/SE/SW) on even shots
 - July 20, 2025. Added shot counting system to spitter snakes - tracks shot number with shotCount property for alternating patterns
 - July 20, 2025. Moved spitter1 spawn position to grid center (7,7) on Level 4 - now spawns at the bottom-right area of the tile grid

@@ -696,4 +696,29 @@ export const LEVELS: Level[] = [
       lightSource: null,
     };
   })(),
+
+  // Level 5: Blank level with basic layout
+  {
+    id: 5,
+    name: "Open Field",
+    player: { x: 50, y: 50 }, // Far left near the top
+    size: { width: 800, height: 600 },
+    walls: [
+      // Outer walls only
+      { x: 0, y: 0, width: 800, height: 20 },     // Top wall
+      { x: 0, y: 580, width: 800, height: 20 },   // Bottom wall
+      { x: 0, y: 0, width: 20, height: 600 },     // Left wall
+      { x: 780, y: 0, width: 20, height: 600 },   // Right wall
+    ],
+    snakes: [], // Start with no snakes
+    door: { x: 720, y: 520, width: 30, height: 40, isOpen: false }, // Bottom right
+    key: { x: 390, y: 290, width: 20, height: 20, collected: false }, // Middle of screen
+    patternTiles: [],
+    patternSequence: [],
+    switches: [],
+    throwableItems: [],
+    mirrors: [],
+    crystal: null,
+    lightSource: null,
+  },
 ];
