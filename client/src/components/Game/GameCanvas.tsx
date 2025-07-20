@@ -504,6 +504,10 @@ const GameCanvas: React.FC = () => {
 
     // Draw snakes with different visuals for each type
     snakes.forEach(snake => {
+      // Skip rendering phase-restricted snakes that aren't in their active phase
+      if (snake.activePhase && currentLevel === 4 && snake.activePhase !== currentPhase) {
+        return; // Don't render this snake
+      }
       let baseColor = '#2d3748';
       let accentColor = '#ff6b6b';
       let eyeColor = '#ff6b6b';

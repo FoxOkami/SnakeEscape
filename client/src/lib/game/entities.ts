@@ -7,6 +7,12 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
   // Convert deltaTime from milliseconds to seconds for calculations
   const dt = deltaTime / 1000;
   
+  // Check if snake is phase-restricted and not in active phase
+  if (snake.activePhase && gameState && gameState.currentPhase !== snake.activePhase) {
+    // Snake is not active in current phase, return without updating
+    return { ...snake, isChasing: false };
+  }
+  
 
 
   // Handle different snake types

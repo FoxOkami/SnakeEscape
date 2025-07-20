@@ -118,8 +118,13 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Recent Changes
-- July 20, 2025. Moved Level 5 exit door to touch bottom wall and positioned 100 pixels left (from x:720 to x:620, y:520 to y:560)
-- July 20, 2025. Added Level 5 "Open Field" - blank level with player starting at far left near top, key in middle of screen, and exit door at bottom right
+- July 20, 2025. Implemented comprehensive Level 5 "Phase Shift" overhaul with tilemap-based design (21x15 grid, 35x35 pixel tiles)
+- July 20, 2025. Added phase-shifting wall system with ^ (shifting walls active in Phase A/C) and = (gates active in Phase B)
+- July 20, 2025. Implemented puzzle shard collection system with phase-specific shards (A=red, B=green, C=blue)
+- July 20, 2025. Added Phase B burster snake formation with 12 snakes that only appear during Phase B
+- July 20, 2025. Created phase-specific snake rendering and AI system that handles phase restrictions
+- July 20, 2025. Added visual phase indicator with progress bar and phase-specific shard pulsing effects
+- July 20, 2025. Updated Level 5 map layout with guard snakes, phase walls, and proper shard/pedestal positioning
 - July 20, 2025. Modified spitter snake shooting pattern on Level 4 - now alternates between cardinal directions (N/S/E/W) on odd shots and diagonal directions (NE/NW/SE/SW) on even shots
 - July 20, 2025. Added shot counting system to spitter snakes - tracks shot number with shotCount property for alternating patterns
 - July 20, 2025. Moved spitter1 spawn position to grid center (7,7) on Level 4 - now spawns at the bottom-right area of the tile grid

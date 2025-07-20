@@ -53,6 +53,8 @@ export interface Snake {
   fireInterval?: number; // Time between shots (3000ms = 3 seconds)
   movementAxis?: 'horizontal' | 'vertical'; // Whether spitter moves east-west or north-south
   shotCount?: number; // Track shot number for alternating patterns
+  // Phase system properties
+  activePhase?: 'A' | 'B' | 'C'; // Phase restriction for Level 5
 }
 
 export interface Wall extends Rectangle {}
