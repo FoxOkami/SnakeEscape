@@ -1673,7 +1673,8 @@ export const useSnakeGame = create<SnakeGameState>()(
             snakesToFire.push(snake.id);
             return {
               ...snake,
-              lastFireTime: currentTime
+              lastFireTime: currentTime,
+              shotCount: (snake.shotCount || 0) + 1 // Increment shot count
             };
           }
         }
@@ -1689,17 +1690,43 @@ export const useSnakeGame = create<SnakeGameState>()(
           const projectileSize = { width: 6, height: 6 };
           const lifespan = 5000; // 5 seconds
           
-          // Create 8 projectiles in cardinal and diagonal directions
-          const directions = [
-            { x: 0, y: -1 },   // North
-            { x: 1, y: -1 },   // Northeast
-            { x: 1, y: 0 },    // East
-            { x: 1, y: 1 },    // Southeast
-            { x: 0, y: 1 },    // South
-            { x: -1, y: 1 },   // Southwest
-            { x: -1, y: 0 },   // West
-            { x: -1, y: -1 }   // Northwest
-          ];
+          // Check if we're on Level 4 for alternating pattern
+          const isLevel4 = state.currentLevel === 3; // Level 4 is 0-indexed as 3
+          let directions: { x: number; y: number }[];
+          
+          if (isLevel4) {
+            const isOddShot = (snake.shotCount || 1) % 2 === 1; // shotCount starts at 1 after increment
+            
+            if (isOddShot) {
+              // Odd shots: cardinal directions (N, S, E, W)
+              directions = [
+                { x: 0, y: -1 },   // North
+                { x: 1, y: 0 },    // East  
+                { x: 0, y: 1 },    // South
+                { x: -1, y: 0 },   // West
+              ];
+            } else {
+              // Even shots: diagonal directions (NE, NW, SE, SW)
+              directions = [
+                { x: 1, y: -1 },   // Northeast
+                { x: -1, y: -1 },  // Northwest
+                { x: 1, y: 1 },    // Southeast
+                { x: -1, y: 1 },   // Southwest
+              ];
+            }
+          } else {
+            // Default behavior for other levels: all 8 directions
+            directions = [
+              { x: 0, y: -1 },   // North
+              { x: 1, y: -1 },   // Northeast
+              { x: 1, y: 0 },    // East
+              { x: 1, y: 1 },    // Southeast
+              { x: 0, y: 1 },    // South
+              { x: -1, y: 1 },   // Southwest
+              { x: -1, y: 0 },   // West
+              { x: -1, y: -1 }   // Northwest
+            ];
+          }
           
           const newProjectiles = directions.map((dir, index) => ({
             id: `${snakeId}_projectile_${Date.now()}_${index}`,
@@ -1749,7 +1776,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         isChasing: false,
         lastFireTime: Date.now(),
         fireInterval: 3000, // 3 seconds
-        movementAxis: undefined // Will be randomly assigned on first update
+        movementAxis: undefined, // Will be randomly assigned on first update
+        shotCount: 0 // Start at 0 shots
       };
       
       set({
@@ -1766,17 +1794,52 @@ export const useSnakeGame = create<SnakeGameState>()(
       const projectileSize = { width: 6, height: 6 };
       const lifespan = 5000; // 5 seconds
       
-      // Create 8 projectiles in cardinal and diagonal directions
-      const directions = [
-        { x: 0, y: -1 },   // North
-        { x: 1, y: -1 },   // Northeast
-        { x: 1, y: 0 },    // East
-        { x: 1, y: 1 },    // Southeast
-        { x: 0, y: 1 },    // South
-        { x: -1, y: 1 },   // Southwest
-        { x: -1, y: 0 },   // West
-        { x: -1, y: -1 }   // Northwest
-      ];
+      // Check if we're on Level 4 for alternating pattern
+      const isLevel4 = state.currentLevel === 3; // Level 4 is 0-indexed as 3
+      let directions: { x: number; y: number }[];
+      
+      if (isLevel4) {
+        // Increment shot count for this manual fire
+        const newShotCount = (snake.shotCount || 0) + 1;
+        const isOddShot = newShotCount % 2 === 1;
+        
+        if (isOddShot) {
+          // Odd shots: cardinal directions (N, S, E, W)
+          directions = [
+            { x: 0, y: -1 },   // North
+            { x: 1, y: 0 },    // East  
+            { x: 0, y: 1 },    // South
+            { x: -1, y: 0 },   // West
+          ];
+        } else {
+          // Even shots: diagonal directions (NE, NW, SE, SW)
+          directions = [
+            { x: 1, y: -1 },   // Northeast
+            { x: -1, y: -1 },  // Northwest
+            { x: 1, y: 1 },    // Southeast
+            { x: -1, y: 1 },   // Southwest
+          ];
+        }
+        
+        // Update the snake's shot count
+        set({
+          snakes: state.snakes.map(s => 
+            s.id === snakeId ? { ...s, shotCount: newShotCount } : s
+          )
+        });
+      } else {
+        // Default behavior for other levels: all 8 directions
+        directions = [
+          { x: 0, y: -1 },   // North
+          { x: 1, y: -1 },   // Northeast
+          { x: 1, y: 0 },    // East
+          { x: 1, y: 1 },    // Southeast
+          { x: 0, y: 1 },    // South
+          { x: -1, y: 1 },   // Southwest
+          { x: -1, y: 0 },   // West
+          { x: -1, y: -1 }   // Northwest
+        ];
+      }
       
       const newProjectiles = directions.map((dir, index) => ({
         id: `${snakeId}_projectile_${Date.now()}_${index}`,

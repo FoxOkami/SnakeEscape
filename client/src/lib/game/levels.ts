@@ -610,6 +610,7 @@ export const LEVELS: Level[] = [
               lastFireTime: Date.now(),
               fireInterval: 3000, // 3 seconds
               movementAxis: undefined, // Will be randomly assigned on first update
+              shotCount: 0 // Start at 0 shots
             },
           ];
         })(),
