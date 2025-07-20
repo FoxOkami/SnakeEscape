@@ -711,7 +711,7 @@ export const LEVELS: Level[] = [
       { x: 780, y: 0, width: 20, height: 600 },   // Right wall
     ],
     snakes: [], // Start with no snakes
-    door: { x: 720, y: 520, width: 30, height: 40, isOpen: false }, // Bottom right
+    door: { x: 620, y: 560, width: 30, height: 40, isOpen: false }, // Bottom wall, 100px left
     key: { x: 390, y: 290, width: 20, height: 20, collected: false }, // Middle of screen
     patternTiles: [],
     patternSequence: [],
