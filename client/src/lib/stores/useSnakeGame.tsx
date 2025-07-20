@@ -1123,11 +1123,14 @@ export const useSnakeGame = create<SnakeGameState>()(
             const newLockedTiles = state.flowState.lockedTiles.filter(tileId => tileId !== state.flowState.currentTile);
             const newCompletedPaths = state.flowState.completedPaths.filter(path => path.tileId !== state.flowState.currentTile);
             
-            // Find next tile in emptying path
+            // Remove the current tile from emptying paths to prevent infinite loops
+            const newEmptyingPaths = state.flowState.emptyingPaths.filter(path => path.tileId !== state.flowState.currentTile);
+            
+            // Find next tile in remaining emptying paths
             const currentPath = state.flowState.emptyingPaths.find(path => path.tileId === state.flowState.currentTile);
-            if (currentPath && currentPath.exitDirection) {
+            if (currentPath && currentPath.exitDirection && newEmptyingPaths.length > 0) {
               const nextTile = get().getNextTile(state.flowState.currentTile, currentPath.exitDirection);
-              const nextPath = state.flowState.emptyingPaths.find(path => path.tileId === nextTile?.id);
+              const nextPath = newEmptyingPaths.find(path => path.tileId === nextTile?.id);
               
               if (nextTile && nextPath) {
                 // Move to next tile
@@ -1141,29 +1144,50 @@ export const useSnakeGame = create<SnakeGameState>()(
                     progress: 0,
                     phaseStartTime: currentTime,
                     lockedTiles: newLockedTiles,
-                    completedPaths: newCompletedPaths
+                    completedPaths: newCompletedPaths,
+                    emptyingPaths: newEmptyingPaths
                   }
                 });
               } else {
-                // Emptying complete
-                set({
-                  flowState: {
-                    isActive: false,
-                    currentPhase: 'entry-to-center',
-                    isEmptying: false,
-                    currentTile: '',
-                    entryDirection: null,
-                    exitDirection: null,
-                    progress: 0,
-                    phaseStartTime: 0,
-                    phaseDuration: 400,
-                    completedPaths: [],
-                    emptyingPaths: [],
-                    lastPosition: undefined,
-                    isBlocked: false,
-                    lockedTiles: []
-                  }
-                });
+                // No valid next tile found, but there are still paths to empty
+                // Find any remaining path to continue emptying
+                const remainingPath = newEmptyingPaths[0];
+                if (remainingPath) {
+                  set({
+                    flowState: {
+                      ...state.flowState,
+                      currentTile: remainingPath.tileId,
+                      entryDirection: remainingPath.entryDirection,
+                      exitDirection: remainingPath.exitDirection,
+                      currentPhase: 'entry-to-center',
+                      progress: 0,
+                      phaseStartTime: currentTime,
+                      lockedTiles: newLockedTiles,
+                      completedPaths: newCompletedPaths,
+                      emptyingPaths: newEmptyingPaths
+                    }
+                  });
+                } else {
+                  // Emptying complete
+                  set({
+                    flowState: {
+                      isActive: false,
+                      currentPhase: 'entry-to-center',
+                      isEmptying: false,
+                      currentTile: '',
+                      entryDirection: null,
+                      exitDirection: null,
+                      progress: 0,
+                      phaseStartTime: 0,
+                      phaseDuration: 400,
+                      completedPaths: [],
+                      emptyingPaths: [],
+                      lastPosition: undefined,
+                      isBlocked: false,
+                      lockedTiles: []
+                    }
+                  });
+                }
               }
             } else {
               // No more emptying paths - complete the emptying process
