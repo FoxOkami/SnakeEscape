@@ -470,23 +470,6 @@ export const LEVELS: Level[] = [
       ],
       snakes: [
         {
-          id: "spitter1",
-          type: "spitter" as const,
-          position: { x: 200, y: 150 }, // Position in the open area
-          size: { width: 25, height: 25 },
-          speed: 50,
-          direction: { x: 0, y: 0 }, // Will be set by movement logic
-          patrolPoints: [],
-          currentPatrolIndex: 0,
-          patrolDirection: 1,
-          chaseSpeed: 0,
-          sightRange: 0,
-          isChasing: false,
-          lastFireTime: Date.now(),
-          fireInterval: 3000, // 3 seconds
-          movementAxis: undefined // Will be randomly assigned on first update
-        },
-        {
           id: "screensaver2",
           type: "screensaver" as const,
           position: { x: 400, y: 300 }, // Different starting position
@@ -510,16 +493,16 @@ export const LEVELS: Level[] = [
           const playableHeight = 560;
           const startX = 20 + (playableWidth - totalGridWidth) / 2;
           const startY = 20 + (playableHeight - totalGridHeight) / 2;
-          
+
           const calculateTileCenter = (row: number, col: number) => {
             const tileX = startX + col * tileSize;
             const tileY = startY + row * tileSize;
             return {
               x: tileX + tileSize / 2 - 12.5, // Center minus half snake size
-              y: tileY + tileSize / 2 - 12.5
+              y: tileY + tileSize / 2 - 12.5,
             };
           };
-          
+
           return [
             {
               id: "plumber2",
@@ -536,7 +519,8 @@ export const LEVELS: Level[] = [
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
-              nextRotationTime: performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
+              nextRotationTime:
+                performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
               tileToRotate: undefined,
             },
             {
@@ -554,7 +538,8 @@ export const LEVELS: Level[] = [
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
-              nextRotationTime: performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
+              nextRotationTime:
+                performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
               tileToRotate: undefined,
             },
             {
@@ -572,7 +557,8 @@ export const LEVELS: Level[] = [
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
-              nextRotationTime: performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
+              nextRotationTime:
+                performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
               tileToRotate: undefined,
             },
             {
@@ -590,8 +576,26 @@ export const LEVELS: Level[] = [
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
-              nextRotationTime: performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
+              nextRotationTime:
+                performance.now() / 1000 + 4 + Math.random() * 2, // Random 4-6 seconds
               tileToRotate: undefined,
+            },
+            {
+              id: "spitter1",
+              type: "spitter" as const,
+              position: calculateTileCenter(7, 7), // Grid position (7,7)
+              size: { width: 25, height: 25 },
+              speed: 50,
+              direction: { x: 0, y: 0 }, // Will be set by movement logic
+              patrolPoints: [],
+              currentPatrolIndex: 0,
+              patrolDirection: 1,
+              chaseSpeed: 0,
+              sightRange: 0,
+              isChasing: false,
+              lastFireTime: Date.now(),
+              fireInterval: 3000, // 3 seconds
+              movementAxis: undefined, // Will be randomly assigned on first update
             },
           ];
         })(),
