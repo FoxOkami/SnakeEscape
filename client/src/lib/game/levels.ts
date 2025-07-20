@@ -699,22 +699,27 @@ export const LEVELS: Level[] = [
 
   // Level 5: Phase-shifting puzzle level
   (() => {
-    const tileSize = 35;
+    // Use same dimensions as Level 1
+    const levelWidth = 800;
+    const levelHeight = 600;
     const cols = 21;
-    const rows = 11;
-    const levelWidth = cols * tileSize;
-    const levelHeight = rows * tileSize;
+    const rows = 15; // Increased rows to better fit 600px height
+    const tileSize = Math.floor(levelWidth / cols); // ~38px tiles
     
     // Tilemap layout - supports all three phases
     const tilemap = [
       "#####################",
       "#P....^....G.....^..#",
       "#.....^...........^..#",
+      "#.....^...........^..#",
       "#.###=###..a..###=###",
       "#.#...............#.#",
       "#.#...............#.#",
       "#.#...............#.#",
+      "#.#...............#.#",
+      "#.#...............#.#",
       "#.###=###..c..###=###",
+      "#.....^...........^..#",
       "#.....^...........^..#",
       "#.....^....G......^..#",
       "#####################"
@@ -816,24 +821,24 @@ export const LEVELS: Level[] = [
     // Phase B layout has shards in middle area with burster snakes
     puzzleShards.push({
       id: 'shard_b_1',
-      x: 12 * tileSize + 5, y: 2 * tileSize + 5, width: 25, height: 25,
+      x: 12 * tileSize + 5, y: 3 * tileSize + 5, width: 25, height: 25,
       phase: 'B', collected: false, shardType: 'b'
     });
     
     // Add Phase B burster snakes that appear in the middle area
     const phaseB_BursterPositions = [
-      { x: 6 * tileSize + 5, y: 4 * tileSize + 5 },   // Left middle
-      { x: 8 * tileSize + 5, y: 4 * tileSize + 5 },   // Center left
-      { x: 10 * tileSize + 5, y: 4 * tileSize + 5 },  // Center
-      { x: 12 * tileSize + 5, y: 4 * tileSize + 5 },  // Center right  
-      { x: 14 * tileSize + 5, y: 4 * tileSize + 5 },  // Right middle
-      { x: 8 * tileSize + 5, y: 5 * tileSize + 5 },   // Center
-      { x: 12 * tileSize + 5, y: 5 * tileSize + 5 },  // Center
       { x: 6 * tileSize + 5, y: 6 * tileSize + 5 },   // Left middle
       { x: 8 * tileSize + 5, y: 6 * tileSize + 5 },   // Center left
       { x: 10 * tileSize + 5, y: 6 * tileSize + 5 },  // Center
-      { x: 12 * tileSize + 5, y: 6 * tileSize + 5 },  // Center right
+      { x: 12 * tileSize + 5, y: 6 * tileSize + 5 },  // Center right  
       { x: 14 * tileSize + 5, y: 6 * tileSize + 5 },  // Right middle
+      { x: 8 * tileSize + 5, y: 7 * tileSize + 5 },   // Center
+      { x: 12 * tileSize + 5, y: 7 * tileSize + 5 },  // Center
+      { x: 6 * tileSize + 5, y: 8 * tileSize + 5 },   // Left middle
+      { x: 8 * tileSize + 5, y: 8 * tileSize + 5 },   // Center left
+      { x: 10 * tileSize + 5, y: 8 * tileSize + 5 },  // Center
+      { x: 12 * tileSize + 5, y: 8 * tileSize + 5 },  // Center right
+      { x: 14 * tileSize + 5, y: 8 * tileSize + 5 },  // Right middle
     ];
     
     phaseB_BursterPositions.forEach((pos, index) => {
@@ -857,17 +862,17 @@ export const LEVELS: Level[] = [
       });
     });
     
-    // Set up pedestal position at the center where * would be (row 7, col 10)
+    // Set up pedestal position at the center where * would be (row 9, col 10)
     if (!puzzlePedestal) {
       puzzlePedestal = {
         id: 'pedestal',
-        x: 10 * tileSize + 5, y: 7 * tileSize + 5, width: 25, height: 25,
+        x: 10 * tileSize + 5, y: 9 * tileSize + 5, width: 25, height: 25,
         requiredShards: 3, collectedShards: 0, isActivated: false
       };
     }
     
-    // Set up door position for Phase C (row 9, col 18)
-    door = { x: 18 * tileSize + 2, y: 9 * tileSize + 2, width: 30, height: 30, isOpen: false };
+    // Set up door position for Phase C (row 13, col 18)
+    door = { x: 18 * tileSize + 2, y: 13 * tileSize + 2, width: 30, height: 30, isOpen: false };
     
     // All phase-specific snakes have been added above
     
