@@ -894,39 +894,41 @@ const GameCanvas: React.FC = () => {
         ctx.textAlign = 'left';
       }
       
-      // Draw phase indicator (top center)
-      const phaseProgress = phaseTimer / phaseDuration;
-      const phaseBarWidth = 200;
-      const phaseBarHeight = 20;
-      const phaseBarX = (levelSize.width - phaseBarWidth) / 2;
-      const phaseBarY = 10;
-      
-      // Phase bar background
-      ctx.fillStyle = '#333333';
-      ctx.fillRect(phaseBarX, phaseBarY, phaseBarWidth, phaseBarHeight);
-      
-      // Phase progress
-      let phaseColor;
-      switch (currentPhase) {
-        case 'A': phaseColor = '#ff6464'; break; // Red
-        case 'B': phaseColor = '#64ff64'; break; // Green
-        case 'C': phaseColor = '#6464ff'; break; // Blue
-        default: phaseColor = '#ffffff';
+      // Draw phase indicator (top center) - only for levels that have phase mechanics
+      if (currentLevel !== 4) { // Don't show phase timer on Level 5 (index 4)
+        const phaseProgress = phaseTimer / phaseDuration;
+        const phaseBarWidth = 200;
+        const phaseBarHeight = 20;
+        const phaseBarX = (levelSize.width - phaseBarWidth) / 2;
+        const phaseBarY = 10;
+        
+        // Phase bar background
+        ctx.fillStyle = '#333333';
+        ctx.fillRect(phaseBarX, phaseBarY, phaseBarWidth, phaseBarHeight);
+        
+        // Phase progress
+        let phaseColor;
+        switch (currentPhase) {
+          case 'A': phaseColor = '#ff6464'; break; // Red
+          case 'B': phaseColor = '#64ff64'; break; // Green
+          case 'C': phaseColor = '#6464ff'; break; // Blue
+          default: phaseColor = '#ffffff';
+        }
+        ctx.fillStyle = phaseColor;
+        ctx.fillRect(phaseBarX, phaseBarY, phaseBarWidth * phaseProgress, phaseBarHeight);
+        
+        // Phase bar border
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(phaseBarX, phaseBarY, phaseBarWidth, phaseBarHeight);
+        
+        // Phase label
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Phase ${currentPhase}`, phaseBarX + phaseBarWidth / 2, phaseBarY + 35);
+        ctx.textAlign = 'left';
       }
-      ctx.fillStyle = phaseColor;
-      ctx.fillRect(phaseBarX, phaseBarY, phaseBarWidth * phaseProgress, phaseBarHeight);
-      
-      // Phase bar border
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(phaseBarX, phaseBarY, phaseBarWidth, phaseBarHeight);
-      
-      // Phase label
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '14px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(`Phase ${currentPhase}`, phaseBarX + phaseBarWidth / 2, phaseBarY + 35);
-      ctx.textAlign = 'left';
     }
 
     // Debug Display - Player Info (bottom right)
