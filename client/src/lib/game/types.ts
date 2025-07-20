@@ -51,6 +51,7 @@ export interface Snake {
   // Spitter-specific properties
   lastFireTime?: number; // Time when last projectile was fired
   fireInterval?: number; // Time between shots (3000ms = 3 seconds)
+  movementAxis?: 'horizontal' | 'vertical'; // Whether spitter moves east-west or north-south
 }
 
 export interface Wall extends Rectangle {}

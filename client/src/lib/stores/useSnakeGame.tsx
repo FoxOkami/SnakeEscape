@@ -1739,8 +1739,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         type: 'spitter',
         position: { x: position.x - 12.5, y: position.y - 12.5 }, // Center the 25x25 snake
         size: { width: 25, height: 25 },
-        speed: 0, // Stationary
-        direction: { x: 0, y: 0 },
+        speed: 50, // Moving snake
+        direction: { x: 0, y: 0 }, // Will be set by movement logic
         patrolPoints: [],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -1748,7 +1748,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         sightRange: 0,
         isChasing: false,
         lastFireTime: Date.now(),
-        fireInterval: 3000 // 3 seconds
+        fireInterval: 3000, // 3 seconds
+        movementAxis: undefined // Will be randomly assigned on first update
       };
       
       set({

@@ -21,6 +21,8 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
       return updateScreensaverSnake(snake, walls, dt);
     case 'plumber':
       return updatePlumberSnake(snake, walls, dt, player, gameState);
+    case 'spitter':
+      return updateSpitterSnake(snake, walls, dt);
     default:
       return snake;
   }
@@ -476,5 +478,51 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     snake.direction = getDirectionVector(snake.position, snake.chaseTarget);
   }
   
+  return snake;
+}
+
+function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number): Snake {
+  // Initialize movement axis if not set
+  if (!snake.movementAxis) {
+    // Randomly choose horizontal or vertical movement
+    snake.movementAxis = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+    
+    // Set initial direction based on movement axis
+    if (snake.movementAxis === 'horizontal') {
+      snake.direction = { x: 1, y: 0 }; // Start moving east
+    } else {
+      snake.direction = { x: 0, y: 1 }; // Start moving south
+    }
+  }
+
+  // Calculate new position
+  const newPosition = {
+    x: snake.position.x + snake.direction.x * snake.speed * dt,
+    y: snake.position.y + snake.direction.y * snake.speed * dt
+  };
+
+  // Check for wall collision
+  if (checkWallCollision(snake, newPosition, walls)) {
+    // Hit a wall, reverse direction
+    snake.direction = {
+      x: -snake.direction.x,
+      y: -snake.direction.y
+    };
+    
+    // Try moving in the reversed direction
+    const reversedPosition = {
+      x: snake.position.x + snake.direction.x * snake.speed * dt,
+      y: snake.position.y + snake.direction.y * snake.speed * dt
+    };
+    
+    // Only move if the reversed direction is clear
+    if (!checkWallCollision(snake, reversedPosition, walls)) {
+      snake.position = reversedPosition;
+    }
+  } else {
+    // No collision, move normally
+    snake.position = newPosition;
+  }
+
   return snake;
 }
