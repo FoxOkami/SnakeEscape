@@ -460,15 +460,31 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     snake.isPaused = false;
     snake.pauseStartTime = undefined;
     
-    // Pick a random tile from the grid
-    const randomTileIndex = Math.floor(Math.random() * gameState.patternTiles.length);
-    const targetTile = gameState.patternTiles[randomTileIndex];
-    
-    // Set target to center of the random tile
-    snake.chaseTarget = {
-      x: targetTile.x + targetTile.width / 2 - snake.size.width / 2,
-      y: targetTile.y + targetTile.height / 2 - snake.size.height / 2
-    };
+    // Check if pattern tiles exist
+    if (gameState.patternTiles && gameState.patternTiles.length > 0) {
+      // Pick a random tile from the grid
+      const randomTileIndex = Math.floor(Math.random() * gameState.patternTiles.length);
+      const targetTile = gameState.patternTiles[randomTileIndex];
+      
+      // Set target to center of the random tile
+      snake.chaseTarget = {
+        x: targetTile.x + targetTile.width / 2 - snake.size.width / 2,
+        y: targetTile.y + targetTile.height / 2 - snake.size.height / 2
+      };
+    } else {
+      // Fallback: move to a random position within the level bounds
+      const levelBounds = {
+        minX: 50,
+        maxX: 700,
+        minY: 50,
+        maxY: 500
+      };
+      
+      snake.chaseTarget = {
+        x: levelBounds.minX + Math.random() * (levelBounds.maxX - levelBounds.minX),
+        y: levelBounds.minY + Math.random() * (levelBounds.maxY - levelBounds.minY)
+      };
+    }
   }
   
   // Move toward current target (but not if paused)

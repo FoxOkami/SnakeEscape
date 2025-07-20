@@ -443,138 +443,138 @@ export const LEVELS: Level[] = [
 
   // Level 4: Simple level - just player, key, and exit door with 16x16 tile grid
   {
-      id: 4,
-      name: "Venom Pipes",
-      player: { x: 50, y: 300 },
-      size: { width: 800, height: 600 },
-      startTilePos: { row: 3, col: 0 },
-      endTilePos: { row: 5, col: 7 },
-      walls: [
-        // Outer walls
-        { x: 0, y: 0, width: 800, height: 20 },
-        { x: 0, y: 580, width: 800, height: 20 },
-        { x: 0, y: 0, width: 20, height: 600 },
-        { x: 780, y: 0, width: 20, height: 600 },
-        // Key chamber walls (similar to level 1)
-        { x: 660, y: 40, width: 100, height: 20 }, // top wall
-        { x: 660, y: 120, width: 100, height: 20 }, // bottom wall
-        { x: 660, y: 50, width: 20, height: 70 }, // left wall
-        { x: 740, y: 50, width: 20, height: 70 }, // right wall
-      ],
-      snakes: [
-        {
-          id: "spitter1",
-          type: "spitter" as const,
-          position: { x: 200, y: 150 }, // Position in the open area
-          size: { width: 25, height: 25 },
-          speed: 50,
-          direction: { x: 0, y: 0 }, // Will be set by movement logic
-          patrolPoints: [],
-          currentPatrolIndex: 0,
-          patrolDirection: 1,
-          chaseSpeed: 0,
-          sightRange: 0,
-          isChasing: false,
-          lastFireTime: 0,
-          fireInterval: 3000, // 3 seconds
-          movementAxis: undefined // Will be randomly assigned on first update
-        },
-        {
-          id: "screensaver2",
-          type: "screensaver" as const,
-          position: { x: 400, y: 300 }, // Different starting position
-          size: { width: 30, height: 30 },
-          speed: 150, // 1.5x faster than screensaver1
-          direction: { x: -1, y: 0 }, // Start moving west
-          patrolPoints: [],
-          currentPatrolIndex: 0,
-          patrolDirection: 1,
-          chaseSpeed: 0,
-          sightRange: 0,
-          isChasing: false,
-        },
-        {
-          id: "plumber2",
-          type: "plumber" as const,
-          position: { x: 320, y: 190 }, // Calculated tile center for (1,1)
-          size: { width: 25, height: 25 },
-          speed: 80,
-          direction: { x: 1, y: 0 }, // Start moving east
-          patrolPoints: [],
-          currentPatrolIndex: 0,
-          patrolDirection: 1,
-          chaseSpeed: 0,
-          sightRange: 0,
-          isChasing: false,
-          currentTileId: undefined,
-          entryDirection: undefined,
-          nextRotationTime: undefined,
-          tileToRotate: undefined,
-        },
-        {
-          id: "plumber3",
-          type: "plumber" as const,
-          position: { x: 620, y: 190 }, // Calculated tile center for (1,6)
-          size: { width: 25, height: 25 },
-          speed: 80,
-          direction: { x: 0, y: 1 }, // Start moving south
-          patrolPoints: [],
-          currentPatrolIndex: 0,
-          patrolDirection: 1,
-          chaseSpeed: 0,
-          sightRange: 0,
-          isChasing: false,
-          currentTileId: undefined,
-          entryDirection: undefined,
-          nextRotationTime: undefined,
-          tileToRotate: undefined,
-        },
-        {
-          id: "plumber4",
-          type: "plumber" as const,
-          position: { x: 320, y: 490 }, // Calculated tile center for (6,1)
-          size: { width: 25, height: 25 },
-          speed: 80,
-          direction: { x: 0, y: -1 }, // Start moving north
-          patrolPoints: [],
-          currentPatrolIndex: 0,
-          patrolDirection: 1,
-          chaseSpeed: 0,
-          sightRange: 0,
-          isChasing: false,
-          currentTileId: undefined,
-          entryDirection: undefined,
-          nextRotationTime: undefined,
-          tileToRotate: undefined,
-        },
-        {
-          id: "plumber5",
-          type: "plumber" as const,
-          position: { x: 620, y: 490 }, // Calculated tile center for (6,6)
-          size: { width: 25, height: 25 },
-          speed: 80,
-          direction: { x: -1, y: 0 }, // Start moving west
-          patrolPoints: [],
-          currentPatrolIndex: 0,
-          patrolDirection: 1,
-          chaseSpeed: 0,
-          sightRange: 0,
-          isChasing: false,
-          currentTileId: undefined,
-          entryDirection: undefined,
-          nextRotationTime: undefined,
-          tileToRotate: undefined,
-        },
-      ],
-      door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
-      key: { x: 700, y: 80, width: 20, height: 20, collected: false },
-      // 8x8 centered tile grid with randomized start and end positions
-      patternTiles: [],
-      patternSequence: [], // No pattern sequence needed
-      switches: [],
-      throwableItems: [],
-      mirrors: [],
-      crystal: null,
-      lightSource: null,
-    },
+    id: 4,
+    name: "Venom Pipes",
+    player: { x: 50, y: 300 },
+    size: { width: 800, height: 600 },
+    startTilePos: { row: 3, col: 0 },
+    endTilePos: { row: 5, col: 7 },
+    walls: [
+      // Outer walls
+      { x: 0, y: 0, width: 800, height: 20 },
+      { x: 0, y: 580, width: 800, height: 20 },
+      { x: 0, y: 0, width: 20, height: 600 },
+      { x: 780, y: 0, width: 20, height: 600 },
+      // Key chamber walls (similar to level 1)
+      { x: 660, y: 40, width: 100, height: 20 }, // top wall
+      { x: 660, y: 120, width: 100, height: 20 }, // bottom wall
+      { x: 660, y: 50, width: 20, height: 70 }, // left wall
+      { x: 740, y: 50, width: 20, height: 70 }, // right wall
+    ],
+    snakes: [
+      {
+        id: "spitter1",
+        type: "spitter" as const,
+        position: { x: 200, y: 150 }, // Position in the open area
+        size: { width: 25, height: 25 },
+        speed: 50,
+        direction: { x: 0, y: 0 }, // Will be set by movement logic
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+        lastFireTime: 0,
+        fireInterval: 3000, // 3 seconds
+        movementAxis: undefined, // Will be randomly assigned on first update
+      },
+      {
+        id: "screensaver2",
+        type: "screensaver" as const,
+        position: { x: 400, y: 300 }, // Different starting position
+        size: { width: 30, height: 30 },
+        speed: 150, // 1.5x faster than screensaver1
+        direction: { x: -1, y: 0 }, // Start moving west
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+      },
+      {
+        id: "plumber2",
+        type: "plumber" as const,
+        position: { x: 320, y: 190 }, // Calculated tile center for (1,1)
+        size: { width: 25, height: 25 },
+        speed: 80,
+        direction: { x: 1, y: 0 }, // Start moving east
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+        currentTileId: undefined,
+        entryDirection: undefined,
+        nextRotationTime: undefined,
+        tileToRotate: undefined,
+      },
+      {
+        id: "plumber3",
+        type: "plumber" as const,
+        position: { x: 620, y: 190 }, // Calculated tile center for (1,6)
+        size: { width: 25, height: 25 },
+        speed: 80,
+        direction: { x: 0, y: 1 }, // Start moving south
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+        currentTileId: undefined,
+        entryDirection: undefined,
+        nextRotationTime: undefined,
+        tileToRotate: undefined,
+      },
+      {
+        id: "plumber4",
+        type: "plumber" as const,
+        position: { x: 320, y: 490 }, // Calculated tile center for (6,1)
+        size: { width: 25, height: 25 },
+        speed: 80,
+        direction: { x: 0, y: -1 }, // Start moving north
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+        currentTileId: undefined,
+        entryDirection: undefined,
+        nextRotationTime: undefined,
+        tileToRotate: undefined,
+      },
+      {
+        id: "plumber5",
+        type: "plumber" as const,
+        position: { x: 620, y: 490 }, // Calculated tile center for (6,6)
+        size: { width: 25, height: 25 },
+        speed: 80,
+        direction: { x: -1, y: 0 }, // Start moving west
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+        currentTileId: undefined,
+        entryDirection: undefined,
+        nextRotationTime: undefined,
+        tileToRotate: undefined,
+      },
+    ],
+    door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
+    key: { x: 700, y: 80, width: 20, height: 20, collected: false },
+    // 8x8 centered tile grid with randomized start and end positions
+    patternTiles: [],
+    patternSequence: [], // No pattern sequence needed
+    switches: [],
+    throwableItems: [],
+    mirrors: [],
+    crystal: null,
+    lightSource: null,
+  },
 ];
