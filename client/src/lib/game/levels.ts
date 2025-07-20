@@ -697,28 +697,172 @@ export const LEVELS: Level[] = [
     };
   })(),
 
-  // Level 5: Blank level with basic layout
-  {
-    id: 5,
-    name: "Open Field",
-    player: { x: 50, y: 50 }, // Far left near the top
-    size: { width: 800, height: 600 },
-    walls: [
-      // Outer walls only
-      { x: 0, y: 0, width: 800, height: 20 },     // Top wall
-      { x: 0, y: 580, width: 800, height: 20 },   // Bottom wall
-      { x: 0, y: 0, width: 20, height: 600 },     // Left wall
-      { x: 780, y: 0, width: 20, height: 600 },   // Right wall
-    ],
-    snakes: [], // Start with no snakes
-    door: { x: 620, y: 560, width: 30, height: 40, isOpen: false }, // Bottom wall, 100px left
-    key: { x: 390, y: 290, width: 20, height: 20, collected: false }, // Middle of screen
-    patternTiles: [],
-    patternSequence: [],
-    switches: [],
-    throwableItems: [],
-    mirrors: [],
-    crystal: null,
-    lightSource: null,
-  },
+  // Level 5: Phase-shifting puzzle level
+  (() => {
+    const tileSize = 35;
+    const cols = 21;
+    const rows = 15;
+    const levelWidth = cols * tileSize;
+    const levelHeight = rows * tileSize;
+    
+    // Tilemap for Phase A layout
+    const tilemap = [
+      "#####################",
+      "#P....^....G.....^..#",
+      "#.....^...........^.#",
+      "#.###=###..a..###=##",
+      "#.#...............#.",
+      "#.#...............#.",
+      "#.#...............#.",
+      "#.###=###.....###=##",
+      "#.....^...........^.#",
+      "#.....^....G......^.#",
+      "#.....^...........^.#",
+      "#.....^....b......^.#",
+      "#.....^...........^.#",
+      "#.....^.....*....D^.#",
+      "#####################"
+    ];
+    
+    const walls: any[] = [];
+    const phaseWalls: any[] = [];
+    const snakes: any[] = [];
+    const puzzleShards: any[] = [];
+    let puzzlePedestal: any = null;
+    let player: any = { x: 50, y: 50 };
+    let door: any = { x: 620, y: 450, width: 30, height: 30, isOpen: false };
+    
+    // Parse tilemap
+    for (let row = 0; row < rows && row < tilemap.length; row++) {
+      const line = tilemap[row];
+      for (let col = 0; col < cols && col < line.length; col++) {
+        const char = line[col];
+        const x = col * tileSize;
+        const y = row * tileSize;
+        
+        switch (char) {
+          case '#': // Solid wall
+            walls.push({ x, y, width: tileSize, height: tileSize });
+            break;
+          case '^': // Shifting wall (Phase A: solid, Phase B: passable, Phase C: solid)
+            phaseWalls.push({
+              id: `shift_${row}_${col}`,
+              x, y, width: tileSize, height: tileSize,
+              wallType: 'shifting',
+              activePhases: ['A', 'C']
+            });
+            break;
+          case '=': // Gate (Phase A: passable, Phase B: solid, Phase C: passable)
+            phaseWalls.push({
+              id: `gate_${row}_${col}`,
+              x, y, width: tileSize, height: tileSize,
+              wallType: 'gate',
+              activePhases: ['B']
+            });
+            break;
+          case 'P': // Player start
+            player = { x: x + 5, y: y + 5 };
+            break;
+          case 'a': // Puzzle shard A
+            puzzleShards.push({
+              id: 'shard_a',
+              x: x + 5, y: y + 5, width: 25, height: 25,
+              phase: 'A', collected: false, shardType: 'a'
+            });
+            break;
+          case 'b': // Puzzle shard B  
+            puzzleShards.push({
+              id: 'shard_b',
+              x: x + 5, y: y + 5, width: 25, height: 25,
+              phase: 'B', collected: false, shardType: 'b'
+            });
+            break;
+          case 'c': // Puzzle shard C
+            puzzleShards.push({
+              id: 'shard_c',
+              x: x + 5, y: y + 5, width: 25, height: 25,
+              phase: 'C', collected: false, shardType: 'c'
+            });
+            break;
+          case '*': // Puzzle pedestal
+            puzzlePedestal = {
+              id: 'pedestal',
+              x: x + 5, y: y + 5, width: 25, height: 25,
+              requiredShards: 3, collectedShards: 0, isActivated: false
+            };
+            break;
+          case 'D': // Exit door
+            door = { x: x + 2, y: y + 2, width: 30, height: 30, isOpen: false };
+            break;
+          case 'G': // Guard snake
+            snakes.push({
+              id: `guard_${row}_${col}`,
+              type: 'guard',
+              position: { x: x + 5, y: y + 5 },
+              size: { width: 25, height: 25 },
+              speed: 60,
+              direction: { x: 1, y: 0 },
+              patrolPoints: [
+                { x: x + 5, y: y + 5 },
+                { x: x + 35, y: y + 5 },
+                { x: x + 35, y: y + 35 },
+                { x: x + 5, y: y + 35 }
+              ],
+              currentPatrolIndex: 0,
+              patrolDirection: 1,
+              chaseSpeed: 100,
+              sightRange: 100,
+              isChasing: false,
+              lostSightCooldown: 0
+            });
+            break;
+        }
+      }
+    }
+    
+    // Add Phase B specific burster snake that only appears in Phase B
+    snakes.push({
+      id: 'burster_phase_b',
+      type: 'burster',
+      position: { x: 350, y: 200 }, // Center area
+      size: { width: 25, height: 25 },
+      speed: 40,
+      direction: { x: 0, y: 1 },
+      patrolPoints: [],
+      currentPatrolIndex: 0,
+      patrolDirection: 1,
+      chaseSpeed: 150,
+      sightRange: 120,
+      isChasing: false,
+      dashSpeed: 300,
+      isDashing: false,
+      dashDuration: 1000,
+      phaseRestriction: 'B' // Only active in Phase B
+    });
+    
+    return {
+      id: 5,
+      name: "Phase Shift",
+      player,
+      size: { width: levelWidth, height: levelHeight },
+      walls,
+      phaseWalls,
+      snakes,
+      door,
+      key: { x: -100, y: -100, width: 20, height: 20, collected: true }, // No key needed
+      puzzleShards,
+      puzzlePedestal,
+      patternTiles: [],
+      patternSequence: [],
+      switches: [],
+      throwableItems: [],
+      mirrors: [],
+      crystal: null,
+      lightSource: null,
+      // Phase system properties
+      currentPhase: 'A',
+      phaseTimer: 0,
+      phaseDuration: 10000, // 10 seconds per phase
+    };
+  })(),
 ];

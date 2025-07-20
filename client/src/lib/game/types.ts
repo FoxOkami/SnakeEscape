@@ -176,6 +176,26 @@ export interface CarriedItem {
   id: string;
 }
 
+export interface PuzzleShard extends Rectangle {
+  id: string;
+  phase: 'A' | 'B' | 'C'; // Which phase this shard appears in
+  collected: boolean;
+  shardType: 'a' | 'b' | 'c';
+}
+
+export interface PuzzlePedestal extends Rectangle {
+  id: string;
+  requiredShards: number; // Number of shards needed to activate
+  collectedShards: number; // Current number of collected shards
+  isActivated: boolean;
+}
+
+export interface PhaseWall extends Rectangle {
+  id: string;
+  wallType: 'shifting' | 'gate'; // ^ = shifting wall, = = gate
+  activePhases: ('A' | 'B' | 'C')[]; // Which phases this wall is solid
+}
+
 export interface Level {
   id: number;
   name: string;
@@ -219,4 +239,11 @@ export interface GameData {
   lightBeam: LightBeam | null;
   flowState: FlowState | null;
   projectiles: Projectile[];
+  // Phase-shifting level mechanics
+  currentPhase: 'A' | 'B' | 'C';
+  phaseTimer: number;
+  phaseDuration: number;
+  puzzleShards: PuzzleShard[];
+  puzzlePedestal: PuzzlePedestal | null;
+  phaseWalls: PhaseWall[];
 }

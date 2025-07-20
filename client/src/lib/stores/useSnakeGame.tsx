@@ -78,6 +78,11 @@ interface SnakeGameState extends GameData {
   updateProjectiles: (deltaTime: number) => void;
   spawnSpitterSnake: (position: Position) => void;
   fireProjectiles: (snakeId: string) => void;
+  
+  // Phase system actions
+  updatePhase: (deltaTime: number) => void;
+  collectPuzzleShard: (shardId: string) => void;
+  getCurrentWalls: () => Wall[];
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -150,6 +155,13 @@ export const useSnakeGame = create<SnakeGameState>()(
     lightBeam: null,
     flowState: null,
     projectiles: [],
+    // Phase system for Level 5
+    currentPhase: 'A',
+    phaseTimer: 0,
+    phaseDuration: 10000,
+    puzzleShards: [],
+    puzzlePedestal: null,
+    phaseWalls: [],
     keysPressed: new Set(),
     currentVelocity: { x: 0, y: 0 },
     targetVelocity: { x: 0, y: 0 },
@@ -229,6 +241,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
         projectiles: [],
+        // Phase system initialization
+        currentPhase: level.currentPhase || 'A',
+        phaseTimer: 0,
+        phaseDuration: level.phaseDuration || 10000,
+        puzzleShards: level.puzzleShards ? level.puzzleShards.map((shard) => ({ ...shard })) : [],
+        puzzlePedestal: level.puzzlePedestal ? { ...level.puzzlePedestal } : null,
+        phaseWalls: level.phaseWalls ? level.phaseWalls.map((wall) => ({ ...wall })) : [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
@@ -269,13 +288,18 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
         projectiles: [],
+        // Phase system initialization  
+        currentPhase: level.currentPhase || 'A',
+        phaseTimer: 0,
+        phaseDuration: level.phaseDuration || 10000,
+        puzzleShards: level.puzzleShards ? level.puzzleShards.map((shard) => ({ ...shard })) : [],
+        puzzlePedestal: level.puzzlePedestal ? { ...level.puzzlePedestal } : null,
+        phaseWalls: level.phaseWalls ? level.phaseWalls.map((wall) => ({ ...wall })) : [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
       });
-      
-
     },
 
     resetGame: () => {
@@ -304,6 +328,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
         projectiles: [],
+        // Phase system reset
+        currentPhase: level.currentPhase || 'A',
+        phaseTimer: 0,
+        phaseDuration: level.phaseDuration || 10000,
+        puzzleShards: level.puzzleShards ? level.puzzleShards.map((shard) => ({ ...shard })) : [],
+        puzzlePedestal: level.puzzlePedestal ? { ...level.puzzlePedestal } : null,
+        phaseWalls: level.phaseWalls ? level.phaseWalls.map((wall) => ({ ...wall })) : [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
@@ -386,7 +417,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         height: state.player.size.height,
       };
 
-      const hasWallCollision = state.walls.some((wall) =>
+      const currentWalls = get().getCurrentWalls();
+      const hasWallCollision = currentWalls.some((wall) =>
         checkAABBCollision(playerRect, wall),
       );
 
@@ -404,6 +436,9 @@ export const useSnakeGame = create<SnakeGameState>()(
     updateGame: (deltaTime: number) => {
       const state = get();
       if (state.gameState !== "playing") return;
+
+      // Update phase system for Level 5
+      get().updatePhase(deltaTime);
 
       // --- SMOOTH PLAYER MOVEMENT ---
       // Smoothly interpolate current velocity toward target velocity
@@ -452,7 +487,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         newPlayerPosition.x >= 0 &&
         newPlayerPosition.x + state.player.size.width <=
           state.levelSize.width &&
-        !state.walls.some((wall) => checkAABBCollision(testXPosition, wall));
+        !get().getCurrentWalls().some((wall) => checkAABBCollision(testXPosition, wall));
 
       if (canMoveX) {
         finalPosition.x = newPlayerPosition.x;
@@ -473,7 +508,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         newPlayerPosition.y >= 0 &&
         newPlayerPosition.y + state.player.size.height <=
           state.levelSize.height &&
-        !state.walls.some((wall) => checkAABBCollision(testYPosition, wall));
+        !get().getCurrentWalls().some((wall) => checkAABBCollision(testYPosition, wall));
 
       if (canMoveY) {
         finalPosition.y = newPlayerPosition.y;
@@ -495,8 +530,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         playerSounds.push(updatedPlayer.position);
       }
       
+      const currentWalls = get().getCurrentWalls();
       const updatedSnakes = state.snakes.map((snake) =>
-        updateSnake(snake, state.walls, deltaTime, updatedPlayer, playerSounds, state),
+        updateSnake(snake, currentWalls, deltaTime, updatedPlayer, playerSounds, state),
       );
 
       // Handle plumber snake tile rotations
@@ -598,6 +634,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         updatedKey = { ...state.key, collected: true };
         updatedPlayer = { ...updatedPlayer, hasKey: true };
       }
+
+      // Check puzzle shard collection (Level 5)
+      state.puzzleShards.forEach(shard => {
+        if (!shard.collected && shard.phase === state.currentPhase && 
+            checkAABBCollision(playerRect, shard)) {
+          get().collectPuzzleShard(shard.id);
+        }
+      });
 
       // Check switch interactions
       let updatedSwitches = state.switches.map((switchObj) => {
@@ -1860,6 +1904,82 @@ export const useSnakeGame = create<SnakeGameState>()(
       set({
         projectiles: [...state.projectiles, ...newProjectiles]
       });
+    },
+
+    // Phase system functions
+    updatePhase: (deltaTime: number) => {
+      const state = get();
+      if (state.currentLevel !== 4) return; // Level 5 is 0-indexed as 4
+
+      const newPhaseTimer = state.phaseTimer + deltaTime;
+      
+      if (newPhaseTimer >= state.phaseDuration) {
+        // Switch to next phase
+        let nextPhase: 'A' | 'B' | 'C';
+        switch (state.currentPhase) {
+          case 'A': nextPhase = 'B'; break;
+          case 'B': nextPhase = 'C'; break;
+          case 'C': nextPhase = 'A'; break;
+          default: nextPhase = 'A';
+        }
+        
+        set({
+          currentPhase: nextPhase,
+          phaseTimer: 0
+        });
+      } else {
+        set({ phaseTimer: newPhaseTimer });
+      }
+    },
+
+    collectPuzzleShard: (shardId: string) => {
+      const state = get();
+      const shard = state.puzzleShards.find(s => s.id === shardId);
+      
+      if (!shard || shard.collected || shard.phase !== state.currentPhase) return;
+      
+      const updatedShards = state.puzzleShards.map(s => 
+        s.id === shardId ? { ...s, collected: true } : s
+      );
+      
+      const collectedCount = updatedShards.filter(s => s.collected).length;
+      let updatedPedestal = state.puzzlePedestal;
+      
+      if (updatedPedestal) {
+        updatedPedestal = {
+          ...updatedPedestal,
+          collectedShards: collectedCount,
+          isActivated: collectedCount >= updatedPedestal.requiredShards
+        };
+        
+        // If pedestal is activated, open the door
+        if (updatedPedestal.isActivated) {
+          set({
+            puzzleShards: updatedShards,
+            puzzlePedestal: updatedPedestal,
+            door: { ...state.door, isOpen: true }
+          });
+        } else {
+          set({
+            puzzleShards: updatedShards,
+            puzzlePedestal: updatedPedestal
+          });
+        }
+      } else {
+        set({ puzzleShards: updatedShards });
+      }
+    },
+
+    getCurrentWalls: () => {
+      const state = get();
+      if (state.currentLevel !== 4) return state.walls; // Level 5 is 0-indexed as 4
+      
+      // Combine regular walls with active phase walls
+      const activePhaseWalls = state.phaseWalls
+        .filter(wall => wall.activePhases.includes(state.currentPhase))
+        .map(wall => ({ x: wall.x, y: wall.y, width: wall.width, height: wall.height }));
+      
+      return [...state.walls, ...activePhaseWalls];
     },
 
   })),

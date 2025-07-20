@@ -36,7 +36,13 @@ const GameCanvas: React.FC = () => {
     flowState,
     updateFlow,
     projectiles,
-    updateProjectiles
+    updateProjectiles,
+    currentPhase,
+    phaseTimer,
+    phaseDuration,
+    puzzleShards,
+    puzzlePedestal,
+    getCurrentWalls
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -73,9 +79,10 @@ const GameCanvas: React.FC = () => {
 
     const currentTile = getPlayerCurrentTile();
 
-    // Draw walls
+    // Draw walls (use dynamic walls for Level 5)
+    const currentWalls = getCurrentWalls();
     ctx.fillStyle = '#4a5568';
-    walls.forEach(wall => {
+    currentWalls.forEach(wall => {
       ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
     });
 
@@ -837,6 +844,87 @@ const GameCanvas: React.FC = () => {
       ctx.fillText(`Reflections: ${lightBeam.segments.length - 1}`, 10, 50);
     }
 
+    // Draw puzzle shards (Level 5)
+    if (currentLevel === 4) { // Level 5 (0-indexed as 4)
+      puzzleShards.forEach(shard => {
+        if (!shard.collected && shard.phase === currentPhase) {
+          // Draw pulsing shard based on phase
+          const pulseTime = Date.now() / 500;
+          const pulseAlpha = 0.8 + 0.2 * Math.sin(pulseTime);
+          
+          let shardColor;
+          switch (shard.phase) {
+            case 'A': shardColor = `rgba(255, 100, 100, ${pulseAlpha})`; break; // Red
+            case 'B': shardColor = `rgba(100, 255, 100, ${pulseAlpha})`; break; // Green  
+            case 'C': shardColor = `rgba(100, 100, 255, ${pulseAlpha})`; break; // Blue
+            default: shardColor = `rgba(255, 255, 255, ${pulseAlpha})`;
+          }
+          
+          ctx.fillStyle = shardColor;
+          ctx.fillRect(shard.x, shard.y, shard.width, shard.height);
+          
+          // Add sparkle effect
+          ctx.fillStyle = `rgba(255, 255, 255, ${pulseAlpha})`;
+          ctx.fillRect(shard.x + shard.width/4, shard.y + shard.height/4, shard.width/2, shard.height/2);
+        }
+      });
+      
+      // Draw puzzle pedestal
+      if (puzzlePedestal) {
+        ctx.fillStyle = puzzlePedestal.isActivated ? '#ffd700' : '#8B4513';
+        ctx.fillRect(puzzlePedestal.x, puzzlePedestal.y, puzzlePedestal.width, puzzlePedestal.height);
+        
+        // Add pedestal details
+        ctx.fillStyle = puzzlePedestal.isActivated ? '#ffeb3b' : '#654321';
+        ctx.fillRect(puzzlePedestal.x + 5, puzzlePedestal.y + 5, puzzlePedestal.width - 10, puzzlePedestal.height - 10);
+        
+        // Show collected shards count
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(
+          `${puzzlePedestal.collectedShards}/${puzzlePedestal.requiredShards}`,
+          puzzlePedestal.x + puzzlePedestal.width / 2,
+          puzzlePedestal.y + puzzlePedestal.height / 2 + 4
+        );
+        ctx.textAlign = 'left';
+      }
+      
+      // Draw phase indicator (top center)
+      const phaseProgress = phaseTimer / phaseDuration;
+      const phaseBarWidth = 200;
+      const phaseBarHeight = 20;
+      const phaseBarX = (levelSize.width - phaseBarWidth) / 2;
+      const phaseBarY = 10;
+      
+      // Phase bar background
+      ctx.fillStyle = '#333333';
+      ctx.fillRect(phaseBarX, phaseBarY, phaseBarWidth, phaseBarHeight);
+      
+      // Phase progress
+      let phaseColor;
+      switch (currentPhase) {
+        case 'A': phaseColor = '#ff6464'; break; // Red
+        case 'B': phaseColor = '#64ff64'; break; // Green
+        case 'C': phaseColor = '#6464ff'; break; // Blue
+        default: phaseColor = '#ffffff';
+      }
+      ctx.fillStyle = phaseColor;
+      ctx.fillRect(phaseBarX, phaseBarY, phaseBarWidth * phaseProgress, phaseBarHeight);
+      
+      // Phase bar border
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(phaseBarX, phaseBarY, phaseBarWidth, phaseBarHeight);
+      
+      // Phase label
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Phase ${currentPhase}`, phaseBarX + phaseBarWidth / 2, phaseBarY + 35);
+      ctx.textAlign = 'left';
+    }
+
     // Debug Display - Player Info (bottom right)
     ctx.fillStyle = '#0088ff';
     ctx.font = '14px Arial';
@@ -855,7 +943,7 @@ const GameCanvas: React.FC = () => {
     ctx.fillText(debugText2, levelSize.width - 150, levelSize.height - 30);
     ctx.fillText(debugText3, levelSize.width - 150, levelSize.height - 10);
 
-  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam, currentLevel, patternTiles]);
+  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam, currentLevel, patternTiles, currentPhase, phaseTimer, phaseDuration, puzzleShards, puzzlePedestal, getCurrentWalls]);
 
   const gameLoop = useCallback((currentTime: number) => {
     const canvas = canvasRef.current;
