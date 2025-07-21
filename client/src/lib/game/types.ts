@@ -198,6 +198,15 @@ export interface PhaseWall extends Rectangle {
   activePhases: ('A' | 'B' | 'C')[]; // Which phases this wall is solid
 }
 
+export interface Teleporter extends Rectangle {
+  id: string;
+  type: 'sender' | 'receiver'; // sender = teleporter pad, receiver = receiving pad
+  linkedTeleporterId?: string; // ID of linked teleporter for sender
+  activationDelay: number; // Time in ms player must stand on pad before teleporting
+  isActive: boolean; // Whether teleporter is currently active (player standing on it)
+  activationStartTime?: number; // When player started standing on teleporter
+}
+
 export interface Level {
   id: number;
   name: string;
@@ -213,6 +222,7 @@ export interface Level {
   mirrors?: Mirror[];
   crystal?: Crystal;
   lightSource?: LightSource;
+  teleporters?: Teleporter[];
   size: Size;
   startTilePos?: { row: number; col: number }; // For Level 4 randomization
   endTilePos?: { row: number; col: number }; // For Level 4 randomization
@@ -241,6 +251,7 @@ export interface GameData {
   lightBeam: LightBeam | null;
   flowState: FlowState | null;
   projectiles: Projectile[];
+  teleporters: Teleporter[];
 
   puzzleShards: PuzzleShard[];
   puzzlePedestal: PuzzlePedestal | null;

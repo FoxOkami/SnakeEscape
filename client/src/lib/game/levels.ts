@@ -7,6 +7,7 @@ import {
   Switch,
   ThrowableItem,
   PatternTile,
+  Teleporter,
 } from "./types";
 
 export const LEVELS: Level[] = [
@@ -610,7 +611,7 @@ export const LEVELS: Level[] = [
               lastFireTime: Date.now(),
               fireInterval: 3000, // 3 seconds
               movementAxis: undefined, // Will be randomly assigned on first update
-              shotCount: 0 // Start at 0 shots
+              shotCount: 0, // Start at 0 shots
             },
           ];
         })(),
@@ -697,11 +698,11 @@ export const LEVELS: Level[] = [
     };
   })(),
 
-  // Level 5: Three concentric rectangles - player in middle zone, switches remove walls progressively
+  // Level 5: Final Challenge with teleportation system
   {
     id: 5,
     name: "Final Challenge",
-    player: { x: 150, y: 300 },
+    player: { x: 25, y: 25 },
     size: { width: 800, height: 600 },
     walls: [
       // Outer walls (800x600)
@@ -709,40 +710,39 @@ export const LEVELS: Level[] = [
       { x: 0, y: 580, width: 800, height: 20 },
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
-      // Middle rectangle walls (600x450, centered)
-      { x: 100, y: 75, width: 600, height: 20 }, // Top middle wall
-      { x: 100, y: 505, width: 600, height: 20 }, // Bottom middle wall  
-      { x: 100, y: 75, width: 20, height: 450 }, // Left middle wall
-      { x: 680, y: 75, width: 20, height: 450 }, // Right middle wall
-      // Inner rectangle walls (400x300, centered)
-      { x: 200, y: 150, width: 400, height: 20 }, // Top inner wall
-      { x: 200, y: 430, width: 400, height: 20 }, // Bottom inner wall  
-      { x: 200, y: 150, width: 20, height: 300 }, // Left inner wall
-      { x: 580, y: 150, width: 20, height: 300 }, // Right inner wall
+      // Cross section walls
+      { x: 400, y: 0, width: 20, height: 600 }, // horizontally centered vertical wall
+      { x: 0, y: 300, width: 800, height: 20 }, // vertically centered horizontal wall
     ],
     snakes: [],
-    door: { x: 730, y: 530, width: 30, height: 40, isOpen: false },
+    door: { x: 730, y: 560, width: 30, height: 40, isOpen: false },
     key: { x: 730, y: 50, width: 20, height: 20, collected: false },
-    patternTiles: [],
-    patternSequence: [],
-    switches: [
+    teleporters: [
       {
+        id: "teleporter_sender",
+        type: "sender",
         x: 150,
-        y: 250,
-        width: 30,
-        height: 30,
-        isPressed: false,
-        id: "middle_switch",
+        y: 150,
+        width: 25,
+        height: 25,
+        linkedTeleporterId: "teleporter_receiver",
+        activationDelay: 1000, // 1 second
+        isActive: false,
       },
       {
-        x: 350,
-        y: 290,
-        width: 30,
-        height: 30,
-        isPressed: false,
-        id: "inner_switch",
+        id: "teleporter_receiver",
+        type: "receiver",
+        x: 25,
+        y: 25,
+        width: 25,
+        height: 25,
+        activationDelay: 0, // Receivers don't need activation delay
+        isActive: false,
       },
     ],
+    patternTiles: [],
+    patternSequence: [],
+    switches: [],
     throwableItems: [],
     mirrors: [],
     crystal: undefined,

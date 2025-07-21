@@ -16,6 +16,7 @@ import {
   LightBeam,
   FlowState,
   Projectile,
+  Teleporter,
 } from "../game/types";
 import { LEVELS } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
@@ -83,6 +84,10 @@ interface SnakeGameState extends GameData {
   updatePhase: (deltaTime: number) => void;
   collectPuzzleShard: (shardId: string) => void;
   getCurrentWalls: () => Wall[];
+  
+  // Teleporter system actions
+  updateTeleporters: (deltaTime: number) => void;
+  checkTeleporterCollision: () => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -155,6 +160,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     lightBeam: null,
     flowState: null,
     projectiles: [],
+    teleporters: [],
 
     puzzleShards: [],
     puzzlePedestal: null,
@@ -238,6 +244,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
         projectiles: [],
+        teleporters: level.teleporters ? level.teleporters.map((teleporter) => ({ ...teleporter })) : [],
         // Phase system initialization
         currentPhase: level.currentPhase || 'A',
         phaseTimer: 0,
@@ -285,6 +292,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
         projectiles: [],
+        teleporters: level.teleporters ? level.teleporters.map((teleporter) => ({ ...teleporter })) : [],
         // Phase system initialization  
         currentPhase: level.currentPhase || 'A',
         phaseTimer: 0,
@@ -325,6 +333,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
         projectiles: [],
+        teleporters: level.teleporters ? level.teleporters.map((teleporter) => ({ ...teleporter })) : [],
         // Phase system reset
         currentPhase: level.currentPhase || 'A',
         phaseTimer: 0,
@@ -375,6 +384,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         crystal: level.crystal ? { ...level.crystal } : null,
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
+        teleporters: level.teleporters ? level.teleporters.map((teleporter) => ({ ...teleporter })) : [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
@@ -636,6 +646,9 @@ export const useSnakeGame = create<SnakeGameState>()(
           get().collectPuzzleShard(shard.id);
         }
       });
+
+      // Check teleporter collisions
+      get().checkTeleporterCollision();
 
       // Check switch interactions
       let updatedSwitches = state.switches.map((switchObj) => {
@@ -2024,6 +2037,58 @@ export const useSnakeGame = create<SnakeGameState>()(
         .map(wall => ({ x: wall.x, y: wall.y, width: wall.width, height: wall.height }));
       
       return [...state.walls, ...activePhaseWalls];
+    },
+
+    checkTeleporterCollision: () => {
+      const state = get();
+      if (state.teleporters.length === 0) return;
+
+      const playerRect = {
+        x: state.player.position.x,
+        y: state.player.position.y,
+        width: state.player.size.width,
+        height: state.player.size.height,
+      };
+
+      state.teleporters.forEach((teleporter) => {
+        if (teleporter.type === 'sender' && checkAABBCollision(playerRect, teleporter)) {
+          get().activateTeleporter(teleporter.id);
+        }
+      });
+    },
+
+    activateTeleporter: (teleporterId: string) => {
+      const state = get();
+      const teleporter = state.teleporters.find(t => t.id === teleporterId && t.type === 'sender');
+      const receiver = state.teleporters.find(t => t.type === 'receiver');
+      
+      if (!teleporter || !receiver) return;
+      
+      // Set activation state with 1-second delay
+      const updatedTeleporters = state.teleporters.map(t => 
+        t.id === teleporterId ? { ...t, isActive: true, activationTime: Date.now() } : t
+      );
+      
+      set({ teleporters: updatedTeleporters });
+      
+      // Schedule teleportation after 1 second
+      setTimeout(() => {
+        const currentState = get();
+        const currentTeleporter = currentState.teleporters.find(t => t.id === teleporterId);
+        
+        if (currentTeleporter && currentTeleporter.isActive) {
+          // Teleport player to receiver position
+          set({
+            player: {
+              ...currentState.player,
+              position: { x: receiver.x, y: receiver.y }
+            },
+            teleporters: currentState.teleporters.map(t => 
+              t.id === teleporterId ? { ...t, isActive: false, activationTime: undefined } : t
+            )
+          });
+        }
+      }, 1000);
     },
 
   })),

@@ -40,7 +40,8 @@ const GameCanvas: React.FC = () => {
 
     puzzleShards,
     puzzlePedestal,
-    getCurrentWalls
+    getCurrentWalls,
+    teleporters
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -849,18 +850,12 @@ const GameCanvas: React.FC = () => {
     // Draw puzzle shards (Level 5)
     if (currentLevel === 4) { // Level 5 (0-indexed as 4)
       puzzleShards.forEach(shard => {
-        if (!shard.collected && shard.phase === currentPhase) {
+        if (!shard.collected) {
           // Draw pulsing shard based on phase
           const pulseTime = Date.now() / 500;
           const pulseAlpha = 0.8 + 0.2 * Math.sin(pulseTime);
           
-          let shardColor;
-          switch (shard.phase) {
-            case 'A': shardColor = `rgba(255, 100, 100, ${pulseAlpha})`; break; // Red
-            case 'B': shardColor = `rgba(100, 255, 100, ${pulseAlpha})`; break; // Green  
-            case 'C': shardColor = `rgba(100, 100, 255, ${pulseAlpha})`; break; // Blue
-            default: shardColor = `rgba(255, 255, 255, ${pulseAlpha})`;
-          }
+          let shardColor = `rgba(255, 255, 255, ${pulseAlpha})`; // Default white
           
           ctx.fillStyle = shardColor;
           ctx.fillRect(shard.x, shard.y, shard.width, shard.height);
@@ -891,6 +886,62 @@ const GameCanvas: React.FC = () => {
         );
         ctx.textAlign = 'left';
       }
+
+      // Draw teleporters
+      teleporters.forEach(teleporter => {
+        if (teleporter.type === 'sender') {
+          // Draw teleporter pad with pulsing effect
+          const pulseTime = Date.now() / 800;
+          const pulseAlpha = teleporter.isActive ? 1.0 : 0.6 + 0.4 * Math.sin(pulseTime);
+          
+          // Outer ring
+          ctx.fillStyle = teleporter.isActive ? 
+            `rgba(0, 255, 255, ${pulseAlpha})` : 
+            `rgba(0, 150, 255, ${pulseAlpha})`;
+          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+          
+          // Inner circle
+          ctx.fillStyle = teleporter.isActive ? 
+            `rgba(255, 255, 255, ${pulseAlpha})` : 
+            `rgba(100, 200, 255, ${pulseAlpha})`;
+          const innerSize = teleporter.width * 0.6;
+          const innerOffset = (teleporter.width - innerSize) / 2;
+          ctx.fillRect(
+            teleporter.x + innerOffset, 
+            teleporter.y + innerOffset, 
+            innerSize, 
+            innerSize
+          );
+          
+          // Activation glow effect
+          if (teleporter.isActive) {
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+            ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+            ctx.shadowBlur = 0;
+          }
+        } else if (teleporter.type === 'receiver') {
+          // Draw receiver pad with different color
+          const pulseTime = Date.now() / 1000;
+          const pulseAlpha = 0.7 + 0.3 * Math.sin(pulseTime);
+          
+          // Outer ring
+          ctx.fillStyle = `rgba(255, 100, 0, ${pulseAlpha})`;
+          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+          
+          // Inner circle
+          ctx.fillStyle = `rgba(255, 200, 100, ${pulseAlpha})`;
+          const innerSize = teleporter.width * 0.6;
+          const innerOffset = (teleporter.width - innerSize) / 2;
+          ctx.fillRect(
+            teleporter.x + innerOffset, 
+            teleporter.y + innerOffset, 
+            innerSize, 
+            innerSize
+          );
+        }
+      });
       
 
     }
@@ -913,7 +964,7 @@ const GameCanvas: React.FC = () => {
     ctx.fillText(debugText2, levelSize.width - 150, levelSize.height - 30);
     ctx.fillText(debugText3, levelSize.width - 150, levelSize.height - 10);
 
-  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam, currentLevel, patternTiles, puzzleShards, puzzlePedestal, getCurrentWalls]);
+  }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam, currentLevel, patternTiles, puzzleShards, puzzlePedestal, getCurrentWalls, teleporters]);
 
   const gameLoop = useCallback((currentTime: number) => {
     const canvas = canvasRef.current;
