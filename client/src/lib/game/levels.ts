@@ -697,11 +697,11 @@ export const LEVELS: Level[] = [
     };
   })(),
 
-  // Level 5: Simple layout - player top left, key center, door bottom right
+  // Level 5: Simple layout - player center, key top right, door bottom right
   {
     id: 5,
     name: "Final Challenge",
-    player: { x: 50, y: 50 },
+    player: { x: 400, y: 300 },
     size: { width: 800, height: 600 },
     walls: [
       // Outer walls only
@@ -712,7 +712,7 @@ export const LEVELS: Level[] = [
     ],
     snakes: [],
     door: { x: 730, y: 530, width: 30, height: 40, isOpen: false },
-    key: { x: 390, y: 290, width: 20, height: 20, collected: false },
+    key: { x: 730, y: 50, width: 20, height: 20, collected: false },
     patternTiles: [],
     patternSequence: [],
     switches: [],
