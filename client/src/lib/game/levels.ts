@@ -697,19 +697,24 @@ export const LEVELS: Level[] = [
     };
   })(),
 
-  // Level 5: Player outside inner walls, key top right, door bottom right
+  // Level 5: Three concentric rectangles - player in outer zone, key and door in inner zone
   {
     id: 5,
     name: "Final Challenge",
-    player: { x: 100, y: 300 },
+    player: { x: 50, y: 300 },
     size: { width: 800, height: 600 },
     walls: [
-      // Outer walls
+      // Outer walls (800x600)
       { x: 0, y: 0, width: 800, height: 20 },
       { x: 0, y: 580, width: 800, height: 20 },
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
-      // Inner rectangle walls (400x300, centered at 400x300)
+      // Middle rectangle walls (600x450, centered)
+      { x: 100, y: 75, width: 600, height: 20 }, // Top middle wall
+      { x: 100, y: 505, width: 600, height: 20 }, // Bottom middle wall  
+      { x: 100, y: 75, width: 20, height: 450 }, // Left middle wall
+      { x: 680, y: 75, width: 20, height: 450 }, // Right middle wall
+      // Inner rectangle walls (400x300, centered)
       { x: 200, y: 150, width: 400, height: 20 }, // Top inner wall
       { x: 200, y: 430, width: 400, height: 20 }, // Bottom inner wall  
       { x: 200, y: 150, width: 20, height: 300 }, // Left inner wall
