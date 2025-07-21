@@ -721,10 +721,10 @@ export const LEVELS: Level[] = [
       {
         id: "teleporter_sender",
         type: "sender",
-        x: 150,
-        y: 150,
-        width: 25,
-        height: 25,
+        x: 350,
+        y: 250,
+        width: 30,
+        height: 30,
         linkedTeleporterId: "teleporter_receiver",
         activationDelay: 1000, // 1 second
         isActive: false,
@@ -732,10 +732,10 @@ export const LEVELS: Level[] = [
       {
         id: "teleporter_receiver",
         type: "receiver",
-        x: 25,
-        y: 25,
-        width: 25,
-        height: 25,
+        x: 350,
+        y: 50,
+        width: 30,
+        height: 30,
         activationDelay: 0, // Receivers don't need activation delay
         isActive: false,
       },
