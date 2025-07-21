@@ -2050,45 +2050,72 @@ export const useSnakeGame = create<SnakeGameState>()(
         height: state.player.size.height,
       };
 
-      state.teleporters.forEach((teleporter) => {
-        if (teleporter.type === 'sender' && checkAABBCollision(playerRect, teleporter)) {
-          get().activateTeleporter(teleporter.id);
+      const currentTime = Date.now();
+      let updatedTeleporters = [...state.teleporters];
+      let shouldTeleport = false;
+      let teleportTarget = null;
+
+      state.teleporters.forEach((teleporter, index) => {
+        if (teleporter.type === 'sender') {
+          const isPlayerOnPad = checkAABBCollision(playerRect, teleporter);
+          
+          if (isPlayerOnPad) {
+            // Player is on the pad
+            if (!teleporter.isActive) {
+              // Start activation
+              updatedTeleporters[index] = {
+                ...teleporter,
+                isActive: true,
+                activationStartTime: currentTime
+              };
+            } else {
+              // Check if enough time has passed (1 second)
+              const timeOnPad = currentTime - (teleporter.activationStartTime || currentTime);
+              if (timeOnPad >= 1000) {
+                // Ready to teleport
+                const receiver = state.teleporters.find(t => t.type === 'receiver');
+                if (receiver) {
+                  shouldTeleport = true;
+                  teleportTarget = { x: receiver.x, y: receiver.y };
+                  // Reset teleporter
+                  updatedTeleporters[index] = {
+                    ...teleporter,
+                    isActive: false,
+                    activationStartTime: undefined
+                  };
+                }
+              }
+            }
+          } else {
+            // Player left the pad - cancel activation
+            if (teleporter.isActive) {
+              updatedTeleporters[index] = {
+                ...teleporter,
+                isActive: false,
+                activationStartTime: undefined
+              };
+            }
+          }
         }
       });
+
+      // Update teleporters state
+      set({ teleporters: updatedTeleporters });
+
+      // Perform teleportation if needed
+      if (shouldTeleport && teleportTarget) {
+        set({
+          player: {
+            ...state.player,
+            position: teleportTarget
+          }
+        });
+      }
     },
 
     activateTeleporter: (teleporterId: string) => {
-      const state = get();
-      const teleporter = state.teleporters.find(t => t.id === teleporterId && t.type === 'sender');
-      const receiver = state.teleporters.find(t => t.type === 'receiver');
-      
-      if (!teleporter || !receiver) return;
-      
-      // Set activation state with 1-second delay
-      const updatedTeleporters = state.teleporters.map(t => 
-        t.id === teleporterId ? { ...t, isActive: true, activationTime: Date.now() } : t
-      );
-      
-      set({ teleporters: updatedTeleporters });
-      
-      // Schedule teleportation after 1 second
-      setTimeout(() => {
-        const currentState = get();
-        const currentTeleporter = currentState.teleporters.find(t => t.id === teleporterId);
-        
-        if (currentTeleporter && currentTeleporter.isActive) {
-          // Teleport player to receiver position
-          set({
-            player: {
-              ...currentState.player,
-              position: { x: receiver.x, y: receiver.y }
-            },
-            teleporters: currentState.teleporters.map(t => 
-              t.id === teleporterId ? { ...t, isActive: false, activationTime: undefined } : t
-            )
-          });
-        }
-      }, 1000);
+      // This method is now handled by checkTeleporterCollision
+      // Keeping for compatibility but functionality moved to checkTeleporterCollision
     },
 
   })),
