@@ -697,11 +697,11 @@ export const LEVELS: Level[] = [
     };
   })(),
 
-  // Level 5: Three concentric rectangles - player in outer zone, key and door in inner zone
+  // Level 5: Three concentric rectangles - player in middle zone, switches remove walls progressively
   {
     id: 5,
     name: "Final Challenge",
-    player: { x: 50, y: 300 },
+    player: { x: 150, y: 300 },
     size: { width: 800, height: 600 },
     walls: [
       // Outer walls (800x600)
@@ -725,7 +725,24 @@ export const LEVELS: Level[] = [
     key: { x: 730, y: 50, width: 20, height: 20, collected: false },
     patternTiles: [],
     patternSequence: [],
-    switches: [],
+    switches: [
+      {
+        x: 150,
+        y: 250,
+        width: 30,
+        height: 30,
+        isPressed: false,
+        id: "middle_switch",
+      },
+      {
+        x: 350,
+        y: 290,
+        width: 30,
+        height: 30,
+        isPressed: false,
+        id: "inner_switch",
+      },
+    ],
     throwableItems: [],
     mirrors: [],
     crystal: undefined,

@@ -765,6 +765,58 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
 
+      // Handle Level 5 progressive wall removal switches
+      if (state.currentLevel === 4) { // Level 5 (0-indexed)
+        const middleSwitch = updatedSwitches.find(s => s.id === 'middle_switch');
+        const innerSwitch = updatedSwitches.find(s => s.id === 'inner_switch');
+        
+        // Check if middle switch is pressed - remove middle rectangle walls
+        if (middleSwitch && middleSwitch.isPressed) {
+          const middleWallsExist = state.walls.some(wall => 
+            (wall.x === 100 && wall.y === 75) || // Top middle wall
+            (wall.x === 100 && wall.y === 505) || // Bottom middle wall
+            (wall.x === 100 && wall.y === 75 && wall.width === 20) || // Left middle wall
+            (wall.x === 680 && wall.y === 75) // Right middle wall
+          );
+          
+          if (middleWallsExist) {
+            // Remove all middle rectangle walls
+            const newWalls = state.walls.filter(wall => 
+              !(
+                (wall.x === 100 && wall.y === 75 && wall.width === 600 && wall.height === 20) || // Top middle
+                (wall.x === 100 && wall.y === 505 && wall.width === 600 && wall.height === 20) || // Bottom middle
+                (wall.x === 100 && wall.y === 75 && wall.width === 20 && wall.height === 450) || // Left middle
+                (wall.x === 680 && wall.y === 75 && wall.width === 20 && wall.height === 450) // Right middle
+              )
+            );
+            set({ walls: newWalls });
+          }
+        }
+        
+        // Check if inner switch is pressed - remove inner rectangle walls
+        if (innerSwitch && innerSwitch.isPressed) {
+          const innerWallsExist = state.walls.some(wall => 
+            (wall.x === 200 && wall.y === 150) || // Top inner wall
+            (wall.x === 200 && wall.y === 430) || // Bottom inner wall
+            (wall.x === 200 && wall.y === 150 && wall.width === 20) || // Left inner wall
+            (wall.x === 580 && wall.y === 150) // Right inner wall
+          );
+          
+          if (innerWallsExist) {
+            // Remove all inner rectangle walls
+            const newWalls = state.walls.filter(wall => 
+              !(
+                (wall.x === 200 && wall.y === 150 && wall.width === 400 && wall.height === 20) || // Top inner
+                (wall.x === 200 && wall.y === 430 && wall.width === 400 && wall.height === 20) || // Bottom inner
+                (wall.x === 200 && wall.y === 150 && wall.width === 20 && wall.height === 300) || // Left inner
+                (wall.x === 580 && wall.y === 150 && wall.width === 20 && wall.height === 300) // Right inner
+              )
+            );
+            set({ walls: newWalls });
+          }
+        }
+      }
+
       // --- LIGHT BEAM CALCULATION ---
       let updatedLightBeam = state.lightBeam;
       let updatedMirrors = state.mirrors;
