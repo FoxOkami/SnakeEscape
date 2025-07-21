@@ -504,9 +504,10 @@ const GameCanvas: React.FC = () => {
     // Draw snakes with different visuals for each type
     snakes.forEach(snake => {
       // Skip rendering phase-restricted snakes that aren't in their active phase
-      if (snake.activePhase && currentLevel === 4 && snake.activePhase !== currentPhase) {
-        return; // Don't render this snake
-      }
+      // For now, render all snakes (phase system can be enhanced later)
+      // if (snake.activePhase && currentLevel === 4 && snake.activePhase !== currentPhase) {
+      //   return; // Don't render this snake
+      // }
       let baseColor = '#2d3748';
       let accentColor = '#ff6b6b';
       let eyeColor = '#ff6b6b';
@@ -620,6 +621,63 @@ const GameCanvas: React.FC = () => {
         ctx.setLineDash([]); // Reset line dash
       }
     });
+
+    // Draw teleporters (Level 5 only - before player so they appear under player)
+    if (currentLevel === 4) { // Level 5 (0-indexed as 4)
+      teleporters.forEach(teleporter => {
+        if (teleporter.type === 'sender') {
+          // Draw teleporter pad with faster pulsing effect
+          const pulseTime = Date.now() / 400; // Increased speed from 800 to 400
+          const pulseAlpha = teleporter.isActive ? 1.0 : 0.6 + 0.4 * Math.sin(pulseTime);
+          
+          // Outer ring
+          ctx.fillStyle = teleporter.isActive ? 
+            `rgba(0, 255, 255, ${pulseAlpha})` : 
+            `rgba(0, 150, 255, ${pulseAlpha})`;
+          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+          
+          // Inner circle
+          ctx.fillStyle = teleporter.isActive ? 
+            `rgba(255, 255, 255, ${pulseAlpha})` : 
+            `rgba(100, 200, 255, ${pulseAlpha})`;
+          const innerSize = teleporter.width * 0.6;
+          const innerOffset = (teleporter.width - innerSize) / 2;
+          ctx.fillRect(
+            teleporter.x + innerOffset, 
+            teleporter.y + innerOffset, 
+            innerSize, 
+            innerSize
+          );
+          
+          // Activation glow effect
+          if (teleporter.isActive) {
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+            ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+            ctx.shadowBlur = 0;
+          }
+        } else if (teleporter.type === 'receiver') {
+          // Draw receiver pad with static color (no animation)
+          const staticAlpha = 0.7; // No pulsing animation
+          
+          // Outer ring
+          ctx.fillStyle = `rgba(255, 100, 0, ${staticAlpha})`;
+          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+          
+          // Inner circle
+          ctx.fillStyle = `rgba(255, 200, 100, ${staticAlpha})`;
+          const innerSize = teleporter.width * 0.6;
+          const innerOffset = (teleporter.width - innerSize) / 2;
+          ctx.fillRect(
+            teleporter.x + innerOffset, 
+            teleporter.y + innerOffset, 
+            innerSize, 
+            innerSize
+          );
+        }
+      });
+    }
 
     // Draw player (different color when walking)
     ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
@@ -887,62 +945,7 @@ const GameCanvas: React.FC = () => {
         ctx.textAlign = 'left';
       }
 
-      // Draw teleporters
-      teleporters.forEach(teleporter => {
-        if (teleporter.type === 'sender') {
-          // Draw teleporter pad with pulsing effect
-          const pulseTime = Date.now() / 800;
-          const pulseAlpha = teleporter.isActive ? 1.0 : 0.6 + 0.4 * Math.sin(pulseTime);
-          
-          // Outer ring
-          ctx.fillStyle = teleporter.isActive ? 
-            `rgba(0, 255, 255, ${pulseAlpha})` : 
-            `rgba(0, 150, 255, ${pulseAlpha})`;
-          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
-          
-          // Inner circle
-          ctx.fillStyle = teleporter.isActive ? 
-            `rgba(255, 255, 255, ${pulseAlpha})` : 
-            `rgba(100, 200, 255, ${pulseAlpha})`;
-          const innerSize = teleporter.width * 0.6;
-          const innerOffset = (teleporter.width - innerSize) / 2;
-          ctx.fillRect(
-            teleporter.x + innerOffset, 
-            teleporter.y + innerOffset, 
-            innerSize, 
-            innerSize
-          );
-          
-          // Activation glow effect
-          if (teleporter.isActive) {
-            ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 20;
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
-            ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
-            ctx.shadowBlur = 0;
-          }
-        } else if (teleporter.type === 'receiver') {
-          // Draw receiver pad with different color
-          const pulseTime = Date.now() / 1000;
-          const pulseAlpha = 0.7 + 0.3 * Math.sin(pulseTime);
-          
-          // Outer ring
-          ctx.fillStyle = `rgba(255, 100, 0, ${pulseAlpha})`;
-          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
-          
-          // Inner circle
-          ctx.fillStyle = `rgba(255, 200, 100, ${pulseAlpha})`;
-          const innerSize = teleporter.width * 0.6;
-          const innerOffset = (teleporter.width - innerSize) / 2;
-          ctx.fillRect(
-            teleporter.x + innerOffset, 
-            teleporter.y + innerOffset, 
-            innerSize, 
-            innerSize
-          );
-        }
-      });
-      
+
 
     }
 
