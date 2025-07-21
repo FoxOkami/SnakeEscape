@@ -697,18 +697,23 @@ export const LEVELS: Level[] = [
     };
   })(),
 
-  // Level 5: Simple layout - player center, key top right, door bottom right
+  // Level 5: Player outside inner walls, key top right, door bottom right
   {
     id: 5,
     name: "Final Challenge",
-    player: { x: 400, y: 300 },
+    player: { x: 100, y: 300 },
     size: { width: 800, height: 600 },
     walls: [
-      // Outer walls only
+      // Outer walls
       { x: 0, y: 0, width: 800, height: 20 },
       { x: 0, y: 580, width: 800, height: 20 },
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
+      // Inner rectangle walls (400x300, centered at 400x300)
+      { x: 200, y: 150, width: 400, height: 20 }, // Top inner wall
+      { x: 200, y: 430, width: 400, height: 20 }, // Bottom inner wall  
+      { x: 200, y: 150, width: 20, height: 300 }, // Left inner wall
+      { x: 580, y: 150, width: 20, height: 300 }, // Right inner wall
     ],
     snakes: [],
     door: { x: 730, y: 530, width: 30, height: 40, isOpen: false },
