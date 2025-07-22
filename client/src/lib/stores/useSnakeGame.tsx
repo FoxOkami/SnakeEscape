@@ -2083,14 +2083,16 @@ export const useSnakeGame = create<SnakeGameState>()(
               // Check if enough time has passed (1 second)
               const timeOnPad = currentTime - (teleporter.activationStartTime || currentTime);
               if (timeOnPad >= 1000) {
-                // Ready to teleport
-                const receiver = state.teleporters.find(t => t.type === 'receiver');
+                // Ready to teleport - find the linked receiver
+                const receiver = state.teleporters.find(t => 
+                  t.type === 'receiver' && t.id === teleporter.linkedTeleporterId
+                );
                 if (receiver) {
                   const teleportCooldownTime = currentTime + 500; // 500ms cooldown
                   teleportInfo = { 
                     targetPosition: { x: receiver.x, y: receiver.y },
-                    teleporters: updatedTeleporters.map(t => 
-                      t.type === 'sender' ? { 
+                    teleporters: updatedTeleporters.map((t, idx) => 
+                      idx === index ? { 
                         ...t, 
                         isActive: false, 
                         activationStartTime: undefined,

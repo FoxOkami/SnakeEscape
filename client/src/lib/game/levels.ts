@@ -711,8 +711,8 @@ export const LEVELS: Level[] = [
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
       // Cross section walls
-      { x: 400, y: 0, width: 20, height: 600 }, // horizontally centered vertical wall
-      { x: 0, y: 300, width: 800, height: 20 }, // vertically centered horizontal wall
+      { x: 390, y: 0, width: 20, height: 600 }, // horizontally centered vertical wall
+      { x: 0, y: 290, width: 800, height: 20 }, // vertically centered horizontal wall
     ],
     snakes: [],
     door: { x: 730, y: 560, width: 30, height: 40, isOpen: false },
@@ -732,7 +732,28 @@ export const LEVELS: Level[] = [
       {
         id: "teleporter_receiver",
         type: "receiver",
-        x: 350,
+        x: 420,
+        y: 50,
+        width: 30,
+        height: 30,
+        activationDelay: 0, // Receivers don't need activation delay
+        isActive: false,
+      },
+      {
+        id: "teleporter_sender_2",
+        type: "sender",
+        x: 420,
+        y: 250,
+        width: 30,
+        height: 30,
+        linkedTeleporterId: "teleporter_receiver_2",
+        activationDelay: 1000, // 1 second
+        isActive: false,
+      },
+      {
+        id: "teleporter_receiver_2",
+        type: "receiver",
+        x: 250,
         y: 50,
         width: 30,
         height: 30,
