@@ -205,6 +205,7 @@ export interface Teleporter extends Rectangle {
   activationDelay: number; // Time in ms player must stand on pad before teleporting
   isActive: boolean; // Whether teleporter is currently active (player standing on it)
   activationStartTime?: number; // When player started standing on teleporter
+  lastTeleportTime?: number; // Cooldown timestamp to prevent immediate re-activation
 }
 
 export interface Level {

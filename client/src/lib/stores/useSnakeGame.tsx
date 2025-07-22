@@ -2059,11 +2059,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (teleporter.type === 'sender') {
           const isPlayerOnPad = checkAABBCollision(playerRect, teleporter);
           
-          if (isPlayerOnPad) {
-            console.log('Player is on teleporter pad');
+          // Check if teleporter is in cooldown period
+          const isInCooldown = teleporter.lastTeleportTime && currentTime < teleporter.lastTeleportTime;
+          
+          if (isPlayerOnPad && !isInCooldown) {
             // Player is on the pad
             if (!teleporter.isActive) {
-              console.log('Starting teleporter activation');
               // Start activation
               updatedTeleporters[index] = {
                 ...teleporter,
@@ -2073,13 +2074,10 @@ export const useSnakeGame = create<SnakeGameState>()(
             } else {
               // Check if enough time has passed (1 second)
               const timeOnPad = currentTime - (teleporter.activationStartTime || currentTime);
-              console.log('Time on pad:', timeOnPad);
               if (timeOnPad >= 1000) {
-                console.log('Ready to teleport!');
                 // Ready to teleport
                 const receiver = state.teleporters.find(t => t.type === 'receiver');
                 if (receiver) {
-                  console.log('Found receiver, teleporting to:', receiver.x, receiver.y);
                   shouldTeleport = true;
                   teleportTarget = { x: receiver.x, y: receiver.y };
                   // Reset teleporter
@@ -2088,15 +2086,12 @@ export const useSnakeGame = create<SnakeGameState>()(
                     isActive: false,
                     activationStartTime: undefined
                   };
-                } else {
-                  console.log('No receiver found!');
                 }
               }
             }
-          } else {
-            // Player left the pad - cancel activation
+          } else if (!isInCooldown) {
+            // Player left the pad - cancel activation (but not during cooldown)
             if (teleporter.isActive) {
-              console.log('Player left pad, canceling activation');
               updatedTeleporters[index] = {
                 ...teleporter,
                 isActive: false,
@@ -2112,12 +2107,17 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Perform teleportation if needed
       if (shouldTeleport && teleportTarget) {
-        console.log('Executing teleportation to:', teleportTarget);
+        // Add a brief cooldown to prevent immediate re-activation
+        const teleportCooldownTime = currentTime + 500; // 500ms cooldown
+        
         set({
           player: {
             ...state.player,
             position: teleportTarget
-          }
+          },
+          teleporters: updatedTeleporters.map(t => 
+            t.type === 'sender' ? { ...t, lastTeleportTime: teleportCooldownTime } : t
+          )
         });
       }
     },
