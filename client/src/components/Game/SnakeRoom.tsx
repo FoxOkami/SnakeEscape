@@ -5,7 +5,7 @@ import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
 
 const SnakeRoom: React.FC = () => {
-  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource, rotateTile, checkPathConnection, removeKeyWalls } = useSnakeGame();
+  const { gameState, setKeyPressed, throwItem, pickupItem, carriedItem, dropItem, pickupNearestItem, rotateMirror, rotateLightSource, rotateTile, checkPathConnection, removeKeyWalls, toggleLightSwitch } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } = useAudio();
 
 
@@ -99,6 +99,13 @@ const SnakeRoom: React.FC = () => {
           
           // Rotate tile right on level 4
           rotateTile('right');
+          return;
+        }
+        
+        // Check if we're on level 5 (light switch level)
+        if (gameState_current.currentLevel === 4) {
+          // Try to toggle light switch first
+          toggleLightSwitch();
           return;
         }
         

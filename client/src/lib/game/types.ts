@@ -70,6 +70,7 @@ export interface Key extends Rectangle {
 export interface Switch extends Rectangle {
   isPressed: boolean;
   id: string;
+  switchType?: 'button' | 'lever'; // Visual style of the switch
 }
 
 export interface PatternTile extends Rectangle {

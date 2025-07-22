@@ -725,14 +725,14 @@ export const LEVELS: Level[] = [
         y: 250,
         width: 30,
         height: 30,
-        linkedTeleporterId: "teleporter_receiver",
+        linkedTeleporterId: "teleporter_receiver_2",
         activationDelay: 1000, // 1 second
         isActive: false,
       },
       {
         id: "teleporter_receiver",
         type: "receiver",
-        x: 420,
+        x: 350,
         y: 50,
         width: 30,
         height: 30,
@@ -746,15 +746,57 @@ export const LEVELS: Level[] = [
         y: 250,
         width: 30,
         height: 30,
-        linkedTeleporterId: "teleporter_receiver_2",
+        linkedTeleporterId: "teleporter_receiver_3",
         activationDelay: 1000, // 1 second
         isActive: false,
       },
       {
         id: "teleporter_receiver_2",
         type: "receiver",
-        x: 250,
+        x: 420,
         y: 50,
+        width: 30,
+        height: 30,
+        activationDelay: 0, // Receivers don't need activation delay
+        isActive: false,
+      },
+      {
+        id: "teleporter_sender_3",
+        type: "sender",
+        x: 350,
+        y: 330,
+        width: 30,
+        height: 30,
+        linkedTeleporterId: "teleporter_receiver_4",
+        activationDelay: 1000, // 1 second
+        isActive: false,
+      },
+      {
+        id: "teleporter_receiver_3",
+        type: "receiver",
+        x: 350,
+        y: 530,
+        width: 30,
+        height: 30,
+        activationDelay: 0, // Receivers don't need activation delay
+        isActive: false,
+      },
+      {
+        id: "teleporter_sender_4",
+        type: "sender",
+        x: 420,
+        y: 330,
+        width: 30,
+        height: 30,
+        linkedTeleporterId: "teleporter_receiver",
+        activationDelay: 1000, // 1 second
+        isActive: false,
+      },
+      {
+        id: "teleporter_receiver_4",
+        type: "receiver",
+        x: 420,
+        y: 530,
         width: 30,
         height: 30,
         activationDelay: 0, // Receivers don't need activation delay
@@ -763,10 +805,27 @@ export const LEVELS: Level[] = [
     ],
     patternTiles: [],
     patternSequence: [],
-    switches: [],
+    switches: [
+      {
+        id: "light_switch",
+        x: 50,
+        y: 100,
+        width: 20,
+        height: 30,
+        isPressed: false,
+        switchType: "lever" // Lever-style switch
+      }
+    ],
     throwableItems: [],
     mirrors: [],
     crystal: undefined,
-    lightSource: null,
+    lightSource: {
+      id: "main_light",
+      x: 400, // Center of the level
+      y: 300,
+      radius: 200, // Light radius
+      isOn: false, // Starts off
+      brightness: 0.8
+    },
   },
 ];

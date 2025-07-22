@@ -108,6 +108,40 @@ const GameCanvas: React.FC = () => {
         ctx.beginPath();
         ctx.arc(switchObj.x + switchObj.width / 2, switchObj.y + switchObj.height / 2, switchObj.width / 2, 0, 2 * Math.PI);
         ctx.stroke();
+      } else if (switchObj.switchType === 'lever') {
+        // Draw lever switch
+        const centerX = switchObj.x + switchObj.width / 2;
+        const baseY = switchObj.y + switchObj.height - 5;
+        
+        // Draw base plate
+        ctx.fillStyle = '#4a5568';
+        ctx.fillRect(switchObj.x, baseY, switchObj.width, 5);
+        
+        // Draw lever (angled based on state)
+        const leverLength = switchObj.height - 8;
+        const leverAngle = switchObj.isPressed ? -0.3 : 0.3; // Tilt left when pressed, right when not
+        const leverEndX = centerX + Math.sin(leverAngle) * leverLength;
+        const leverEndY = baseY - Math.cos(leverAngle) * leverLength;
+        
+        // Draw lever arm
+        ctx.strokeStyle = switchObj.isPressed ? '#68d391' : '#f6ad55';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(centerX, baseY);
+        ctx.lineTo(leverEndX, leverEndY);
+        ctx.stroke();
+        
+        // Draw lever handle
+        ctx.fillStyle = switchObj.isPressed ? '#48bb78' : '#ed8936';
+        ctx.beginPath();
+        ctx.arc(leverEndX, leverEndY, 3, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Draw base border
+        ctx.strokeStyle = '#2d3748';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(switchObj.x, baseY, switchObj.width, 5);
       } else {
         // Draw regular switch as a rectangle
         ctx.fillStyle = switchObj.isPressed ? '#48bb78' : '#ed8936';
@@ -622,6 +656,25 @@ const GameCanvas: React.FC = () => {
       }
     });
 
+    // Draw interaction hints for lever switches
+    switches.forEach(switchObj => {
+      if (switchObj.switchType === 'lever') {
+        // Show interaction hint if player is nearby
+        const distance = Math.sqrt(
+          Math.pow(player.position.x - (switchObj.x + switchObj.width / 2), 2) + 
+          Math.pow(player.position.y - (switchObj.y + switchObj.height / 2), 2)
+        );
+        
+        if (distance < 60) {
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '12px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('E to toggle', switchObj.x + switchObj.width / 2, switchObj.y - 10);
+          ctx.textAlign = 'left';
+        }
+      }
+    });
+
     // Draw teleporters (Level 5 only - before player so they appear under player)
     if (currentLevel === 4) { // Level 5 (0-indexed as 4)
       teleporters.forEach(teleporter => {
@@ -763,56 +816,64 @@ const GameCanvas: React.FC = () => {
     
     // Draw light source
     if (lightSource) {
-      ctx.fillStyle = '#ffff00';
-      ctx.beginPath();
-      ctx.arc(lightSource.x, lightSource.y, 8, 0, 2 * Math.PI);
-      ctx.fill();
+      if (lightSource.isOn) {
+        // Draw bright light when on
+        ctx.save();
+        ctx.globalAlpha = lightSource.brightness || 0.8;
+        
+        // Draw light radius/glow effect
+        const gradient = ctx.createRadialGradient(
+          lightSource.x, lightSource.y, 0,
+          lightSource.x, lightSource.y, lightSource.radius || 200
+        );
+        gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+        gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.1)');
+        gradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(lightSource.x, lightSource.y, lightSource.radius || 200, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        ctx.restore();
+        
+        // Draw light source bulb (bright)
+        ctx.fillStyle = '#ffff00';
+        ctx.beginPath();
+        ctx.arc(lightSource.x, lightSource.y, 12, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Add bright glow effect
+        ctx.fillStyle = '#ffff80';
+        ctx.beginPath();
+        ctx.arc(lightSource.x, lightSource.y, 16, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Core light
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(lightSource.x, lightSource.y, 8, 0, 2 * Math.PI);
+        ctx.fill();
+      } else {
+        // Draw dim light when off
+        ctx.fillStyle = '#666666';
+        ctx.beginPath();
+        ctx.arc(lightSource.x, lightSource.y, 12, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Dark center
+        ctx.fillStyle = '#333333';
+        ctx.beginPath();
+        ctx.arc(lightSource.x, lightSource.y, 8, 0, 2 * Math.PI);
+        ctx.fill();
+      }
       
-      // Add glow effect
-      ctx.fillStyle = '#ffff80';
+      // Add border
+      ctx.strokeStyle = '#2d3748';
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(lightSource.x, lightSource.y, 12, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      // Core light
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(lightSource.x, lightSource.y, 4, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      // Draw direction indicator
-      ctx.save();
-      ctx.translate(lightSource.x, lightSource.y);
-      ctx.rotate((lightSource.rotation * Math.PI) / 180);
-      ctx.strokeStyle = '#ff0000';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(0, 20);
       ctx.stroke();
-      
-      // Arrow tip
-      ctx.beginPath();
-      ctx.moveTo(-3, 17);
-      ctx.lineTo(0, 20);
-      ctx.lineTo(3, 17);
-      ctx.stroke();
-      ctx.restore();
-      
-      // Show interaction hint if player is nearby
-      const distance = Math.sqrt(
-        Math.pow(player.position.x - lightSource.x, 2) + 
-        Math.pow(player.position.y - lightSource.y, 2)
-      );
-      
-      if (distance < 60) {
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('Q/E to rotate', lightSource.x, lightSource.y - 25);
-        ctx.fillText('(1° increments)', lightSource.x, lightSource.y + 35);
-        ctx.textAlign = 'left';
-      }
     }
 
     // Draw mirrors

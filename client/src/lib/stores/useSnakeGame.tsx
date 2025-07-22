@@ -692,6 +692,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           
           return { ...switchObj, isPressed };
         }
+
+        // Lever switch logic (for light_switch) - handled in toggleLightSwitch function
+        if (switchObj.switchType === 'lever') {
+          return switchObj; // State changes only on E key press
+        }
         
         return switchObj;
       });
@@ -2127,6 +2132,39 @@ export const useSnakeGame = create<SnakeGameState>()(
     activateTeleporter: (teleporterId: string) => {
       // This method is now handled by checkTeleporterCollision
       // Keeping for compatibility but functionality moved to checkTeleporterCollision
+    },
+
+    toggleLightSwitch: () => {
+      const state = get();
+      const playerRect = {
+        x: state.player.position.x,
+        y: state.player.position.y,
+        width: state.player.size.width,
+        height: state.player.size.height,
+      };
+
+      // Find the light switch
+      const lightSwitch = state.switches.find(s => s.switchType === 'lever');
+      if (!lightSwitch) return;
+
+      // Check if player is close enough to the switch
+      if (checkAABBCollision(playerRect, lightSwitch)) {
+        // Toggle the switch
+        const updatedSwitches = state.switches.map(s => 
+          s.id === lightSwitch.id ? { ...s, isPressed: !s.isPressed } : s
+        );
+
+        // Toggle the light source
+        const updatedLightSource = state.lightSource ? {
+          ...state.lightSource,
+          isOn: !state.lightSource.isOn
+        } : null;
+
+        set({
+          switches: updatedSwitches,
+          lightSource: updatedLightSource
+        });
+      }
     },
 
   })),
