@@ -44,9 +44,59 @@ const GameCanvas: React.FC = () => {
     teleporters
   } = useSnakeGame();
 
+  // Helper function to check if a line intersects with a wall
+  const lineIntersectsWall = useCallback((x1: number, y1: number, x2: number, y2: number, wall: any) => {
+    // Line-rectangle intersection test
+    const left = wall.x;
+    const right = wall.x + wall.width;
+    const top = wall.y;
+    const bottom = wall.y + wall.height;
+    
+    // Check if line endpoints are on opposite sides of any wall edge
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    
+    // Check intersection with each wall edge
+    const edges = [
+      { x1: left, y1: top, x2: right, y2: top },     // top edge
+      { x1: right, y1: top, x2: right, y2: bottom }, // right edge
+      { x1: right, y1: bottom, x2: left, y2: bottom }, // bottom edge
+      { x1: left, y1: bottom, x2: left, y2: top }    // left edge
+    ];
+    
+    for (const edge of edges) {
+      const edx = edge.x2 - edge.x1;
+      const edy = edge.y2 - edge.y1;
+      
+      const denom = dx * edy - dy * edx;
+      if (Math.abs(denom) < 0.001) continue; // parallel lines
+      
+      const t = ((edge.x1 - x1) * edy - (edge.y1 - y1) * edx) / denom;
+      const u = ((edge.x1 - x1) * dy - (edge.y1 - y1) * dx) / denom;
+      
+      if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+        return true; // intersection found
+      }
+    }
+    
+    return false;
+  }, []);
+
+  // Helper function to check if a point has line-of-sight to the light source
+  const hasLineOfSight = useCallback((x: number, y: number, lightX: number, lightY: number) => {
+    const currentWalls = getCurrentWalls();
+    
+    for (const wall of currentWalls) {
+      if (lineIntersectsWall(x, y, lightX, lightY, wall)) {
+        return false;
+      }
+    }
+    return true;
+  }, [lineIntersectsWall, getCurrentWalls]);
+
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
-    // Clear canvas
-    ctx.fillStyle = '#1a1a2e';
+    // Clear canvas with dark background
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, levelSize.width, levelSize.height);
     
     // Add test border to see if canvas is drawing
@@ -1057,6 +1107,62 @@ const GameCanvas: React.FC = () => {
     ctx.fillText(debugText1, levelSize.width - 150, levelSize.height - 50);
     ctx.fillText(debugText2, levelSize.width - 150, levelSize.height - 30);
     ctx.fillText(debugText3, levelSize.width - 150, levelSize.height - 10);
+
+    // Apply darkness overlay for Level 5 lighting system
+    if (currentLevel === 4) { // Level 5 (0-indexed as 4)
+      if (!lightSource || !lightSource.isOn) {
+        // Complete darkness when light is off
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+        ctx.fillRect(0, 0, levelSize.width, levelSize.height);
+        
+        // Small visibility around player for basic movement
+        const playerCenterX = player.position.x + player.size.width / 2;
+        const playerCenterY = player.position.y + player.size.height / 2;
+        
+        const gradient = ctx.createRadialGradient(
+          playerCenterX, playerCenterY, 0,
+          playerCenterX, playerCenterY, 40
+        );
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.3)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, levelSize.width, levelSize.height);
+      } else {
+        // Apply selective darkness with wall occlusion when light is on
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.fillRect(0, 0, levelSize.width, levelSize.height);
+        
+        // Create lit areas using composite operations
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
+        
+        // Sample points in a grid and check line-of-sight to light
+        const gridSize = 20;
+        for (let x = 0; x < levelSize.width; x += gridSize) {
+          for (let y = 0; y < levelSize.height; y += gridSize) {
+            if (hasLineOfSight(x + gridSize/2, y + gridSize/2, lightSource.x, lightSource.y)) {
+              const distance = Math.sqrt(
+                Math.pow(x + gridSize/2 - lightSource.x, 2) + 
+                Math.pow(y + gridSize/2 - lightSource.y, 2)
+              );
+              
+              if (distance <= lightSource.radius) {
+                // Calculate light intensity based on distance
+                const intensity = Math.max(0, 1 - (distance / lightSource.radius));
+                const lightStrength = intensity * (lightSource.brightness || 0.8);
+                
+                ctx.fillStyle = `rgba(0, 0, 0, ${lightStrength})`;
+                ctx.fillRect(x, y, gridSize, gridSize);
+              }
+            }
+          }
+        }
+        
+        ctx.restore();
+      }
+    }
 
   }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam, currentLevel, patternTiles, puzzleShards, puzzlePedestal, getCurrentWalls, teleporters]);
 
