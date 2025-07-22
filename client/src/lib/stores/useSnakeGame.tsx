@@ -648,7 +648,16 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
 
       // Check teleporter collisions
-      get().checkTeleporterCollision();
+      const teleportResult = get().checkTeleporterCollision();
+      if (teleportResult) {
+        // Player is being teleported - update position and teleporter state
+        updatedPlayer = {
+          ...updatedPlayer,
+          position: teleportResult.targetPosition
+        };
+        // The teleporter state will be updated in the main set() call below
+        set({ teleporters: teleportResult.teleporters });
+      }
 
       // Check switch interactions
       let updatedSwitches = state.switches.map((switchObj) => {
@@ -2041,7 +2050,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     checkTeleporterCollision: () => {
       const state = get();
-      if (state.teleporters.length === 0) return;
+      if (state.teleporters.length === 0) return null;
 
       const playerRect = {
         x: state.player.position.x,
@@ -2052,8 +2061,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       const currentTime = Date.now();
       let updatedTeleporters = [...state.teleporters];
-      let shouldTeleport = false;
-      let teleportTarget = null;
+      let teleportInfo = null;
 
       state.teleporters.forEach((teleporter, index) => {
         if (teleporter.type === 'sender') {
@@ -2077,16 +2085,18 @@ export const useSnakeGame = create<SnakeGameState>()(
               if (timeOnPad >= 1000) {
                 // Ready to teleport
                 const receiver = state.teleporters.find(t => t.type === 'receiver');
-                console.log('Teleporter ready! Found receiver:', receiver);
                 if (receiver) {
-                  shouldTeleport = true;
-                  teleportTarget = { x: receiver.x, y: receiver.y };
-                  console.log('Setting teleport target:', teleportTarget);
-                  // Reset teleporter
-                  updatedTeleporters[index] = {
-                    ...teleporter,
-                    isActive: false,
-                    activationStartTime: undefined
+                  const teleportCooldownTime = currentTime + 500; // 500ms cooldown
+                  teleportInfo = { 
+                    targetPosition: { x: receiver.x, y: receiver.y },
+                    teleporters: updatedTeleporters.map(t => 
+                      t.type === 'sender' ? { 
+                        ...t, 
+                        isActive: false, 
+                        activationStartTime: undefined,
+                        lastTeleportTime: teleportCooldownTime 
+                      } : t
+                    )
                   };
                 }
               }
@@ -2104,31 +2114,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
 
-      // Update teleporters state
-      set({ teleporters: updatedTeleporters });
-
-      // Perform teleportation if needed
-      if (shouldTeleport && teleportTarget) {
-        console.log('EXECUTING TELEPORTATION - Before:', state.player.position, 'Target:', teleportTarget);
-        // Add a brief cooldown to prevent immediate re-activation
-        const teleportCooldownTime = currentTime + 500; // 500ms cooldown
-        
-        set({
-          player: {
-            ...state.player,
-            position: teleportTarget
-          },
-          teleporters: updatedTeleporters.map(t => 
-            t.type === 'sender' ? { ...t, lastTeleportTime: teleportCooldownTime } : t
-          )
-        });
-        
-        // Verify the teleportation worked
-        setTimeout(() => {
-          const newState = get();
-          console.log('TELEPORTATION RESULT - After:', newState.player.position);
-        }, 10);
+      // Update teleporters state only if not teleporting
+      if (!teleportInfo) {
+        set({ teleporters: updatedTeleporters });
       }
+
+      return teleportInfo;
     },
 
     activateTeleporter: (teleporterId: string) => {
