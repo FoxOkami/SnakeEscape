@@ -162,6 +162,9 @@ export interface Crystal extends Rectangle {
 
 export interface LightSource extends Position {
   rotation: number; // 0-360 degrees, 0 = north, 90 = east, 180 = south, 270 = west
+  isOn: boolean; // Whether the light source is currently on
+  brightness?: number; // Optional brightness level (0-1)
+  radius?: number; // Optional light radius
 }
 
 export interface Projectile {

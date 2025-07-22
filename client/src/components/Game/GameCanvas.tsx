@@ -762,56 +762,6 @@ const GameCanvas: React.FC = () => {
       });
     }
 
-    // Draw player (different color when walking)
-    ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
-    ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
-    
-    // Add player details
-    ctx.fillStyle = isWalking ? '#2f855a' : '#2b6cb0'; // Darker green/blue for details
-    ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
-    
-    // Player eyes
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
-    ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-    
-    // Walking indicator - small stealth icon
-    if (isWalking) {
-      ctx.fillStyle = '#68d391';
-      ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-      ctx.fillStyle = '#38a169';
-      ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
-    }
-    
-    // Show key indicator if player has key
-    if (player.hasKey) {
-      ctx.fillStyle = '#ffd700';
-      ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
-    }
-
-    // Show "E to start" message if player is on the start tile in Level 4
-    if (currentLevel === 3 && currentTile && currentTile.id === 'grid_tile_3_0') {
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('E to start', player.position.x + player.size.width / 2, player.position.y - 10);
-      ctx.textAlign = 'left';
-    }
-
-    // Draw projectiles
-    projectiles.forEach(projectile => {
-      ctx.fillStyle = projectile.color;
-      ctx.fillRect(projectile.position.x, projectile.position.y, projectile.size.width, projectile.size.height);
-      
-      // Add a small glow effect for neon green projectiles
-      if (projectile.color === '#00ff41') {
-        ctx.shadowBlur = 5;
-        ctx.shadowColor = projectile.color;
-        ctx.fillRect(projectile.position.x, projectile.position.y, projectile.size.width, projectile.size.height);
-        ctx.shadowBlur = 0; // Reset shadow
-      }
-    });
-
     // Draw light reflection elements (mirrors, crystal, light beam)
     
     // Draw light source (before player so player appears on top)
@@ -875,6 +825,56 @@ const GameCanvas: React.FC = () => {
       ctx.arc(lightSource.x, lightSource.y, 12, 0, 2 * Math.PI);
       ctx.stroke();
     }
+
+    // Draw player (different color when walking)
+    ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
+    ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
+    
+    // Add player details
+    ctx.fillStyle = isWalking ? '#2f855a' : '#2b6cb0'; // Darker green/blue for details
+    ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
+    
+    // Player eyes
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
+    ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+    
+    // Walking indicator - small stealth icon
+    if (isWalking) {
+      ctx.fillStyle = '#68d391';
+      ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
+      ctx.fillStyle = '#38a169';
+      ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
+    }
+    
+    // Show key indicator if player has key
+    if (player.hasKey) {
+      ctx.fillStyle = '#ffd700';
+      ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
+    }
+
+    // Show "E to start" message if player is on the start tile in Level 4
+    if (currentLevel === 3 && currentTile && currentTile.id === 'grid_tile_3_0') {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('E to start', player.position.x + player.size.width / 2, player.position.y - 10);
+      ctx.textAlign = 'left';
+    }
+
+    // Draw projectiles
+    projectiles.forEach(projectile => {
+      ctx.fillStyle = projectile.color;
+      ctx.fillRect(projectile.position.x, projectile.position.y, projectile.size.width, projectile.size.height);
+      
+      // Add a small glow effect for neon green projectiles
+      if (projectile.color === '#00ff41') {
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = projectile.color;
+        ctx.fillRect(projectile.position.x, projectile.position.y, projectile.size.width, projectile.size.height);
+        ctx.shadowBlur = 0; // Reset shadow
+      }
+    });
 
     // Draw mirrors
     mirrors.forEach(mirror => {
