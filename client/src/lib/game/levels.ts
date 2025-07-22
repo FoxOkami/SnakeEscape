@@ -821,9 +821,9 @@ export const LEVELS: Level[] = [
     crystal: undefined,
     lightSource: {
       id: "main_light",
-      x: 150,
-      y: 150,
-      radius: 150, // Light radius
+      x: 400, // Center of the level
+      y: 300,
+      radius: 200, // Light radius
       isOn: false, // Starts off
       brightness: 0.8
     },
