@@ -813,19 +813,19 @@ export const LEVELS: Level[] = [
         width: 20,
         height: 30,
         isPressed: false,
-        switchType: "lever" // Lever-style switch
-      }
+        switchType: "lever", // Lever-style switch
+      },
     ],
     throwableItems: [],
     mirrors: [],
     crystal: undefined,
     lightSource: {
       id: "main_light",
-      x: 400, // Center of the level
-      y: 300,
-      radius: 200, // Light radius
-      isOn: false, // Starts off
-      brightness: 0.8
+      x: 100,
+      y: 100,
+      radius: 300, // Light radius
+      isOn: true,
+      brightness: 0.8,
     },
   },
 ];

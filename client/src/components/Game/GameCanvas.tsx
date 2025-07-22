@@ -814,21 +814,21 @@ const GameCanvas: React.FC = () => {
 
     // Draw light reflection elements (mirrors, crystal, light beam)
     
-    // Draw light source
+    // Draw light source (before player so player appears on top)
     if (lightSource) {
       if (lightSource.isOn) {
         // Draw bright light when on
         ctx.save();
         ctx.globalAlpha = lightSource.brightness || 0.8;
         
-        // Draw light radius/glow effect
+        // Draw light radius/glow effect (pink-tinted)
         const gradient = ctx.createRadialGradient(
           lightSource.x, lightSource.y, 0,
           lightSource.x, lightSource.y, lightSource.radius || 200
         );
-        gradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
-        gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.1)');
-        gradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
+        gradient.addColorStop(0, 'rgba(255, 192, 203, 0.3)');
+        gradient.addColorStop(0.5, 'rgba(255, 182, 193, 0.15)');
+        gradient.addColorStop(1, 'rgba(255, 160, 180, 0)');
         
         ctx.fillStyle = gradient;
         ctx.beginPath();
@@ -837,20 +837,20 @@ const GameCanvas: React.FC = () => {
         
         ctx.restore();
         
-        // Draw light source bulb (bright)
-        ctx.fillStyle = '#ffff00';
+        // Draw light source bulb (pink-tinted)
+        ctx.fillStyle = '#ff69b4';
         ctx.beginPath();
         ctx.arc(lightSource.x, lightSource.y, 12, 0, 2 * Math.PI);
         ctx.fill();
         
-        // Add bright glow effect
-        ctx.fillStyle = '#ffff80';
+        // Add bright glow effect (pink)
+        ctx.fillStyle = '#ffb6c1';
         ctx.beginPath();
         ctx.arc(lightSource.x, lightSource.y, 16, 0, 2 * Math.PI);
         ctx.fill();
         
-        // Core light
-        ctx.fillStyle = '#ffffff';
+        // Core light (pink-white)
+        ctx.fillStyle = '#ffe4e1';
         ctx.beginPath();
         ctx.arc(lightSource.x, lightSource.y, 8, 0, 2 * Math.PI);
         ctx.fill();
