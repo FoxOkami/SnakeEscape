@@ -2077,9 +2077,11 @@ export const useSnakeGame = create<SnakeGameState>()(
               if (timeOnPad >= 1000) {
                 // Ready to teleport
                 const receiver = state.teleporters.find(t => t.type === 'receiver');
+                console.log('Teleporter ready! Found receiver:', receiver);
                 if (receiver) {
                   shouldTeleport = true;
                   teleportTarget = { x: receiver.x, y: receiver.y };
+                  console.log('Setting teleport target:', teleportTarget);
                   // Reset teleporter
                   updatedTeleporters[index] = {
                     ...teleporter,
@@ -2107,6 +2109,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Perform teleportation if needed
       if (shouldTeleport && teleportTarget) {
+        console.log('EXECUTING TELEPORTATION - Before:', state.player.position, 'Target:', teleportTarget);
         // Add a brief cooldown to prevent immediate re-activation
         const teleportCooldownTime = currentTime + 500; // 500ms cooldown
         
@@ -2119,6 +2122,12 @@ export const useSnakeGame = create<SnakeGameState>()(
             t.type === 'sender' ? { ...t, lastTeleportTime: teleportCooldownTime } : t
           )
         });
+        
+        // Verify the teleportation worked
+        setTimeout(() => {
+          const newState = get();
+          console.log('TELEPORTATION RESULT - After:', newState.player.position);
+        }, 10);
       }
     },
 
