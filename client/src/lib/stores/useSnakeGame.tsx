@@ -2060,8 +2060,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           const isPlayerOnPad = checkAABBCollision(playerRect, teleporter);
           
           if (isPlayerOnPad) {
+            console.log('Player is on teleporter pad');
             // Player is on the pad
             if (!teleporter.isActive) {
+              console.log('Starting teleporter activation');
               // Start activation
               updatedTeleporters[index] = {
                 ...teleporter,
@@ -2071,10 +2073,13 @@ export const useSnakeGame = create<SnakeGameState>()(
             } else {
               // Check if enough time has passed (1 second)
               const timeOnPad = currentTime - (teleporter.activationStartTime || currentTime);
+              console.log('Time on pad:', timeOnPad);
               if (timeOnPad >= 1000) {
+                console.log('Ready to teleport!');
                 // Ready to teleport
                 const receiver = state.teleporters.find(t => t.type === 'receiver');
                 if (receiver) {
+                  console.log('Found receiver, teleporting to:', receiver.x, receiver.y);
                   shouldTeleport = true;
                   teleportTarget = { x: receiver.x, y: receiver.y };
                   // Reset teleporter
@@ -2083,12 +2088,15 @@ export const useSnakeGame = create<SnakeGameState>()(
                     isActive: false,
                     activationStartTime: undefined
                   };
+                } else {
+                  console.log('No receiver found!');
                 }
               }
             }
           } else {
             // Player left the pad - cancel activation
             if (teleporter.isActive) {
+              console.log('Player left pad, canceling activation');
               updatedTeleporters[index] = {
                 ...teleporter,
                 isActive: false,
@@ -2104,6 +2112,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Perform teleportation if needed
       if (shouldTeleport && teleportTarget) {
+        console.log('Executing teleportation to:', teleportTarget);
         set({
           player: {
             ...state.player,
