@@ -2134,6 +2134,66 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Keeping for compatibility but functionality moved to checkTeleporterCollision
     },
 
+    evaluateLogicPuzzle: (switches: any[]) => {
+      // Get switch states: ((A XOR B) AND (C AND D)) AND (NOT (E AND F))
+      const A = switches.find(s => s.id === 'light_switch')?.isPressed || false;
+      const B = switches.find(s => s.id === 'switch_1')?.isPressed || false;  
+      const C = switches.find(s => s.id === 'switch_2')?.isPressed || false;
+      const D = switches.find(s => s.id === 'switch_3')?.isPressed || false;
+      const E = switches.find(s => s.id === 'switch_4')?.isPressed || false;
+      const F = switches.find(s => s.id === 'switch_5')?.isPressed || false;
+
+      // Logic evaluation: ((A XOR B) AND (C AND D)) AND (NOT (E AND F))
+      const aXorB = (A && !B) || (!A && B); // XOR operation
+      const cAndD = C && D; // AND operation
+      const eAndF = E && F; // AND operation
+      const notEAndF = !eAndF; // NOT operation
+      
+      const firstPart = aXorB && cAndD; // (A XOR B) AND (C AND D)
+      const result = firstPart && notEAndF; // Final result
+
+      console.log(`Logic breakdown: A=${A}, B=${B}, C=${C}, D=${D}, E=${E}, F=${F}`);
+      console.log(`A XOR B = ${aXorB}, C AND D = ${cAndD}, E AND F = ${eAndF}, NOT(E AND F) = ${notEAndF}`);
+      console.log(`Final result: ((${aXorB}) AND (${cAndD})) AND (${notEAndF}) = ${result}`);
+
+      // Update key walls based on puzzle state
+      const state = get();
+      const currentWalls = state.walls;
+      
+      // Define key wall positions for identification
+      const keyWallPositions = [
+        { x: 710, y: 30, width: 60, height: 20 }, // Top wall
+        { x: 710, y: 80, width: 60, height: 20 }, // Bottom wall
+        { x: 710, y: 30, width: 20, height: 70 }, // Left wall  
+        { x: 750, y: 30, width: 20, height: 70 }  // Right wall
+      ];
+      
+      const isKeyWall = (wall: any) => {
+        return keyWallPositions.some(keyWall => 
+          wall.x === keyWall.x && wall.y === keyWall.y && 
+          wall.width === keyWall.width && wall.height === keyWall.height
+        );
+      };
+      
+      let updatedWalls;
+      if (result) {
+        // Puzzle solved - remove key walls
+        updatedWalls = currentWalls.filter(wall => !isKeyWall(wall));
+      } else {
+        // Puzzle not solved - ensure key walls are present
+        const hasKeyWalls = currentWalls.some(wall => isKeyWall(wall));
+        if (!hasKeyWalls) {
+          // Re-add key walls from original level definition
+          updatedWalls = [...currentWalls, ...keyWallPositions];
+        } else {
+          updatedWalls = currentWalls;
+        }
+      }
+
+      set({ walls: updatedWalls });
+      return result;
+    },
+
     toggleLightSwitch: () => {
       const state = get();
       const playerRect = {
@@ -2155,6 +2215,19 @@ export const useSnakeGame = create<SnakeGameState>()(
         s.id === nearbyLeverSwitch.id ? { ...s, isPressed: !s.isPressed } : s
       );
 
+      // Console log for switch toggles
+      const switchNames = {
+        'light_switch': 'A (Light Switch)',
+        'switch_1': 'B (Switch 1)', 
+        'switch_2': 'C (Switch 2)',
+        'switch_3': 'D (Switch 3)',
+        'switch_4': 'E (Switch 4)',
+        'switch_5': 'F (Switch 5)'
+      };
+      const switchName = switchNames[nearbyLeverSwitch.id as keyof typeof switchNames] || nearbyLeverSwitch.id;
+      const newState = !nearbyLeverSwitch.isPressed;
+      console.log(`Switch ${switchName} toggled to: ${newState ? 'ON' : 'OFF'}`);
+
       // Only toggle the light source if it's the main light switch
       let updatedLightSource = state.lightSource;
       if (nearbyLeverSwitch.id === 'light_switch') {
@@ -2162,6 +2235,12 @@ export const useSnakeGame = create<SnakeGameState>()(
           ...state.lightSource,
           isOn: !state.lightSource.isOn
         } : null;
+      }
+
+      // Evaluate logic puzzle and update key walls for Level 5
+      if (state.currentLevel === 4) { // Level 5 (0-indexed as 4)
+        const puzzleSolved = get().evaluateLogicPuzzle(updatedSwitches);
+        console.log(`Logic puzzle evaluation: ${puzzleSolved ? 'SOLVED' : 'NOT SOLVED'}`);
       }
 
       set({

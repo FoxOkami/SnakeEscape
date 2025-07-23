@@ -718,6 +718,11 @@ export const LEVELS: Level[] = [
       // Cross section walls
       { x: 390, y: 0, width: 20, height: 600 }, // horizontally centered vertical wall
       { x: 0, y: 290, width: 800, height: 20 }, // vertically centered horizontal wall
+      // Key chamber walls (removable when logic puzzle is solved)
+      { x: 710, y: 30, width: 60, height: 20 }, // Top wall
+      { x: 710, y: 80, width: 60, height: 20 }, // Bottom wall
+      { x: 710, y: 30, width: 20, height: 70 }, // Left wall
+      { x: 750, y: 30, width: 20, height: 70 }, // Right wall
     ],
     snakes: [],
     door: { x: 730, y: 560, width: 30, height: 40, isOpen: false },
