@@ -823,7 +823,7 @@ export const LEVELS: Level[] = [
       id: "main_light",
       x: 100,
       y: 100,
-      radius: 300, // Light radius
+      radius: 150, // Light radius
       isOn: true,
       brightness: 0.8,
     },

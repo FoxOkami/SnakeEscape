@@ -45,9 +45,18 @@ const GameCanvas: React.FC = () => {
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
-    // Clear canvas
+    // Clear canvas with default background
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, levelSize.width, levelSize.height);
+    
+    // Level 5 quadrant lighting effect
+    if (currentLevel === 4 && lightSource) { // Level 5 (0-indexed as 4)
+      // Draw top quadrant background based on light state
+      const topQuadrantColor = lightSource.isOn ? '#ffffff' : '#000000';
+      ctx.fillStyle = topQuadrantColor;
+      // Top quadrant: full width, from y=0 to y=290 (above the horizontal center wall)
+      ctx.fillRect(0, 0, levelSize.width, 290);
+    }
     
     // Add test border to see if canvas is drawing
     ctx.strokeStyle = '#ff0000';
@@ -764,67 +773,8 @@ const GameCanvas: React.FC = () => {
 
     // Draw light reflection elements (mirrors, crystal, light beam)
     
-    // Draw light source (before player so player appears on top)
-    if (lightSource) {
-      if (lightSource.isOn) {
-        // Draw bright light when on
-        ctx.save();
-        ctx.globalAlpha = lightSource.brightness || 0.8;
-        
-        // Draw light radius/glow effect (pink-tinted)
-        const gradient = ctx.createRadialGradient(
-          lightSource.x, lightSource.y, 0,
-          lightSource.x, lightSource.y, lightSource.radius || 200
-        );
-        gradient.addColorStop(0, 'rgba(255, 192, 203, 0.3)');
-        gradient.addColorStop(0.5, 'rgba(255, 182, 193, 0.15)');
-        gradient.addColorStop(1, 'rgba(255, 160, 180, 0)');
-        
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(lightSource.x, lightSource.y, lightSource.radius || 200, 0, 2 * Math.PI);
-        ctx.fill();
-        
-        ctx.restore();
-        
-        // Draw light source bulb (pink-tinted)
-        ctx.fillStyle = '#ff69b4';
-        ctx.beginPath();
-        ctx.arc(lightSource.x, lightSource.y, 12, 0, 2 * Math.PI);
-        ctx.fill();
-        
-        // Add bright glow effect (pink)
-        ctx.fillStyle = '#ffb6c1';
-        ctx.beginPath();
-        ctx.arc(lightSource.x, lightSource.y, 16, 0, 2 * Math.PI);
-        ctx.fill();
-        
-        // Core light (pink-white)
-        ctx.fillStyle = '#ffe4e1';
-        ctx.beginPath();
-        ctx.arc(lightSource.x, lightSource.y, 8, 0, 2 * Math.PI);
-        ctx.fill();
-      } else {
-        // Draw dim light when off
-        ctx.fillStyle = '#666666';
-        ctx.beginPath();
-        ctx.arc(lightSource.x, lightSource.y, 12, 0, 2 * Math.PI);
-        ctx.fill();
-        
-        // Dark center
-        ctx.fillStyle = '#333333';
-        ctx.beginPath();
-        ctx.arc(lightSource.x, lightSource.y, 8, 0, 2 * Math.PI);
-        ctx.fill();
-      }
-      
-      // Add border
-      ctx.strokeStyle = '#2d3748';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(lightSource.x, lightSource.y, 12, 0, 2 * Math.PI);
-      ctx.stroke();
-    }
+    // Note: For Level 5, the lighting effect is now handled by the background quadrant system above
+    // No physical light source object is rendered - the lighting is environmental
 
     // Draw player (different color when walking)
     ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
