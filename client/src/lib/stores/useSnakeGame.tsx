@@ -2143,28 +2143,31 @@ export const useSnakeGame = create<SnakeGameState>()(
         height: state.player.size.height,
       };
 
-      // Find the light switch
-      const lightSwitch = state.switches.find(s => s.switchType === 'lever');
-      if (!lightSwitch) return;
+      // Find any lever switch that the player is touching
+      const nearbyLeverSwitch = state.switches.find(s => 
+        s.switchType === 'lever' && checkAABBCollision(playerRect, s)
+      );
+      
+      if (!nearbyLeverSwitch) return;
 
-      // Check if player is close enough to the switch
-      if (checkAABBCollision(playerRect, lightSwitch)) {
-        // Toggle the switch
-        const updatedSwitches = state.switches.map(s => 
-          s.id === lightSwitch.id ? { ...s, isPressed: !s.isPressed } : s
-        );
+      // Toggle the switch
+      const updatedSwitches = state.switches.map(s => 
+        s.id === nearbyLeverSwitch.id ? { ...s, isPressed: !s.isPressed } : s
+      );
 
-        // Toggle the light source
-        const updatedLightSource = state.lightSource ? {
+      // Only toggle the light source if it's the main light switch
+      let updatedLightSource = state.lightSource;
+      if (nearbyLeverSwitch.id === 'light_switch') {
+        updatedLightSource = state.lightSource ? {
           ...state.lightSource,
           isOn: !state.lightSource.isOn
         } : null;
-
-        set({
-          switches: updatedSwitches,
-          lightSource: updatedLightSource
-        });
       }
+
+      set({
+        switches: updatedSwitches,
+        lightSource: updatedLightSource
+      });
     },
 
   })),
