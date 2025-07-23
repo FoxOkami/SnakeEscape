@@ -51,13 +51,27 @@ const GameCanvas: React.FC = () => {
     
     // Level 5 quadrant lighting effect
     if (currentLevel === 4 && lightSource) { // Level 5 (0-indexed as 4)
-      // Only draw black overlay when light is OFF
+      // Define quadrant boundaries based on the cross-shaped walls
+      const centerX = 390; // Vertical wall position
+      const centerY = 290; // Horizontal wall position
+      
+      // Only draw black overlays when light is OFF
       if (!lightSource.isOn) {
         ctx.fillStyle = '#000000';
-        // Top quadrant: full width, from y=0 to y=290 (above the horizontal center wall)
-        ctx.fillRect(0, 0, levelSize.width, 290);
+        
+        // Top-left quadrant
+        ctx.fillRect(0, 0, centerX, centerY);
+        
+        // Top-right quadrant  
+        ctx.fillRect(centerX + 20, 0, levelSize.width - (centerX + 20), centerY);
+        
+        // Bottom-left quadrant
+        ctx.fillRect(0, centerY + 20, centerX, levelSize.height - (centerY + 20));
+        
+        // Bottom-right quadrant
+        ctx.fillRect(centerX + 20, centerY + 20, levelSize.width - (centerX + 20), levelSize.height - (centerY + 20));
       }
-      // When light is ON, no overlay is drawn, showing the normal background
+      // When light is ON, no overlays are drawn, showing the normal background
     }
     
     // Add test border to see if canvas is drawing

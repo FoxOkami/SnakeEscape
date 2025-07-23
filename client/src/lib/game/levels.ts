@@ -824,7 +824,7 @@ export const LEVELS: Level[] = [
       x: 100,
       y: 100,
       radius: 150, // Light radius
-      isOn: true,
+      isOn: false,
       brightness: 0.8,
     },
   },
