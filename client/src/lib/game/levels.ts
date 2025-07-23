@@ -393,7 +393,12 @@ export const LEVELS: Level[] = [
     ],
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 690, y: 300, width: 20, height: 20, collected: false },
-    lightSource: { x: 100, y: 50, rotation: 180 }, // Initially pointing south
+    lightSource: { 
+      x: 100, 
+      y: 50, 
+      rotation: 180, // Initially pointing south
+      isOn: false 
+    },
     crystal: {
       x: 620,
       y: 300,
@@ -694,7 +699,7 @@ export const LEVELS: Level[] = [
       throwableItems: [],
       mirrors: [],
       crystal: undefined,
-      lightSource: null,
+      lightSource: undefined,
     };
   })(),
 
@@ -815,17 +820,62 @@ export const LEVELS: Level[] = [
         isPressed: false,
         switchType: "lever", // Lever-style switch
       },
+      {
+        id: "switch_1",
+        x: 150,
+        y: 50,
+        width: 20,
+        height: 30,
+        isPressed: false,
+        switchType: "lever",
+      },
+      {
+        id: "switch_2",
+        x: 250,
+        y: 80,
+        width: 20,
+        height: 30,
+        isPressed: false,
+        switchType: "lever",
+      },
+      {
+        id: "switch_3",
+        x: 100,
+        y: 180,
+        width: 20,
+        height: 30,
+        isPressed: false,
+        switchType: "lever",
+      },
+      {
+        id: "switch_4",
+        x: 300,
+        y: 200,
+        width: 20,
+        height: 30,
+        isPressed: false,
+        switchType: "lever",
+      },
+      {
+        id: "switch_5",
+        x: 200,
+        y: 240,
+        width: 20,
+        height: 30,
+        isPressed: false,
+        switchType: "lever",
+      },
     ],
     throwableItems: [],
     mirrors: [],
     crystal: undefined,
     lightSource: {
-      id: "main_light",
       x: 100,
       y: 100,
-      radius: 150, // Light radius
+      rotation: 0,
       isOn: false,
       brightness: 0.8,
+      radius: 150,
     },
   },
 ];
