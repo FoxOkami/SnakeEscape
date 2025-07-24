@@ -49,29 +49,47 @@ const GameCanvas: React.FC = () => {
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, levelSize.width, levelSize.height);
     
-    // Level 5 quadrant lighting effect
-    if (currentLevel === 4 && lightSource) { // Level 5 (0-indexed as 4)
+    // Level 5 quadrant lighting effect with individual logic conditions
+    if (currentLevel === 4) { // Level 5 (0-indexed as 4)
       // Define quadrant boundaries based on the cross-shaped walls
       const centerX = 390; // Vertical wall position
       const centerY = 290; // Horizontal wall position
       
-      // Only draw black overlays when light is OFF
-      if (!lightSource.isOn) {
-        ctx.fillStyle = '#000000';
-        
-        // Top-left quadrant
+      // Get switch states for logic evaluation
+      const A = switches.find(s => s.id === 'light_switch')?.isPressed || false;
+      const B = switches.find(s => s.id === 'switch_1')?.isPressed || false;  
+      const C = switches.find(s => s.id === 'switch_2')?.isPressed || false;
+      const D = switches.find(s => s.id === 'switch_3')?.isPressed || false;
+      const E = switches.find(s => s.id === 'switch_4')?.isPressed || false;
+      const F = switches.find(s => s.id === 'switch_5')?.isPressed || false;
+
+      // Calculate lighting conditions for each quadrant
+      const topLeftLit = (A && !B) || (!A && B); // A XOR B
+      const topRightLit = C && D; // C AND D
+      const bottomLeftLit = !(E && F); // NOT (E AND F)
+      const bottomRightLit = topLeftLit && topRightLit; // (A XOR B) AND (C AND D)
+      
+      ctx.fillStyle = '#000000';
+      
+      // Top-left quadrant - draw overlay if NOT lit
+      if (!topLeftLit) {
         ctx.fillRect(0, 0, centerX, centerY);
-        
-        // Top-right quadrant  
+      }
+      
+      // Top-right quadrant - draw overlay if NOT lit  
+      if (!topRightLit) {
         ctx.fillRect(centerX + 20, 0, levelSize.width - (centerX + 20), centerY);
-        
-        // Bottom-left quadrant
+      }
+      
+      // Bottom-left quadrant - draw overlay if NOT lit
+      if (!bottomLeftLit) {
         ctx.fillRect(0, centerY + 20, centerX, levelSize.height - (centerY + 20));
-        
-        // Bottom-right quadrant
+      }
+      
+      // Bottom-right quadrant - draw overlay if NOT lit
+      if (!bottomRightLit) {
         ctx.fillRect(centerX + 20, centerY + 20, levelSize.width - (centerX + 20), levelSize.height - (centerY + 20));
       }
-      // When light is ON, no overlays are drawn, showing the normal background
     }
     
     // Add test border to see if canvas is drawing
