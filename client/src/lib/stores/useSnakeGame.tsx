@@ -2166,12 +2166,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       const currentWalls = state.walls;
       
-      // Define key wall positions for identification
+      // Define key wall positions for identification (updated to match levels.ts)
       const keyWallPositions = [
-        { x: 710, y: 30, width: 60, height: 20 }, // Top wall
-        { x: 710, y: 80, width: 60, height: 20 }, // Bottom wall
-        { x: 710, y: 30, width: 20, height: 70 }, // Left wall  
-        { x: 750, y: 30, width: 20, height: 70 }  // Right wall
+        { x: 710, y: 0, width: 60, height: 20 },   // Top wall
+        { x: 710, y: 70, width: 80, height: 20 },  // Bottom wall
+        { x: 710, y: 20, width: 20, height: 70 },  // Left wall  
+        { x: 780, y: 20, width: 20, height: 70 }   // Right wall
       ];
       
       const isKeyWall = (wall: any) => {

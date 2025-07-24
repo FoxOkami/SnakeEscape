@@ -393,11 +393,11 @@ export const LEVELS: Level[] = [
     ],
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 690, y: 300, width: 20, height: 20, collected: false },
-    lightSource: { 
-      x: 100, 
-      y: 50, 
+    lightSource: {
+      x: 100,
+      y: 50,
       rotation: 180, // Initially pointing south
-      isOn: false 
+      isOn: false,
     },
     crystal: {
       x: 620,
@@ -719,14 +719,14 @@ export const LEVELS: Level[] = [
       { x: 390, y: 0, width: 20, height: 600 }, // horizontally centered vertical wall
       { x: 0, y: 290, width: 800, height: 20 }, // vertically centered horizontal wall
       // Key chamber walls (removable when logic puzzle is solved)
-      { x: 710, y: 30, width: 60, height: 20 }, // Top wall
-      { x: 710, y: 80, width: 60, height: 20 }, // Bottom wall
-      { x: 710, y: 30, width: 20, height: 70 }, // Left wall
-      { x: 750, y: 30, width: 20, height: 70 }, // Right wall
+      { x: 710, y: 0, width: 60, height: 20 }, // Top wall
+      { x: 710, y: 70, width: 80, height: 20 }, // Bottom wall
+      { x: 710, y: 20, width: 20, height: 70 }, // Left wall
+      { x: 780, y: 20, width: 20, height: 70 }, // Right wall
     ],
     snakes: [],
     door: { x: 730, y: 560, width: 30, height: 40, isOpen: false },
-    key: { x: 730, y: 50, width: 20, height: 20, collected: false },
+    key: { x: 745, y: 35, width: 20, height: 20, collected: false },
     teleporters: [
       {
         id: "teleporter_sender",
@@ -817,44 +817,44 @@ export const LEVELS: Level[] = [
     patternSequence: [],
     switches: [
       {
-        id: "light_switch",
-        x: 50,
-        y: 100,
+        id: "light_switch", // A
+        x: 60,
+        y: 135,
         width: 20,
         height: 30,
         isPressed: false,
         switchType: "lever", // Lever-style switch
       },
       {
-        id: "switch_1",
-        x: 150,
-        y: 50,
+        id: "switch_1", // B
+        x: 330,
+        y: 135,
         width: 20,
         height: 30,
         isPressed: false,
         switchType: "lever",
       },
       {
-        id: "switch_2",
-        x: 250,
-        y: 80,
+        id: "switch_2", // C
+        x: 60,
+        y: 435,
         width: 20,
         height: 30,
         isPressed: false,
         switchType: "lever",
       },
       {
-        id: "switch_3",
-        x: 100,
-        y: 180,
+        id: "switch_3", // D
+        x: 330,
+        y: 435,
         width: 20,
         height: 30,
         isPressed: false,
         switchType: "lever",
       },
       {
-        id: "switch_4",
-        x: 300,
+        id: "switch_4", // E
+        x: 500,
         y: 200,
         width: 20,
         height: 30,
@@ -862,9 +862,9 @@ export const LEVELS: Level[] = [
         switchType: "lever",
       },
       {
-        id: "switch_5",
-        x: 200,
-        y: 240,
+        id: "switch_5", // F
+        x: 500,
+        y: 440,
         width: 20,
         height: 30,
         isPressed: false,
