@@ -905,7 +905,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Level 3 (light reflection puzzle) - player must have key and crystal must be activated
       if (state.currentLevel === 2 && updatedPlayer.hasKey && updatedCrystal && updatedCrystal.isActivated) {
         updatedDoor = { ...state.door, isOpen: true };
-      } else if (state.currentLevel !== 2 && updatedPlayer.hasKey && allSwitchesPressed) {
+      } 
+      // Level 5 (logic gate puzzle) - player only needs the key
+      else if (state.currentLevel === 4 && updatedPlayer.hasKey) {
+        updatedDoor = { ...state.door, isOpen: true };
+      }
+      // Other levels - player must have key and all switches pressed
+      else if (state.currentLevel !== 2 && state.currentLevel !== 4 && updatedPlayer.hasKey && allSwitchesPressed) {
         updatedDoor = { ...state.door, isOpen: true };
       }
 

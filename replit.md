@@ -118,6 +118,7 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Recent Changes
+- July 24, 2025. Fixed Level 5 door logic to only require the key - door no longer depends on switch states, only on player having collected the key
 - July 24, 2025. Enhanced Level 5 quadrant lighting system with individual logic conditions - each quadrant now has its own lighting formula: top-left (A XOR B), top-right (C AND D), bottom-left (NOT (E AND F)), bottom-right ((A XOR B) AND (C AND D))
 - July 24, 2025. Implemented complete logic gate puzzle system with 6 switches (A-F) and dynamic key wall removal/addition based on puzzle solution formula ((A XOR B) AND (C AND D)) AND (NOT (E AND F))
 - July 24, 2025. Added comprehensive console logging for switch toggles and logic breakdown to help debug puzzle mechanics
