@@ -19,7 +19,7 @@ export interface Player {
 
 export interface Snake {
   id: string;
-  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter';
+  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic';
   position: Position;
   size: Size;
   speed: number;
@@ -55,6 +55,13 @@ export interface Snake {
   shotCount?: number; // Track shot number for alternating patterns
   // Phase system properties
   activePhase?: 'A' | 'B' | 'C'; // Phase restriction for Level 5
+  // Photophobic-specific properties
+  isInDarkness?: boolean; // Whether the quadrant is dark (has overlay)
+  isBerserk?: boolean; // Whether in aggressive light-exposed state
+  pauseStartTime?: number; // Time when pause started (for 100ms pauses)
+  isPaused?: boolean; // Whether currently paused
+  chargeDirection?: Position; // Direction of direct charge at player
+  isCharging?: boolean; // Whether currently charging at player
 }
 
 export interface Wall extends Rectangle {}

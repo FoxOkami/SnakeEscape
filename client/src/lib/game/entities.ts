@@ -29,6 +29,8 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
       return updatePlumberSnake(snake, walls, dt, player, gameState);
     case 'spitter':
       return updateSpitterSnake(snake, walls, dt);
+    case 'photophobic':
+      return updatePhotophobicSnake(snake, walls, dt, player, sounds, currentTime, gameState);
     default:
       return snake;
   }
@@ -337,6 +339,139 @@ function getPatrolTarget(snake: Snake): Position {
   }
   
   return snake.patrolPoints[snake.currentPatrolIndex];
+}
+
+function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, sounds?: Position[], currentTime?: number, gameState?: any): Snake {
+  if (!player || !currentTime) return snake;
+
+  // Determine which quadrant the snake is in
+  const isInTopLeft = snake.position.x < 390 && snake.position.y < 290;
+  const isInTopRight = snake.position.x > 410 && snake.position.y < 290;
+  const isInBottomLeft = snake.position.x < 390 && snake.position.y > 310;
+  const isInBottomRight = snake.position.x > 410 && snake.position.y > 310;
+
+  // Get lighting state from game state (passed through gameState parameter)
+  let isDark = false;
+  if (gameState && gameState.quadrantLighting) {
+    const lighting = gameState.quadrantLighting;
+    if (isInTopLeft) {
+      isDark = !lighting.topLeft;
+    } else if (isInTopRight) {
+      isDark = !lighting.topRight;
+    } else if (isInBottomLeft) {
+      isDark = !lighting.bottomLeft;
+    } else if (isInBottomRight) {
+      isDark = !lighting.bottomRight;
+    }
+  }
+  
+  // Check if currently paused (100ms pause states)
+  if (snake.isPaused && snake.pauseStartTime) {
+    if (currentTime - snake.pauseStartTime >= 0.1) { // 100ms
+      snake.isPaused = false;
+      snake.pauseStartTime = undefined;
+    } else {
+      return snake; // Stay still during pause
+    }
+  }
+
+  // Dark state behavior - stay still, only react to sound
+  if (isDark && !snake.isBerserk) {
+    snake.isInDarkness = true;
+    snake.isBerserk = false;
+    snake.isChasing = false;
+    snake.isCharging = false;
+
+    // React to sounds if player is moving and not walking stealthily
+    if (sounds && sounds.length > 0 && snake.hearingRange) {
+      for (const sound of sounds) {
+        const distanceToSound = getDistance(snake.position, sound);
+        if (distanceToSound <= snake.hearingRange) {
+          // Face the sound but don't move
+          snake.direction = getDirectionVector(snake.position, sound);
+          snake.lastHeardSound = sound;
+          break;
+        }
+      }
+    }
+    
+    return snake; // Stay still in dark
+  }
+
+  // Light state - berserk mode
+  snake.isInDarkness = false;
+  snake.isBerserk = true;
+
+  // Check if snake can see player
+  const distanceToPlayer = getDistance(snake.position, player.position);
+  const canSeePlayer = distanceToPlayer <= snake.sightRange && 
+                      hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
+
+  // If charging and hit a wall, pause and redirect
+  if (snake.isCharging && snake.chargeDirection) {
+    const chargePosition = {
+      x: snake.position.x + snake.chargeDirection.x * snake.chaseSpeed * dt,
+      y: snake.position.y + snake.chargeDirection.y * snake.chaseSpeed * dt
+    };
+
+    if (checkWallCollision(snake, chargePosition, walls)) {
+      // Hit wall during charge - pause for 100ms then redirect to player
+      snake.isPaused = true;
+      snake.pauseStartTime = currentTime;
+      snake.isCharging = false;
+      snake.chargeDirection = undefined;
+      
+      // Set new charge direction toward player's current position
+      snake.chargeDirection = getDirectionVector(snake.position, player.position);
+      
+      return snake;
+    } else {
+      // Continue charging
+      snake.position = chargePosition;
+      return snake;
+    }
+  }
+
+  // If can see player, stop and prepare to charge
+  if (canSeePlayer && !snake.isCharging) {
+    snake.isPaused = true;
+    snake.pauseStartTime = currentTime;
+    snake.chaseTarget = { ...player.position };
+    snake.chargeDirection = getDirectionVector(snake.position, player.position);
+    
+    return snake;
+  }
+
+  // If pause is complete, start charging
+  if (snake.isPaused && snake.pauseStartTime && currentTime - snake.pauseStartTime >= 0.1) {
+    snake.isPaused = false;
+    snake.pauseStartTime = undefined;
+    snake.isCharging = true;
+  }
+
+  // If not charging and not paused, patrol quickly
+  if (!snake.isCharging && !snake.isPaused) {
+    const targetPoint = getPatrolTarget(snake);
+    const newPosition = moveTowards(snake.position, targetPoint, snake.chaseSpeed * dt);
+    
+    if (!checkWallCollision(snake, newPosition, walls)) {
+      snake.position = newPosition;
+    } else {
+      // Skip to next patrol point if blocked
+      snake.currentPatrolIndex += snake.patrolDirection;
+      if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
+        snake.currentPatrolIndex = snake.patrolPoints.length - 2;
+        snake.patrolDirection = -1;
+      } else if (snake.currentPatrolIndex < 0) {
+        snake.currentPatrolIndex = 1;
+        snake.patrolDirection = 1;
+      }
+    }
+    
+    snake.direction = getDirectionVector(snake.position, targetPoint);
+  }
+
+  return snake;
 }
 
 function checkWallCollision(snake: Snake, newPosition: Position, walls: Wall[]): boolean {

@@ -621,6 +621,22 @@ const GameCanvas: React.FC = () => {
           accentColor = '#00ff41'; // Neon green accent
           eyeColor = '#00ff41'; // Neon green eyes
           break;
+        case 'photophobic':
+          // Change colors based on state
+          if (snake.isInDarkness) {
+            baseColor = '#4a5568'; // Dark gray when in darkness
+            accentColor = '#718096'; // Lighter gray
+            eyeColor = '#a0aec0'; // Light gray eyes
+          } else if (snake.isBerserk) {
+            baseColor = snake.isCharging ? '#ff0000' : '#cc0000'; // Bright red when berserk
+            accentColor = snake.isCharging ? '#ff6b6b' : '#e53e3e';
+            eyeColor = '#ffff00'; // Yellow eyes when aggressive
+          } else {
+            baseColor = '#805ad5'; // Purple default
+            accentColor = '#b794f6';
+            eyeColor = '#d69e2e';
+          }
+          break;
       }
       
       // Main body
@@ -666,6 +682,24 @@ const GameCanvas: React.FC = () => {
         // Diagonal lines
         ctx.fillRect(centerX - 5, centerY - 1, 10, 2); // Diagonal 1
         ctx.fillRect(centerX - 1, centerY - 5, 2, 10); // Diagonal 2
+      } else if (snake.type === 'photophobic') {
+        // Lightning/energy pattern for photophobic (represents light sensitivity)
+        const centerX = snake.position.x + snake.size.width / 2;
+        const centerY = snake.position.y + snake.size.height / 2;
+        
+        if (snake.isInDarkness) {
+          // Subtle dots pattern when in darkness
+          ctx.fillRect(snake.position.x + 4, snake.position.y + 4, 2, 2);
+          ctx.fillRect(snake.position.x + 12, snake.position.y + 8, 2, 2);
+          ctx.fillRect(snake.position.x + 8, snake.position.y + 16, 2, 2);
+          ctx.fillRect(snake.position.x + 20, snake.position.y + 20, 2, 2);
+        } else {
+          // Jagged lightning pattern when berserk
+          ctx.fillRect(snake.position.x + 3, snake.position.y + 3, snake.size.width - 6, 3);
+          ctx.fillRect(snake.position.x + 8, snake.position.y + 8, snake.size.width - 16, 2);
+          ctx.fillRect(snake.position.x + 5, snake.position.y + 13, snake.size.width - 10, 3);
+          ctx.fillRect(snake.position.x + 10, snake.position.y + 18, snake.size.width - 20, 2);
+        }
       }
       
       // Add snake eyes (stalkers have no visible eyes)

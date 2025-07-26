@@ -475,20 +475,6 @@ export const LEVELS: Level[] = [
         { x: 740, y: 50, width: 20, height: 70 }, // right wall
       ],
       snakes: [
-        // {
-        //   id: "screensaver1",
-        //   type: "screensaver" as const,
-        //   position: calculateTileCenter(7, 0), // Grid position (7,0)
-        //   size: { width: 30, height: 30 },
-        //   speed: 150, // 1.5x faster than screensaver1
-        //   direction: { x: -1, y: 0 }, // Start moving west
-        //   patrolPoints: [],
-        //   currentPatrolIndex: 0,
-        //   patrolDirection: 1,
-        //   chaseSpeed: 0,
-        //   sightRange: 0,
-        //   isChasing: false,
-        // },
         // Helper function to calculate tile center position
         ...(() => {
           const tileSize = 60;
@@ -707,7 +693,7 @@ export const LEVELS: Level[] = [
   {
     id: 5,
     name: "Final Challenge",
-    player: { x: 25, y: 25 },
+    player: { x: 25, y: 315 },
     size: { width: 800, height: 600 },
     walls: [
       // Outer walls (800x600)
@@ -724,15 +710,110 @@ export const LEVELS: Level[] = [
       { x: 710, y: 20, width: 20, height: 70 }, // Left wall
       { x: 780, y: 20, width: 20, height: 70 }, // Right wall
     ],
-    snakes: [],
+    snakes: [
+      {
+        id: "screensaver1",
+        type: "screensaver" as const,
+        position: { x: 350, y: 325 },
+        size: { width: 30, height: 30 },
+        speed: 175,
+        direction: { x: 0, y: 1 },
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+      },
+      {
+        id: "stalker1",
+        type: "stalker" as const,
+        position: { x: 200, y: 350 },
+        size: { width: 28, height: 28 },
+        speed: 100,
+        direction: { x: 0, y: 1 },
+        patrolPoints: [
+          { x: 180, y: 320 },
+          { x: 300, y: 550 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 125,
+        sightRange: 0, // Stalkers are blind
+        hearingRange: 300,
+        isChasing: false,
+        soundCooldown: 0,
+      },
+      {
+        id: "screensaver2",
+        type: "screensaver" as const,
+        position: { x: 200, y: 150 },
+        size: { width: 30, height: 30 },
+        speed: 175,
+        direction: { x: -1, y: 1 },
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+      },
+      {
+        id: "guard1",
+        type: "guard" as const,
+        position: { x: 425, y: 25 },
+        size: { width: 30, height: 30 },
+        speed: 100,
+        direction: { x: 0, y: 1 },
+        patrolPoints: [
+          { x: 425, y: 25 },
+          { x: 425, y: 250 },
+          { x: 720, y: 250 },
+          { x: 720, y: 100 },
+          { x: 600, y: 150 },
+          { x: 425, y: 25 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 150,
+        sightRange: 100,
+        isChasing: false,
+        lostSightCooldown: 0,
+      },
+      {
+        id: "photophobic1",
+        type: "photophobic" as const,
+        position: { x: 500, y: 400 }, // Bottom-right quadrant
+        size: { width: 32, height: 32 },
+        speed: 80, // Slower when patrolling normally
+        direction: { x: 1, y: 0 },
+        patrolPoints: [
+          { x: 450, y: 350 },
+          { x: 650, y: 350 },
+          { x: 650, y: 500 },
+          { x: 450, y: 500 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 250, // Very fast when berserk
+        sightRange: 150, // Good sight range when berserk
+        hearingRange: 200, // Can hear player when in darkness
+        isChasing: false,
+        isInDarkness: true, // Start in darkness state
+        isBerserk: false,
+        isPaused: false,
+        isCharging: false,
+      },
+    ],
     door: { x: 730, y: 560, width: 30, height: 40, isOpen: false },
     key: { x: 745, y: 35, width: 20, height: 20, collected: false },
     teleporters: [
       {
+        // NW
         id: "teleporter_sender",
         type: "sender",
         x: 350,
-        y: 250,
+        y: 140,
         width: 30,
         height: 30,
         linkedTeleporterId: "teleporter_receiver_2",
@@ -740,16 +821,18 @@ export const LEVELS: Level[] = [
         isActive: false,
       },
       {
+        // NW
         id: "teleporter_receiver",
         type: "receiver",
-        x: 350,
-        y: 50,
+        x: 30,
+        y: 30,
         width: 30,
         height: 30,
         activationDelay: 0, // Receivers don't need activation delay
         isActive: false,
       },
       {
+        // NE
         id: "teleporter_sender_2",
         type: "sender",
         x: 420,
@@ -761,20 +844,22 @@ export const LEVELS: Level[] = [
         isActive: false,
       },
       {
+        // NE
         id: "teleporter_receiver_2",
         type: "receiver",
-        x: 420,
-        y: 50,
+        x: 740,
+        y: 140,
         width: 30,
         height: 30,
         activationDelay: 0, // Receivers don't need activation delay
         isActive: false,
       },
       {
+        // SW
         id: "teleporter_sender_3",
         type: "sender",
         x: 350,
-        y: 330,
+        y: 430,
         width: 30,
         height: 30,
         linkedTeleporterId: "teleporter_receiver_4",
@@ -782,20 +867,22 @@ export const LEVELS: Level[] = [
         isActive: false,
       },
       {
+        // SW
         id: "teleporter_receiver_3",
         type: "receiver",
-        x: 350,
-        y: 530,
+        x: 30,
+        y: 540,
         width: 30,
         height: 30,
         activationDelay: 0, // Receivers don't need activation delay
         isActive: false,
       },
       {
+        // SE
         id: "teleporter_sender_4",
         type: "sender",
         x: 420,
-        y: 330,
+        y: 325,
         width: 30,
         height: 30,
         linkedTeleporterId: "teleporter_receiver",
@@ -803,10 +890,11 @@ export const LEVELS: Level[] = [
         isActive: false,
       },
       {
+        // SE
         id: "teleporter_receiver_4",
         type: "receiver",
-        x: 420,
-        y: 530,
+        x: 740,
+        y: 425,
         width: 30,
         height: 30,
         activationDelay: 0, // Receivers don't need activation delay
@@ -817,54 +905,60 @@ export const LEVELS: Level[] = [
     patternSequence: [],
     switches: [
       {
+        // NE
         id: "light_switch", // A
-        x: 60,
-        y: 135,
+        x: 170,
+        y: 210,
         width: 20,
         height: 30,
         isPressed: false,
         switchType: "lever", // Lever-style switch
       },
       {
+        // SE
         id: "switch_1", // B
-        x: 330,
-        y: 135,
+        x: 610,
+        y: 460,
         width: 20,
         height: 30,
         isPressed: false,
         switchType: "lever",
       },
       {
+        // NW
         id: "switch_2", // C
-        x: 60,
-        y: 435,
+        x: 210,
+        y: 60,
         width: 20,
         height: 30,
         isPressed: false,
         switchType: "lever",
       },
       {
+        // NW
         id: "switch_3", // D
-        x: 330,
-        y: 435,
+        x: 570,
+        y: 105,
         width: 20,
         height: 30,
         isPressed: false,
         switchType: "lever",
       },
       {
+        // SW
         id: "switch_4", // E
-        x: 500,
-        y: 200,
+        x: 170,
+        y: 360,
         width: 20,
         height: 30,
         isPressed: false,
         switchType: "lever",
       },
       {
+        // SW
         id: "switch_5", // F
-        x: 500,
-        y: 440,
+        x: 210,
+        y: 510,
         width: 20,
         height: 30,
         isPressed: false,

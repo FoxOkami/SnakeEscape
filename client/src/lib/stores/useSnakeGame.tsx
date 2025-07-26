@@ -535,8 +535,27 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
       
       const currentWalls = get().getCurrentWalls();
+      
+      // Calculate quadrant lighting for photophobic snakes (Level 5)
+      let quadrantLighting = {};
+      if (state.currentLevel === 4) { // Level 5 (0-indexed as 4)
+        const A = state.switches.find(s => s.id === 'light_switch')?.isPressed || false;
+        const B = state.switches.find(s => s.id === 'switch_1')?.isPressed || false;  
+        const C = state.switches.find(s => s.id === 'switch_2')?.isPressed || false;
+        const D = state.switches.find(s => s.id === 'switch_3')?.isPressed || false;
+        const E = state.switches.find(s => s.id === 'switch_4')?.isPressed || false;
+        const F = state.switches.find(s => s.id === 'switch_5')?.isPressed || false;
+
+        quadrantLighting = {
+          topLeft: (A && !B) || (!A && B), // A XOR B
+          topRight: C && D, // C AND D
+          bottomLeft: !(E && F), // NOT (E AND F)
+          bottomRight: ((A && !B) || (!A && B)) && (C && D) // (A XOR B) AND (C AND D)
+        };
+      }
+      
       const updatedSnakes = state.snakes.map((snake) =>
-        updateSnake(snake, currentWalls, deltaTime, updatedPlayer, playerSounds, state),
+        updateSnake(snake, currentWalls, deltaTime, updatedPlayer, playerSounds, { ...state, quadrantLighting }),
       );
 
       // Handle plumber snake tile rotations
