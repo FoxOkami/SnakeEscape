@@ -578,6 +578,93 @@ const GameCanvas: React.FC = () => {
       ctx.fillRect(door.x + 5, door.y + 15, 5, 10);
     }
 
+    // Draw teleporters (Level 5 only - before snakes so they appear under snakes)
+    if (currentLevel === 4) { // Level 5 (0-indexed as 4)
+      teleporters.forEach(teleporter => {
+        if (teleporter.type === 'sender') {
+          // Draw teleporter pad with faster pulsing effect
+          const pulseTime = Date.now() / 400; // Increased speed from 800 to 400
+          const pulseAlpha = teleporter.isActive ? 1.0 : 0.6 + 0.4 * Math.sin(pulseTime);
+          
+          // Outer ring
+          ctx.fillStyle = teleporter.isActive ? 
+            `rgba(0, 255, 255, ${pulseAlpha})` : 
+            `rgba(0, 150, 255, ${pulseAlpha})`;
+          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+          
+          // Inner circle
+          ctx.fillStyle = teleporter.isActive ? 
+            `rgba(255, 255, 255, ${pulseAlpha})` : 
+            `rgba(100, 200, 255, ${pulseAlpha})`;
+          const innerSize = teleporter.width * 0.6;
+          const innerOffset = (teleporter.width - innerSize) / 2;
+          ctx.fillRect(
+            teleporter.x + innerOffset, 
+            teleporter.y + innerOffset, 
+            innerSize, 
+            innerSize
+          );
+          
+          // Activation progress indicator
+          if (teleporter.isActive && teleporter.activationStartTime) {
+            const currentTime = Date.now();
+            const timeElapsed = currentTime - teleporter.activationStartTime;
+            const progress = Math.min(timeElapsed / 1000, 1.0); // 1000ms = 1 second
+            
+            // Draw progress ring around teleporter
+            const centerX = teleporter.x + teleporter.width / 2;
+            const centerY = teleporter.y + teleporter.height / 2;
+            const radius = teleporter.width / 2 + 5;
+            
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (progress * 2 * Math.PI));
+            ctx.stroke();
+            
+            // Extra glow when near completion
+            if (progress > 0.8) {
+              ctx.shadowColor = '#00ffff';
+              ctx.shadowBlur = 15;
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (progress * 2 * Math.PI));
+              ctx.stroke();
+              ctx.shadowBlur = 0;
+            }
+          }
+          
+          // Activation glow effect (static when active)
+          if (teleporter.isActive) {
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+            ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+            ctx.shadowBlur = 0;
+          }
+        } else if (teleporter.type === 'receiver') {
+          // Draw receiver pad with static color (no animation)
+          const staticAlpha = 0.7; // No pulsing animation
+          
+          // Outer ring
+          ctx.fillStyle = `rgba(255, 100, 0, ${staticAlpha})`;
+          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+          
+          // Inner circle
+          ctx.fillStyle = `rgba(255, 200, 100, ${staticAlpha})`;
+          const innerSize = teleporter.width * 0.6;
+          const innerOffset = (teleporter.width - innerSize) / 2;
+          ctx.fillRect(
+            teleporter.x + innerOffset, 
+            teleporter.y + innerOffset, 
+            innerSize, 
+            innerSize
+          );
+        }
+      });
+    }
+
     // Draw snakes with different visuals for each type
     snakes.forEach(snake => {
       // Skip rendering phase-restricted snakes that aren't in their active phase
@@ -752,92 +839,7 @@ const GameCanvas: React.FC = () => {
       }
     });
 
-    // Draw teleporters (Level 5 only - before player so they appear under player)
-    if (currentLevel === 4) { // Level 5 (0-indexed as 4)
-      teleporters.forEach(teleporter => {
-        if (teleporter.type === 'sender') {
-          // Draw teleporter pad with faster pulsing effect
-          const pulseTime = Date.now() / 400; // Increased speed from 800 to 400
-          const pulseAlpha = teleporter.isActive ? 1.0 : 0.6 + 0.4 * Math.sin(pulseTime);
-          
-          // Outer ring
-          ctx.fillStyle = teleporter.isActive ? 
-            `rgba(0, 255, 255, ${pulseAlpha})` : 
-            `rgba(0, 150, 255, ${pulseAlpha})`;
-          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
-          
-          // Inner circle
-          ctx.fillStyle = teleporter.isActive ? 
-            `rgba(255, 255, 255, ${pulseAlpha})` : 
-            `rgba(100, 200, 255, ${pulseAlpha})`;
-          const innerSize = teleporter.width * 0.6;
-          const innerOffset = (teleporter.width - innerSize) / 2;
-          ctx.fillRect(
-            teleporter.x + innerOffset, 
-            teleporter.y + innerOffset, 
-            innerSize, 
-            innerSize
-          );
-          
-          // Activation progress indicator
-          if (teleporter.isActive && teleporter.activationStartTime) {
-            const currentTime = Date.now();
-            const timeElapsed = currentTime - teleporter.activationStartTime;
-            const progress = Math.min(timeElapsed / 1000, 1.0); // 1000ms = 1 second
-            
-            // Draw progress ring around teleporter
-            const centerX = teleporter.x + teleporter.width / 2;
-            const centerY = teleporter.y + teleporter.height / 2;
-            const radius = teleporter.width / 2 + 5;
-            
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (progress * 2 * Math.PI));
-            ctx.stroke();
-            
-            // Extra glow when near completion
-            if (progress > 0.8) {
-              ctx.shadowColor = '#00ffff';
-              ctx.shadowBlur = 15;
-              ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-              ctx.lineWidth = 2;
-              ctx.beginPath();
-              ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (progress * 2 * Math.PI));
-              ctx.stroke();
-              ctx.shadowBlur = 0;
-            }
-          }
-          
-          // Activation glow effect (static when active)
-          if (teleporter.isActive) {
-            ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 20;
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
-            ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
-            ctx.shadowBlur = 0;
-          }
-        } else if (teleporter.type === 'receiver') {
-          // Draw receiver pad with static color (no animation)
-          const staticAlpha = 0.7; // No pulsing animation
-          
-          // Outer ring
-          ctx.fillStyle = `rgba(255, 100, 0, ${staticAlpha})`;
-          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
-          
-          // Inner circle
-          ctx.fillStyle = `rgba(255, 200, 100, ${staticAlpha})`;
-          const innerSize = teleporter.width * 0.6;
-          const innerOffset = (teleporter.width - innerSize) / 2;
-          ctx.fillRect(
-            teleporter.x + innerOffset, 
-            teleporter.y + innerOffset, 
-            innerSize, 
-            innerSize
-          );
-        }
-      });
-    }
+
 
     // Draw light reflection elements (mirrors, crystal, light beam)
     
