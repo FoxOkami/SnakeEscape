@@ -804,6 +804,30 @@ export const LEVELS: Level[] = [
         isPaused: false,
         isCharging: false,
       },
+      {
+        id: "photophobic2",
+        type: "photophobic" as const,
+        position: { x: 320, y: 220 }, // Top-left quadrant (requested position)
+        size: { width: 32, height: 32 },
+        speed: 80, // Slower when patrolling normally
+        direction: { x: 0, y: 1 },
+        patrolPoints: [
+          { x: 50, y: 50 },
+          { x: 350, y: 50 },
+          { x: 350, y: 260 },
+          { x: 50, y: 260 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 250, // Very fast when berserk
+        sightRange: 150, // Good sight range when berserk
+        hearingRange: 200, // Can hear player when in darkness
+        isChasing: false,
+        isInDarkness: true, // Start in darkness state
+        isBerserk: false,
+        isPaused: false,
+        isCharging: false,
+      },
     ],
     door: { x: 730, y: 560, width: 30, height: 40, isOpen: false },
     key: { x: 745, y: 35, width: 20, height: 20, collected: false },
