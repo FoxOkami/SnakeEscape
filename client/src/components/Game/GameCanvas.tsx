@@ -1078,6 +1078,50 @@ const GameCanvas: React.FC = () => {
     ctx.fillText(debugText2, levelSize.width - 150, levelSize.height - 30);
     ctx.fillText(debugText3, levelSize.width - 150, levelSize.height - 10);
 
+    // Level 5 darkness overlay - makes dark quadrants 90% darker (applied on top of everything)
+    if (currentLevel === 4) { // Level 5 (0-indexed as 4)
+      // Define quadrant boundaries based on the cross-shaped walls
+      const centerX = 390; // Vertical wall position
+      const centerY = 290; // Horizontal wall position
+      
+      // Get switch states for logic evaluation
+      const A = switches.find(s => s.id === 'light_switch')?.isPressed || false;
+      const B = switches.find(s => s.id === 'switch_1')?.isPressed || false;  
+      const C = switches.find(s => s.id === 'switch_2')?.isPressed || false;
+      const D = switches.find(s => s.id === 'switch_3')?.isPressed || false;
+      const E = switches.find(s => s.id === 'switch_4')?.isPressed || false;
+      const F = switches.find(s => s.id === 'switch_5')?.isPressed || false;
+
+      // Calculate lighting conditions for each quadrant
+      const topLeftLit = (A && !B) || (!A && B); // A XOR B
+      const topRightLit = C && D; // C AND D
+      const bottomLeftLit = !(E && F); // NOT (E AND F)
+      const bottomRightLit = topLeftLit && topRightLit; // (A XOR B) AND (C AND D)
+      
+      // Apply 90% darkness overlay with rgba(0,0,0,0.9) for dark quadrants
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+      
+      // Top-left quadrant - apply darkness overlay if NOT lit
+      if (!topLeftLit) {
+        ctx.fillRect(0, 0, centerX, centerY);
+      }
+      
+      // Top-right quadrant - apply darkness overlay if NOT lit  
+      if (!topRightLit) {
+        ctx.fillRect(centerX + 20, 0, levelSize.width - (centerX + 20), centerY);
+      }
+      
+      // Bottom-left quadrant - apply darkness overlay if NOT lit
+      if (!bottomLeftLit) {
+        ctx.fillRect(0, centerY + 20, centerX, levelSize.height - (centerY + 20));
+      }
+      
+      // Bottom-right quadrant - apply darkness overlay if NOT lit
+      if (!bottomRightLit) {
+        ctx.fillRect(centerX + 20, centerY + 20, levelSize.width - (centerX + 20), levelSize.height - (centerY + 20));
+      }
+    }
+
   }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam, currentLevel, patternTiles, puzzleShards, puzzlePedestal, getCurrentWalls, teleporters]);
 
   const gameLoop = useCallback((currentTime: number) => {
