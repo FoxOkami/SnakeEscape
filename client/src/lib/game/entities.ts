@@ -574,27 +574,94 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
     }
   }
 
-  // Dark state behavior - stay still, only react to sound
+  // Dark state behavior - hunt sounds
   if (isDark && !snake.isBerserk) {
     snake.isInDarkness = true;
     snake.isBerserk = false;
-    snake.isChasing = false;
     snake.isCharging = false;
 
-    // React to sounds if player is moving and not walking stealthily
+    // Update sound cooldown
+    if (snake.soundCooldown && snake.soundCooldown > 0) {
+      snake.soundCooldown -= dt;
+    }
+
+    // Check for current sounds to chase
+    let nearestSound: Position | null = null;
+    let nearestSoundDistance = Infinity;
+    
     if (sounds && sounds.length > 0 && snake.hearingRange) {
       for (const sound of sounds) {
         const distanceToSound = getDistance(snake.position, sound);
-        if (distanceToSound <= snake.hearingRange) {
-          // Face the sound but don't move
-          snake.direction = getDirectionVector(snake.position, sound);
-          snake.lastHeardSound = sound;
-          break;
+        if (distanceToSound <= snake.hearingRange && distanceToSound < nearestSoundDistance) {
+          nearestSound = sound;
+          nearestSoundDistance = distanceToSound;
         }
       }
     }
+
+    if (nearestSound) {
+      // Actively chase current sounds
+      snake.lastHeardSound = nearestSound;
+      snake.isChasing = true;
+      snake.soundCooldown = 0;
+      
+      // Move toward the sound
+      const newPosition = moveTowards(snake.position, nearestSound, snake.speed * dt);
+      if (!checkWallCollision(snake, newPosition, walls)) {
+        snake.position = newPosition;
+      } else {
+        // Try sliding along wall if blocked
+        const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
+        snake.position = slidePosition;
+      }
+      snake.direction = getDirectionVector(snake.position, nearestSound);
+      
+    } else if (snake.lastHeardSound && snake.isChasing) {
+      // Continue moving toward last heard sound
+      const distanceToLastSound = getDistance(snake.position, snake.lastHeardSound);
+      
+      if (distanceToLastSound > 25) {
+        // Still moving toward the last heard sound
+        if (!snake.soundCooldown) {
+          snake.soundCooldown = 3.0; // Give time to reach the location
+        }
+        
+        const newPosition = moveTowards(snake.position, snake.lastHeardSound, snake.speed * dt);
+        if (!checkWallCollision(snake, newPosition, walls)) {
+          snake.position = newPosition;
+        } else {
+          const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
+          snake.position = slidePosition;
+        }
+        snake.direction = getDirectionVector(snake.position, snake.lastHeardSound);
+        
+      } else {
+        // Reached last sound location, search briefly then stop
+        if (!snake.soundCooldown || snake.soundCooldown > 2.0) {
+          snake.soundCooldown = 2.0; // 2 seconds to search
+        } else {
+          snake.soundCooldown -= dt;
+          if (snake.soundCooldown <= 0) {
+            snake.lastHeardSound = undefined;
+            snake.isChasing = false;
+            snake.soundCooldown = 0;
+          }
+        }
+      }
+      
+    } else {
+      // No sounds to chase, patrol slowly in darkness
+      snake.isChasing = false;
+      const targetPoint = getPatrolTarget(snake);
+      const newPosition = moveTowards(snake.position, targetPoint, (snake.speed * 0.5) * dt); // Half speed patrol
+      
+      if (!checkWallCollision(snake, newPosition, walls)) {
+        snake.position = newPosition;
+      }
+      snake.direction = getDirectionVector(snake.position, targetPoint);
+    }
     
-    return snake; // Stay still in dark
+    return snake;
   }
 
   // Light state - berserk mode
