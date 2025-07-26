@@ -575,10 +575,11 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
   }
 
   // Dark state behavior - hunt sounds
-  if (isDark && !snake.isBerserk) {
+  if (isDark) {
     snake.isInDarkness = true;
     snake.isBerserk = false;
     snake.isCharging = false;
+    snake.chargeDirection = undefined; // Clear any previous charge direction
 
     // Update sound cooldown
     if (snake.soundCooldown && snake.soundCooldown > 0) {

@@ -843,7 +843,7 @@ export const LEVELS: Level[] = [
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
-        chaseSpeed: 350, // Very fast when berserk
+        chaseSpeed: 250, // Very fast when berserk
         sightRange: 150, // Good sight range when berserk
         hearingRange: 200, // Can hear player when in darkness
         isChasing: false,
