@@ -623,17 +623,6 @@ const GameCanvas: React.FC = () => {
     if (currentLevel === 4) { // Level 5 (0-indexed as 4)
       teleporters.forEach(teleporter => {
         if (teleporter.type === 'sender') {
-          // Check if teleporter is in a dark quadrant for glow effect
-          const teleporterCenterX = teleporter.x + teleporter.width / 2;
-          const teleporterCenterY = teleporter.y + teleporter.height / 2;
-          const inDark = isInDarkQuadrant(teleporterCenterX, teleporterCenterY);
-          
-          // Add glow effect if in dark quadrant
-          if (inDark) {
-            ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 15;
-          }
-          
           // Draw teleporter pad with faster pulsing effect
           const pulseTime = Date.now() / 400; // Increased speed from 800 to 400
           const pulseAlpha = teleporter.isActive ? 1.0 : 0.6 + 0.4 * Math.sin(pulseTime);
@@ -656,11 +645,6 @@ const GameCanvas: React.FC = () => {
             innerSize, 
             innerSize
           );
-          
-          // Reset shadow after drawing
-          if (inDark) {
-            ctx.shadowBlur = 0;
-          }
           
           // Activation progress indicator
           if (teleporter.isActive && teleporter.activationStartTime) {
@@ -904,17 +888,6 @@ const GameCanvas: React.FC = () => {
     // No physical light source object is rendered - the lighting is environmental
 
     // Draw player (different color when walking)
-    // Check if player is in a dark quadrant for glow effect
-    const playerCenterX = player.position.x + player.size.width / 2;
-    const playerCenterY = player.position.y + player.size.height / 2;
-    const playerInDark = isInDarkQuadrant(playerCenterX, playerCenterY);
-    
-    // Add glow effect if in dark quadrant
-    if (playerInDark) {
-      ctx.shadowColor = isWalking ? '#38a169' : '#4299e1';
-      ctx.shadowBlur = 12;
-    }
-    
     ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
     ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
     
@@ -926,11 +899,6 @@ const GameCanvas: React.FC = () => {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
     ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-    
-    // Reset shadow after drawing player
-    if (playerInDark) {
-      ctx.shadowBlur = 0;
-    }
     
     // Walking indicator - small stealth icon
     if (isWalking) {
@@ -1193,6 +1161,57 @@ const GameCanvas: React.FC = () => {
       if (!bottomRightLit) {
         ctx.fillRect(centerX + 20, centerY + 20, levelSize.width - (centerX + 20), levelSize.height - (centerY + 20));
       }
+      
+      // Add glow effects for player and teleporter sender pads when in dark quadrants (on top of darkness)
+      // Player glow effect
+      const playerCenterX = player.position.x + player.size.width / 2;
+      const playerCenterY = player.position.y + player.size.height / 2;
+      const playerInDark = isInDarkQuadrant(playerCenterX, playerCenterY);
+      
+      if (playerInDark) {
+        ctx.shadowColor = isWalking ? '#38a169' : '#4299e1';
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = isWalking ? '#38a169' : '#4299e1';
+        ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
+        ctx.shadowBlur = 0; // Reset shadow
+      }
+      
+      // Teleporter sender pad glow effects
+      teleporters.forEach(teleporter => {
+        if (teleporter.type === 'sender') {
+          const teleporterCenterX = teleporter.x + teleporter.width / 2;
+          const teleporterCenterY = teleporter.y + teleporter.height / 2;
+          const inDark = isInDarkQuadrant(teleporterCenterX, teleporterCenterY);
+          
+          if (inDark) {
+            const pulseTime = Date.now() / 400;
+            const pulseAlpha = teleporter.isActive ? 1.0 : 0.6 + 0.4 * Math.sin(pulseTime);
+            
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 15;
+            
+            // Redraw teleporter with glow
+            ctx.fillStyle = teleporter.isActive ? 
+              `rgba(0, 255, 255, ${pulseAlpha})` : 
+              `rgba(0, 150, 255, ${pulseAlpha})`;
+            ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+            
+            ctx.fillStyle = teleporter.isActive ? 
+              `rgba(255, 255, 255, ${pulseAlpha})` : 
+              `rgba(100, 200, 255, ${pulseAlpha})`;
+            const innerSize = teleporter.width * 0.6;
+            const innerOffset = (teleporter.width - innerSize) / 2;
+            ctx.fillRect(
+              teleporter.x + innerOffset, 
+              teleporter.y + innerOffset, 
+              innerSize, 
+              innerSize
+            );
+            
+            ctx.shadowBlur = 0; // Reset shadow
+          }
+        }
+      });
     }
 
   }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam, currentLevel, patternTiles, puzzleShards, puzzlePedestal, getCurrentWalls, teleporters]);
