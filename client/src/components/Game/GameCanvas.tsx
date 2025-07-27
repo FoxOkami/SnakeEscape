@@ -861,24 +861,7 @@ const GameCanvas: React.FC = () => {
       }
     });
 
-    // Draw interaction hints for lever switches
-    switches.forEach(switchObj => {
-      if (switchObj.switchType === 'lever') {
-        // Show interaction hint if player is nearby
-        const distance = Math.sqrt(
-          Math.pow(player.position.x - (switchObj.x + switchObj.width / 2), 2) + 
-          Math.pow(player.position.y - (switchObj.y + switchObj.height / 2), 2)
-        );
-        
-        if (distance < 60) {
-          ctx.fillStyle = '#ffffff';
-          ctx.font = '12px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText('E to toggle', switchObj.x + switchObj.width / 2, switchObj.y - 10);
-          ctx.textAlign = 'left';
-        }
-      }
-    });
+
 
 
 
@@ -1209,6 +1192,40 @@ const GameCanvas: React.FC = () => {
             );
             
             ctx.shadowBlur = 0; // Reset shadow
+          }
+        }
+      });
+      
+      // Draw interaction hints for lever switches (on top of darkness overlay)
+      switches.forEach(switchObj => {
+        if (switchObj.switchType === 'lever') {
+          // Show interaction hint if player is nearby
+          const distance = Math.sqrt(
+            Math.pow(player.position.x - (switchObj.x + switchObj.width / 2), 2) + 
+            Math.pow(player.position.y - (switchObj.y + switchObj.height / 2), 2)
+          );
+          
+          if (distance < 60) {
+            // Check if switch is in dark quadrant for enhanced visibility
+            const switchCenterX = switchObj.x + switchObj.width / 2;
+            const switchCenterY = switchObj.y + switchObj.height / 2;
+            const switchInDark = isInDarkQuadrant(switchCenterX, switchCenterY);
+            
+            if (switchInDark) {
+              // Add glow effect for text in dark areas
+              ctx.shadowColor = '#ffffff';
+              ctx.shadowBlur = 8;
+            }
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('E to toggle', switchObj.x + switchObj.width / 2, switchObj.y - 10);
+            ctx.textAlign = 'left';
+            
+            if (switchInDark) {
+              ctx.shadowBlur = 0; // Reset shadow
+            }
           }
         }
       });
