@@ -1145,56 +1145,7 @@ const GameCanvas: React.FC = () => {
         ctx.fillRect(centerX + 20, centerY + 20, levelSize.width - (centerX + 20), levelSize.height - (centerY + 20));
       }
       
-      // Add glow effects for player and teleporter sender pads when in dark quadrants (on top of darkness)
-      // Player glow effect
-      const playerCenterX = player.position.x + player.size.width / 2;
-      const playerCenterY = player.position.y + player.size.height / 2;
-      const playerInDark = isInDarkQuadrant(playerCenterX, playerCenterY);
-      
-      if (playerInDark) {
-        ctx.shadowColor = isWalking ? '#38a169' : '#4299e1';
-        ctx.shadowBlur = 12;
-        ctx.fillStyle = isWalking ? '#38a169' : '#4299e1';
-        ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
-        ctx.shadowBlur = 0; // Reset shadow
-      }
-      
-      // Teleporter sender pad glow effects
-      teleporters.forEach(teleporter => {
-        if (teleporter.type === 'sender') {
-          const teleporterCenterX = teleporter.x + teleporter.width / 2;
-          const teleporterCenterY = teleporter.y + teleporter.height / 2;
-          const inDark = isInDarkQuadrant(teleporterCenterX, teleporterCenterY);
-          
-          if (inDark) {
-            const pulseTime = Date.now() / 400;
-            const pulseAlpha = teleporter.isActive ? 1.0 : 0.6 + 0.4 * Math.sin(pulseTime);
-            
-            ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 15;
-            
-            // Redraw teleporter with glow
-            ctx.fillStyle = teleporter.isActive ? 
-              `rgba(0, 255, 255, ${pulseAlpha})` : 
-              `rgba(0, 150, 255, ${pulseAlpha})`;
-            ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
-            
-            ctx.fillStyle = teleporter.isActive ? 
-              `rgba(255, 255, 255, ${pulseAlpha})` : 
-              `rgba(100, 200, 255, ${pulseAlpha})`;
-            const innerSize = teleporter.width * 0.6;
-            const innerOffset = (teleporter.width - innerSize) / 2;
-            ctx.fillRect(
-              teleporter.x + innerOffset, 
-              teleporter.y + innerOffset, 
-              innerSize, 
-              innerSize
-            );
-            
-            ctx.shadowBlur = 0; // Reset shadow
-          }
-        }
-      });
+      // Glow effects have been removed for cleaner darkness overlay rendering
       
       // Draw interaction hints for lever switches (on top of darkness overlay)
       switches.forEach(switchObj => {
