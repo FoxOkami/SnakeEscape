@@ -628,10 +628,10 @@ const GameCanvas: React.FC = () => {
           const teleporterCenterY = teleporter.y + teleporter.height / 2;
           const inDark = isInDarkQuadrant(teleporterCenterX, teleporterCenterY);
           
-          // Add strong glow effect if in dark quadrant
+          // Add glow effect if in dark quadrant
           if (inDark) {
             ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 25;
+            ctx.shadowBlur = 15;
           }
           
           // Draw teleporter pad with faster pulsing effect
@@ -656,14 +656,6 @@ const GameCanvas: React.FC = () => {
             innerSize, 
             innerSize
           );
-          
-          // Add additional outer glow ring for extra visibility in dark
-          if (inDark) {
-            ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 35;
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
-            ctx.fillRect(teleporter.x - 5, teleporter.y - 5, teleporter.width + 10, teleporter.height + 10);
-          }
           
           // Reset shadow after drawing
           if (inDark) {
@@ -917,10 +909,10 @@ const GameCanvas: React.FC = () => {
     const playerCenterY = player.position.y + player.size.height / 2;
     const playerInDark = isInDarkQuadrant(playerCenterX, playerCenterY);
     
-    // Add strong glow effect if in dark quadrant
+    // Add glow effect if in dark quadrant
     if (playerInDark) {
       ctx.shadowColor = isWalking ? '#38a169' : '#4299e1';
-      ctx.shadowBlur = 20;
+      ctx.shadowBlur = 12;
     }
     
     ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
@@ -934,14 +926,6 @@ const GameCanvas: React.FC = () => {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
     ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-    
-    // Add additional outer glow ring for extra player visibility in dark
-    if (playerInDark) {
-      ctx.shadowColor = isWalking ? '#38a169' : '#4299e1';
-      ctx.shadowBlur = 30;
-      ctx.fillStyle = isWalking ? 'rgba(56, 161, 105, 0.4)' : 'rgba(66, 153, 225, 0.4)';
-      ctx.fillRect(player.position.x - 6, player.position.y - 6, player.size.width + 12, player.size.height + 12);
-    }
     
     // Reset shadow after drawing player
     if (playerInDark) {
@@ -1209,52 +1193,6 @@ const GameCanvas: React.FC = () => {
       if (!bottomRightLit) {
         ctx.fillRect(centerX + 20, centerY + 20, levelSize.width - (centerX + 20), levelSize.height - (centerY + 20));
       }
-      
-      // Draw glow effects AFTER darkness overlay so they appear on top
-      
-      // Player glow effect (redraw after darkness overlay)
-      const playerCenterX = player.position.x + player.size.width / 2;
-      const playerCenterY = player.position.y + player.size.height / 2;
-      const playerInDark = isInDarkQuadrant(playerCenterX, playerCenterY);
-      
-      if (playerInDark) {
-        // Strong outer glow ring
-        ctx.shadowColor = isWalking ? '#38a169' : '#4299e1';
-        ctx.shadowBlur = 30;
-        ctx.fillStyle = isWalking ? 'rgba(56, 161, 105, 0.6)' : 'rgba(66, 153, 225, 0.6)';
-        ctx.fillRect(player.position.x - 8, player.position.y - 8, player.size.width + 16, player.size.height + 16);
-        
-        // Inner bright glow
-        ctx.shadowBlur = 20;
-        ctx.fillStyle = isWalking ? 'rgba(56, 161, 105, 0.8)' : 'rgba(66, 153, 225, 0.8)';
-        ctx.fillRect(player.position.x - 4, player.position.y - 4, player.size.width + 8, player.size.height + 8);
-        
-        ctx.shadowBlur = 0; // Reset shadow
-      }
-      
-      // Teleporter sender glow effects (redraw after darkness overlay)
-      teleporters.forEach(teleporter => {
-        if (teleporter.type === 'sender') {
-          const teleporterCenterX = teleporter.x + teleporter.width / 2;
-          const teleporterCenterY = teleporter.y + teleporter.height / 2;
-          const inDark = isInDarkQuadrant(teleporterCenterX, teleporterCenterY);
-          
-          if (inDark) {
-            // Strong outer glow ring
-            ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 35;
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
-            ctx.fillRect(teleporter.x - 8, teleporter.y - 8, teleporter.width + 16, teleporter.height + 16);
-            
-            // Inner bright glow
-            ctx.shadowBlur = 25;
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.7)';
-            ctx.fillRect(teleporter.x - 4, teleporter.y - 4, teleporter.width + 8, teleporter.height + 8);
-            
-            ctx.shadowBlur = 0; // Reset shadow
-          }
-        }
-      });
     }
 
   }, [player, snakes, walls, door, key, switches, throwableItems, carriedItem, levelSize, gameState, isWalking, currentVelocity, targetVelocity, mirrors, crystal, lightSource, lightBeam, currentLevel, patternTiles, puzzleShards, puzzlePedestal, getCurrentWalls, teleporters]);
