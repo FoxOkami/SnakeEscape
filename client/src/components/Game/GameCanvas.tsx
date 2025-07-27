@@ -1147,6 +1147,100 @@ const GameCanvas: React.FC = () => {
       
       // Glow effects have been removed for cleaner darkness overlay rendering
       
+      // Redraw player on top of darkness overlay (Level 5 only)
+      ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
+      ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
+      
+      // Add player details on top
+      ctx.fillStyle = isWalking ? '#2f855a' : '#2b6cb0'; // Darker green/blue for details
+      ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
+      
+      // Player eyes on top
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
+      ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+      
+      // Walking indicator - small stealth icon on top
+      if (isWalking) {
+        ctx.fillStyle = '#68d391';
+        ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
+        ctx.fillStyle = '#38a169';
+        ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
+      }
+      
+      // Show key indicator if player has key on top
+      if (player.hasKey) {
+        ctx.fillStyle = '#ffd700';
+        ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
+      }
+      
+      // Redraw teleporter sender pads on top of darkness overlay
+      teleporters.forEach(teleporter => {
+        if (teleporter.type === 'sender') {
+          // Draw teleporter pad with faster pulsing effect
+          const pulseTime = Date.now() / 400; // Increased speed from 800 to 400
+          const pulseAlpha = teleporter.isActive ? 1.0 : 0.6 + 0.4 * Math.sin(pulseTime);
+          
+          // Outer ring
+          ctx.fillStyle = teleporter.isActive ? 
+            `rgba(0, 255, 255, ${pulseAlpha})` : 
+            `rgba(0, 150, 255, ${pulseAlpha})`;
+          ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+          
+          // Inner circle
+          ctx.fillStyle = teleporter.isActive ? 
+            `rgba(255, 255, 255, ${pulseAlpha})` : 
+            `rgba(100, 200, 255, ${pulseAlpha})`;
+          const innerSize = teleporter.width * 0.6;
+          const innerOffset = (teleporter.width - innerSize) / 2;
+          ctx.fillRect(
+            teleporter.x + innerOffset, 
+            teleporter.y + innerOffset, 
+            innerSize, 
+            innerSize
+          );
+          
+          // Activation progress indicator
+          if (teleporter.isActive && teleporter.activationStartTime) {
+            const currentTime = Date.now();
+            const timeElapsed = currentTime - teleporter.activationStartTime;
+            const progress = Math.min(timeElapsed / 1000, 1.0); // 1000ms = 1 second
+
+            // Draw progress ring around teleporter
+            const centerX = teleporter.x + teleporter.width / 2;
+            const centerY = teleporter.y + teleporter.height / 2;
+            const radius = teleporter.width / 2 + 5;
+            
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (progress * 2 * Math.PI));
+            ctx.stroke();
+            
+            // Extra glow when near completion
+            if (progress > 0.8) {
+              ctx.shadowColor = '#00ffff';
+              ctx.shadowBlur = 15;
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (progress * 2 * Math.PI));
+              ctx.stroke();
+              ctx.shadowBlur = 0;
+            }
+          }
+          
+          // Activation glow effect (static when active)
+          if (teleporter.isActive) {
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+            ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+            ctx.shadowBlur = 0;
+          }
+        }
+      });
+      
       // Draw interaction hints for lever switches (on top of darkness overlay)
       switches.forEach(switchObj => {
         if (switchObj.switchType === 'lever') {
