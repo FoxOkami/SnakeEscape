@@ -628,10 +628,10 @@ const GameCanvas: React.FC = () => {
           const teleporterCenterY = teleporter.y + teleporter.height / 2;
           const inDark = isInDarkQuadrant(teleporterCenterX, teleporterCenterY);
           
-          // Add glow effect if in dark quadrant
+          // Add strong glow effect if in dark quadrant
           if (inDark) {
             ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 25;
           }
           
           // Draw teleporter pad with faster pulsing effect
@@ -656,6 +656,14 @@ const GameCanvas: React.FC = () => {
             innerSize, 
             innerSize
           );
+          
+          // Add additional outer glow ring for extra visibility in dark
+          if (inDark) {
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 35;
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
+            ctx.fillRect(teleporter.x - 5, teleporter.y - 5, teleporter.width + 10, teleporter.height + 10);
+          }
           
           // Reset shadow after drawing
           if (inDark) {
@@ -909,10 +917,10 @@ const GameCanvas: React.FC = () => {
     const playerCenterY = player.position.y + player.size.height / 2;
     const playerInDark = isInDarkQuadrant(playerCenterX, playerCenterY);
     
-    // Add glow effect if in dark quadrant
+    // Add strong glow effect if in dark quadrant
     if (playerInDark) {
       ctx.shadowColor = isWalking ? '#38a169' : '#4299e1';
-      ctx.shadowBlur = 12;
+      ctx.shadowBlur = 20;
     }
     
     ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
@@ -926,6 +934,14 @@ const GameCanvas: React.FC = () => {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
     ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+    
+    // Add additional outer glow ring for extra player visibility in dark
+    if (playerInDark) {
+      ctx.shadowColor = isWalking ? '#38a169' : '#4299e1';
+      ctx.shadowBlur = 30;
+      ctx.fillStyle = isWalking ? 'rgba(56, 161, 105, 0.4)' : 'rgba(66, 153, 225, 0.4)';
+      ctx.fillRect(player.position.x - 6, player.position.y - 6, player.size.width + 12, player.size.height + 12);
+    }
     
     // Reset shadow after drawing player
     if (playerInDark) {
