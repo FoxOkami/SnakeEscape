@@ -1019,6 +1019,30 @@ const GameCanvas: React.FC = () => {
       ctx.stroke();
     }
 
+    // Draw light source rhombus (Level 3 only)
+    if (currentLevel === 2 && lightSource) { // Level 3 (0-indexed as 2)
+      const centerX = lightSource.x;
+      const centerY = lightSource.y;
+      const size = 8; // Half the rhombus size
+      
+      ctx.fillStyle = '#ffff00'; // Yellow color
+      ctx.beginPath();
+      
+      // Draw rhombus (diamond) shape centered at light source
+      ctx.moveTo(centerX, centerY - size); // Top point
+      ctx.lineTo(centerX + size, centerY); // Right point
+      ctx.lineTo(centerX, centerY + size); // Bottom point
+      ctx.lineTo(centerX - size, centerY); // Left point
+      ctx.closePath();
+      
+      ctx.fill();
+      
+      // Add a subtle border
+      ctx.strokeStyle = '#ffcc00';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
 
 
     // Draw puzzle shards (Level 5)
