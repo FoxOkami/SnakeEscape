@@ -899,18 +899,21 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
 
-      // Handle Level 3 crystal activation - remove key room wall
-      if (state.currentLevel === 2 && updatedCrystal && updatedCrystal.isActivated) {
-        // Check if the key room wall still exists
+      // Handle Level 3 crystal activation - dynamic wall state based on light beam
+      if (state.currentLevel === 2 && updatedCrystal) {
         const keyRoomWallExists = state.walls.some(wall => 
           wall.x === 650 && wall.y === 250 && wall.width === 20 && wall.height === 120
         );
         
-        if (keyRoomWallExists) {
-          // Remove the left wall of the key room (x: 650, y: 250, width: 20, height: 120)
+        if (updatedCrystal.isActivated && keyRoomWallExists) {
+          // Crystal is activated by light beam - remove the wall
           const newWalls = state.walls.filter(wall => 
             !(wall.x === 650 && wall.y === 250 && wall.width === 20 && wall.height === 120)
           );
+          set({ walls: newWalls });
+        } else if (!updatedCrystal.isActivated && !keyRoomWallExists) {
+          // Crystal is not activated by light beam - restore the wall
+          const newWalls = [...state.walls, { x: 650, y: 250, width: 20, height: 120 }];
           set({ walls: newWalls });
         }
       }
