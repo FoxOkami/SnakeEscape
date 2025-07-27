@@ -1026,12 +1026,6 @@ const GameCanvas: React.FC = () => {
       ctx.stroke();
     }
 
-    // Debug Display - FPS Counter (bottom left)
-    ctx.fillStyle = '#00ff00';
-    ctx.font = '16px Arial';
-    const fpsDisplay = fpsRef.current > 0 ? fpsRef.current : '--';
-    ctx.fillText(`FPS: ${fpsDisplay}`, 10, levelSize.height - 10);
-    
     // Debug Display - Light Beam Info (top left)
     if (lightBeam) {
       ctx.fillStyle = '#ffff00';
@@ -1084,23 +1078,7 @@ const GameCanvas: React.FC = () => {
 
     }
 
-    // Debug Display - Player Info (bottom right)
-    ctx.fillStyle = '#0088ff';
-    ctx.font = '14px Arial';
-    const playerX = Math.round(player.position.x);
-    const playerY = Math.round(player.position.y);
-    const velX = Math.round(currentVelocity.x);
-    const velY = Math.round(currentVelocity.y);
-    const targetX = Math.round(targetVelocity.x);
-    const targetY = Math.round(targetVelocity.y);
-    
-    const debugText1 = `Pos: (${playerX}, ${playerY})`;
-    const debugText2 = `Vel: (${velX}, ${velY})`;
-    const debugText3 = `Target: (${targetX}, ${targetY})`;
-    
-    ctx.fillText(debugText1, levelSize.width - 150, levelSize.height - 50);
-    ctx.fillText(debugText2, levelSize.width - 150, levelSize.height - 30);
-    ctx.fillText(debugText3, levelSize.width - 150, levelSize.height - 10);
+
 
     // Level 5 darkness overlay - makes dark quadrants 90% darker (applied on top of everything)
     if (currentLevel === 4) { // Level 5 (0-indexed as 4)

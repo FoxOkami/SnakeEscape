@@ -264,7 +264,7 @@ export const LEVELS: Level[] = [
         currentPatrolIndex: 0,
         patrolDirection: 1,
         chaseSpeed: 90,
-        sightRange: 160,
+        sightRange: 200,
         isChasing: false,
         dashSpeed: 200,
         isDashing: false,
