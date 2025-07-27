@@ -10,16 +10,13 @@ export function calculateLightBeam(
   let currentStart = { x: lightSource.x, y: lightSource.y };
   
   // Calculate direction based on rotation (0 = north, 90 = east, 180 = south, 270 = west)
+  // We need to adjust the calculation since standard trig has 0° = east
+  // For our coordinate system: 0° = north (negative y), 90° = east (positive x), etc.
   const radians = (lightSource.rotation * Math.PI) / 180;
   let direction = {
     x: Math.sin(radians),
-    y: Math.cos(radians)
+    y: -Math.cos(radians)  // Negative because y increases downward on screen
   };
-  
-  // For north (0°), we want negative y direction
-  if (lightSource.rotation === 0) {
-    direction = { x: 0, y: -1 };
-  }
   
   let reflectionCount = 0;
   let lastMirror: Mirror | undefined = undefined;
