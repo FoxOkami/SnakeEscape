@@ -963,14 +963,7 @@ const GameCanvas: React.FC = () => {
         ctx.textAlign = 'left';
       }
       
-      // On-screen debugging for mirrors
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '10px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(mirror.id, mirror.x + mirror.width / 2, mirror.y + mirror.height + 35);
-      ctx.fillText(`Rot: ${mirror.rotation}°`, mirror.x + mirror.width / 2, mirror.y + mirror.height + 45);
-      ctx.fillText(`Reflecting: ${mirror.isReflecting ? 'YES' : 'NO'}`, mirror.x + mirror.width / 2, mirror.y + mirror.height + 55);
-      ctx.textAlign = 'left';
+
     });
 
     // Draw crystal
@@ -1026,13 +1019,7 @@ const GameCanvas: React.FC = () => {
       ctx.stroke();
     }
 
-    // Debug Display - Light Beam Info (top left)
-    if (lightBeam) {
-      ctx.fillStyle = '#ffff00';
-      ctx.font = '14px Arial';
-      ctx.fillText(`Light Beam Segments: ${lightBeam.segments.length}`, 10, 30);
-      ctx.fillText(`Reflections: ${lightBeam.segments.length - 1}`, 10, 50);
-    }
+
 
     // Draw puzzle shards (Level 5)
     if (currentLevel === 4) { // Level 5 (0-indexed as 4)
