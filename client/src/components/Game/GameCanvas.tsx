@@ -968,21 +968,78 @@ const GameCanvas: React.FC = () => {
 
     // Draw crystal
     if (crystal) {
-      ctx.fillStyle = crystal.isActivated ? '#ff6b6b' : '#9f7aea';
-      ctx.fillRect(crystal.x, crystal.y, crystal.width, crystal.height);
-      
-      // Add crystal facets
-      ctx.fillStyle = crystal.isActivated ? '#ff9999' : '#b794f6';
-      ctx.fillRect(crystal.x + 2, crystal.y + 2, crystal.width - 4, crystal.height - 4);
-      
-      // Add crystal glow when activated
-      if (crystal.isActivated) {
-        ctx.fillStyle = 'rgba(255, 107, 107, 0.4)';
-        ctx.fillRect(crystal.x - 3, crystal.y - 3, crystal.width + 6, crystal.height + 6);
+      // On level 3, draw crystal as diamond shape like light source
+      if (currentLevel === 2) { // Level 3 (0-indexed as 2)
+        const centerX = crystal.x + crystal.width / 2;
+        const centerY = crystal.y + crystal.height / 2;
+        const size = 10; // Half the diamond size
         
-        // Add sparkle effect
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(crystal.x + crystal.width / 2 - 1, crystal.y + crystal.height / 2 - 1, 2, 2);
+        // Draw main diamond
+        ctx.fillStyle = crystal.isActivated ? '#ff6b6b' : '#9f7aea';
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY - size); // Top point
+        ctx.lineTo(centerX + size, centerY); // Right point
+        ctx.lineTo(centerX, centerY + size); // Bottom point
+        ctx.lineTo(centerX - size, centerY); // Left point
+        ctx.closePath();
+        ctx.fill();
+        
+        // Add inner diamond (facets)
+        const innerSize = size * 0.6;
+        ctx.fillStyle = crystal.isActivated ? '#ff9999' : '#b794f6';
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY - innerSize); // Top point
+        ctx.lineTo(centerX + innerSize, centerY); // Right point
+        ctx.lineTo(centerX, centerY + innerSize); // Bottom point
+        ctx.lineTo(centerX - innerSize, centerY); // Left point
+        ctx.closePath();
+        ctx.fill();
+        
+        // Add crystal glow when activated
+        if (crystal.isActivated) {
+          const glowSize = size + 3;
+          ctx.fillStyle = 'rgba(255, 107, 107, 0.4)';
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY - glowSize); // Top point
+          ctx.lineTo(centerX + glowSize, centerY); // Right point
+          ctx.lineTo(centerX, centerY + glowSize); // Bottom point
+          ctx.lineTo(centerX - glowSize, centerY); // Left point
+          ctx.closePath();
+          ctx.fill();
+          
+          // Add sparkle effect
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(centerX - 1, centerY - 1, 2, 2);
+        }
+        
+        // Add border
+        ctx.strokeStyle = crystal.isActivated ? '#cc5555' : '#7a6bb3';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY - size); // Top point
+        ctx.lineTo(centerX + size, centerY); // Right point
+        ctx.lineTo(centerX, centerY + size); // Bottom point
+        ctx.lineTo(centerX - size, centerY); // Left point
+        ctx.closePath();
+        ctx.stroke();
+      } else {
+        // For other levels, keep the original square shape
+        ctx.fillStyle = crystal.isActivated ? '#ff6b6b' : '#9f7aea';
+        ctx.fillRect(crystal.x, crystal.y, crystal.width, crystal.height);
+        
+        // Add crystal facets
+        ctx.fillStyle = crystal.isActivated ? '#ff9999' : '#b794f6';
+        ctx.fillRect(crystal.x + 2, crystal.y + 2, crystal.width - 4, crystal.height - 4);
+        
+        // Add crystal glow when activated
+        if (crystal.isActivated) {
+          ctx.fillStyle = 'rgba(255, 107, 107, 0.4)';
+          ctx.fillRect(crystal.x - 3, crystal.y - 3, crystal.width + 6, crystal.height + 6);
+          
+          // Add sparkle effect
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(crystal.x + crystal.width / 2 - 1, crystal.y + crystal.height / 2 - 1, 2, 2);
+        }
       }
     }
 
