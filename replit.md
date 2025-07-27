@@ -118,6 +118,7 @@ Snake Room is a 2D escape game built with React, TypeScript, and Express. Player
 - `npm run db:push`: Apply database schema changes
 
 ## Recent Changes
+- July 26, 2025. Added highlighting glow effects for player and teleporter sender pads when in dark quadrants on Level 5 - ensures they remain visible despite 90% darkness overlay, player glows blue/green and teleporters glow cyan
 - July 26, 2025. Added second darkness overlay system for Level 5 - dark quadrants now have 90% darkness overlay applied on top of all game objects to make everything harder to see, enhancing photophobic snake challenge
 - July 26, 2025. Fixed snake rendering order - snakes now appear on top of teleportation pads in Level 5 for proper visual layering
 - July 24, 2025. Fixed Level 5 door logic to only require the key - door no longer depends on switch states, only on player having collected the key

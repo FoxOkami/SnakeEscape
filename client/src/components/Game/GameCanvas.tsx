@@ -49,6 +49,47 @@ const GameCanvas: React.FC = () => {
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, levelSize.width, levelSize.height);
     
+    // Helper function to check if a position is in a dark quadrant (Level 5 only)
+    const isInDarkQuadrant = (x: number, y: number): boolean => {
+      if (currentLevel !== 4) return false; // Only Level 5 (0-indexed as 4)
+      
+      // Define quadrant boundaries based on the cross-shaped walls
+      const centerX = 390; // Vertical wall position
+      const centerY = 290; // Horizontal wall position
+      
+      // Get switch states for logic evaluation
+      const A = switches.find(s => s.id === 'light_switch')?.isPressed || false;
+      const B = switches.find(s => s.id === 'switch_1')?.isPressed || false;  
+      const C = switches.find(s => s.id === 'switch_2')?.isPressed || false;
+      const D = switches.find(s => s.id === 'switch_3')?.isPressed || false;
+      const E = switches.find(s => s.id === 'switch_4')?.isPressed || false;
+      const F = switches.find(s => s.id === 'switch_5')?.isPressed || false;
+
+      // Calculate lighting conditions for each quadrant
+      const topLeftLit = (A && !B) || (!A && B); // A XOR B
+      const topRightLit = C && D; // C AND D
+      const bottomLeftLit = !(E && F); // NOT (E AND F)
+      const bottomRightLit = topLeftLit && topRightLit; // (A XOR B) AND (C AND D)
+      
+      // Check which quadrant the position is in and return if it's dark
+      if (x < centerX && y < centerY) {
+        // Top-left quadrant
+        return !topLeftLit;
+      } else if (x >= centerX + 20 && y < centerY) {
+        // Top-right quadrant  
+        return !topRightLit;
+      } else if (x < centerX && y >= centerY + 20) {
+        // Bottom-left quadrant
+        return !bottomLeftLit;
+      } else if (x >= centerX + 20 && y >= centerY + 20) {
+        // Bottom-right quadrant
+        return !bottomRightLit;
+      }
+      
+      // Position is in the cross area (walls), not dark
+      return false;
+    };
+    
     // Level 5 quadrant lighting effect with individual logic conditions
     if (currentLevel === 4) { // Level 5 (0-indexed as 4)
       // Define quadrant boundaries based on the cross-shaped walls
@@ -582,6 +623,17 @@ const GameCanvas: React.FC = () => {
     if (currentLevel === 4) { // Level 5 (0-indexed as 4)
       teleporters.forEach(teleporter => {
         if (teleporter.type === 'sender') {
+          // Check if teleporter is in a dark quadrant for glow effect
+          const teleporterCenterX = teleporter.x + teleporter.width / 2;
+          const teleporterCenterY = teleporter.y + teleporter.height / 2;
+          const inDark = isInDarkQuadrant(teleporterCenterX, teleporterCenterY);
+          
+          // Add glow effect if in dark quadrant
+          if (inDark) {
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 15;
+          }
+          
           // Draw teleporter pad with faster pulsing effect
           const pulseTime = Date.now() / 400; // Increased speed from 800 to 400
           const pulseAlpha = teleporter.isActive ? 1.0 : 0.6 + 0.4 * Math.sin(pulseTime);
@@ -604,6 +656,11 @@ const GameCanvas: React.FC = () => {
             innerSize, 
             innerSize
           );
+          
+          // Reset shadow after drawing
+          if (inDark) {
+            ctx.shadowBlur = 0;
+          }
           
           // Activation progress indicator
           if (teleporter.isActive && teleporter.activationStartTime) {
@@ -847,6 +904,17 @@ const GameCanvas: React.FC = () => {
     // No physical light source object is rendered - the lighting is environmental
 
     // Draw player (different color when walking)
+    // Check if player is in a dark quadrant for glow effect
+    const playerCenterX = player.position.x + player.size.width / 2;
+    const playerCenterY = player.position.y + player.size.height / 2;
+    const playerInDark = isInDarkQuadrant(playerCenterX, playerCenterY);
+    
+    // Add glow effect if in dark quadrant
+    if (playerInDark) {
+      ctx.shadowColor = isWalking ? '#38a169' : '#4299e1';
+      ctx.shadowBlur = 12;
+    }
+    
     ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
     ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
     
@@ -858,6 +926,11 @@ const GameCanvas: React.FC = () => {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
     ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+    
+    // Reset shadow after drawing player
+    if (playerInDark) {
+      ctx.shadowBlur = 0;
+    }
     
     // Walking indicator - small stealth icon
     if (isWalking) {
