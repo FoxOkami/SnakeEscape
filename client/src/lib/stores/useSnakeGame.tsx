@@ -2174,6 +2174,81 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Keeping for compatibility but functionality moved to checkTeleporterCollision
     },
 
+    updateSnakePits: (deltaTime: number) => {
+      const state = get();
+      const currentTime = Date.now();
+      
+      // Only process snake pits if they exist
+      if (!state.snakePits || state.snakePits.length === 0) return;
+      
+      let updatedSnakes = [...state.snakes];
+      let updatedSnakePits = [...state.snakePits];
+      
+      // Process each snake pit
+      updatedSnakePits.forEach((pit, pitIndex) => {
+        const timeSinceLastEmergence = currentTime - pit.lastEmergenceTime;
+        
+        // Check if it's time for a new rattlesnake to emerge
+        if (timeSinceLastEmergence >= pit.emergenceInterval) {
+          // Find the next rattlesnake to emerge (currently in pit)
+          const rattlesnakeToEmerge = updatedSnakes.find(snake => 
+            pit.snakeIds.includes(snake.id) && 
+            snake.type === 'rattlesnake' && 
+            snake.isInPit === true
+          );
+          
+          if (rattlesnakeToEmerge) {
+            // Emerge the rattlesnake
+            const snakeIndex = updatedSnakes.findIndex(s => s.id === rattlesnakeToEmerge.id);
+            if (snakeIndex !== -1) {
+              updatedSnakes[snakeIndex] = {
+                ...rattlesnakeToEmerge,
+                isInPit: false,
+                emergenceTime: currentTime,
+                // Set initial patrol position
+                position: { x: pit.x - 14, y: pit.y - 14 } // Center snake on pit
+              };
+              
+              // Update pit's last emergence time
+              updatedSnakePits[pitIndex] = {
+                ...pit,
+                lastEmergenceTime: currentTime
+              };
+            }
+          }
+        }
+      });
+      
+      // Check for rattlesnakes that need to return to pit
+      updatedSnakes.forEach((snake, snakeIndex) => {
+        if (snake.type === 'rattlesnake' && !snake.isInPit && snake.emergenceTime) {
+          const timeOutOfPit = currentTime - snake.emergenceTime;
+          
+          // Check if patrol time is over (3.5-4.5 seconds based on patrolDuration)
+          if (timeOutOfPit >= (snake.patrolDuration || 4000)) {
+            // Return snake to pit
+            updatedSnakes[snakeIndex] = {
+              ...snake,
+              isInPit: true,
+              emergenceTime: undefined,
+              isChasing: false, // Stop chasing when returning to pit
+              // Reset position to pit center
+              position: { 
+                x: state.snakePits.find(p => p.id === snake.pitId)?.x - 14 || snake.position.x,
+                y: state.snakePits.find(p => p.id === snake.pitId)?.y - 14 || snake.position.y
+              }
+            };
+          }
+        }
+      });
+      
+      // Update state with modified snakes and pits
+      set({
+        snakes: updatedSnakes,
+        snakePits: updatedSnakePits
+      });
+    },
+
     evaluateLogicPuzzle: (switches: any[]) => {
       // Get switch states: ((A XOR B) AND (C AND D)) AND (NOT (E AND F))
       const A = switches.find(s => s.id === 'light_switch')?.isPressed || false;
@@ -2289,134 +2364,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
     },
 
-    // Snake pit management functions
-    updateSnakePits: (deltaTime: number) => {
-      const state = get();
-      const currentTime = Date.now();
-      
-      state.snakePits.forEach(pit => {
-        // Check if it's time for a snake to emerge
-        if (currentTime - pit.lastEmergenceTime >= pit.emergenceInterval) {
-          get().emergeSnakeFromPit(pit.id);
-          
-          // Update pit emergence time
-          set((state) => ({
-            snakePits: state.snakePits.map(p => 
-              p.id === pit.id ? { ...p, lastEmergenceTime: currentTime } : p
-            )
-          }));
-        }
-      });
-      
-      // Update rattlesnake behavior
-      const updatedSnakes = state.snakes.map(snake => {
-        if (snake.type === 'rattlesnake') {
-          return get().updateRattlesnake(snake, deltaTime);
-        }
-        return snake;
-      });
-      
-      set({ snakes: updatedSnakes });
-    },
 
-    emergeSnakeFromPit: (pitId: string) => {
-      const state = get();
-      const pit = state.snakePits.find(p => p.id === pitId);
-      if (!pit) return;
-      
-      // Find a snake in the pit that can emerge
-      const snakeInPit = state.snakes.find(snake => 
-        snake.pitId === pitId && snake.isInPit
-      );
-      
-      if (!snakeInPit) return;
-      
-      // Mark snake as emerged and start its patrol
-      const updatedSnakes = state.snakes.map(snake => {
-        if (snake.id === snakeInPit.id) {
-          return {
-            ...snake,
-            isInPit: false,
-            patrolStartTime: Date.now(),
-            returnToPitTime: Date.now() + (snake.patrolDuration || 4000),
-            position: { x: pit.x, y: pit.y }, // Emerge at pit location
-          };
-        }
-        return snake;
-      });
-      
-      set({ snakes: updatedSnakes });
-    },
 
-    updateRattlesnake: (snake: Snake, deltaTime: number) => {
-      const currentTime = Date.now();
-      
-      // If snake is in pit, don't update
-      if (snake.isInPit) {
-        return snake;
-      }
-      
-      // If it's time to return to pit
-      if (snake.returnToPitTime && currentTime >= snake.returnToPitTime) {
-        const state = get();
-        const pit = state.snakePits.find(p => p.id === snake.pitId);
-        if (pit) {
-          return {
-            ...snake,
-            isInPit: true,
-            position: { x: pit.x, y: pit.y },
-            patrolStartTime: undefined,
-            returnToPitTime: undefined,
-            isChasing: false,
-          };
-        }
-      }
-      
-      // Standard rattlesnake AI: patrol and respond to sound/sight
-      const state = get();
-      const player = state.player;
-      const playerCenter = {
-        x: player.position.x + player.size.width / 2,
-        y: player.position.y + player.size.height / 2,
-      };
-      const snakeCenter = {
-        x: snake.position.x + snake.size.width / 2,
-        y: snake.position.y + snake.size.height / 2,
-      };
-      
-      // Check for player visibility (sight)
-      const distanceToPlayer = Math.sqrt(
-        Math.pow(playerCenter.x - snakeCenter.x, 2) + 
-        Math.pow(playerCenter.y - snakeCenter.y, 2)
-      );
-      
-      const canSeePlayer = distanceToPlayer <= snake.sightRange;
-      const canHearPlayer = snake.hearingRange && distanceToPlayer <= snake.hearingRange && 
-                           (state.isWalking === false); // Can hear running player
-      
-      if (canSeePlayer || canHearPlayer) {
-        // Chase the player
-        const direction = {
-          x: playerCenter.x - snakeCenter.x,
-          y: playerCenter.y - snakeCenter.y,
-        };
-        const length = Math.sqrt(direction.x * direction.x + direction.y * direction.y);
-        if (length > 0) {
-          direction.x /= length;
-          direction.y /= length;
-        }
-        
-        return {
-          ...snake,
-          isChasing: true,
-          chaseTarget: playerCenter,
-          direction,
-        };
-      } else {
-        // Patrol behavior
-        return updateSnake(snake, deltaTime, state.walls, state.levelSize);
-      }
-    },
 
   })),
 );

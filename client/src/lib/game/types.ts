@@ -46,8 +46,6 @@ export interface Snake {
   entryDirection?: 'north' | 'south' | 'east' | 'west'; // Direction plumber entered current tile from
   nextRotationTime?: number; // Time when next rotation should occur
   tileToRotate?: string; // Tile ID that needs to be rotated
-  pauseStartTime?: number; // Time when pause started (for 100ms pauses)
-  isPaused?: boolean; // Whether the snake is currently paused at tile center
   // Spitter-specific properties
   lastFireTime?: number; // Time when last projectile was fired
   fireInterval?: number; // Time between shots (3000ms = 3 seconds)
@@ -65,6 +63,7 @@ export interface Snake {
   // Rattlesnake-specific properties
   pitId?: string; // Which pit this snake belongs to
   isInPit?: boolean; // Whether snake is currently in the pit
+  emergenceTime?: number; // When the snake emerged from pit
   patrolStartTime?: number; // When the snake started its patrol
   patrolDuration?: number; // How long the patrol should last
   returnToPitTime?: number; // When the snake should return to pit
