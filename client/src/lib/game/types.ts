@@ -19,7 +19,7 @@ export interface Player {
 
 export interface Snake {
   id: string;
-  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic';
+  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic' | 'rattlesnake';
   position: Position;
   size: Size;
   speed: number;
@@ -29,7 +29,7 @@ export interface Snake {
   patrolDirection: number;
   chaseSpeed: number;
   sightRange: number;
-  hearingRange?: number; // For stalkers
+  hearingRange?: number; // For stalkers and rattlesnakes
   isChasing: boolean;
   chaseTarget?: Position;
   lastHeardSound?: Position;
@@ -46,7 +46,7 @@ export interface Snake {
   entryDirection?: 'north' | 'south' | 'east' | 'west'; // Direction plumber entered current tile from
   nextRotationTime?: number; // Time when next rotation should occur
   tileToRotate?: string; // Tile ID that needs to be rotated
-  pauseStartTime?: number; // Time when pause at tile center started
+  pauseStartTime?: number; // Time when pause started (for 100ms pauses)
   isPaused?: boolean; // Whether the snake is currently paused at tile center
   // Spitter-specific properties
   lastFireTime?: number; // Time when last projectile was fired
@@ -62,6 +62,12 @@ export interface Snake {
   isPaused?: boolean; // Whether currently paused
   chargeDirection?: Position; // Direction of direct charge at player
   isCharging?: boolean; // Whether currently charging at player
+  // Rattlesnake-specific properties
+  pitId?: string; // Which pit this snake belongs to
+  isInPit?: boolean; // Whether snake is currently in the pit
+  patrolStartTime?: number; // When the snake started its patrol
+  patrolDuration?: number; // How long the patrol should last
+  returnToPitTime?: number; // When the snake should return to pit
 }
 
 export interface Wall extends Rectangle {}
@@ -72,6 +78,14 @@ export interface Door extends Rectangle {
 
 export interface Key extends Rectangle {
   collected: boolean;
+}
+
+export interface SnakePit extends Position {
+  id: string;
+  radius: number;
+  snakeIds: string[]; // IDs of snakes that belong to this pit
+  lastEmergenceTime: number; // When a snake last emerged
+  emergenceInterval: number; // Time between emergences (3000ms = 3 seconds)
 }
 
 export interface Switch extends Rectangle {
@@ -235,6 +249,7 @@ export interface Level {
   crystal?: Crystal;
   lightSource?: LightSource;
   teleporters?: Teleporter[];
+  snakePits?: SnakePit[];
   size: Size;
   startTilePos?: { row: number; col: number }; // For Level 4 randomization
   endTilePos?: { row: number; col: number }; // For Level 4 randomization
@@ -268,4 +283,5 @@ export interface GameData {
   puzzleShards: PuzzleShard[];
   puzzlePedestal: PuzzlePedestal | null;
   phaseWalls: PhaseWall[];
+  snakePits: SnakePit[];
 }

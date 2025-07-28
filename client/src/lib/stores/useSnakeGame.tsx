@@ -17,6 +17,7 @@ import {
   FlowState,
   Projectile,
   Teleporter,
+  SnakePit,
 } from "../game/types";
 import { LEVELS } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
@@ -88,6 +89,10 @@ interface SnakeGameState extends GameData {
   // Teleporter system actions
   updateTeleporters: (deltaTime: number) => void;
   checkTeleporterCollision: () => void;
+  
+  // Snake pit system actions
+  updateSnakePits: (deltaTime: number) => void;
+  emergeSnakeFromPit: (pitId: string) => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -161,6 +166,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     flowState: null,
     projectiles: [],
     teleporters: [],
+    snakePits: [],
 
     puzzleShards: [],
     puzzlePedestal: null,
@@ -245,6 +251,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightBeam: null,
         projectiles: [],
         teleporters: level.teleporters ? level.teleporters.map((teleporter) => ({ ...teleporter })) : [],
+        snakePits: level.snakePits ? level.snakePits.map((pit) => ({ ...pit })) : [],
         // Phase system initialization
         currentPhase: level.currentPhase || 'A',
         phaseTimer: 0,
@@ -293,6 +300,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightBeam: null,
         projectiles: [],
         teleporters: level.teleporters ? level.teleporters.map((teleporter) => ({ ...teleporter })) : [],
+        snakePits: level.snakePits ? level.snakePits.map((pit) => ({ ...pit })) : [],
         // Phase system initialization  
         currentPhase: level.currentPhase || 'A',
         phaseTimer: 0,
@@ -946,6 +954,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- PROJECTILE SYSTEM ---
       // Update projectiles and spitter snake firing
       get().updateProjectiles(deltaTime);
+      
+      // --- SNAKE PIT SYSTEM ---
+      // Update snake pits and rattlesnake emergence
+      get().updateSnakePits(deltaTime);
 
       // --- UPDATE STATE ---
       set({
@@ -2275,6 +2287,135 @@ export const useSnakeGame = create<SnakeGameState>()(
         switches: updatedSwitches,
         lightSource: updatedLightSource
       });
+    },
+
+    // Snake pit management functions
+    updateSnakePits: (deltaTime: number) => {
+      const state = get();
+      const currentTime = Date.now();
+      
+      state.snakePits.forEach(pit => {
+        // Check if it's time for a snake to emerge
+        if (currentTime - pit.lastEmergenceTime >= pit.emergenceInterval) {
+          get().emergeSnakeFromPit(pit.id);
+          
+          // Update pit emergence time
+          set((state) => ({
+            snakePits: state.snakePits.map(p => 
+              p.id === pit.id ? { ...p, lastEmergenceTime: currentTime } : p
+            )
+          }));
+        }
+      });
+      
+      // Update rattlesnake behavior
+      const updatedSnakes = state.snakes.map(snake => {
+        if (snake.type === 'rattlesnake') {
+          return get().updateRattlesnake(snake, deltaTime);
+        }
+        return snake;
+      });
+      
+      set({ snakes: updatedSnakes });
+    },
+
+    emergeSnakeFromPit: (pitId: string) => {
+      const state = get();
+      const pit = state.snakePits.find(p => p.id === pitId);
+      if (!pit) return;
+      
+      // Find a snake in the pit that can emerge
+      const snakeInPit = state.snakes.find(snake => 
+        snake.pitId === pitId && snake.isInPit
+      );
+      
+      if (!snakeInPit) return;
+      
+      // Mark snake as emerged and start its patrol
+      const updatedSnakes = state.snakes.map(snake => {
+        if (snake.id === snakeInPit.id) {
+          return {
+            ...snake,
+            isInPit: false,
+            patrolStartTime: Date.now(),
+            returnToPitTime: Date.now() + (snake.patrolDuration || 4000),
+            position: { x: pit.x, y: pit.y }, // Emerge at pit location
+          };
+        }
+        return snake;
+      });
+      
+      set({ snakes: updatedSnakes });
+    },
+
+    updateRattlesnake: (snake: Snake, deltaTime: number) => {
+      const currentTime = Date.now();
+      
+      // If snake is in pit, don't update
+      if (snake.isInPit) {
+        return snake;
+      }
+      
+      // If it's time to return to pit
+      if (snake.returnToPitTime && currentTime >= snake.returnToPitTime) {
+        const state = get();
+        const pit = state.snakePits.find(p => p.id === snake.pitId);
+        if (pit) {
+          return {
+            ...snake,
+            isInPit: true,
+            position: { x: pit.x, y: pit.y },
+            patrolStartTime: undefined,
+            returnToPitTime: undefined,
+            isChasing: false,
+          };
+        }
+      }
+      
+      // Standard rattlesnake AI: patrol and respond to sound/sight
+      const state = get();
+      const player = state.player;
+      const playerCenter = {
+        x: player.position.x + player.size.width / 2,
+        y: player.position.y + player.size.height / 2,
+      };
+      const snakeCenter = {
+        x: snake.position.x + snake.size.width / 2,
+        y: snake.position.y + snake.size.height / 2,
+      };
+      
+      // Check for player visibility (sight)
+      const distanceToPlayer = Math.sqrt(
+        Math.pow(playerCenter.x - snakeCenter.x, 2) + 
+        Math.pow(playerCenter.y - snakeCenter.y, 2)
+      );
+      
+      const canSeePlayer = distanceToPlayer <= snake.sightRange;
+      const canHearPlayer = snake.hearingRange && distanceToPlayer <= snake.hearingRange && 
+                           (state.isWalking === false); // Can hear running player
+      
+      if (canSeePlayer || canHearPlayer) {
+        // Chase the player
+        const direction = {
+          x: playerCenter.x - snakeCenter.x,
+          y: playerCenter.y - snakeCenter.y,
+        };
+        const length = Math.sqrt(direction.x * direction.x + direction.y * direction.y);
+        if (length > 0) {
+          direction.x /= length;
+          direction.y /= length;
+        }
+        
+        return {
+          ...snake,
+          isChasing: true,
+          chaseTarget: playerCenter,
+          direction,
+        };
+      } else {
+        // Patrol behavior
+        return updateSnake(snake, deltaTime, state.walls, state.levelSize);
+      }
     },
 
   })),

@@ -352,7 +352,7 @@ export const LEVELS: Level[] = [
   {
     id: 3,
     name: "Light Reflection",
-    player: { x: 50, y: 550 },
+    player: { x: 25, y: 25 },
     size: { width: 800, height: 600 },
     walls: [
       // Outer walls
@@ -366,8 +366,13 @@ export const LEVELS: Level[] = [
       { x: 650, y: 250, width: 20, height: 120 }, // Left wall (removable)
       { x: 730, y: 250, width: 20, height: 120 }, // Right wall
       // Some internal walls for layout
-      { x: 200, y: 300, width: 300, height: 20 },
-      { x: 400, y: 150, width: 20, height: 150 },
+      { x: 125, y: 20, width: 20, height: 80 },
+      { x: 145, y: 150, width: 80, height: 20 },
+      { x: 125, y: 220, width: 20, height: 80 },
+      { x: 125, y: 300, width: 80, height: 20 },
+      { x: 205, y: 300, width: 20, height: 100 },
+      { x: 660, y: 450, width: 60, height: 20 },
+      { x: 390, y: 260, width: 20, height: 40 },
     ],
     snakes: [
       {
@@ -390,13 +395,97 @@ export const LEVELS: Level[] = [
         isChasing: false,
         lostSightCooldown: 0,
       },
+      // Rattlesnakes that emerge from snake pit
+      {
+        id: "rattlesnake1",
+        type: "rattlesnake" as const,
+        position: { x: 550, y: 450 }, // Snake pit location
+        size: { width: 28, height: 28 },
+        speed: 60,
+        direction: { x: 0, y: 0 },
+        patrolPoints: [
+          { x: 520, y: 420 },
+          { x: 580, y: 420 },
+          { x: 580, y: 480 },
+          { x: 520, y: 480 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 110,
+        sightRange: 120,
+        hearingRange: 180,
+        isChasing: false,
+        pitId: "pit1",
+        isInPit: true,
+        patrolDuration: 4000, // 4 seconds patrol
+        lostSightCooldown: 0,
+      },
+      {
+        id: "rattlesnake2",
+        type: "rattlesnake" as const,
+        position: { x: 550, y: 450 }, // Same pit location
+        size: { width: 28, height: 28 },
+        speed: 65,
+        direction: { x: 0, y: 0 },
+        patrolPoints: [
+          { x: 520, y: 420 },
+          { x: 580, y: 420 },
+          { x: 580, y: 480 },
+          { x: 520, y: 480 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 115,
+        sightRange: 130,
+        hearingRange: 170,
+        isChasing: false,
+        pitId: "pit1",
+        isInPit: true,
+        patrolDuration: 3500, // 3.5 seconds patrol
+        lostSightCooldown: 0,
+      },
+      {
+        id: "rattlesnake3",
+        type: "rattlesnake" as const,
+        position: { x: 550, y: 450 }, // Same pit location
+        size: { width: 28, height: 28 },
+        speed: 55,
+        direction: { x: 0, y: 0 },
+        patrolPoints: [
+          { x: 520, y: 420 },
+          { x: 580, y: 420 },
+          { x: 580, y: 480 },
+          { x: 520, y: 480 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 105,
+        sightRange: 110,
+        hearingRange: 160,
+        isChasing: false,
+        pitId: "pit1",
+        isInPit: true,
+        patrolDuration: 4500, // 4.5 seconds patrol
+        lostSightCooldown: 0,
+      },
     ],
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 690, y: 300, width: 20, height: 20, collected: false },
+    snakePits: [
+      {
+        id: "pit1",
+        x: 550,
+        y: 450,
+        radius: 25,
+        snakeIds: ["rattlesnake1", "rattlesnake2", "rattlesnake3"],
+        lastEmergenceTime: 0,
+        emergenceInterval: 3000, // 3 seconds between emergences
+      },
+    ],
     lightSource: {
       x: 100,
       y: 50,
-      rotation: 180, // Initially pointing south
+      rotation: 200, // Initially pointing south
       isOn: false,
     },
     crystal: {
@@ -410,8 +499,8 @@ export const LEVELS: Level[] = [
     mirrors: [
       {
         id: "mirror1",
-        x: 150,
-        y: 100,
+        x: 50,
+        y: 500,
         width: 20,
         height: 20,
         rotation: 45,
@@ -419,8 +508,8 @@ export const LEVELS: Level[] = [
       },
       {
         id: "mirror2",
-        x: 300,
-        y: 180,
+        x: 700,
+        y: 550,
         width: 20,
         height: 20,
         rotation: 135,
@@ -428,8 +517,8 @@ export const LEVELS: Level[] = [
       },
       {
         id: "mirror3",
-        x: 500,
-        y: 120,
+        x: 185,
+        y: 225,
         width: 20,
         height: 20,
         rotation: 225,
@@ -438,7 +527,7 @@ export const LEVELS: Level[] = [
       {
         id: "mirror4",
         x: 580,
-        y: 250,
+        y: 50,
         width: 20,
         height: 20,
         rotation: 315,
@@ -447,7 +536,7 @@ export const LEVELS: Level[] = [
     ],
   },
 
-  // Level 4: Simple level - just player, key, and exit door with 16x16 tile grid
+  // Level 4
   (() => {
     // Generate random start and end positions once for this level
     const startRow = Math.floor(Math.random() * 8); // Random row from 0-7

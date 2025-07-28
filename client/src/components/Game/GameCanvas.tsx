@@ -41,7 +41,8 @@ const GameCanvas: React.FC = () => {
     puzzleShards,
     puzzlePedestal,
     getCurrentWalls,
-    teleporters
+    teleporters,
+    snakePits
   } = useSnakeGame();
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -706,8 +707,38 @@ const GameCanvas: React.FC = () => {
       });
     }
 
+    // Draw snake pits (holes in the ground)
+    snakePits.forEach(pit => {
+      // Draw the pit as a dark circular hole
+      ctx.fillStyle = '#0a0a0a'; // Very dark color for the hole
+      ctx.beginPath();
+      ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      // Add a gradient effect for depth
+      const gradient = ctx.createRadialGradient(pit.x, pit.y, 0, pit.x, pit.y, pit.radius);
+      gradient.addColorStop(0, '#000000'); // Black center
+      gradient.addColorStop(0.7, '#1a1a1a'); // Dark gray
+      gradient.addColorStop(1, '#333333'); // Lighter edge
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      // Add subtle border to make it more visible
+      ctx.strokeStyle = '#444444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+      ctx.stroke();
+    });
+
     // Draw snakes with different visuals for each type
     snakes.forEach(snake => {
+      // Skip drawing rattlesnakes that are in the pit
+      if (snake.type === 'rattlesnake' && snake.isInPit) {
+        return;
+      }
       // Skip rendering phase-restricted snakes that aren't in their active phase
       // For now, render all snakes (phase system can be enhanced later)
       // if (snake.activePhase && currentLevel === 4 && snake.activePhase !== currentPhase) {
@@ -764,6 +795,11 @@ const GameCanvas: React.FC = () => {
             accentColor = '#b794f6';
             eyeColor = '#d69e2e';
           }
+          break;
+        case 'rattlesnake':
+          baseColor = snake.isChasing ? '#8b4513' : '#a0522d'; // Brown/tan
+          accentColor = '#daa520'; // Golden accents  
+          eyeColor = snake.isChasing ? '#ff4500' : '#ffd700'; // Orange/gold eyes
           break;
       }
       
@@ -827,6 +863,27 @@ const GameCanvas: React.FC = () => {
           ctx.fillRect(snake.position.x + 8, snake.position.y + 8, snake.size.width - 16, 2);
           ctx.fillRect(snake.position.x + 5, snake.position.y + 13, snake.size.width - 10, 3);
           ctx.fillRect(snake.position.x + 10, snake.position.y + 18, snake.size.width - 20, 2);
+        }
+      } else if (snake.type === 'rattlesnake') {
+        // Diamond/rattle pattern for rattlesnake
+        const centerX = snake.position.x + snake.size.width / 2;
+        const centerY = snake.position.y + snake.size.height / 2;
+        
+        // Diamond pattern to represent rattle segments
+        ctx.fillRect(centerX - 3, snake.position.y + 3, 6, 4);
+        ctx.fillRect(centerX - 4, snake.position.y + 8, 8, 4);
+        ctx.fillRect(centerX - 3, snake.position.y + 13, 6, 4);
+        ctx.fillRect(centerX - 2, snake.position.y + 18, 4, 4);
+        
+        // Add rattle sound indicator when chasing
+        if (snake.isChasing) {
+          ctx.strokeStyle = '#ffd700';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([2, 2]);
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, snake.size.width/2 + 8, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.setLineDash([]);
         }
       }
       
