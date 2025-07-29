@@ -2214,13 +2214,15 @@ export const useSnakeGame = create<SnakeGameState>()(
             // Emerge the rattlesnake
             const snakeIndex = updatedSnakes.findIndex(s => s.id === rattlesnakeToEmerge.id);
             if (snakeIndex !== -1) {
-              updatedSnakes[snakeIndex] = {
+              const emergedSnake = {
                 ...rattlesnakeToEmerge,
                 isInPit: false,
                 emergenceTime: currentTime,
                 // Set initial patrol position
                 position: { x: pit.x - 14, y: pit.y - 14 } // Center snake on pit
               };
+              updatedSnakes[snakeIndex] = emergedSnake;
+              console.log(`Snake ${emergedSnake.id} emerged: isInPit=${emergedSnake.isInPit}, position=(${emergedSnake.position.x}, ${emergedSnake.position.y})`);
               
               // Update pit's last emergence time
               updatedSnakePits[pitIndex] = {
