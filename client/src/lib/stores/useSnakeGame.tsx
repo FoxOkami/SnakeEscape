@@ -2179,7 +2179,16 @@ export const useSnakeGame = create<SnakeGameState>()(
       const currentTime = Date.now();
       
       // Only process snake pits if they exist
-      if (!state.snakePits || state.snakePits.length === 0) return;
+      if (!state.snakePits || state.snakePits.length === 0) {
+        if (state.currentLevel === 2) { // Level 3 is zero-indexed as 2
+          console.log("Level 3 has no snake pits configured");
+        }
+        return;
+      }
+      
+      if (state.currentLevel === 2) {
+        console.log(`Updating snake pits on level 3. Found ${state.snakePits.length} pits.`);
+      }
       
       let updatedSnakes = [...state.snakes];
       let updatedSnakePits = [...state.snakePits];
@@ -2188,8 +2197,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       updatedSnakePits.forEach((pit, pitIndex) => {
         const timeSinceLastEmergence = currentTime - pit.lastEmergenceTime;
         
+        // Allow immediate emergence on first run (when lastEmergenceTime is 0)
+        const shouldEmerge = pit.lastEmergenceTime === 0 || timeSinceLastEmergence >= pit.emergenceInterval;
+        
         // Check if it's time for a new rattlesnake to emerge
-        if (timeSinceLastEmergence >= pit.emergenceInterval) {
+        if (shouldEmerge) {
           // Find the next rattlesnake to emerge (currently in pit)
           const rattlesnakeToEmerge = updatedSnakes.find(snake => 
             pit.snakeIds.includes(snake.id) && 
@@ -2198,6 +2210,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           );
           
           if (rattlesnakeToEmerge) {
+            console.log(`Snake ${rattlesnakeToEmerge.id} emerging from pit ${pit.id}`);
             // Emerge the rattlesnake
             const snakeIndex = updatedSnakes.findIndex(s => s.id === rattlesnakeToEmerge.id);
             if (snakeIndex !== -1) {
@@ -2215,6 +2228,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                 lastEmergenceTime: currentTime
               };
             }
+          } else {
+            console.log(`No rattlesnakes in pit ${pit.id} to emerge`);
           }
         }
       });
