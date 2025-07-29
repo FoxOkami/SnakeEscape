@@ -361,18 +361,18 @@ export const LEVELS: Level[] = [
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
       // Key room walls (enclose the key)
-      { x: 650, y: 250, width: 100, height: 20 }, // Top wall
-      { x: 650, y: 350, width: 100, height: 20 }, // Bottom wall
-      { x: 650, y: 250, width: 20, height: 120 }, // Left wall (removable)
-      { x: 730, y: 250, width: 20, height: 120 }, // Right wall
+      { x: 650, y: 260, width: 100, height: 20 }, // Top wall
+      { x: 650, y: 340, width: 100, height: 20 }, // Bottom wall
+      { x: 650, y: 260, width: 20, height: 100 }, // Left wall
+      { x: 730, y: 260, width: 20, height: 100 }, // Right wall
       // Some internal walls for layout
-      { x: 125, y: 20, width: 20, height: 80 },
-      { x: 145, y: 150, width: 80, height: 20 },
-      { x: 125, y: 220, width: 20, height: 80 },
-      { x: 125, y: 300, width: 80, height: 20 },
-      { x: 205, y: 300, width: 20, height: 100 },
-      { x: 660, y: 450, width: 60, height: 20 },
-      { x: 390, y: 260, width: 20, height: 40 },
+      // { x: 125, y: 20, width: 20, height: 80 },
+      // { x: 145, y: 150, width: 80, height: 20 },
+      // { x: 125, y: 220, width: 20, height: 80 },
+      // { x: 125, y: 300, width: 80, height: 20 },
+      // { x: 205, y: 300, width: 20, height: 100 },
+      // { x: 660, y: 450, width: 60, height: 20 },
+      // { x: 390, y: 260, width: 20, height: 40 },
     ],
     snakes: [
       {
