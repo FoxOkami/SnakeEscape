@@ -31,6 +31,8 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
       return updateSpitterSnake(snake, walls, dt);
     case 'photophobic':
       return updatePhotophobicSnake(snake, walls, dt, player, sounds, currentTime, gameState);
+    case 'rattlesnake':
+      return updateRattlesnakeSnake(snake, walls, dt, player);
     default:
       return snake;
   }
@@ -734,5 +736,84 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
     snake.direction = getDirectionVector(snake.position, targetPoint);
   }
 
+  return snake;
+}
+
+function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?: Player): Snake {
+  // Skip processing if snake is still in pit
+  if (snake.isInPit) {
+    return snake;
+  }
+
+  // Rattlesnakes patrol when emerged and can chase if they see the player
+  let targetPoint: Position = snake.position;
+  
+  // Check if can see player and start chasing
+  if (player && snake.sightRange && snake.hearingRange) {
+    const distanceToPlayer = getDistance(snake.position, player.position);
+    const canSeePlayer = distanceToPlayer <= snake.sightRange && 
+                        hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
+    
+    // Also check hearing range for rattlesnakes
+    const canHearPlayer = distanceToPlayer <= snake.hearingRange;
+    
+    if (canSeePlayer || canHearPlayer) {
+      snake.isChasing = true;
+      targetPoint = player.position;
+    } else if (snake.isChasing) {
+      // Lost sight/sound, stop chasing after cooldown
+      snake.lostSightCooldown = (snake.lostSightCooldown || 0) + dt;
+      if (snake.lostSightCooldown >= 2.0) { // 2 second cooldown
+        snake.isChasing = false;
+        snake.lostSightCooldown = 0;
+      } else {
+        // Continue chasing for a bit
+        targetPoint = player.position;
+      }
+    } else {
+      // Default patrol behavior
+      targetPoint = getPatrolTarget(snake);
+    }
+  } else {
+    // No player reference, just patrol
+    targetPoint = getPatrolTarget(snake);
+  }
+  
+  // Calculate movement speed
+  const moveSpeed = snake.isChasing ? snake.chaseSpeed : snake.speed;
+  
+  // Move toward target
+  const newPosition = moveTowards(snake.position, targetPoint, moveSpeed * dt);
+  
+  // Check collision and update position
+  if (!checkWallCollision(snake, newPosition, walls)) {
+    snake.position = newPosition;
+  } else if (snake.isChasing) {
+    // If blocked by wall while chasing, try sliding along the wall
+    const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
+    snake.position = slidePosition;
+  } else {
+    // Use smart pathfinding for patrol behavior
+    const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
+    const smartNewPosition = moveTowards(snake.position, smartTarget, moveSpeed * dt);
+    
+    if (!checkWallCollision(snake, smartNewPosition, walls)) {
+      snake.position = smartNewPosition;
+    } else {
+      // If still blocked during patrol, skip to next patrol point
+      snake.currentPatrolIndex += snake.patrolDirection;
+      
+      // Reverse direction if we've reached the end
+      if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
+        snake.currentPatrolIndex = snake.patrolPoints.length - 2;
+        snake.patrolDirection = -1;
+      } else if (snake.currentPatrolIndex < 0) {
+        snake.currentPatrolIndex = 1;
+        snake.patrolDirection = 1;
+      }
+    }
+  }
+
+  snake.direction = getDirectionVector(snake.position, targetPoint);
   return snake;
 }
