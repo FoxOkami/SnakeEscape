@@ -67,7 +67,7 @@ export interface Snake {
   patrolStartTime?: number; // When the snake started its patrol
   patrolDuration?: number; // How long the patrol should last
   returnToPitTime?: number; // When the snake should return to pit
-  rattlesnakeState?: 'inPit' | 'chasing' | 'pausing' | 'returningToPit'; // Current behavior state
+  rattlesnakeState?: 'inPit' | 'patrolling' | 'chasing' | 'pausing' | 'returningToPit'; // Current behavior state
   pauseStartTime?: number; // When the pause phase started
   pitPosition?: Position; // Original pit position to return to
 }

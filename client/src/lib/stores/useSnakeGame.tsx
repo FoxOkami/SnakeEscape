@@ -563,7 +563,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
       
       const updatedSnakes = state.snakes.map((snake) => {
-        // Skip updating rattlesnakes that are in pits or returning to pit - they'll be handled by updateSnakePits
+        // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
+        // Allow patrolling and chasing rattlesnakes to be processed by normal AI
         if (snake.type === 'rattlesnake' && (snake.isInPit || snake.rattlesnakeState === 'returningToPit' || snake.rattlesnakeState === 'pausing')) {
           return snake;
         }
@@ -2205,7 +2206,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         const timeSinceLastEmergence = currentTime - pit.lastEmergenceTime;
         
         // Allow immediate emergence on first run (when lastEmergenceTime is 0)
-        const shouldEmerge = pit.lastEmergenceTime === 0 || timeSinceLastEmergence >= pit.emergenceInterval;
+        // Otherwise wait for emergence interval (5 seconds default) plus 4 seconds pit wait time
+        const totalWaitTime = pit.emergenceInterval + 4000; // Add 4 second wait time in pit
+        const shouldEmerge = pit.lastEmergenceTime === 0 || timeSinceLastEmergence >= totalWaitTime;
         
         // Check if it's time for a new rattlesnake to emerge
         if (shouldEmerge) {
@@ -2225,8 +2228,9 @@ export const useSnakeGame = create<SnakeGameState>()(
                 ...rattlesnakeToEmerge,
                 isInPit: false,
                 emergenceTime: currentTime,
-                rattlesnakeState: 'chasing' as const,
-                isChasing: true, // Start chasing immediately
+                rattlesnakeState: 'patrolling' as const,
+                isChasing: false, // Start patrolling, not chasing
+                patrolStartTime: currentTime,
                 // Set initial patrol position
                 position: { x: pit.x - 14, y: pit.y - 14 } // Center snake on pit
               };
@@ -2249,12 +2253,36 @@ export const useSnakeGame = create<SnakeGameState>()(
       updatedSnakes.forEach((snake, snakeIndex) => {
         if (snake.type === 'rattlesnake' && !snake.isInPit && snake.emergenceTime) {
           const timeOutOfPit = currentTime - snake.emergenceTime;
-          const currentState = snake.rattlesnakeState || 'chasing';
+          const currentState = snake.rattlesnakeState || 'patrolling';
           
           switch (currentState) {
+            case 'patrolling':
+              // Patrol for 4 seconds - let normal AI handle movement/detection
+              if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 4000) {
+                // If currently chasing player, switch to chasing state for another 4 seconds
+                if (snake.isChasing) {
+                  console.log(`Rattlesnake ${snake.id} detected player during patrol, entering chase phase`);
+                  updatedSnakes[snakeIndex] = {
+                    ...snake,
+                    rattlesnakeState: 'chasing',
+                    patrolStartTime: currentTime // Reset timer for chase phase
+                  };
+                } else {
+                  // No player detected, go straight to pause
+                  console.log(`Rattlesnake ${snake.id} finished patrolling without detecting player, entering pause phase`);
+                  updatedSnakes[snakeIndex] = {
+                    ...snake,
+                    rattlesnakeState: 'pausing',
+                    pauseStartTime: currentTime,
+                    isChasing: false
+                  };
+                }
+              }
+              break;
+              
             case 'chasing':
               // Chase for 4 seconds
-              if (timeOutOfPit >= 4000) {
+              if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 4000) {
                 console.log(`Rattlesnake ${snake.id} finished chasing, entering pause phase`);
                 updatedSnakes[snakeIndex] = {
                   ...snake,
@@ -2288,8 +2316,18 @@ export const useSnakeGame = create<SnakeGameState>()(
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance <= 5) {
-                  // Reached pit - go back in
-                  console.log(`Rattlesnake ${snake.id} returned to pit`);
+                  // Reached pit - go back in and update pit's last emergence time for waiting period
+                  console.log(`Rattlesnake ${snake.id} returned to pit, starting 4-second wait`);
+                  
+                  // Update the pit's lastEmergenceTime to current time for the waiting period
+                  const pitIndex = updatedSnakePits.findIndex(p => p.id === snake.pitId);
+                  if (pitIndex !== -1) {
+                    updatedSnakePits[pitIndex] = {
+                      ...updatedSnakePits[pitIndex],
+                      lastEmergenceTime: currentTime
+                    };
+                  }
+                  
                   updatedSnakes[snakeIndex] = {
                     ...snake,
                     isInPit: true,
@@ -2297,6 +2335,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                     emergenceTime: undefined,
                     pauseStartTime: undefined,
                     pitPosition: undefined,
+                    patrolStartTime: undefined,
                     isChasing: false,
                     position: snake.pitPosition
                   };
