@@ -562,9 +562,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         };
       }
       
-      const updatedSnakes = state.snakes.map((snake) =>
-        updateSnake(snake, currentWalls, deltaTime, updatedPlayer, playerSounds, { ...state, quadrantLighting }),
-      );
+      const updatedSnakes = state.snakes.map((snake) => {
+        // Skip updating rattlesnakes that are in pits - they'll be handled by updateSnakePits
+        if (snake.type === 'rattlesnake' && snake.isInPit) {
+          return snake;
+        }
+        return updateSnake(snake, currentWalls, deltaTime, updatedPlayer, playerSounds, { ...state, quadrantLighting });
+      });
 
       // Handle plumber snake tile rotations
       let updatedPatternTilesFromRotation = state.patternTiles;
@@ -960,9 +964,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       get().updateSnakePits(deltaTime);
 
       // --- UPDATE STATE ---
+      // Get the most up-to-date snakes after all processing (snake pits, projectiles, etc.)
+      const finalSnakes = get().snakes;
+      
       set({
         currentVelocity: newVelocity, // Use the updated velocity that includes wall collision resets
-        snakes: updatedSnakes,
+        snakes: finalSnakes, // Use snakes after pit/projectile processing
         key: updatedKey,
         player: updatedPlayer,
         switches: updatedSwitches,
@@ -2260,6 +2267,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       
       // Update state with modified snakes and pits
+      console.log(`Snake pit update complete. Setting ${updatedSnakes.length} snakes, ${updatedSnakes.filter(s => s.type === 'rattlesnake' && !s.isInPit).length} emerged rattlesnakes`);
       set({
         snakes: updatedSnakes,
         snakePits: updatedSnakePits
