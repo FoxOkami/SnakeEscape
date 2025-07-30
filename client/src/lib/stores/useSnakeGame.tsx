@@ -563,8 +563,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
       
       const updatedSnakes = state.snakes.map((snake) => {
-        // Skip updating rattlesnakes that are in pits - they'll be handled by updateSnakePits
-        if (snake.type === 'rattlesnake' && snake.isInPit) {
+        // Skip updating rattlesnakes that are in pits or returning to pit - they'll be handled by updateSnakePits
+        if (snake.type === 'rattlesnake' && (snake.isInPit || snake.rattlesnakeState === 'returningToPit' || snake.rattlesnakeState === 'pausing')) {
           return snake;
         }
         return updateSnake(snake, currentWalls, deltaTime, updatedPlayer, playerSounds, { ...state, quadrantLighting });
@@ -2225,6 +2225,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                 ...rattlesnakeToEmerge,
                 isInPit: false,
                 emergenceTime: currentTime,
+                rattlesnakeState: 'chasing' as const,
+                isChasing: true, // Start chasing immediately
                 // Set initial patrol position
                 position: { x: pit.x - 14, y: pit.y - 14 } // Center snake on pit
               };
@@ -2243,25 +2245,77 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
       
-      // Check for rattlesnakes that need to return to pit
+      // Process rattlesnake behavior state machine
       updatedSnakes.forEach((snake, snakeIndex) => {
         if (snake.type === 'rattlesnake' && !snake.isInPit && snake.emergenceTime) {
           const timeOutOfPit = currentTime - snake.emergenceTime;
+          const currentState = snake.rattlesnakeState || 'chasing';
           
-          // Check if patrol time is over (3.5-4.5 seconds based on patrolDuration)
-          if (timeOutOfPit >= (snake.patrolDuration || 4000)) {
-            // Return snake to pit
-            updatedSnakes[snakeIndex] = {
-              ...snake,
-              isInPit: true,
-              emergenceTime: undefined,
-              isChasing: false, // Stop chasing when returning to pit
-              // Reset position to pit center
-              position: { 
-                x: state.snakePits.find(p => p.id === snake.pitId)?.x - 14 || snake.position.x,
-                y: state.snakePits.find(p => p.id === snake.pitId)?.y - 14 || snake.position.y
+          switch (currentState) {
+            case 'chasing':
+              // Chase for 4 seconds
+              if (timeOutOfPit >= 4000) {
+                console.log(`Rattlesnake ${snake.id} finished chasing, entering pause phase`);
+                updatedSnakes[snakeIndex] = {
+                  ...snake,
+                  rattlesnakeState: 'pausing',
+                  pauseStartTime: currentTime,
+                  isChasing: false // Stop chasing during pause
+                };
               }
-            };
+              break;
+              
+            case 'pausing':
+              // Pause for 200ms
+              if (snake.pauseStartTime && (currentTime - snake.pauseStartTime) >= 200) {
+                console.log(`Rattlesnake ${snake.id} finished pausing, returning to pit`);
+                // Find the pit position
+                const pit = state.snakePits.find(p => p.id === snake.pitId);
+                updatedSnakes[snakeIndex] = {
+                  ...snake,
+                  rattlesnakeState: 'returningToPit',
+                  pitPosition: pit ? { x: pit.x - 14, y: pit.y - 14 } : snake.position,
+                  isChasing: false
+                };
+              }
+              break;
+              
+            case 'returningToPit':
+              // Move toward pit position
+              if (snake.pitPosition) {
+                const dx = snake.pitPosition.x - snake.position.x;
+                const dy = snake.pitPosition.y - snake.position.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance <= 5) {
+                  // Reached pit - go back in
+                  console.log(`Rattlesnake ${snake.id} returned to pit`);
+                  updatedSnakes[snakeIndex] = {
+                    ...snake,
+                    isInPit: true,
+                    rattlesnakeState: 'inPit',
+                    emergenceTime: undefined,
+                    pauseStartTime: undefined,
+                    pitPosition: undefined,
+                    isChasing: false,
+                    position: snake.pitPosition
+                  };
+                } else {
+                  // Move toward pit
+                  const speed = snake.speed * deltaTime;
+                  const normalizedDx = dx / distance;
+                  const normalizedDy = dy / distance;
+                  
+                  updatedSnakes[snakeIndex] = {
+                    ...snake,
+                    position: {
+                      x: snake.position.x + normalizedDx * speed,
+                      y: snake.position.y + normalizedDy * speed
+                    }
+                  };
+                }
+              }
+              break;
           }
         }
       });
