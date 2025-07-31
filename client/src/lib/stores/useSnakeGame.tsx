@@ -2315,7 +2315,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                 const dy = snake.pitPosition.y - snake.position.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                if (distance <= 5) {
+                if (distance <= 10) {
                   // Reached pit - go back in and update pit's last emergence time for waiting period
                   console.log(`Rattlesnake ${snake.id} returned to pit, starting 4-second wait`);
                   
@@ -2340,16 +2340,18 @@ export const useSnakeGame = create<SnakeGameState>()(
                     position: snake.pitPosition
                   };
                 } else {
-                  // Move toward pit
-                  const speed = snake.speed * deltaTime;
+                  // Move toward pit with slower, controlled speed to prevent overshooting
+                  const returnSpeed = Math.min(snake.speed * 0.5, 50); // Slower return speed with max cap
+                  const speed = returnSpeed * deltaTime;
+                  const moveDistance = Math.min(speed, distance); // Don't move further than remaining distance
                   const normalizedDx = dx / distance;
                   const normalizedDy = dy / distance;
                   
                   updatedSnakes[snakeIndex] = {
                     ...snake,
                     position: {
-                      x: snake.position.x + normalizedDx * speed,
-                      y: snake.position.y + normalizedDy * speed
+                      x: snake.position.x + normalizedDx * moveDistance,
+                      y: snake.position.y + normalizedDy * moveDistance
                     }
                   };
                 }
