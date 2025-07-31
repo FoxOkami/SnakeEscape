@@ -2198,8 +2198,149 @@ export const useSnakeGame = create<SnakeGameState>()(
         console.log(`Updating snake pits on level 3. Found ${state.snakePits.length} pits.`);
       }
       
+      // Check for light beam intersection with pits (Level 3 only)
+      const lightBeamHitsPit = (pit: any) => {
+        if (state.currentLevel !== 2 || !state.lightBeam) return false;
+        
+        // Check if any segment of the light beam passes through the pit
+        for (let i = 0; i < state.lightBeam.segments.length - 1; i++) {
+          const start = state.lightBeam.segments[i];
+          const end = state.lightBeam.segments[i + 1];
+          
+          // Check if line segment intersects with pit circle
+          const distance = distanceFromPointToLineSegment(
+            { x: pit.x, y: pit.y },
+            start,
+            end
+          );
+          
+          if (distance <= pit.radius) {
+            return true;
+          }
+        }
+        return false;
+      };
+      
+      // Helper function to calculate distance from point to line segment
+      const distanceFromPointToLineSegment = (point: any, lineStart: any, lineEnd: any) => {
+        const A = point.x - lineStart.x;
+        const B = point.y - lineStart.y;
+        const C = lineEnd.x - lineStart.x;
+        const D = lineEnd.y - lineStart.y;
+        
+        const dot = A * C + B * D;
+        const lenSq = C * C + D * D;
+        let param = -1;
+        
+        if (lenSq !== 0) {
+          param = dot / lenSq;
+        }
+        
+        let xx, yy;
+        
+        if (param < 0) {
+          xx = lineStart.x;
+          yy = lineStart.y;
+        } else if (param > 1) {
+          xx = lineEnd.x;
+          yy = lineEnd.y;
+        } else {
+          xx = lineStart.x + param * C;
+          yy = lineStart.y + param * D;
+        }
+        
+        const dx = point.x - xx;
+        const dy = point.y - yy;
+        return Math.sqrt(dx * dx + dy * dy);
+      };
+      
       let updatedSnakes = [...state.snakes];
       let updatedSnakePits = [...state.snakePits];
+      
+      // Check for light beam hitting pits and trigger light emergence
+      updatedSnakePits.forEach((pit, pitIndex) => {
+        const isCurrentlyHitByLight = lightBeamHitsPit(pit);
+        const wasHitByLight = pit.isLightHit || false;
+        
+        // Light just started hitting the pit
+        if (isCurrentlyHitByLight && !wasHitByLight) {
+          console.log(`🔦 Light beam hit pit ${pit.id}! Triggering emergency emergence.`);
+          
+          // Find all snakes in this pit
+          const snakesInPit = updatedSnakes.filter(snake => 
+            pit.snakeIds.includes(snake.id) && 
+            snake.type === 'rattlesnake' && 
+            snake.isInPit === true
+          );
+          
+          if (snakesInPit.length > 0) {
+            // Emerge all snakes in different cardinal directions
+            const cardinalDirections = ['north', 'south', 'east', 'west'];
+            
+            snakesInPit.forEach((snake, index) => {
+              const direction = cardinalDirections[index % cardinalDirections.length];
+              const snakeIndex = updatedSnakes.findIndex(s => s.id === snake.id);
+              
+              if (snakeIndex !== -1) {
+                // Calculate position based on direction
+                let emergenceX = pit.x - 14;
+                let emergenceY = pit.y - 14;
+                
+                switch (direction) {
+                  case 'north':
+                    emergenceY -= 30;
+                    break;
+                  case 'south':
+                    emergenceY += 30;
+                    break;
+                  case 'east':
+                    emergenceX += 30;
+                    break;
+                  case 'west':
+                    emergenceX -= 30;
+                    break;
+                }
+                
+                console.log(`Emerging snake ${snake.id} in ${direction} direction from light trigger`);
+                
+                updatedSnakes[snakeIndex] = {
+                  ...snake,
+                  isInPit: false,
+                  emergenceTime: currentTime,
+                  rattlesnakeState: 'patrolling',
+                  isLightEmergence: true,
+                  lightEmergenceDirection: direction,
+                  patrolStartTime: currentTime,
+                  isChasing: false,
+                  position: { x: emergenceX, y: emergenceY }
+                };
+              }
+            });
+            
+            // Update pit to track light emergence
+            updatedSnakePits[pitIndex] = {
+              ...pit,
+              isLightHit: true,
+              lightEmergenceTime: currentTime,
+              isLightEmergence: true
+            };
+          }
+        } 
+        // Light stopped hitting the pit
+        else if (!isCurrentlyHitByLight && wasHitByLight) {
+          updatedSnakePits[pitIndex] = {
+            ...pit,
+            isLightHit: false
+          };
+        }
+        // Light is currently hitting the pit
+        else if (isCurrentlyHitByLight) {
+          updatedSnakePits[pitIndex] = {
+            ...pit,
+            isLightHit: true
+          };
+        }
+      });
       
       // Process each snake pit
       updatedSnakePits.forEach((pit, pitIndex) => {
@@ -2257,25 +2398,39 @@ export const useSnakeGame = create<SnakeGameState>()(
           
           switch (currentState) {
             case 'patrolling':
-              // Patrol for 4 seconds - let normal AI handle movement/detection
-              if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 4000) {
-                // If currently chasing player, switch to chasing state for another 4 seconds
-                if (snake.isChasing) {
-                  console.log(`Rattlesnake ${snake.id} detected player during patrol, entering chase phase`);
-                  updatedSnakes[snakeIndex] = {
-                    ...snake,
-                    rattlesnakeState: 'chasing',
-                    patrolStartTime: currentTime // Reset timer for chase phase
-                  };
-                } else {
-                  // No player detected, go straight to pause
-                  console.log(`Rattlesnake ${snake.id} finished patrolling without detecting player, entering pause phase`);
+              // Different behavior for light emergence vs normal emergence
+              if (snake.isLightEmergence) {
+                // Light emergence: patrol for 2 seconds only
+                if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 2000) {
+                  console.log(`Rattlesnake ${snake.id} finished 2-second light emergence patrol, entering pause phase`);
                   updatedSnakes[snakeIndex] = {
                     ...snake,
                     rattlesnakeState: 'pausing',
                     pauseStartTime: currentTime,
                     isChasing: false
                   };
+                }
+              } else {
+                // Normal emergence: patrol for 4 seconds - let normal AI handle movement/detection
+                if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 4000) {
+                  // If currently chasing player, switch to chasing state for another 4 seconds
+                  if (snake.isChasing) {
+                    console.log(`Rattlesnake ${snake.id} detected player during patrol, entering chase phase`);
+                    updatedSnakes[snakeIndex] = {
+                      ...snake,
+                      rattlesnakeState: 'chasing',
+                      patrolStartTime: currentTime // Reset timer for chase phase
+                    };
+                  } else {
+                    // No player detected, go straight to pause
+                    console.log(`Rattlesnake ${snake.id} finished patrolling without detecting player, entering pause phase`);
+                    updatedSnakes[snakeIndex] = {
+                      ...snake,
+                      rattlesnakeState: 'pausing',
+                      pauseStartTime: currentTime,
+                      isChasing: false
+                    };
+                  }
                 }
               }
               break;
@@ -2339,6 +2494,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                     pitPosition: undefined,
                     patrolStartTime: undefined,
                     isChasing: false,
+                    isLightEmergence: undefined, // Clear light emergence flag
+                    lightEmergenceDirection: undefined, // Clear direction
                     position: snake.pitPosition
                   };
                 } else {

@@ -70,6 +70,9 @@ export interface Snake {
   rattlesnakeState?: 'inPit' | 'patrolling' | 'chasing' | 'pausing' | 'returningToPit'; // Current behavior state
   pauseStartTime?: number; // When the pause phase started
   pitPosition?: Position; // Original pit position to return to
+  // Light emergence properties
+  isLightEmergence?: boolean; // Whether this snake emerged due to light detection
+  lightEmergenceDirection?: 'north' | 'south' | 'east' | 'west'; // Cardinal direction for light emergence
 }
 
 export interface Wall extends Rectangle {}
@@ -88,6 +91,10 @@ export interface SnakePit extends Position {
   snakeIds: string[]; // IDs of snakes that belong to this pit
   lastEmergenceTime: number; // When a snake last emerged
   emergenceInterval: number; // Time between emergences (3000ms = 3 seconds)
+  // Light detection properties
+  isLightHit?: boolean; // Whether light beam is currently hitting this pit
+  lightEmergenceTime?: number; // When snakes emerged due to light hit
+  isLightEmergence?: boolean; // Whether current emergence is due to light
 }
 
 export interface Switch extends Rectangle {
