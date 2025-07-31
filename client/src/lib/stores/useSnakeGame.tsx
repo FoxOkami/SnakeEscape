@@ -2299,10 +2299,12 @@ export const useSnakeGame = create<SnakeGameState>()(
                 console.log(`Rattlesnake ${snake.id} finished pausing, returning to pit`);
                 // Find the pit position
                 const pit = state.snakePits.find(p => p.id === snake.pitId);
+                const pitPos = pit ? { x: pit.x - 14, y: pit.y - 14 } : snake.position;
+                console.log(`Rattlesnake ${snake.id} current position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)}), target pit: (${pitPos.x}, ${pitPos.y})`);
                 updatedSnakes[snakeIndex] = {
                   ...snake,
                   rattlesnakeState: 'returningToPit',
-                  pitPosition: pit ? { x: pit.x - 14, y: pit.y - 14 } : snake.position,
+                  pitPosition: pitPos,
                   isChasing: false
                 };
               }
@@ -2340,12 +2342,13 @@ export const useSnakeGame = create<SnakeGameState>()(
                     position: snake.pitPosition
                   };
                 } else {
-                  // Move toward pit with slower, controlled speed to prevent overshooting
-                  const returnSpeed = Math.min(snake.speed * 0.5, 50); // Slower return speed with max cap
-                  const speed = returnSpeed * deltaTime;
-                  const moveDistance = Math.min(speed, distance); // Don't move further than remaining distance
+                  // Move toward pit with controlled speed - use fixed speed per frame
+                  const returnSpeedPerFrame = 1; // Fixed 1 pixel per frame for very smooth, visible movement
+                  const moveDistance = Math.min(returnSpeedPerFrame, distance); // Don't move further than remaining distance
                   const normalizedDx = dx / distance;
                   const normalizedDy = dy / distance;
+                  
+                  console.log(`Rattlesnake ${snake.id} moving to pit: distance=${distance.toFixed(1)}, moveDistance=${moveDistance}`);
                   
                   updatedSnakes[snakeIndex] = {
                     ...snake,
