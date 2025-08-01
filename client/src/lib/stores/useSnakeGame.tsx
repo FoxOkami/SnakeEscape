@@ -2220,7 +2220,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Snake pit processing for Level 3
       
-      // Check for light beam intersection with pits (Level 3 only) - optimized version
+      // Check for light beam intersection with pits (Level 3 only) - with detailed debugging
       const lightBeamHitsPit = (pit: any) => {
         if (state.currentLevel !== 2 || !state.lightBeam || !state.lightBeam.segments) {
           return false;
@@ -2234,22 +2234,33 @@ export const useSnakeGame = create<SnakeGameState>()(
           bottom: pit.y + pit.radius
         };
         
+        console.log(`Pit bounds: left=${pitBounds.left}, right=${pitBounds.right}, top=${pitBounds.top}, bottom=${pitBounds.bottom}`);
+        
         let nearPit = false;
         for (let i = 0; i < state.lightBeam.segments.length; i++) {
           const segment = state.lightBeam.segments[i];
+          console.log(`Checking segment ${i}: (${segment.x}, ${segment.y})`);
           if (segment.x >= pitBounds.left && segment.x <= pitBounds.right &&
               segment.y >= pitBounds.top && segment.y <= pitBounds.bottom) {
             nearPit = true;
+            console.log(`Segment ${i} is within pit bounds!`);
             break;
           }
         }
         
-        if (!nearPit) return false;
+        if (!nearPit) {
+          console.log(`❌ No segments within pit bounds`);
+          return false;
+        }
+        
+        console.log(`✅ Light beam near pit, checking line-circle intersection`);
         
         // Only do expensive line-circle intersection if light beam is near pit
         for (let i = 0; i < state.lightBeam.segments.length - 1; i++) {
           const start = state.lightBeam.segments[i];
           const end = state.lightBeam.segments[i + 1];
+          
+          console.log(`Checking line segment ${i}-${i+1}: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
           
           // Simplified distance calculation
           const distance = distanceFromPointToLineSegment(
@@ -2258,11 +2269,14 @@ export const useSnakeGame = create<SnakeGameState>()(
             end
           );
           
+          console.log(`Distance from pit center to line segment: ${distance} (radius: ${pit.radius})`);
+          
           if (distance <= pit.radius) {
-            console.log(`🔦 LIGHT BEAM HITS SNAKE PIT! Triggering emergency emergence`);
+            console.log(`🔦 LIGHT BEAM HITS SNAKE PIT! Distance ${distance} <= radius ${pit.radius}`);
             return true;
           }
         }
+        console.log(`❌ No intersection found - closest distance was greater than radius`);
         return false;
       };
       
