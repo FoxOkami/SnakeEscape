@@ -2293,6 +2293,20 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Check for light beam hitting pits and trigger light emergence (optimized for performance)
       updatedSnakePits.forEach((pit, pitIndex) => {
+        // Debug: Check if we have light beam data for Level 3
+        if (state.currentLevel === 2 && pit.id === 'pit1') {
+          console.log(`🔍 DEBUG Level 3: Checking pit ${pit.id} at (${pit.x}, ${pit.y}) radius=${pit.radius}`);
+          if (state.lightBeam && state.lightBeam.segments) {
+            console.log(`Light beam has ${state.lightBeam.segments.length} segments`);
+            if (state.lightBeam.segments.length > 1) {
+              console.log(`First: (${state.lightBeam.segments[0].x}, ${state.lightBeam.segments[0].y})`);
+              console.log(`Last: (${state.lightBeam.segments[state.lightBeam.segments.length-1].x}, ${state.lightBeam.segments[state.lightBeam.segments.length-1].y})`);
+            }
+          } else {
+            console.log(`No light beam found: hasLightBeam=${!!state.lightBeam}, hasSegments=${!!(state.lightBeam && state.lightBeam.segments)}`);
+          }
+        }
+        
         // Always check light beam hits, but use optimized calculation
         const isCurrentlyHitByLight = lightBeamHitsPit(pit);
         const wasHitByLight = pit.isLightHit || false;
@@ -2336,7 +2350,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                     break;
                 }
                 
-                console.log(`Emerging snake ${snake.id} in ${direction} direction from light trigger`);
+                // Snake emerging from light trigger
                 
                 updatedSnakes[snakeIndex] = {
                   ...snake,
@@ -2396,7 +2410,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           );
           
           if (rattlesnakeToEmerge) {
-            console.log(`Snake ${rattlesnakeToEmerge.id} emerging from pit ${pit.id}`);
+            // Snake emerging from regular cycle
             // Emerge the rattlesnake
             const snakeIndex = updatedSnakes.findIndex(s => s.id === rattlesnakeToEmerge.id);
             if (snakeIndex !== -1) {
@@ -2411,7 +2425,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                 position: { x: pit.x - 14, y: pit.y - 14 } // Center snake on pit
               };
               updatedSnakes[snakeIndex] = emergedSnake;
-              console.log(`Snake ${emergedSnake.id} emerged: isInPit=${emergedSnake.isInPit}, position=(${emergedSnake.position.x}, ${emergedSnake.position.y})`);
+              // Snake emerged successfully
               
               // Update pit's last emergence time
               updatedSnakePits[pitIndex] = {
@@ -2419,8 +2433,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                 lastEmergenceTime: currentTime
               };
             }
-          } else {
-            console.log(`No rattlesnakes in pit ${pit.id} to emerge`);
           }
         }
       });
@@ -2437,7 +2449,7 @@ export const useSnakeGame = create<SnakeGameState>()(
               if (snake.isLightEmergence) {
                 // Light emergence: patrol for 2 seconds only
                 if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 2000) {
-                  console.log(`Rattlesnake ${snake.id} finished 2-second light emergence patrol, entering pause phase`);
+                  // Light emergence patrol complete
                   updatedSnakes[snakeIndex] = {
                     ...snake,
                     rattlesnakeState: 'pausing',
@@ -2450,7 +2462,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                 if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 4000) {
                   // If currently chasing player, switch to chasing state for another 4 seconds
                   if (snake.isChasing) {
-                    console.log(`Rattlesnake ${snake.id} detected player during patrol, entering chase phase`);
+                    // Player detected, entering chase phase
                     updatedSnakes[snakeIndex] = {
                       ...snake,
                       rattlesnakeState: 'chasing',
@@ -2458,7 +2470,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                     };
                   } else {
                     // No player detected, go straight to pause
-                    console.log(`Rattlesnake ${snake.id} finished patrolling without detecting player, entering pause phase`);
+                    // Patrol complete, no player detected
                     updatedSnakes[snakeIndex] = {
                       ...snake,
                       rattlesnakeState: 'pausing',
@@ -2473,7 +2485,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             case 'chasing':
               // Chase for 4 seconds
               if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 4000) {
-                console.log(`Rattlesnake ${snake.id} finished chasing, entering pause phase`);
+                // Chase phase complete
                 updatedSnakes[snakeIndex] = {
                   ...snake,
                   rattlesnakeState: 'pausing',
@@ -2486,11 +2498,9 @@ export const useSnakeGame = create<SnakeGameState>()(
             case 'pausing':
               // Pause for 200ms
               if (snake.pauseStartTime && (currentTime - snake.pauseStartTime) >= 200) {
-                console.log(`Rattlesnake ${snake.id} finished pausing, returning to pit`);
-                // Find the pit position
+                // Pause complete, returning to pit
                 const pit = state.snakePits.find(p => p.id === snake.pitId);
                 const pitPos = pit ? { x: pit.x - 14, y: pit.y - 14 } : snake.position;
-                console.log(`Rattlesnake ${snake.id} current position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)}), target pit: (${pitPos.x}, ${pitPos.y})`);
                 updatedSnakes[snakeIndex] = {
                   ...snake,
                   rattlesnakeState: 'returningToPit',
@@ -2509,7 +2519,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                 
                 if (distance <= 10) {
                   // Reached pit - go back in and update pit's last emergence time for waiting period
-                  console.log(`Rattlesnake ${snake.id} returned to pit, starting 4-second wait`);
+                  // Snake returned to pit
                   
                   // Update the pit's lastEmergenceTime to current time for the waiting period
                   const pitIndex = updatedSnakePits.findIndex(p => p.id === snake.pitId);
