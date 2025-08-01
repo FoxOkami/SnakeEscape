@@ -912,7 +912,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
 
-      // Handle Level 3 crystal activation - dynamic wall state based on light beam
+      // Handle Level 3 crystal activation - dynamic wall state based on light beam and mirror usage
       if (state.currentLevel === 2 && updatedCrystal) {
         // Define all four key room walls for Level 3
         const keyRoomWalls = [
@@ -929,8 +929,14 @@ export const useSnakeGame = create<SnakeGameState>()(
           )
         );
         
-        if (updatedCrystal.isActivated && keyRoomWallsExist) {
-          // Crystal is activated by light beam - remove all key room walls
+        // Check if all mirrors are being used (reflecting)
+        const allMirrorsUsed = updatedMirrors.every(mirror => mirror.isReflecting);
+        
+        // Puzzle is solved when crystal is activated AND all mirrors are being used
+        const puzzleSolved = updatedCrystal.isActivated && allMirrorsUsed;
+        
+        if (puzzleSolved && keyRoomWallsExist) {
+          // Puzzle solved - remove all key room walls
           const newWalls = state.walls.filter(wall => 
             !keyRoomWalls.some(keyWall => 
               wall.x === keyWall.x && wall.y === keyWall.y && 
@@ -938,8 +944,8 @@ export const useSnakeGame = create<SnakeGameState>()(
             )
           );
           set({ walls: newWalls });
-        } else if (!updatedCrystal.isActivated && !keyRoomWallsExist) {
-          // Crystal is not activated by light beam - restore all key room walls
+        } else if (!puzzleSolved && !keyRoomWallsExist) {
+          // Puzzle not solved - restore all key room walls
           const newWalls = [...state.walls, ...keyRoomWalls];
           set({ walls: newWalls });
         }
@@ -951,9 +957,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         updatedSwitches.length === 0 ||
         updatedSwitches.every((s) => s.isPressed);
 
-      // Level 3 (light reflection puzzle) - player must have key and crystal must be activated
+      // Level 3 (light reflection puzzle) - player must have key, crystal activated, and all mirrors used
       if (state.currentLevel === 2 && updatedPlayer.hasKey && updatedCrystal && updatedCrystal.isActivated) {
-        updatedDoor = { ...state.door, isOpen: true };
+        const allMirrorsUsed = updatedMirrors.every(mirror => mirror.isReflecting);
+        if (allMirrorsUsed) {
+          updatedDoor = { ...state.door, isOpen: true };
+        }
       } 
       // Level 5 (logic gate puzzle) - player only needs the key
       else if (state.currentLevel === 4 && updatedPlayer.hasKey) {
