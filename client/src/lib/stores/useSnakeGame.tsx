@@ -2222,9 +2222,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         console.log(`Updating snake pits on level 3. Found ${state.snakePits.length} pits.`);
       }
       
-      // Check for light beam intersection with pits (Level 3 only) - optimized version
+      // Check for light beam intersection with pits (Level 3 only) - with debugging
       const lightBeamHitsPit = (pit: any) => {
-        if (state.currentLevel !== 2 || !state.lightBeam || !state.lightBeam.segments) return false;
+        if (state.currentLevel !== 2 || !state.lightBeam || !state.lightBeam.segments) {
+          console.log(`Light beam check failed: level=${state.currentLevel}, hasLightBeam=${!!state.lightBeam}, hasSegments=${!!(state.lightBeam && state.lightBeam.segments)}`);
+          return false;
+        }
+        
+        console.log(`Checking light beam intersection with pit ${pit.id} at (${pit.x}, ${pit.y}) radius=${pit.radius}`);
+        console.log(`Light beam has ${state.lightBeam.segments.length} segments:`, state.lightBeam.segments);
         
         // Quick bounding box check first - if light beam doesn't even come near pit area, skip expensive calculations
         const pitBounds = {
@@ -2240,11 +2246,15 @@ export const useSnakeGame = create<SnakeGameState>()(
           if (segment.x >= pitBounds.left && segment.x <= pitBounds.right &&
               segment.y >= pitBounds.top && segment.y <= pitBounds.bottom) {
             nearPit = true;
+            console.log(`Light beam segment ${i} (${segment.x}, ${segment.y}) is near pit bounds`);
             break;
           }
         }
         
-        if (!nearPit) return false;
+        if (!nearPit) {
+          console.log(`Light beam not near pit bounds`);
+          return false;
+        }
         
         // Only do expensive line-circle intersection if light beam is near pit
         for (let i = 0; i < state.lightBeam.segments.length - 1; i++) {
@@ -2258,10 +2268,14 @@ export const useSnakeGame = create<SnakeGameState>()(
             end
           );
           
+          console.log(`Light beam segment ${i}-${i+1}: (${start.x}, ${start.y}) to (${end.x}, ${end.y}), distance to pit: ${distance}`);
+          
           if (distance <= pit.radius) {
+            console.log(`🔦 Light beam HIT detected! Distance ${distance} <= radius ${pit.radius}`);
             return true;
           }
         }
+        console.log(`No light beam intersection detected`);
         return false;
       };
       
