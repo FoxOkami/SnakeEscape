@@ -914,19 +914,33 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Handle Level 3 crystal activation - dynamic wall state based on light beam
       if (state.currentLevel === 2 && updatedCrystal) {
-        const keyRoomWallExists = state.walls.some(wall => 
-          wall.x === 650 && wall.y === 250 && wall.width === 20 && wall.height === 120
+        // Define all four key room walls for Level 3
+        const keyRoomWalls = [
+          { x: 650, y: 260, width: 100, height: 20 }, // Top wall
+          { x: 650, y: 340, width: 100, height: 20 }, // Bottom wall
+          { x: 650, y: 260, width: 20, height: 100 }, // Left wall
+          { x: 730, y: 260, width: 20, height: 100 }, // Right wall
+        ];
+        
+        const keyRoomWallsExist = keyRoomWalls.some(keyWall => 
+          state.walls.some(wall => 
+            wall.x === keyWall.x && wall.y === keyWall.y && 
+            wall.width === keyWall.width && wall.height === keyWall.height
+          )
         );
         
-        if (updatedCrystal.isActivated && keyRoomWallExists) {
-          // Crystal is activated by light beam - remove the wall
+        if (updatedCrystal.isActivated && keyRoomWallsExist) {
+          // Crystal is activated by light beam - remove all key room walls
           const newWalls = state.walls.filter(wall => 
-            !(wall.x === 650 && wall.y === 250 && wall.width === 20 && wall.height === 120)
+            !keyRoomWalls.some(keyWall => 
+              wall.x === keyWall.x && wall.y === keyWall.y && 
+              wall.width === keyWall.width && wall.height === keyWall.height
+            )
           );
           set({ walls: newWalls });
-        } else if (!updatedCrystal.isActivated && !keyRoomWallExists) {
-          // Crystal is not activated by light beam - restore the wall
-          const newWalls = [...state.walls, { x: 650, y: 250, width: 20, height: 120 }];
+        } else if (!updatedCrystal.isActivated && !keyRoomWallsExist) {
+          // Crystal is not activated by light beam - restore all key room walls
+          const newWalls = [...state.walls, ...keyRoomWalls];
           set({ walls: newWalls });
         }
       }
