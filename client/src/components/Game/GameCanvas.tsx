@@ -737,13 +737,7 @@ const GameCanvas: React.FC = () => {
     snakes.forEach(snake => {
       // Skip drawing rattlesnakes that are in the pit
       if (snake.type === 'rattlesnake' && snake.isInPit) {
-        console.log(`Skipping render of ${snake.id} - still in pit`);
         return;
-      }
-      
-      // Debug logging for rattlesnakes
-      if (snake.type === 'rattlesnake') {
-        console.log(`Rendering rattlesnake ${snake.id}: isInPit=${snake.isInPit}, position=(${snake.position.x}, ${snake.position.y})`);
       }
       // Skip rendering phase-restricted snakes that aren't in their active phase
       // For now, render all snakes (phase system can be enhanced later)

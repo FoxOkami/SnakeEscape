@@ -2218,19 +2218,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
       
-      if (state.currentLevel === 2) {
-        console.log(`Updating snake pits on level 3. Found ${state.snakePits.length} pits.`);
-      }
+      // Snake pit processing for Level 3
       
-      // Check for light beam intersection with pits (Level 3 only) - with debugging
+      // Check for light beam intersection with pits (Level 3 only) - optimized version
       const lightBeamHitsPit = (pit: any) => {
         if (state.currentLevel !== 2 || !state.lightBeam || !state.lightBeam.segments) {
-          console.log(`Light beam check failed: level=${state.currentLevel}, hasLightBeam=${!!state.lightBeam}, hasSegments=${!!(state.lightBeam && state.lightBeam.segments)}`);
           return false;
         }
-        
-        console.log(`Checking light beam intersection with pit ${pit.id} at (${pit.x}, ${pit.y}) radius=${pit.radius}`);
-        console.log(`Light beam has ${state.lightBeam.segments.length} segments:`, state.lightBeam.segments);
         
         // Quick bounding box check first - if light beam doesn't even come near pit area, skip expensive calculations
         const pitBounds = {
@@ -2246,15 +2240,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           if (segment.x >= pitBounds.left && segment.x <= pitBounds.right &&
               segment.y >= pitBounds.top && segment.y <= pitBounds.bottom) {
             nearPit = true;
-            console.log(`Light beam segment ${i} (${segment.x}, ${segment.y}) is near pit bounds`);
             break;
           }
         }
         
-        if (!nearPit) {
-          console.log(`Light beam not near pit bounds`);
-          return false;
-        }
+        if (!nearPit) return false;
         
         // Only do expensive line-circle intersection if light beam is near pit
         for (let i = 0; i < state.lightBeam.segments.length - 1; i++) {
@@ -2268,14 +2258,11 @@ export const useSnakeGame = create<SnakeGameState>()(
             end
           );
           
-          console.log(`Light beam segment ${i}-${i+1}: (${start.x}, ${start.y}) to (${end.x}, ${end.y}), distance to pit: ${distance}`);
-          
           if (distance <= pit.radius) {
-            console.log(`🔦 Light beam HIT detected! Distance ${distance} <= radius ${pit.radius}`);
+            console.log(`🔦 LIGHT BEAM HITS SNAKE PIT! Triggering emergency emergence`);
             return true;
           }
         }
-        console.log(`No light beam intersection detected`);
         return false;
       };
       
@@ -2312,7 +2299,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // Light just started hitting the pit
         if (isCurrentlyHitByLight && !wasHitByLight) {
-          console.log(`🔦 Light beam hit pit ${pit.id}! Triggering emergency emergence.`);
+          console.log(`🔦 LIGHT HIT PIT ${pit.id}! Triggering emergency emergence.`);
           
           // Find all snakes in this pit
           const snakesInPit = updatedSnakes.filter(snake => 
@@ -2553,7 +2540,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                   const normalizedDx = dx / distance;
                   const normalizedDy = dy / distance;
                   
-                  console.log(`Rattlesnake ${snake.id} moving to pit: distance=${distance.toFixed(1)}, moveDistance=${moveDistance}`);
+                  // Moving back to pit smoothly
                   
                   updatedSnakes[snakeIndex] = {
                     ...snake,
@@ -2570,7 +2557,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       
       // Update state with modified snakes and pits
-      console.log(`Snake pit update complete. Setting ${updatedSnakes.length} snakes, ${updatedSnakes.filter(s => s.type === 'rattlesnake' && !s.isInPit).length} emerged rattlesnakes`);
       set({
         snakes: updatedSnakes,
         snakePits: updatedSnakePits
