@@ -2218,11 +2218,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
       
-      // Throttle expensive light beam calculations to reduce lag when all mirrors are reflecting
-      const timeSinceLastLightCheck = currentTime - (state.lastLightCheckTime || 0);
-      const shouldCheckLight = timeSinceLastLightCheck > 100; // Check every 100ms instead of every frame
-      
-      if (state.currentLevel === 2 && shouldCheckLight) {
+      if (state.currentLevel === 2) {
         console.log(`Updating snake pits on level 3. Found ${state.snakePits.length} pits.`);
       }
       
@@ -2269,49 +2265,35 @@ export const useSnakeGame = create<SnakeGameState>()(
         return false;
       };
       
-      // Helper function to calculate distance from point to line segment
+      // Optimized helper function to calculate distance from point to line segment
       const distanceFromPointToLineSegment = (point: any, lineStart: any, lineEnd: any) => {
         const A = point.x - lineStart.x;
         const B = point.y - lineStart.y;
         const C = lineEnd.x - lineStart.x;
         const D = lineEnd.y - lineStart.y;
         
-        const dot = A * C + B * D;
         const lenSq = C * C + D * D;
-        let param = -1;
-        
-        if (lenSq !== 0) {
-          param = dot / lenSq;
+        if (lenSq === 0) {
+          // Line segment is a point, return distance to point
+          return Math.sqrt(A * A + B * B);
         }
         
-        let xx, yy;
+        const param = Math.max(0, Math.min(1, (A * C + B * D) / lenSq));
+        const projX = lineStart.x + param * C;
+        const projY = lineStart.y + param * D;
         
-        if (param < 0) {
-          xx = lineStart.x;
-          yy = lineStart.y;
-        } else if (param > 1) {
-          xx = lineEnd.x;
-          yy = lineEnd.y;
-        } else {
-          xx = lineStart.x + param * C;
-          yy = lineStart.y + param * D;
-        }
-        
-        const dx = point.x - xx;
-        const dy = point.y - yy;
+        const dx = point.x - projX;
+        const dy = point.y - projY;
         return Math.sqrt(dx * dx + dy * dy);
       };
       
       let updatedSnakes = [...state.snakes];
       let updatedSnakePits = [...state.snakePits];
       
-      // Check for light beam hitting pits and trigger light emergence (throttled for performance)
+      // Check for light beam hitting pits and trigger light emergence (optimized for performance)
       updatedSnakePits.forEach((pit, pitIndex) => {
-        // Only do expensive light beam calculations occasionally to prevent lag
-        let isCurrentlyHitByLight = pit.isLightHit || false; // Default to current state
-        if (shouldCheckLight) {
-          isCurrentlyHitByLight = lightBeamHitsPit(pit);
-        }
+        // Always check light beam hits, but use optimized calculation
+        const isCurrentlyHitByLight = lightBeamHitsPit(pit);
         const wasHitByLight = pit.isLightHit || false;
         
         // Light just started hitting the pit
@@ -2575,17 +2557,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Update state with modified snakes and pits
       console.log(`Snake pit update complete. Setting ${updatedSnakes.length} snakes, ${updatedSnakes.filter(s => s.type === 'rattlesnake' && !s.isInPit).length} emerged rattlesnakes`);
-      const updateData: any = {
+      set({
         snakes: updatedSnakes,
         snakePits: updatedSnakePits
-      };
-      
-      // Update light check timestamp if we performed light calculations
-      if (shouldCheckLight) {
-        updateData.lastLightCheckTime = currentTime;
-      }
-      
-      set(updateData);
+      });
     },
 
     evaluateLogicPuzzle: (switches: any[]) => {
