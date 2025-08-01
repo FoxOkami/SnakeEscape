@@ -2220,63 +2220,65 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Snake pit processing for Level 3
       
-      // Check for light beam intersection with pits (Level 3 only) - with detailed debugging
+      // Check for light beam intersection with pits (Level 3 only) - proper line-circle intersection
       const lightBeamHitsPit = (pit: any) => {
         if (state.currentLevel !== 2 || !state.lightBeam || !state.lightBeam.segments) {
           return false;
         }
         
-        // Quick bounding box check first - if light beam doesn't even come near pit area, skip expensive calculations
-        const pitBounds = {
-          left: pit.x - pit.radius,
-          right: pit.x + pit.radius,
-          top: pit.y - pit.radius,
-          bottom: pit.y + pit.radius
-        };
-        
-        console.log(`Pit bounds: left=${pitBounds.left}, right=${pitBounds.right}, top=${pitBounds.top}, bottom=${pitBounds.bottom}`);
-        
-        let nearPit = false;
-        for (let i = 0; i < state.lightBeam.segments.length; i++) {
-          const segment = state.lightBeam.segments[i];
-          console.log(`Checking segment ${i}: (${segment.x}, ${segment.y})`);
-          if (segment.x >= pitBounds.left && segment.x <= pitBounds.right &&
-              segment.y >= pitBounds.top && segment.y <= pitBounds.bottom) {
-            nearPit = true;
-            console.log(`Segment ${i} is within pit bounds!`);
-            break;
-          }
-        }
-        
-        if (!nearPit) {
-          console.log(`❌ No segments within pit bounds`);
-          return false;
-        }
-        
-        console.log(`✅ Light beam near pit, checking line-circle intersection`);
-        
-        // Only do expensive line-circle intersection if light beam is near pit
+        // Check each line segment of the light beam for intersection with the circular pit
         for (let i = 0; i < state.lightBeam.segments.length - 1; i++) {
           const start = state.lightBeam.segments[i];
           const end = state.lightBeam.segments[i + 1];
           
-          console.log(`Checking line segment ${i}-${i+1}: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
+          console.log(`Checking line segment ${i}: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
+          console.log(`Pit center: (${pit.x}, ${pit.y}) radius: ${pit.radius}`);
           
-          // Simplified distance calculation
-          const distance = distanceFromPointToLineSegment(
-            { x: pit.x, y: pit.y },
-            start,
-            end
-          );
+          // Calculate line equation coefficients: ax + by + c = 0
+          // For line from (x1,y1) to (x2,y2): (y2-y1)x - (x2-x1)y + (x2-x1)y1 - (y2-y1)x1 = 0
+          const a = end.y - start.y;
+          const b = start.x - end.x;  
+          const c = (end.x - start.x) * start.y - (end.y - start.y) * start.x;
           
-          console.log(`Distance from pit center to line segment: ${distance} (radius: ${pit.radius})`);
+          console.log(`Line equation: ${a}x + ${b}y + ${c} = 0`);
+          
+          // Calculate distance from circle center to infinite line
+          const distance = Math.abs(a * pit.x + b * pit.y + c) / Math.sqrt(a * a + b * b);
+          
+          console.log(`Distance from pit center to infinite line: ${distance}`);
           
           if (distance <= pit.radius) {
-            console.log(`🔦 LIGHT BEAM HITS SNAKE PIT! Distance ${distance} <= radius ${pit.radius}`);
-            return true;
+            // Line intersects circle, but we need to check if intersection is within the line segment
+            console.log(`Infinite line intersects circle! Checking if intersection is within segment bounds...`);
+            
+            // Check if the intersection point is within the line segment bounds
+            const minX = Math.min(start.x, end.x);
+            const maxX = Math.max(start.x, end.x);
+            const minY = Math.min(start.y, end.y);
+            const maxY = Math.max(start.y, end.y);
+            
+            // Expand bounds by pit radius to account for circle intersection
+            const expandedMinX = minX - pit.radius;
+            const expandedMaxX = maxX + pit.radius;
+            const expandedMinY = minY - pit.radius;
+            const expandedMaxY = maxY + pit.radius;
+            
+            console.log(`Segment bounds (expanded): x=[${expandedMinX}, ${expandedMaxX}], y=[${expandedMinY}, ${expandedMaxY}]`);
+            console.log(`Pit center within expanded bounds: x=${pit.x >= expandedMinX && pit.x <= expandedMaxX}, y=${pit.y >= expandedMinY && pit.y <= expandedMaxY}`);
+            
+            if (pit.x >= expandedMinX && pit.x <= expandedMaxX && 
+                pit.y >= expandedMinY && pit.y <= expandedMaxY) {
+              console.log(`🔦 LIGHT BEAM HITS SNAKE PIT! Segment ${i} intersects pit`);
+              return true;
+            } else {
+              console.log(`Intersection outside segment bounds`);
+            }
+          } else {
+            console.log(`Line too far from circle (${distance} > ${pit.radius})`);
           }
         }
-        console.log(`❌ No intersection found - closest distance was greater than radius`);
+        
+        console.log(`❌ No segments intersect the pit`);
         return false;
       };
       
