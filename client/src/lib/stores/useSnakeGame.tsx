@@ -31,6 +31,7 @@ interface SnakeGameState extends GameData {
   
   // Performance optimization
   lastLightCheckTime?: number;
+  lastLightBeamHash?: string;
   
   // Actions
   startGame: () => void;
@@ -2220,7 +2221,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Snake pit processing for Level 3
       
-      // Check for light beam intersection with pits (Level 3 only) - proper line-circle intersection
+      // Check for light beam intersection with pits (Level 3 only) - optimized line-circle intersection
       const lightBeamHitsPit = (pit: any) => {
         if (state.currentLevel !== 2 || !state.lightBeam || !state.lightBeam.segments) {
           return false;
@@ -2231,54 +2232,27 @@ export const useSnakeGame = create<SnakeGameState>()(
           const start = state.lightBeam.segments[i];
           const end = state.lightBeam.segments[i + 1];
           
-          console.log(`Checking line segment ${i}: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
-          console.log(`Pit center: (${pit.x}, ${pit.y}) radius: ${pit.radius}`);
-          
           // Calculate line equation coefficients: ax + by + c = 0
-          // For line from (x1,y1) to (x2,y2): (y2-y1)x - (x2-x1)y + (x2-x1)y1 - (y2-y1)x1 = 0
           const a = end.y - start.y;
           const b = start.x - end.x;  
           const c = (end.x - start.x) * start.y - (end.y - start.y) * start.x;
           
-          console.log(`Line equation: ${a}x + ${b}y + ${c} = 0`);
-          
           // Calculate distance from circle center to infinite line
           const distance = Math.abs(a * pit.x + b * pit.y + c) / Math.sqrt(a * a + b * b);
           
-          console.log(`Distance from pit center to infinite line: ${distance}`);
-          
           if (distance <= pit.radius) {
-            // Line intersects circle, but we need to check if intersection is within the line segment
-            console.log(`Infinite line intersects circle! Checking if intersection is within segment bounds...`);
+            // Line intersects circle, check if intersection is within the line segment bounds
+            const minX = Math.min(start.x, end.x) - pit.radius;
+            const maxX = Math.max(start.x, end.x) + pit.radius;
+            const minY = Math.min(start.y, end.y) - pit.radius;
+            const maxY = Math.max(start.y, end.y) + pit.radius;
             
-            // Check if the intersection point is within the line segment bounds
-            const minX = Math.min(start.x, end.x);
-            const maxX = Math.max(start.x, end.x);
-            const minY = Math.min(start.y, end.y);
-            const maxY = Math.max(start.y, end.y);
-            
-            // Expand bounds by pit radius to account for circle intersection
-            const expandedMinX = minX - pit.radius;
-            const expandedMaxX = maxX + pit.radius;
-            const expandedMinY = minY - pit.radius;
-            const expandedMaxY = maxY + pit.radius;
-            
-            console.log(`Segment bounds (expanded): x=[${expandedMinX}, ${expandedMaxX}], y=[${expandedMinY}, ${expandedMaxY}]`);
-            console.log(`Pit center within expanded bounds: x=${pit.x >= expandedMinX && pit.x <= expandedMaxX}, y=${pit.y >= expandedMinY && pit.y <= expandedMaxY}`);
-            
-            if (pit.x >= expandedMinX && pit.x <= expandedMaxX && 
-                pit.y >= expandedMinY && pit.y <= expandedMaxY) {
-              console.log(`🔦 LIGHT BEAM HITS SNAKE PIT! Segment ${i} intersects pit`);
+            if (pit.x >= minX && pit.x <= maxX && pit.y >= minY && pit.y <= maxY) {
+              console.log(`🔦 LIGHT BEAM HITS SNAKE PIT! Emergency emergence triggered`);
               return true;
-            } else {
-              console.log(`Intersection outside segment bounds`);
             }
-          } else {
-            console.log(`Line too far from circle (${distance} > ${pit.radius})`);
           }
         }
-        
-        console.log(`❌ No segments intersect the pit`);
         return false;
       };
       
@@ -2307,25 +2281,25 @@ export const useSnakeGame = create<SnakeGameState>()(
       let updatedSnakes = [...state.snakes];
       let updatedSnakePits = [...state.snakePits];
       
-      // Check for light beam hitting pits and trigger light emergence (optimized for performance)
-      updatedSnakePits.forEach((pit, pitIndex) => {
-        // Debug: Check if we have light beam data for Level 3
-        if (state.currentLevel === 2 && pit.id === 'pit1') {
-          console.log(`🔍 DEBUG Level 3: Checking pit ${pit.id} at (${pit.x}, ${pit.y}) radius=${pit.radius}`);
-          if (state.lightBeam && state.lightBeam.segments) {
-            console.log(`Light beam has ${state.lightBeam.segments.length} segments`);
-            if (state.lightBeam.segments.length > 1) {
-              console.log(`First: (${state.lightBeam.segments[0].x}, ${state.lightBeam.segments[0].y})`);
-              console.log(`Last: (${state.lightBeam.segments[state.lightBeam.segments.length-1].x}, ${state.lightBeam.segments[state.lightBeam.segments.length-1].y})`);
-            }
-          } else {
-            console.log(`No light beam found: hasLightBeam=${!!state.lightBeam}, hasSegments=${!!(state.lightBeam && state.lightBeam.segments)}`);
-          }
-        }
+      // Only check light beam intersections when light beam changes or on initial check
+      // This prevents expensive calculations from running every frame
+      const lightBeamHash = state.lightBeam ? 
+        `${state.lightBeam.segments?.length || 0}-${state.lightBeam.segments?.[0]?.x || 0}-${state.lightBeam.segments?.[state.lightBeam.segments?.length - 1]?.x || 0}` : 
+        'no-beam';
+      
+      const shouldCheckLightBeam = state.lastLightBeamHash !== lightBeamHash;
+      
+      if (shouldCheckLightBeam) {
+        // Update the hash to prevent recalculation until light beam changes
+        set({ lastLightBeamHash: lightBeamHash });
         
-        // Always check light beam hits, but use optimized calculation
-        const isCurrentlyHitByLight = lightBeamHitsPit(pit);
-        const wasHitByLight = pit.isLightHit || false;
+        // Check for light beam hitting pits and trigger light emergence (only when beam changes)
+        updatedSnakePits.forEach((pit, pitIndex) => {
+          console.log(`🔍 Light beam changed - checking pit ${pit.id}`);
+          
+          // Check light beam intersection only when beam actually changes
+          const isCurrentlyHitByLight = lightBeamHitsPit(pit);
+          const wasHitByLight = pit.isLightHit || false;
         
         // Light just started hitting the pit
         if (isCurrentlyHitByLight && !wasHitByLight) {
@@ -2405,7 +2379,8 @@ export const useSnakeGame = create<SnakeGameState>()(
             isLightHit: true
           };
         }
-      });
+        });
+      }
       
       // Process each snake pit
       updatedSnakePits.forEach((pit, pitIndex) => {
