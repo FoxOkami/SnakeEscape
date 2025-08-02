@@ -468,6 +468,54 @@ export const LEVELS: Level[] = [
         patrolDuration: 4500, // 4.5 seconds patrol
         lostSightCooldown: 0,
       },
+      {
+        id: "rattlesnake4",
+        type: "rattlesnake" as const,
+        position: { x: 390, y: 150 }, // Second pit location
+        size: { width: 28, height: 28 },
+        speed: 55,
+        direction: { x: 0, y: 0 },
+        patrolPoints: [
+          { x: 360, y: 120 },
+          { x: 420, y: 120 },
+          { x: 420, y: 180 },
+          { x: 360, y: 180 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 105,
+        sightRange: 110,
+        hearingRange: 160,
+        isChasing: false,
+        pitId: "pit2",
+        isInPit: true,
+        patrolDuration: 4500, // 4.5 seconds patrol
+        lostSightCooldown: 0,
+      },
+      {
+        id: "rattlesnake5",
+        type: "rattlesnake" as const,
+        position: { x: 390, y: 150 }, // Second pit location
+        size: { width: 28, height: 28 },
+        speed: 55,
+        direction: { x: 0, y: 0 },
+        patrolPoints: [
+          { x: 360, y: 120 },
+          { x: 420, y: 120 },
+          { x: 420, y: 180 },
+          { x: 360, y: 180 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 105,
+        sightRange: 110,
+        hearingRange: 160,
+        isChasing: false,
+        pitId: "pit2",
+        isInPit: true,
+        patrolDuration: 4500, // 4.5 seconds patrol
+        lostSightCooldown: 0,
+      },
     ],
     door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 690, y: 300, width: 20, height: 20, collected: false },
@@ -478,6 +526,15 @@ export const LEVELS: Level[] = [
         y: 450,
         radius: 25,
         snakeIds: ["rattlesnake1", "rattlesnake2", "rattlesnake3"],
+        lastEmergenceTime: 0,
+        emergenceInterval: 3000, // 3 seconds between emergences
+      },
+      {
+        id: "pit2",
+        x: 390,
+        y: 150,
+        radius: 25,
+        snakeIds: ["rattlesnake4", "rattlesnake5"],
         lastEmergenceTime: 0,
         emergenceInterval: 3000, // 3 seconds between emergences
       },
