@@ -2432,77 +2432,126 @@ export const useSnakeGame = create<SnakeGameState>()(
             case 'patrolling':
               // Different behavior for light emergence vs normal emergence
               if (snake.isLightEmergence) {
-                // Light emergence: patrol for 2 seconds, but extend to chase if player detected
-                if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 2000) {
-                  // Check if currently chasing player
-                  if (snake.isChasing) {
-                    // Player detected during light emergence, switch to chasing state for 4 seconds
-                    updatedSnakes[snakeIndex] = {
-                      ...snake,
-                      rattlesnakeState: 'chasing',
-                      patrolStartTime: currentTime, // Reset timer for chase phase
-                      isLightEmergence: false // Clear light emergence flag since now chasing
-                    };
-                  } else {
-                    // No player detected, return to pit after 2 seconds
-                    updatedSnakes[snakeIndex] = {
-                      ...snake,
-                      rattlesnakeState: 'pausing',
-                      pauseStartTime: currentTime,
-                      isChasing: false
-                    };
+                // Check if pit is currently lit
+                const pitForLightPatrol = state.snakePits.find(p => p.id === snake.pitId);
+                const isPitLitForLightPatrol = pitForLightPatrol && pitForLightPatrol.isLightHit;
+                
+                if (isPitLitForLightPatrol) {
+                  // Pit is still lit, continue patrolling indefinitely
+                  console.log(`🐍 Snake ${snake.id} continuing patrol - pit is lit`);
+                  // Don't check time, just keep patrolling
+                } else {
+                  // Pit is no longer lit, patrol for 2 more seconds then decide
+                  if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 2000) {
+                    // Check if currently chasing player
+                    if (snake.isChasing) {
+                      // Player detected during light emergence, switch to chasing state for 4 seconds
+                      updatedSnakes[snakeIndex] = {
+                        ...snake,
+                        rattlesnakeState: 'chasing',
+                        patrolStartTime: currentTime, // Reset timer for chase phase
+                        isLightEmergence: false // Clear light emergence flag since now chasing
+                      };
+                    } else {
+                      // No player detected, return to pit after 2 seconds
+                      updatedSnakes[snakeIndex] = {
+                        ...snake,
+                        rattlesnakeState: 'pausing',
+                        pauseStartTime: currentTime,
+                        isChasing: false
+                      };
+                    }
                   }
                 }
               } else {
                 // Normal emergence: patrol for 4 seconds - let normal AI handle movement/detection
-                if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 4000) {
-                  // If currently chasing player, switch to chasing state for another 4 seconds
-                  if (snake.isChasing) {
-                    // Player detected, entering chase phase
-                    updatedSnakes[snakeIndex] = {
-                      ...snake,
-                      rattlesnakeState: 'chasing',
-                      patrolStartTime: currentTime // Reset timer for chase phase
-                    };
-                  } else {
-                    // No player detected, go straight to pause
-                    // Patrol complete, no player detected
-                    updatedSnakes[snakeIndex] = {
-                      ...snake,
-                      rattlesnakeState: 'pausing',
-                      pauseStartTime: currentTime,
-                      isChasing: false
-                    };
+                // But also check if pit is lit to prevent return
+                const pitForNormalPatrol = state.snakePits.find(p => p.id === snake.pitId);
+                const isPitLitForNormalPatrol = pitForNormalPatrol && pitForNormalPatrol.isLightHit;
+                
+                if (isPitLitForNormalPatrol) {
+                  // Pit is lit, continue patrolling indefinitely regardless of time
+                  console.log(`🐍 Snake ${snake.id} continuing normal patrol - pit is lit`);
+                  // Don't check time, just keep patrolling
+                } else {
+                  // Pit is not lit, follow normal timing
+                  if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 4000) {
+                    // If currently chasing player, switch to chasing state for another 4 seconds
+                    if (snake.isChasing) {
+                      // Player detected, entering chase phase
+                      updatedSnakes[snakeIndex] = {
+                        ...snake,
+                        rattlesnakeState: 'chasing',
+                        patrolStartTime: currentTime // Reset timer for chase phase
+                      };
+                    } else {
+                      // No player detected, go straight to pause
+                      updatedSnakes[snakeIndex] = {
+                        ...snake,
+                        rattlesnakeState: 'pausing',
+                        pauseStartTime: currentTime,
+                        isChasing: false
+                      };
+                    }
                   }
                 }
               }
               break;
               
             case 'chasing':
-              // Chase for 4 seconds
-              if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 4000) {
-                // Chase phase complete
-                updatedSnakes[snakeIndex] = {
-                  ...snake,
-                  rattlesnakeState: 'pausing',
-                  pauseStartTime: currentTime,
-                  isChasing: false // Stop chasing during pause
-                };
+              // Check if pit is currently lit
+              const pit = state.snakePits.find(p => p.id === snake.pitId);
+              const isPitLit = pit && pit.isLightHit;
+              
+              if (isPitLit) {
+                // Pit is lit, continue chasing indefinitely until pit is no longer lit
+                console.log(`🐍 Snake ${snake.id} continuing chase - pit is lit`);
+                // No time limit while pit is lit
+              } else {
+                // Pit is not lit, chase for 4 seconds then return
+                if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 4000) {
+                  // Chase phase complete
+                  updatedSnakes[snakeIndex] = {
+                    ...snake,
+                    rattlesnakeState: 'pausing',
+                    pauseStartTime: currentTime,
+                    isChasing: false // Stop chasing during pause
+                  };
+                } else if (!snake.patrolStartTime) {
+                  // Just started chasing after pit stopped being lit, set timer
+                  updatedSnakes[snakeIndex] = {
+                    ...snake,
+                    patrolStartTime: currentTime
+                  };
+                }
               }
               break;
               
             case 'pausing':
               // Pause for 200ms
               if (snake.pauseStartTime && (currentTime - snake.pauseStartTime) >= 200) {
-                // Pause complete, returning to pit
+                // Check if pit is currently lit - if so, don't return yet
                 const pit = state.snakePits.find(p => p.id === snake.pitId);
-                const pitPos = pit ? { x: pit.x - 14, y: pit.y - 14 } : snake.position;
-                updatedSnakes[snakeIndex] = {
-                  ...snake,
-                  rattlesnakeState: 'returningToPit',
-                  pitPosition: pitPos,
-                  isChasing: false
-                };
+                const isPitLit = pit && pit.isLightHit;
+                
+                if (isPitLit) {
+                  // Pit is lit, continue patrolling for 2 more seconds
+                  updatedSnakes[snakeIndex] = {
+                    ...snake,
+                    rattlesnakeState: 'patrolling',
+                    patrolStartTime: currentTime,
+                    isChasing: false
+                  };
+                } else {
+                  // Pit is not lit, return to pit
+                  const pitPos = pit ? { x: pit.x - 14, y: pit.y - 14 } : snake.position;
+                  updatedSnakes[snakeIndex] = {
+                    ...snake,
+                    rattlesnakeState: 'returningToPit',
+                    pitPosition: pitPos,
+                    isChasing: false
+                  };
+                }
               }
               break;
               
