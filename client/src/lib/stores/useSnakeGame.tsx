@@ -2438,15 +2438,26 @@ export const useSnakeGame = create<SnakeGameState>()(
             case 'patrolling':
               // Different behavior for light emergence vs normal emergence
               if (snake.isLightEmergence) {
-                // Light emergence: patrol for 2 seconds only
+                // Light emergence: patrol for 2 seconds, but extend to chase if player detected
                 if (snake.patrolStartTime && (currentTime - snake.patrolStartTime) >= 2000) {
-                  // Light emergence patrol complete
-                  updatedSnakes[snakeIndex] = {
-                    ...snake,
-                    rattlesnakeState: 'pausing',
-                    pauseStartTime: currentTime,
-                    isChasing: false
-                  };
+                  // Check if currently chasing player
+                  if (snake.isChasing) {
+                    // Player detected during light emergence, switch to chasing state for 4 seconds
+                    updatedSnakes[snakeIndex] = {
+                      ...snake,
+                      rattlesnakeState: 'chasing',
+                      patrolStartTime: currentTime, // Reset timer for chase phase
+                      isLightEmergence: false // Clear light emergence flag since now chasing
+                    };
+                  } else {
+                    // No player detected, return to pit after 2 seconds
+                    updatedSnakes[snakeIndex] = {
+                      ...snake,
+                      rattlesnakeState: 'pausing',
+                      pauseStartTime: currentTime,
+                      isChasing: false
+                    };
+                  }
                 }
               } else {
                 // Normal emergence: patrol for 4 seconds - let normal AI handle movement/detection
