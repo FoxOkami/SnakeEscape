@@ -2556,13 +2556,29 @@ export const useSnakeGame = create<SnakeGameState>()(
               break;
               
             case 'returningToPit':
-              // Move toward pit position
-              if (snake.pitPosition) {
-                const dx = snake.pitPosition.x - snake.position.x;
-                const dy = snake.pitPosition.y - snake.position.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance <= 10) {
+              // First check if pit is now lit - if so, interrupt return and emerge again
+              const pitForReturn = state.snakePits.find(p => p.id === snake.pitId);
+              const isPitLitForReturn = pitForReturn && pitForReturn.isLightHit;
+              
+              if (isPitLitForReturn) {
+                // Pit is now lit while returning, interrupt return and start patrolling again
+                console.log(`🐍 Snake ${snake.id} interrupted return - pit is now lit!`);
+                updatedSnakes[snakeIndex] = {
+                  ...snake,
+                  rattlesnakeState: 'patrolling',
+                  patrolStartTime: currentTime,
+                  isLightEmergence: true, // Mark as light emergence
+                  pitPosition: undefined, // Clear pit position
+                  isChasing: false
+                };
+              } else {
+                // Move toward pit position
+                if (snake.pitPosition) {
+                  const dx = snake.pitPosition.x - snake.position.x;
+                  const dy = snake.pitPosition.y - snake.position.y;
+                  const distance = Math.sqrt(dx * dx + dy * dy);
+                  
+                  if (distance <= 10) {
                   // Reached pit - go back in and update pit's last emergence time for waiting period
                   // Snake returned to pit
                   
@@ -2605,6 +2621,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                     }
                   };
                 }
+              }
               }
               break;
           }
