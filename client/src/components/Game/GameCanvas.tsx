@@ -709,24 +709,35 @@ const GameCanvas: React.FC = () => {
 
     // Draw snake pits (holes in the ground)
     snakePits.forEach(pit => {
+      // Check if pit is being hit by light (change color to dark yellow)
+      const isLightHit = pit.isLightHit || false;
+      
       // Draw the pit as a dark circular hole
-      ctx.fillStyle = '#0a0a0a'; // Very dark color for the hole
+      ctx.fillStyle = isLightHit ? '#1a1a00' : '#0a0a0a'; // Dark yellow if hit, black otherwise
       ctx.beginPath();
       ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
       ctx.fill();
       
       // Add a gradient effect for depth
       const gradient = ctx.createRadialGradient(pit.x, pit.y, 0, pit.x, pit.y, pit.radius);
-      gradient.addColorStop(0, '#000000'); // Black center
-      gradient.addColorStop(0.7, '#1a1a1a'); // Dark gray
-      gradient.addColorStop(1, '#333333'); // Lighter edge
+      if (isLightHit) {
+        // Dark yellow gradient when light hits
+        gradient.addColorStop(0, '#2a2a00'); // Darker yellow center
+        gradient.addColorStop(0.7, '#1a1a00'); // Dark yellow
+        gradient.addColorStop(1, '#333300'); // Yellowish edge
+      } else {
+        // Normal black gradient
+        gradient.addColorStop(0, '#000000'); // Black center
+        gradient.addColorStop(0.7, '#1a1a1a'); // Dark gray
+        gradient.addColorStop(1, '#333333'); // Lighter edge
+      }
       ctx.fillStyle = gradient;
       ctx.beginPath();
       ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
       ctx.fill();
       
       // Add subtle border to make it more visible
-      ctx.strokeStyle = '#444444';
+      ctx.strokeStyle = isLightHit ? '#555500' : '#444444'; // Yellowish border if hit
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);

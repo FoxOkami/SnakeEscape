@@ -2221,9 +2221,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Snake pit processing for Level 3
       
-      // Check for light beam intersection with pits (Level 3 only) - optimized line-circle intersection
+      // Check for light beam intersection with pits (Level 3 only) - improved line-circle intersection
       const lightBeamHitsPit = (pit: any) => {
-        if (state.currentLevel !== 2 || !state.lightBeam || !state.lightBeam.segments) {
+        if (state.currentLevel !== 2 || !state.lightBeam || !state.lightBeam.segments || state.lightBeam.segments.length < 2) {
           return false;
         }
         
@@ -2232,25 +2232,12 @@ export const useSnakeGame = create<SnakeGameState>()(
           const start = state.lightBeam.segments[i];
           const end = state.lightBeam.segments[i + 1];
           
-          // Calculate line equation coefficients: ax + by + c = 0
-          const a = end.y - start.y;
-          const b = start.x - end.x;  
-          const c = (end.x - start.x) * start.y - (end.y - start.y) * start.x;
-          
-          // Calculate distance from circle center to infinite line
-          const distance = Math.abs(a * pit.x + b * pit.y + c) / Math.sqrt(a * a + b * b);
+          // Use point-to-line-segment distance calculation for more accurate results
+          const distance = distanceFromPointToLineSegment(pit, start, end);
           
           if (distance <= pit.radius) {
-            // Line intersects circle, check if intersection is within the line segment bounds
-            const minX = Math.min(start.x, end.x) - pit.radius;
-            const maxX = Math.max(start.x, end.x) + pit.radius;
-            const minY = Math.min(start.y, end.y) - pit.radius;
-            const maxY = Math.max(start.y, end.y) + pit.radius;
-            
-            if (pit.x >= minX && pit.x <= maxX && pit.y >= minY && pit.y <= maxY) {
-              console.log(`🔦 LIGHT BEAM HITS SNAKE PIT! Emergency emergence triggered`);
-              return true;
-            }
+            console.log(`🔦 LIGHT BEAM HITS SNAKE PIT! Emergency emergence triggered`);
+            return true;
           }
         }
         return false;
@@ -2301,16 +2288,18 @@ export const useSnakeGame = create<SnakeGameState>()(
           const isCurrentlyHitByLight = lightBeamHitsPit(pit);
           const wasHitByLight = pit.isLightHit || false;
         
-        // Light just started hitting the pit
+        // Light just started hitting the pit (trigger emergence)
         if (isCurrentlyHitByLight && !wasHitByLight) {
           console.log(`🔦 LIGHT HIT PIT ${pit.id}! Triggering emergency emergence.`);
           
-          // Find all snakes in this pit
+          // Find all snakes in this pit that can emerge
           const snakesInPit = updatedSnakes.filter(snake => 
-            pit.snakeIds.includes(snake.id) && 
+            pit.snakeIds && pit.snakeIds.includes(snake.id) && 
             snake.type === 'rattlesnake' && 
             snake.isInPit === true
           );
+          
+          console.log(`🐍 Found ${snakesInPit.length} snakes in pit ${pit.id} that can emerge`);
           
           if (snakesInPit.length > 0) {
             // Emerge all snakes in different cardinal directions
@@ -2340,15 +2329,16 @@ export const useSnakeGame = create<SnakeGameState>()(
                     break;
                 }
                 
-                // Snake emerging from light trigger
+                console.log(`🐍 Emerging snake ${snake.id} from pit ${pit.id} to direction ${direction}`);
                 
+                // Snake emerging from light trigger
                 updatedSnakes[snakeIndex] = {
                   ...snake,
                   isInPit: false,
                   emergenceTime: currentTime,
-                  rattlesnakeState: 'patrolling',
+                  rattlesnakeState: 'patrolling' as const,
                   isLightEmergence: true,
-                  lightEmergenceDirection: direction,
+                  lightEmergenceDirection: direction as 'north' | 'south' | 'east' | 'west',
                   patrolStartTime: currentTime,
                   isChasing: false,
                   position: { x: emergenceX, y: emergenceY }
