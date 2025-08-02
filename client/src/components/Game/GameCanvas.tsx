@@ -1168,6 +1168,21 @@ const GameCanvas: React.FC = () => {
       ctx.strokeStyle = '#ffcc00';
       ctx.lineWidth = 1;
       ctx.stroke();
+      
+      // Show helper text when player is nearby
+      const distance = Math.sqrt(
+        Math.pow(player.position.x + player.size.width / 2 - centerX, 2) + 
+        Math.pow(player.position.y + player.size.height / 2 - centerY, 2)
+      );
+      
+      if (distance < 60) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Q/E to rotate light', centerX, centerY - 20);
+        ctx.fillText('(10° increments)', centerX, centerY + 25);
+        ctx.textAlign = 'left';
+      }
     }
 
     // Draw player on top of light beam and mirrors (Level 3 only)
