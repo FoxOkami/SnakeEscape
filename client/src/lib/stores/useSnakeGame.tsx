@@ -2270,11 +2270,15 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Only check light beam intersections when light beam changes or on initial check
       // This prevents expensive calculations from running every frame
-      const lightBeamHash = state.lightBeam ? 
-        `${state.lightBeam.segments?.length || 0}-${state.lightBeam.segments?.[0]?.x || 0}-${state.lightBeam.segments?.[state.lightBeam.segments?.length - 1]?.x || 0}` : 
+      const lightBeamHash = state.lightBeam && state.lightBeam.segments && state.lightBeam.segments.length > 0 ? 
+        `${state.lightBeam.segments.length}-${Math.round(state.lightBeam.segments[0]?.x || 0)}-${Math.round(state.lightBeam.segments[0]?.y || 0)}-${Math.round(state.lightBeam.segments[state.lightBeam.segments.length - 1]?.x || 0)}-${Math.round(state.lightBeam.segments[state.lightBeam.segments.length - 1]?.y || 0)}` : 
         'no-beam';
       
       const shouldCheckLightBeam = state.lastLightBeamHash !== lightBeamHash;
+      
+      if (shouldCheckLightBeam) {
+        console.log(`🔄 Light beam hash changed: ${state.lastLightBeamHash} -> ${lightBeamHash}`);
+      }
       
       if (shouldCheckLightBeam) {
         // Update the hash to prevent recalculation until light beam changes
@@ -2288,87 +2292,87 @@ export const useSnakeGame = create<SnakeGameState>()(
           const isCurrentlyHitByLight = lightBeamHitsPit(pit);
           const wasHitByLight = pit.isLightHit || false;
         
-        // Light just started hitting the pit (trigger emergence)
-        if (isCurrentlyHitByLight && !wasHitByLight) {
-          console.log(`🔦 LIGHT HIT PIT ${pit.id}! Triggering emergency emergence.`);
-          
-          // Find all snakes in this pit that can emerge
-          const snakesInPit = updatedSnakes.filter(snake => 
-            pit.snakeIds && pit.snakeIds.includes(snake.id) && 
-            snake.type === 'rattlesnake' && 
-            snake.isInPit === true
-          );
-          
-          console.log(`🐍 Found ${snakesInPit.length} snakes in pit ${pit.id} that can emerge`);
-          
-          if (snakesInPit.length > 0) {
-            // Emerge all snakes in different cardinal directions
-            const cardinalDirections = ['north', 'south', 'east', 'west'];
+          // Always update the visual state first
+          updatedSnakePits[pitIndex] = {
+            ...pit,
+            isLightHit: isCurrentlyHitByLight
+          };
+        
+          // Light just started hitting the pit (trigger emergence)
+          if (isCurrentlyHitByLight && !wasHitByLight) {
+            console.log(`🔦 LIGHT HIT PIT ${pit.id}! Triggering emergency emergence.`);
             
-            snakesInPit.forEach((snake, index) => {
-              const direction = cardinalDirections[index % cardinalDirections.length];
-              const snakeIndex = updatedSnakes.findIndex(s => s.id === snake.id);
+            // Find all snakes in this pit that can emerge
+            const snakesInPit = updatedSnakes.filter(snake => 
+              pit.snakeIds && pit.snakeIds.includes(snake.id) && 
+              snake.type === 'rattlesnake' && 
+              snake.isInPit === true
+            );
+            
+            console.log(`🐍 Found ${snakesInPit.length} snakes in pit ${pit.id} that can emerge`);
+            console.log(`🐍 Snake states: ${updatedSnakes.filter(s => pit.snakeIds && pit.snakeIds.includes(s.id)).map(s => `${s.id}:${s.isInPit ? 'inPit' : 'out'}`).join(', ')}`);
+            
+            if (snakesInPit.length > 0) {
+              // Emerge all snakes in different cardinal directions
+              const cardinalDirections = ['north', 'south', 'east', 'west'];
               
-              if (snakeIndex !== -1) {
-                // Calculate position based on direction
-                let emergenceX = pit.x - 14;
-                let emergenceY = pit.y - 14;
+              snakesInPit.forEach((snake, index) => {
+                const direction = cardinalDirections[index % cardinalDirections.length];
+                const snakeIndex = updatedSnakes.findIndex(s => s.id === snake.id);
                 
-                switch (direction) {
-                  case 'north':
-                    emergenceY -= 30;
-                    break;
-                  case 'south':
-                    emergenceY += 30;
-                    break;
-                  case 'east':
-                    emergenceX += 30;
-                    break;
-                  case 'west':
-                    emergenceX -= 30;
-                    break;
+                if (snakeIndex !== -1) {
+                  // Calculate position based on direction
+                  let emergenceX = pit.x - 14;
+                  let emergenceY = pit.y - 14;
+                  
+                  switch (direction) {
+                    case 'north':
+                      emergenceY -= 30;
+                      break;
+                    case 'south':
+                      emergenceY += 30;
+                      break;
+                    case 'east':
+                      emergenceX += 30;
+                      break;
+                    case 'west':
+                      emergenceX -= 30;
+                      break;
+                  }
+                  
+                  console.log(`🐍 Emerging snake ${snake.id} from pit ${pit.id} to direction ${direction}`);
+                  
+                  // Snake emerging from light trigger
+                  updatedSnakes[snakeIndex] = {
+                    ...snake,
+                    isInPit: false,
+                    emergenceTime: currentTime,
+                    rattlesnakeState: 'patrolling' as const,
+                    isLightEmergence: true,
+                    lightEmergenceDirection: direction as 'north' | 'south' | 'east' | 'west',
+                    patrolStartTime: currentTime,
+                    isChasing: false,
+                    position: { x: emergenceX, y: emergenceY }
+                  };
                 }
-                
-                console.log(`🐍 Emerging snake ${snake.id} from pit ${pit.id} to direction ${direction}`);
-                
-                // Snake emerging from light trigger
-                updatedSnakes[snakeIndex] = {
-                  ...snake,
-                  isInPit: false,
-                  emergenceTime: currentTime,
-                  rattlesnakeState: 'patrolling' as const,
-                  isLightEmergence: true,
-                  lightEmergenceDirection: direction as 'north' | 'south' | 'east' | 'west',
-                  patrolStartTime: currentTime,
-                  isChasing: false,
-                  position: { x: emergenceX, y: emergenceY }
-                };
-              }
-            });
-            
-            // Update pit to track light emergence
+              });
+              
+              // Update pit to track light emergence
+              updatedSnakePits[pitIndex] = {
+                ...updatedSnakePits[pitIndex],
+                lightEmergenceTime: currentTime,
+                isLightEmergence: true
+              };
+            }
+          } 
+          // Light stopped hitting the pit
+          else if (!isCurrentlyHitByLight && wasHitByLight) {
+            console.log(`🔦 Light stopped hitting pit ${pit.id}`);
             updatedSnakePits[pitIndex] = {
-              ...pit,
-              isLightHit: true,
-              lightEmergenceTime: currentTime,
-              isLightEmergence: true
+              ...updatedSnakePits[pitIndex],
+              isLightEmergence: false
             };
           }
-        } 
-        // Light stopped hitting the pit
-        else if (!isCurrentlyHitByLight && wasHitByLight) {
-          updatedSnakePits[pitIndex] = {
-            ...pit,
-            isLightHit: false
-          };
-        }
-        // Light is currently hitting the pit
-        else if (isCurrentlyHitByLight) {
-          updatedSnakePits[pitIndex] = {
-            ...pit,
-            isLightHit: true
-          };
-        }
         });
       }
       
