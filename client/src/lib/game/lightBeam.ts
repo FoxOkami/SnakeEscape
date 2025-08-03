@@ -64,8 +64,17 @@ export function calculateLightBeam(
   
   // Update mirrors reflection state
   mirrors.forEach(mirror => {
+    const wasReflecting = mirror.isReflecting;
     mirror.isReflecting = isMirrorHit(segments, mirror);
+    if (wasReflecting !== mirror.isReflecting) {
+      console.log(`🪞 Mirror ${mirror.id} reflection state changed: ${wasReflecting} -> ${mirror.isReflecting}`);
+    }
   });
+  
+  // Debug: Log current mirror states
+  const reflectingCount = mirrors.filter(m => m.isReflecting).length;
+  console.log(`🪞 Mirror status: ${reflectingCount}/${mirrors.length} reflecting`, 
+    mirrors.map(m => `${m.id}:${m.isReflecting}`).join(', '));
 
   return {
     start: lightSource,
@@ -236,6 +245,7 @@ function isMirrorHit(segments: Position[], mirror: Mirror): boolean {
     const end = segments[i + 1];
     
     if (lineRectIntersection(start, end, mirror)) {
+      console.log(`🎯 Mirror ${mirror.id} hit by light segment ${i}: (${start.x.toFixed(1)}, ${start.y.toFixed(1)}) -> (${end.x.toFixed(1)}, ${end.y.toFixed(1)})`);
       return true;
     }
   }
