@@ -799,10 +799,16 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Open key room if pattern completed
       if (shouldOpenKeyRoom) {
-        // Remove the left wall of the key room to allow access
-        const keyRoomWalls = state.walls.filter(wall => 
-          !(wall.x === 600 && wall.y === 290 && wall.width === 20 && wall.height === 40)
-        );
+        // Remove all walls of the key room to allow access
+        const keyRoomWalls = state.walls.filter(wall => {
+          // Filter out all four walls of the key chamber
+          const isTopWall = wall.x === 600 && wall.y === 270 && wall.width === 100 && wall.height === 20;
+          const isBottomWall = wall.x === 600 && wall.y === 330 && wall.width === 100 && wall.height === 20;
+          const isLeftWall = wall.x === 600 && wall.y === 290 && wall.width === 20 && wall.height === 40;
+          const isRightWall = wall.x === 680 && wall.y === 290 && wall.width === 20 && wall.height === 40;
+          
+          return !(isTopWall || isBottomWall || isLeftWall || isRightWall);
+        });
         set({ walls: keyRoomWalls });
       }
 
