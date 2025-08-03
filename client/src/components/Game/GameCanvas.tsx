@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import { useSnakeGame } from "../../lib/stores/useSnakeGame";
+import { checkAABBCollision } from "../../lib/game/collision";
 
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1404,13 +1405,18 @@ const GameCanvas: React.FC = () => {
       // Draw interaction hints for lever switches (on top of darkness overlay)
       switches.forEach(switchObj => {
         if (switchObj.switchType === 'lever') {
-          // Show interaction hint if player is nearby
-          const distance = Math.sqrt(
-            Math.pow(player.position.x - (switchObj.x + switchObj.width / 2), 2) + 
-            Math.pow(player.position.y - (switchObj.y + switchObj.height / 2), 2)
-          );
+          // Show interaction hint only if player can actually interact with the lever
+          const playerRect = {
+            x: player.position.x,
+            y: player.position.y,
+            width: player.size.width,
+            height: player.size.height
+          };
           
-          if (distance < 60) {
+          // Use the same collision check as the actual interaction logic
+          const canInteract = checkAABBCollision(playerRect, switchObj);
+          
+          if (canInteract) {
             // Check if switch is in dark quadrant for enhanced visibility
             const switchCenterX = switchObj.x + switchObj.width / 2;
             const switchCenterY = switchObj.y + switchObj.height / 2;
