@@ -347,6 +347,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightBeam: null,
         projectiles: [],
         teleporters: level.teleporters ? level.teleporters.map((teleporter) => ({ ...teleporter })) : [],
+        snakePits: level.snakePits ? level.snakePits.map((pit) => ({ ...pit })) : [],
         // Phase system reset
         currentPhase: level.currentPhase || 'A',
         phaseTimer: 0,
@@ -398,6 +399,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
         teleporters: level.teleporters ? level.teleporters.map((teleporter) => ({ ...teleporter })) : [],
+        snakePits: level.snakePits ? level.snakePits.map((pit) => ({ ...pit })) : [],
+        projectiles: [],
+        // Phase system initialization
+        currentPhase: level.currentPhase || 'A',
+        phaseTimer: 0,
+        phaseDuration: level.phaseDuration || 10000,
+        puzzleShards: level.puzzleShards ? level.puzzleShards.map((shard) => ({ ...shard })) : [],
+        puzzlePedestal: level.puzzlePedestal ? { ...level.puzzlePedestal } : null,
+        phaseWalls: level.phaseWalls ? level.phaseWalls.map((wall) => ({ ...wall })) : [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
