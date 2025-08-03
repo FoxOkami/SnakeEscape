@@ -39,8 +39,7 @@ export const useAudio = create<AudioState>((set, get) => ({
     // Just update the muted state
     set({ isMuted: newMutedState });
     
-    // Log the change
-    console.log(`Sound ${newMutedState ? 'muted' : 'unmuted'}`);
+
   },
   
   playHit: () => {
@@ -48,15 +47,14 @@ export const useAudio = create<AudioState>((set, get) => ({
     if (hitSound) {
       // If sound is muted, don't play anything
       if (isMuted) {
-        console.log("Hit sound skipped (muted)");
         return;
       }
       
       // Clone the sound to allow overlapping playback
       const soundClone = hitSound.cloneNode() as HTMLAudioElement;
       soundClone.volume = 0.3;
-      soundClone.play().catch(error => {
-        console.log("Hit sound play prevented:", error);
+      soundClone.play().catch(() => {
+        // Sound play prevented
       });
     }
   },
@@ -66,13 +64,12 @@ export const useAudio = create<AudioState>((set, get) => ({
     if (successSound) {
       // If sound is muted, don't play anything
       if (isMuted) {
-        console.log("Success sound skipped (muted)");
         return;
       }
       
       successSound.currentTime = 0;
-      successSound.play().catch(error => {
-        console.log("Success sound play prevented:", error);
+      successSound.play().catch(() => {
+        // Sound play prevented
       });
     }
   },
@@ -82,15 +79,14 @@ export const useAudio = create<AudioState>((set, get) => ({
     if (rockSound) {
       // If sound is muted, don't play anything
       if (isMuted) {
-        console.log("Rock sound skipped (muted)");
         return;
       }
       
       // Clone the sound to allow overlapping playback
       const soundClone = rockSound.cloneNode() as HTMLAudioElement;
       soundClone.volume = 0.4;
-      soundClone.play().catch(error => {
-        console.log("Rock sound play prevented:", error);
+      soundClone.play().catch(() => {
+        // Sound play prevented
       });
     }
   }

@@ -32,7 +32,7 @@ const GameUI: React.FC = () => {
   React.useEffect(() => {
     if (gameState === 'playing' && backgroundMusic) {
       if (!isMuted) {
-        backgroundMusic.play().catch(console.log);
+        backgroundMusic.play().catch(() => {});
       }
     } else if (backgroundMusic) {
       backgroundMusic.pause();

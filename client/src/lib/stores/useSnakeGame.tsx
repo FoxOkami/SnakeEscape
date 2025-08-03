@@ -1763,7 +1763,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Check if this tile is locked (flow has entered it)
       if (state.flowState && state.flowState.lockedTiles.includes(currentTile.id)) {
-        console.log(`Tile ${currentTile.id} is locked - flow has passed through it`);
         return; // Tile is locked, cannot rotate
       }
       
@@ -2263,7 +2262,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           const distance = distanceFromPointToLineSegment(pit, start, end);
           
           if (distance <= pit.radius) {
-            console.log(`🔦 LIGHT BEAM HITS SNAKE PIT! Emergency emergence triggered`);
             return true;
           }
         }
@@ -2304,7 +2302,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       const shouldCheckLightBeam = state.lastLightBeamHash !== lightBeamHash;
       
       if (shouldCheckLightBeam) {
-        console.log(`🔄 Light beam hash changed: ${state.lastLightBeamHash} -> ${lightBeamHash}`);
+        // Light beam hash changed
       }
       
       if (shouldCheckLightBeam) {
@@ -2313,7 +2311,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // Check for light beam hitting pits and trigger light emergence (only when beam changes)
         updatedSnakePits.forEach((pit, pitIndex) => {
-          console.log(`🔍 Light beam changed - checking pit ${pit.id}`);
           
           // Check light beam intersection only when beam actually changes
           const isCurrentlyHitByLight = lightBeamHitsPit(pit);
@@ -2327,7 +2324,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         
           // Light just started hitting the pit (trigger emergence)
           if (isCurrentlyHitByLight && !wasHitByLight) {
-            console.log(`🔦 LIGHT HIT PIT ${pit.id}! Triggering emergency emergence.`);
             
             // Find all snakes in this pit that can emerge
             const snakesInPit = updatedSnakes.filter(snake => 
@@ -2335,9 +2331,6 @@ export const useSnakeGame = create<SnakeGameState>()(
               snake.type === 'rattlesnake' && 
               snake.isInPit === true
             );
-            
-            console.log(`🐍 Found ${snakesInPit.length} snakes in pit ${pit.id} that can emerge`);
-            console.log(`🐍 Snake states: ${updatedSnakes.filter(s => pit.snakeIds && pit.snakeIds.includes(s.id)).map(s => `${s.id}:${s.isInPit ? 'inPit' : 'out'}`).join(', ')}`);
             
             if (snakesInPit.length > 0) {
               // Emerge all snakes in different cardinal directions
@@ -2367,8 +2360,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                       break;
                   }
                   
-                  console.log(`🐍 Emerging snake ${snake.id} from pit ${pit.id} to direction ${direction}`);
-                  
                   // Snake emerging from light trigger
                   updatedSnakes[snakeIndex] = {
                     ...snake,
@@ -2394,7 +2385,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           } 
           // Light stopped hitting the pit
           else if (!isCurrentlyHitByLight && wasHitByLight) {
-            console.log(`🔦 Light stopped hitting pit ${pit.id}`);
             updatedSnakePits[pitIndex] = {
               ...updatedSnakePits[pitIndex],
               isLightEmergence: false
@@ -2465,7 +2455,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                 
                 if (isPitLitForLightPatrol) {
                   // Pit is still lit, continue patrolling indefinitely
-                  console.log(`🐍 Snake ${snake.id} continuing patrol - pit is lit`);
                   // Don't check time, just keep patrolling
                 } else {
                   // Pit is no longer lit, patrol for 2 more seconds then decide
@@ -2498,7 +2487,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                 
                 if (isPitLitForNormalPatrol) {
                   // Pit is lit, continue patrolling indefinitely regardless of time
-                  console.log(`🐍 Snake ${snake.id} continuing normal patrol - pit is lit`);
                   // Don't check time, just keep patrolling
                 } else {
                   // Pit is not lit, follow normal timing
@@ -2532,7 +2520,6 @@ export const useSnakeGame = create<SnakeGameState>()(
               
               if (isPitLit) {
                 // Pit is lit, continue chasing indefinitely until pit is no longer lit
-                console.log(`🐍 Snake ${snake.id} continuing chase - pit is lit`);
                 // No time limit while pit is lit
               } else {
                 // Pit is not lit, chase for 4 seconds then return
@@ -2589,7 +2576,6 @@ export const useSnakeGame = create<SnakeGameState>()(
               
               if (isPitLitForReturn) {
                 // Pit is now lit while returning, interrupt return and start patrolling again
-                console.log(`🐍 Snake ${snake.id} interrupted return - pit is now lit!`);
                 updatedSnakes[snakeIndex] = {
                   ...snake,
                   rattlesnakeState: 'patrolling',
@@ -2680,9 +2666,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       const firstPart = aXorB && cAndD; // (A XOR B) AND (C AND D)
       const result = firstPart && notEAndF; // Final result
 
-      console.log(`Logic breakdown: A=${A}, B=${B}, C=${C}, D=${D}, E=${E}, F=${F}`);
-      console.log(`A XOR B = ${aXorB}, C AND D = ${cAndD}, E AND F = ${eAndF}, NOT(E AND F) = ${notEAndF}`);
-      console.log(`Final result: ((${aXorB}) AND (${cAndD})) AND (${notEAndF}) = ${result}`);
+
 
       // Update key walls based on puzzle state
       const state = get();
@@ -2752,9 +2736,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         'switch_4': 'E (Switch 4)',
         'switch_5': 'F (Switch 5)'
       };
-      const switchName = switchNames[nearbyLeverSwitch.id as keyof typeof switchNames] || nearbyLeverSwitch.id;
       const newState = !nearbyLeverSwitch.isPressed;
-      console.log(`Switch ${switchName} toggled to: ${newState ? 'ON' : 'OFF'}`);
 
       // Only toggle the light source if it's the main light switch
       let updatedLightSource = state.lightSource;
@@ -2767,8 +2749,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Evaluate logic puzzle and update key walls for Level 5
       if (state.currentLevel === 4) { // Level 5 (0-indexed as 4)
-        const puzzleSolved = get().evaluateLogicPuzzle(updatedSwitches);
-        console.log(`Logic puzzle evaluation: ${puzzleSolved ? 'SOLVED' : 'NOT SOLVED'}`);
+        get().evaluateLogicPuzzle(updatedSwitches);
       }
 
       set({
