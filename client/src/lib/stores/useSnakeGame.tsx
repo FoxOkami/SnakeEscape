@@ -812,25 +812,36 @@ export const useSnakeGame = create<SnakeGameState>()(
         set({ walls: keyRoomWalls });
       }
 
-      // Handle key room wall for level 2 pressure plates
+      // Handle key room walls for level 2 pressure plates
       if (state.currentLevel === 1) { // Level 2 (0-indexed)
         const pressurePlates = updatedSwitches.filter(s => s.id.startsWith('pressure'));
         const allPressurePlatesActive = pressurePlates.length === 3 && pressurePlates.every(p => p.isPressed);
         
-        // Check if the key room wall exists
-        const keyRoomWallExists = state.walls.some(wall => 
-          wall.x === 620 && wall.y === 320 && wall.width === 20 && wall.height === 80
-        );
+        // Define all four key room walls (matching levels.ts)
+        const keyRoomWallPositions = [
+          { x: 620, y: 320, width: 80, height: 20 }, // top wall
+          { x: 620, y: 380, width: 80, height: 20 }, // bottom wall
+          { x: 620, y: 320, width: 20, height: 80 }, // left wall
+          { x: 680, y: 320, width: 20, height: 80 }  // right wall
+        ];
         
-        if (allPressurePlatesActive && keyRoomWallExists) {
-          // Remove the left wall of the key room
-          const newWalls = state.walls.filter(wall => 
-            !(wall.x === 620 && wall.y === 320 && wall.width === 20 && wall.height === 80)
+        const isKeyRoomWall = (wall: any) => {
+          return keyRoomWallPositions.some(keyWall => 
+            wall.x === keyWall.x && wall.y === keyWall.y && 
+            wall.width === keyWall.width && wall.height === keyWall.height
           );
+        };
+        
+        // Check if any key room walls exist
+        const keyRoomWallsExist = state.walls.some(wall => isKeyRoomWall(wall));
+        
+        if (allPressurePlatesActive && keyRoomWallsExist) {
+          // Remove all key room walls
+          const newWalls = state.walls.filter(wall => !isKeyRoomWall(wall));
           set({ walls: newWalls });
-        } else if (!allPressurePlatesActive && !keyRoomWallExists) {
-          // Add the left wall back if not all pressure plates are active
-          const newWalls = [...state.walls, { x: 620, y: 320, width: 20, height: 80 }];
+        } else if (!allPressurePlatesActive && !keyRoomWallsExist) {
+          // Add all key room walls back if not all pressure plates are active
+          const newWalls = [...state.walls, ...keyRoomWallPositions];
           set({ walls: newWalls });
         }
       }
