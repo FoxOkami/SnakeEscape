@@ -960,16 +960,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           state.walls
         );
         
-        // Update mirrors based on light beam
-        updatedMirrors = state.mirrors.map(mirror => ({
-          ...mirror,
-          isReflecting: updatedLightBeam ? 
-            updatedLightBeam.segments.some((segment, index) => {
-              if (index === 0) return false; // Skip first segment (light source)
-              const prevSegment = updatedLightBeam.segments[index - 1];
-              return lineIntersectsRect(prevSegment, segment, mirror);
-            }) : false
-        }));
+        // Mirrors are already updated by calculateLightBeam function
+        updatedMirrors = state.mirrors;
         
         // Update crystal based on light beam
         if (updatedLightBeam) {
