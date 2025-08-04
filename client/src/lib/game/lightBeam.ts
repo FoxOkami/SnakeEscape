@@ -21,8 +21,14 @@ export function calculateLightBeam(
   let reflectionCount = 0;
   let lastMirror: Mirror | undefined = undefined;
   const maxReflections = 10; // Prevent infinite loops
+  const reflectedMirrors = new Set<string>(); // Track mirrors that actually reflected light
 
   segments.push(currentStart);
+
+  // Reset all mirrors reflection state first
+  mirrors.forEach(mirror => {
+    mirror.isReflecting = false;
+  });
 
   while (reflectionCount < maxReflections) {
     // Cast ray and find the next intersection
@@ -47,6 +53,10 @@ export function calculateLightBeam(
       const mirror = intersection.mirror!;
       direction = reflectDirection(direction, mirror.rotation);
       
+      // Mark this mirror as reflecting (actually used for reflection)
+      mirror.isReflecting = true;
+      reflectedMirrors.add(mirror.id);
+      
       // Move the start point slightly away from the mirror surface to avoid re-intersection
       const offset = 0.1;
       currentStart = {
@@ -61,11 +71,6 @@ export function calculateLightBeam(
 
   // Check if the light beam hits the crystal
   const crystalHit = checkCrystalHit(segments, crystal);
-  
-  // Update mirrors reflection state
-  mirrors.forEach(mirror => {
-    mirror.isReflecting = isMirrorHit(segments, mirror);
-  });
 
   return {
     start: lightSource,
