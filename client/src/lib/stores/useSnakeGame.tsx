@@ -1920,6 +1920,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       const currentTime = Date.now();
       let hitCount = 0;
       let playerKilled = false;
+      let playerHitThisFrame = false; // Track if player was hit this frame
       
       // Update projectile positions and remove expired ones
       const updatedProjectiles = state.projectiles.filter(projectile => {
@@ -1932,21 +1933,26 @@ export const useSnakeGame = create<SnakeGameState>()(
         projectile.position.x += projectile.velocity.x * deltaTime;
         projectile.position.y += projectile.velocity.y * deltaTime;
         
-        // Check collision with player (only if not invincible)
+        // Check collision with player
         const collision = checkAABBCollision(
           { ...projectile.position, ...projectile.size },
           { ...state.player.position, ...state.player.size }
         );
         
-        if (collision && state.player.isInvincible) {
+        // Player is invincible either from before this frame or from a hit earlier in this frame
+        const isInvincible = state.player.isInvincible || playerHitThisFrame;
+        
+        if (collision && isInvincible) {
           console.log(`[DEBUG] Projectile hit player but blocked by invincibility (ends at: ${state.player.invincibilityEndTime}, current: ${performance.now()})`);
         }
         
-        if (!state.player.isInvincible && collision) {
-          // Player hit by projectile
+        if (!isInvincible && collision) {
+          // Player hit by projectile - first hit this frame
           console.log(`[DEBUG] Projectile hit player! Current health: ${state.player.health}, isInvincible: ${state.player.isInvincible}`);
-          hitCount++;
-          if (state.player.health <= hitCount) {
+          hitCount = 1; // Only one hit per frame allowed
+          playerHitThisFrame = true; // Prevent additional hits this frame
+          
+          if (state.player.health - hitCount <= 0) {
             playerKilled = true;
             console.log(`[DEBUG] Player will be killed by this hit (${hitCount} hits this frame)`);
           }
