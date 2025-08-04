@@ -215,13 +215,18 @@ export const useSnakeGame = create<SnakeGameState>()(
           targetVelocity.x += moveSpeed;
         }
 
-        // Debug logging for diagonal movement issues
-        if (isWalking && (targetVelocity.x !== 0 || targetVelocity.y !== 0)) {
-          console.log('[DEBUG] Walking movement:', {
-            keys: Array.from(newKeysPressed),
+        // Debug logging for movement issues - focus on arrow keys
+        if (key.startsWith('Arrow') && (targetVelocity.x !== 0 || targetVelocity.y !== 0)) {
+          console.log('[DEBUG] Arrow key movement:', {
+            pressedKey: key,
+            pressed: pressed,
+            allKeys: Array.from(newKeysPressed),
             targetVelocity: { ...targetVelocity },
-            moveSpeed,
-            isDiagonal: targetVelocity.x !== 0 && targetVelocity.y !== 0
+            isWalking,
+            upPressed: newKeysPressed.has("ArrowUp"),
+            downPressed: newKeysPressed.has("ArrowDown"),
+            leftPressed: newKeysPressed.has("ArrowLeft"),
+            rightPressed: newKeysPressed.has("ArrowRight")
           });
         }
 
