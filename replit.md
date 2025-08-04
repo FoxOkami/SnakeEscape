@@ -29,6 +29,7 @@ Preferred communication style: Simple, everyday language.
 - **Entity System**: Supports various game entities including Player, Snake (with AI), Walls, Doors, Keys, and Switches
 - **Level System**: JSON-based definitions for scalable and complex level designs
 - **Audio**: HTML5 Audio API for immersive soundscapes and effects
+- **Health System**: 2-hit player health with 1-second invincibility, health persists between levels
 
 ### UI/UX Decisions
 - **Components**: Utilizes Radix UI for accessible and performant UI elements.

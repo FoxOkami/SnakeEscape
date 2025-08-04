@@ -396,7 +396,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           size: { width: 25, height: 25 },
           speed: PLAYER_SPEED,
           hasKey: false,
-          health: 2,
+          health: state.player.health, // Preserve current health
           maxHealth: 2,
           isInvincible: false,
           invincibilityEndTime: 0,
