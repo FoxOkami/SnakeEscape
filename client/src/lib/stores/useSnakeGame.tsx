@@ -1935,10 +1935,21 @@ export const useSnakeGame = create<SnakeGameState>()(
         projectile.position.y += projectile.velocity.y * deltaTime;
         
         // Check collision with player
-        const collision = checkAABBCollision(
-          { ...projectile.position, ...projectile.size },
-          { ...state.player.position, ...state.player.size }
+        const projectileRect = { ...projectile.position, ...projectile.size };
+        const playerRect = { ...state.player.position, ...state.player.size };
+        const collision = checkAABBCollision(projectileRect, playerRect);
+        
+        // Debug collision detection for projectiles very close to player
+        const distance = Math.sqrt(
+          Math.pow(projectile.position.x - state.player.position.x, 2) + 
+          Math.pow(projectile.position.y - state.player.position.y, 2)
         );
+        
+        if (distance < 50) { // Only log when projectile is close to player
+          console.log(`[DEBUG] Close projectile - Distance: ${distance.toFixed(1)}, Collision: ${collision}`);
+          console.log(`[DEBUG] Projectile: x=${projectileRect.x.toFixed(1)}, y=${projectileRect.y.toFixed(1)}, w=${projectileRect.width}, h=${projectileRect.height}`);
+          console.log(`[DEBUG] Player: x=${playerRect.x.toFixed(1)}, y=${playerRect.y.toFixed(1)}, w=${playerRect.width}, h=${playerRect.height}`);
+        }
         
         // Player is invincible either from before this frame or from a hit earlier in this frame
         const isInvincible = state.player.isInvincible || playerHitThisFrame;
