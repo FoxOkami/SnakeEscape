@@ -235,8 +235,26 @@ const GameUI: React.FC = () => {
     </div>
   );
 
+  const renderHealthDisplay = () => (
+    <div className="absolute top-4 left-4 flex flex-col gap-1 z-5">
+      {Array.from({ length: player.maxHealth }, (_, index) => (
+        <div
+          key={index}
+          className={`w-6 h-6 ${
+            index < player.health ? 'text-yellow-400' : 'text-gray-600'
+          } ${player.isInvincible ? 'animate-pulse' : ''}`}
+          style={{
+            filter: player.isInvincible ? 'brightness(1.5)' : 'none'
+          }}
+        >
+          ▲
+        </div>
+      ))}
+    </div>
+  );
+
   const renderGameHUD = () => (
-    <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-5">
+    <div className="absolute top-4 left-20 right-4 flex justify-between items-start z-5">
       <div className="flex gap-2">
         <Badge variant="secondary" className="bg-gray-800 text-white border-gray-600">
           Level: {currentLevel + 1} / {LEVELS.length}
@@ -300,6 +318,7 @@ const GameUI: React.FC = () => {
       {gameState === 'levelComplete' && renderLevelComplete()}
       {gameState === 'victory' && renderVictory()}
       {gameState === 'playing' && renderGameHUD()}
+      {gameState === 'playing' && renderHealthDisplay()}
     </>
   );
 };

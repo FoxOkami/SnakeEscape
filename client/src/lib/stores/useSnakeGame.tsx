@@ -151,6 +151,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       size: { width: 25, height: 25 },
       speed: PLAYER_SPEED,
       hasKey: false,
+      health: 2,
+      maxHealth: 2,
+      isInvincible: false,
+      invincibilityEndTime: 0,
     },
     snakes: [],
     walls: [],
@@ -285,6 +289,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           size: { width: 25, height: 25 },
           speed: PLAYER_SPEED,
           hasKey: false,
+          health: 2,
+          maxHealth: 2,
+          isInvincible: false,
+          invincibilityEndTime: 0,
         },
         snakes: level.snakes.map((snake) => ({ ...snake })),
         walls: level.walls.map((wall) => ({ ...wall })),
@@ -330,6 +338,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           size: { width: 25, height: 25 },
           speed: PLAYER_SPEED,
           hasKey: false,
+          health: 2,
+          maxHealth: 2,
+          isInvincible: false,
+          invincibilityEndTime: 0,
         },
         snakes: level.snakes.map((snake) => ({ ...snake })),
         walls: level.walls.map((wall) => ({ ...wall })),
@@ -616,7 +628,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         height: updatedPlayer.size.height,
       };
 
-      const hitBySnake = updatedSnakes.some((snake) => {
+      // Check for invincibility expiration
+      const invincibilityCheckTime = performance.now();
+      if (updatedPlayer.isInvincible && invincibilityCheckTime >= updatedPlayer.invincibilityEndTime) {
+        updatedPlayer.isInvincible = false;
+      }
+
+      const hitBySnake = !updatedPlayer.isInvincible && updatedSnakes.some((snake) => {
         const snakeRect = {
           x: snake.position.x,
           y: snake.position.y,
@@ -627,8 +645,21 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
 
       if (hitBySnake) {
-        set({ gameState: "gameOver" });
-        return;
+        updatedPlayer.health -= 1;
+        
+        if (updatedPlayer.health <= 0) {
+          // Player is dead - game over
+          set({ gameState: "gameOver" });
+          return;
+        } else {
+          // Player takes damage but survives - start invincibility period
+          updatedPlayer.isInvincible = true;
+          updatedPlayer.invincibilityEndTime = invincibilityCheckTime + 1000; // 1 second of invincibility
+          
+          // Play hit sound
+          const { playHit } = useAudio.getState();
+          playHit();
+        }
       }
 
       // --- THROWN ITEM PHYSICS ---

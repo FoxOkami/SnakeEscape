@@ -15,6 +15,10 @@ export interface Player {
   size: Size;
   speed: number;
   hasKey: boolean;
+  health: number;
+  maxHealth: number;
+  isInvincible: boolean;
+  invincibilityEndTime: number;
 }
 
 export interface Snake {

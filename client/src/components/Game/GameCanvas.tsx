@@ -941,30 +941,34 @@ const GameCanvas: React.FC = () => {
 
     // Draw player (different color when walking) - except on level 3 where it's drawn after light beam
     if (currentLevel !== 2) { // Not level 3
-      ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
-      ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
-      
-      // Add player details
-      ctx.fillStyle = isWalking ? '#2f855a' : '#2b6cb0'; // Darker green/blue for details
-      ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
-      
-      // Player eyes
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
-      ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-      
-      // Walking indicator - small stealth icon
-      if (isWalking) {
-        ctx.fillStyle = '#68d391';
-        ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-        ctx.fillStyle = '#38a169';
-        ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
-      }
-      
-      // Show key indicator if player has key
-      if (player.hasKey) {
-        ctx.fillStyle = '#ffd700';
-        ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
+      // Implement flashing effect when invincible
+      const shouldFlash = player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
+      if (!shouldFlash) {
+        ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
+        ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
+        
+        // Add player details
+        ctx.fillStyle = isWalking ? '#2f855a' : '#2b6cb0'; // Darker green/blue for details
+        ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
+        
+        // Player eyes
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
+        ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+        
+        // Walking indicator - small stealth icon
+        if (isWalking) {
+          ctx.fillStyle = '#68d391';
+          ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
+          ctx.fillStyle = '#38a169';
+          ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
+        }
+        
+        // Show key indicator if player has key
+        if (player.hasKey) {
+          ctx.fillStyle = '#ffd700';
+          ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
+        }
       }
     }
 
@@ -1188,30 +1192,34 @@ const GameCanvas: React.FC = () => {
 
     // Draw player on top of light beam and mirrors (Level 3 only)
     if (currentLevel === 2) { // Level 3 (0-indexed as 2)
-      ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
-      ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
-      
-      // Add player details
-      ctx.fillStyle = isWalking ? '#2f855a' : '#2b6cb0'; // Darker green/blue for details
-      ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
-      
-      // Player eyes
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
-      ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-      
-      // Walking indicator - small stealth icon
-      if (isWalking) {
-        ctx.fillStyle = '#68d391';
-        ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-        ctx.fillStyle = '#38a169';
-        ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
-      }
-      
-      // Show key indicator if player has key
-      if (player.hasKey) {
-        ctx.fillStyle = '#ffd700';
-        ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
+      // Implement flashing effect when invincible
+      const shouldFlash = player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
+      if (!shouldFlash) {
+        ctx.fillStyle = isWalking ? '#38a169' : '#4299e1'; // Green when walking, blue when running
+        ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
+        
+        // Add player details
+        ctx.fillStyle = isWalking ? '#2f855a' : '#2b6cb0'; // Darker green/blue for details
+        ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
+        
+        // Player eyes
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
+        ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+        
+        // Walking indicator - small stealth icon
+        if (isWalking) {
+          ctx.fillStyle = '#68d391';
+          ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
+          ctx.fillStyle = '#38a169';
+          ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
+        }
+        
+        // Show key indicator if player has key
+        if (player.hasKey) {
+          ctx.fillStyle = '#ffd700';
+          ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
+        }
       }
     }
 
