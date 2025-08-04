@@ -60,7 +60,7 @@ export interface Snake {
   // Photophobic-specific properties
   isInDarkness?: boolean; // Whether the quadrant is dark (has overlay)
   isBerserk?: boolean; // Whether in aggressive light-exposed state
-  pauseStartTime?: number; // Time when pause started (for 100ms pauses)
+  photophobicPauseStartTime?: number; // Time when pause started (for 100ms pauses)
   isPaused?: boolean; // Whether currently paused
   chargeDirection?: Position; // Direction of direct charge at player
   isCharging?: boolean; // Whether currently charging at player
@@ -72,7 +72,7 @@ export interface Snake {
   patrolDuration?: number; // How long the patrol should last
   returnToPitTime?: number; // When the snake should return to pit
   rattlesnakeState?: 'inPit' | 'patrolling' | 'chasing' | 'pausing' | 'returningToPit'; // Current behavior state
-  pauseStartTime?: number; // When the pause phase started
+  rattlesnakePauseStartTime?: number; // When the pause phase started
   pitPosition?: Position; // Original pit position to return to
   // Light emergence properties
   isLightEmergence?: boolean; // Whether this snake emerged due to light detection

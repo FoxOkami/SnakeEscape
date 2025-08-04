@@ -649,7 +649,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         if (updatedPlayer.health <= 0) {
           // Player is dead - game over
-          set({ gameState: "gameOver" });
+          set({ gameState: "gameOver", player: updatedPlayer });
           return;
         } else {
           // Player takes damage but survives - start invincibility period
