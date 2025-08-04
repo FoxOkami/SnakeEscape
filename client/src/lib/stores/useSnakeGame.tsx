@@ -1048,11 +1048,14 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Handle projectile hits to player
       if (projectileResult.playerHit) {
+        console.log(`[DEBUG] Processing projectile hit - Health before: ${updatedPlayer.health}`);
         updatedPlayer.health -= 1;
         updatedPlayer.isInvincible = true;
         updatedPlayer.invincibilityEndTime = performance.now() + 1000;
+        console.log(`[DEBUG] Health after hit: ${updatedPlayer.health}, invincible until: ${updatedPlayer.invincibilityEndTime}`);
         
         if (updatedPlayer.health <= 0 || projectileResult.playerKilled) {
+          console.log(`[DEBUG] Game over triggered by projectile hit`);
           set({ gameState: "gameOver", player: updatedPlayer });
           return;
         }
@@ -1927,14 +1930,22 @@ export const useSnakeGame = create<SnakeGameState>()(
         projectile.position.y += projectile.velocity.y * deltaTime;
         
         // Check collision with player (only if not invincible)
-        if (!state.player.isInvincible && checkAABBCollision(
+        const collision = checkAABBCollision(
           { ...projectile.position, ...projectile.size },
           { ...state.player.position, ...state.player.size }
-        )) {
+        );
+        
+        if (collision && state.player.isInvincible) {
+          console.log(`[DEBUG] Projectile hit player but blocked by invincibility (ends at: ${state.player.invincibilityEndTime}, current: ${performance.now()})`);
+        }
+        
+        if (!state.player.isInvincible && collision) {
           // Player hit by projectile
+          console.log(`[DEBUG] Projectile hit player! Current health: ${state.player.health}, isInvincible: ${state.player.isInvincible}`);
           playerHit = true;
           if (state.player.health <= 1) {
             playerKilled = true;
+            console.log(`[DEBUG] Player will be killed by this hit`);
           }
           
           return false; // Remove projectile
