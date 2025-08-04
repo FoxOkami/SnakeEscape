@@ -653,10 +653,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
 
       if (hitBySnake) {
+        console.log(`[DEBUG] Snake hit player! Current health: ${updatedPlayer.health}`);
         updatedPlayer.health -= 1;
         
         if (updatedPlayer.health <= 0) {
           // Player is dead - game over
+          console.log(`[DEBUG] Game over triggered by snake hit`);
           set({ gameState: "gameOver", player: updatedPlayer });
           return;
         } else {
@@ -1045,6 +1047,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- PROJECTILE SYSTEM ---
       // Update projectiles and spitter snake firing
       const projectileResult = get().updateProjectiles(deltaTime);
+      console.log(`[DEBUG] Projectile system returned: hitCount=${projectileResult.hitCount}, playerKilled=${projectileResult.playerKilled}`);
       
       // Handle projectile hits to player
       if (projectileResult.hitCount > 0) {
