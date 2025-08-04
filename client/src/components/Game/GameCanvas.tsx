@@ -901,7 +901,43 @@ const GameCanvas: React.FC = () => {
       
       // Add snake eyes (stalkers have no visible eyes)
       if (snake.type !== 'stalker') {
-        ctx.fillStyle = eyeColor;
+        // Check if snake is in dark quadrant on level 5 for yellow eyes
+        let finalEyeColor = eyeColor;
+        if (currentLevel === 4) { // Level 5 (0-indexed as 4)
+          const snakeCenterX = snake.position.x + snake.size.width / 2;
+          const snakeCenterY = snake.position.y + snake.size.height / 2;
+          
+          // Use the same dark quadrant logic as for silhouettes
+          const centerX = 390; // Vertical wall position
+          const centerY = 290; // Horizontal wall position
+          
+          // Get switch states for lighting logic
+          const A = switches.find(s => s.id === 'light_switch')?.isPressed || false;
+          const B = switches.find(s => s.id === 'switch_1')?.isPressed || false;  
+          const C = switches.find(s => s.id === 'switch_2')?.isPressed || false;
+          const D = switches.find(s => s.id === 'switch_3')?.isPressed || false;
+          const E = switches.find(s => s.id === 'switch_4')?.isPressed || false;
+          const F = switches.find(s => s.id === 'switch_5')?.isPressed || false;
+
+          // Calculate lighting conditions for each quadrant
+          const topLeftLit = (A && !B) || (!A && B); // A XOR B
+          const topRightLit = C && D; // C AND D
+          const bottomLeftLit = !(E && F); // NOT (E AND F)
+          const bottomRightLit = topLeftLit && topRightLit; // (A XOR B) AND (C AND D)
+          
+          // Check if snake is in a dark quadrant
+          let isInDark = false;
+          if (snakeCenterX < centerX && snakeCenterY < centerY) isInDark = !topLeftLit;
+          else if (snakeCenterX > centerX + 20 && snakeCenterY < centerY) isInDark = !topRightLit;
+          else if (snakeCenterX < centerX && snakeCenterY > centerY + 20) isInDark = !bottomLeftLit;
+          else if (snakeCenterX > centerX + 20 && snakeCenterY > centerY + 20) isInDark = !bottomRightLit;
+          
+          if (isInDark) {
+            finalEyeColor = '#ffff00'; // Yellow eyes in dark areas
+          }
+        }
+        
+        ctx.fillStyle = finalEyeColor;
         ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
         ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
       }
