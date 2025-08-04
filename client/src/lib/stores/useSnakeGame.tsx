@@ -1925,7 +1925,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             ...currentPlayer,
             health: currentPlayer.health - 1,
             isInvincible: true,
-            invincibilityEndTime: Date.now() + 1000 // 1 second invincibility
+            invincibilityEndTime: performance.now() + 1000 // 1 second invincibility
           };
           
           if (updatedPlayer.health <= 0) {
