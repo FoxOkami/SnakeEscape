@@ -202,39 +202,24 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Calculate target velocity based on current pressed keys
         const targetVelocity = { x: 0, y: 0 };
 
-        // In walking mode, only allow cardinal directions (no diagonal movement)
-        if (isWalking) {
-          // Priority order: vertical movement takes precedence over horizontal
-          if (newKeysPressed.has("ArrowUp") || newKeysPressed.has("KeyW")) {
-            targetVelocity.y -= moveSpeed;
-          } else if (newKeysPressed.has("ArrowDown") || newKeysPressed.has("KeyS")) {
-            targetVelocity.y += moveSpeed;
-          } else if (newKeysPressed.has("ArrowLeft") || newKeysPressed.has("KeyA")) {
-            targetVelocity.x -= moveSpeed;
-          } else if (newKeysPressed.has("ArrowRight") || newKeysPressed.has("KeyD")) {
-            targetVelocity.x += moveSpeed;
-          }
-        } else {
-          // In running mode, allow diagonal movement as before
-          if (newKeysPressed.has("ArrowUp") || newKeysPressed.has("KeyW")) {
-            targetVelocity.y -= moveSpeed;
-          }
-          if (newKeysPressed.has("ArrowDown") || newKeysPressed.has("KeyS")) {
-            targetVelocity.y += moveSpeed;
-          }
-          if (newKeysPressed.has("ArrowLeft") || newKeysPressed.has("KeyA")) {
-            targetVelocity.x -= moveSpeed;
-          }
-          if (newKeysPressed.has("ArrowRight") || newKeysPressed.has("KeyD")) {
-            targetVelocity.x += moveSpeed;
-          }
+        if (newKeysPressed.has("ArrowUp") || newKeysPressed.has("KeyW")) {
+          targetVelocity.y -= moveSpeed;
+        }
+        if (newKeysPressed.has("ArrowDown") || newKeysPressed.has("KeyS")) {
+          targetVelocity.y += moveSpeed;
+        }
+        if (newKeysPressed.has("ArrowLeft") || newKeysPressed.has("KeyA")) {
+          targetVelocity.x -= moveSpeed;
+        }
+        if (newKeysPressed.has("ArrowRight") || newKeysPressed.has("KeyD")) {
+          targetVelocity.x += moveSpeed;
+        }
 
-          // Normalize diagonal movement to maintain consistent speed (running mode only)
-          if (targetVelocity.x !== 0 && targetVelocity.y !== 0) {
-            const factor = Math.sqrt(2) / 2; // 1/sqrt(2)
-            targetVelocity.x *= factor;
-            targetVelocity.y *= factor;
-          }
+        // Normalize diagonal movement to maintain consistent speed
+        if (targetVelocity.x !== 0 && targetVelocity.y !== 0) {
+          const factor = Math.sqrt(2) / 2; // 1/sqrt(2)
+          targetVelocity.x *= factor;
+          targetVelocity.y *= factor;
         }
 
         return {
