@@ -1444,6 +1444,29 @@ const GameCanvas: React.FC = () => {
         }
       });
       
+      // Redraw key with faint glow on top of darkness overlay (Level 5 only)
+      if (key && !key.collected) {
+        const keyCenterX = key.x + key.width / 2;
+        const keyCenterY = key.y + key.height / 2;
+        
+        if (isInDarkQuadrant(keyCenterX, keyCenterY)) {
+          // Add faint glow effect for key in dark areas
+          ctx.shadowColor = '#ffd700';
+          ctx.shadowBlur = 15;
+          
+          // Draw key with glow
+          ctx.fillStyle = '#ffd700';
+          ctx.fillRect(key.x, key.y, key.width, key.height);
+          
+          // Add sparkle effect with glow
+          ctx.fillStyle = '#ffeb3b';
+          ctx.fillRect(key.x + 5, key.y + 5, 10, 10);
+          
+          // Reset shadow
+          ctx.shadowBlur = 0;
+        }
+      }
+      
       // Redraw player on top of darkness overlay (Level 5 only)
       // Implement flashing effect when invincible
       const shouldFlash = player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
