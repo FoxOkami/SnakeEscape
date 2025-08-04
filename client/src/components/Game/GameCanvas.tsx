@@ -1023,6 +1023,19 @@ const GameCanvas: React.FC = () => {
         ctx.fillRect(mirror.x - 2, mirror.y - 2, mirror.width + 4, mirror.height + 4);
       }
       
+      // Debug info for Level 3 - show mirror usage status
+      if (currentLevel === 2) { // Level 3 (0-indexed)
+        ctx.fillStyle = mirror.isReflecting ? '#00ff00' : '#ff0000'; // Green if used, red if not
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(
+          `${mirror.id}: ${mirror.isReflecting ? 'USED' : 'NOT USED'}`,
+          mirror.x + mirror.width / 2,
+          mirror.y - 25
+        );
+        ctx.textAlign = 'left';
+      }
+      
       // Show interaction hint if player is nearby
       const distance = Math.sqrt(
         Math.pow(player.position.x - (mirror.x + mirror.width / 2), 2) + 
