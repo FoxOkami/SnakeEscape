@@ -81,7 +81,7 @@ interface SnakeGameState extends GameData {
   removeKeyWalls: () => void;
   
   // Projectile system actions
-  updateProjectiles: (deltaTime: number) => { playerHit: boolean; playerKilled: boolean };
+  updateProjectiles: (deltaTime: number) => { hitCount: number; playerKilled: boolean };
   spawnSpitterSnake: (position: Position) => void;
   fireProjectiles: (snakeId: string) => void;
   
@@ -1047,9 +1047,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       const projectileResult = get().updateProjectiles(deltaTime);
       
       // Handle projectile hits to player
-      if (projectileResult.playerHit) {
-        console.log(`[DEBUG] Processing projectile hit - Health before: ${updatedPlayer.health}`);
-        updatedPlayer.health -= 1;
+      if (projectileResult.hitCount > 0) {
+        console.log(`[DEBUG] Processing ${projectileResult.hitCount} projectile hit(s) - Health before: ${updatedPlayer.health}`);
+        updatedPlayer.health -= projectileResult.hitCount;
         updatedPlayer.isInvincible = true;
         updatedPlayer.invincibilityEndTime = performance.now() + 1000;
         console.log(`[DEBUG] Health after hit: ${updatedPlayer.health}, invincible until: ${updatedPlayer.invincibilityEndTime}`);
@@ -1915,7 +1915,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     updateProjectiles: (deltaTime: number) => {
       const state = get();
       const currentTime = Date.now();
-      let playerHit = false;
+      let hitCount = 0;
       let playerKilled = false;
       
       // Update projectile positions and remove expired ones
@@ -1942,10 +1942,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (!state.player.isInvincible && collision) {
           // Player hit by projectile
           console.log(`[DEBUG] Projectile hit player! Current health: ${state.player.health}, isInvincible: ${state.player.isInvincible}`);
-          playerHit = true;
-          if (state.player.health <= 1) {
+          hitCount++;
+          if (state.player.health <= hitCount) {
             playerKilled = true;
-            console.log(`[DEBUG] Player will be killed by this hit`);
+            console.log(`[DEBUG] Player will be killed by this hit (${hitCount} hits this frame)`);
           }
           
           return false; // Remove projectile
@@ -2057,7 +2057,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         snakes: updatedSnakes
       });
       
-      return { playerHit, playerKilled };
+      return { hitCount, playerKilled };
     },
 
     spawnSpitterSnake: (position: Position) => {
