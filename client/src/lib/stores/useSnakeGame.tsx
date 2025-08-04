@@ -215,6 +215,16 @@ export const useSnakeGame = create<SnakeGameState>()(
           targetVelocity.x += moveSpeed;
         }
 
+        // Debug logging for diagonal movement issues
+        if (isWalking && (targetVelocity.x !== 0 || targetVelocity.y !== 0)) {
+          console.log('[DEBUG] Walking movement:', {
+            keys: Array.from(newKeysPressed),
+            targetVelocity: { ...targetVelocity },
+            moveSpeed,
+            isDiagonal: targetVelocity.x !== 0 && targetVelocity.y !== 0
+          });
+        }
+
         // Normalize diagonal movement to maintain consistent speed
         if (targetVelocity.x !== 0 && targetVelocity.y !== 0) {
           const factor = Math.sqrt(2) / 2; // 1/sqrt(2)
