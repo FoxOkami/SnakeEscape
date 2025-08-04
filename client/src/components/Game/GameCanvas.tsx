@@ -1316,6 +1316,57 @@ const GameCanvas: React.FC = () => {
       
       // Glow effects have been removed for cleaner darkness overlay rendering
       
+      // Helper function to check if a position is in a dark quadrant
+      const isInDarkQuadrant = (x: number, y: number) => {
+        // Top-left quadrant
+        if (x < centerX && y < centerY) return !topLeftLit;
+        // Top-right quadrant  
+        if (x > centerX + 20 && y < centerY) return !topRightLit;
+        // Bottom-left quadrant
+        if (x < centerX && y > centerY + 20) return !bottomLeftLit;
+        // Bottom-right quadrant
+        if (x > centerX + 20 && y > centerY + 20) return !bottomRightLit;
+        return false; // In the cross/wall area
+      };
+      
+      // Draw lever silhouettes in dark areas
+      switches.forEach(switchObj => {
+        if (switchObj.switchType === 'lever') {
+          const switchCenterX = switchObj.x + switchObj.width / 2;
+          const switchCenterY = switchObj.y + switchObj.height / 2;
+          
+          if (isInDarkQuadrant(switchCenterX, switchCenterY)) {
+            // Draw lever silhouette with subtle visibility
+            const centerX = switchObj.x + switchObj.width / 2;
+            const baseY = switchObj.y + switchObj.height - 5;
+            
+            // Draw base plate silhouette
+            ctx.fillStyle = 'rgba(120, 120, 120, 0.6)';
+            ctx.fillRect(switchObj.x, baseY, switchObj.width, 5);
+            
+            // Draw lever arm silhouette
+            const leverLength = switchObj.height - 8;
+            const leverAngle = switchObj.isPressed ? -0.3 : 0.3;
+            const leverEndX = centerX + Math.sin(leverAngle) * leverLength;
+            const leverEndY = baseY - Math.cos(leverAngle) * leverLength;
+            
+            ctx.strokeStyle = 'rgba(140, 140, 140, 0.7)';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(centerX, baseY);
+            ctx.lineTo(leverEndX, leverEndY);
+            ctx.stroke();
+            
+            // Draw lever handle silhouette
+            ctx.fillStyle = 'rgba(160, 160, 160, 0.8)';
+            ctx.beginPath();
+            ctx.arc(leverEndX, leverEndY, 3, 0, 2 * Math.PI);
+            ctx.fill();
+          }
+        }
+      });
+      
       // Redraw player on top of darkness overlay (Level 5 only)
       // Implement flashing effect when invincible
       const shouldFlash = player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
