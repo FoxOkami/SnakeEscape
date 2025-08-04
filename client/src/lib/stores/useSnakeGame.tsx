@@ -81,7 +81,7 @@ interface SnakeGameState extends GameData {
   removeKeyWalls: () => void;
   
   // Projectile system actions
-  updateProjectiles: (deltaTime: number) => void;
+  updateProjectiles: (deltaTime: number) => { playerHit: boolean; playerKilled: boolean };
   spawnSpitterSnake: (position: Position) => void;
   fireProjectiles: (snakeId: string) => void;
   
@@ -1044,7 +1044,19 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // --- PROJECTILE SYSTEM ---
       // Update projectiles and spitter snake firing
-      get().updateProjectiles(deltaTime);
+      const projectileResult = get().updateProjectiles(deltaTime);
+      
+      // Handle projectile hits to player
+      if (projectileResult.playerHit) {
+        updatedPlayer.health -= 1;
+        updatedPlayer.isInvincible = true;
+        updatedPlayer.invincibilityEndTime = performance.now() + 1000;
+        
+        if (updatedPlayer.health <= 0 || projectileResult.playerKilled) {
+          set({ gameState: "gameOver", player: updatedPlayer });
+          return;
+        }
+      }
       
       // --- SNAKE PIT SYSTEM ---
       // Update snake pits and rattlesnake emergence
@@ -1900,8 +1912,8 @@ export const useSnakeGame = create<SnakeGameState>()(
     updateProjectiles: (deltaTime: number) => {
       const state = get();
       const currentTime = Date.now();
-      
-
+      let playerHit = false;
+      let playerKilled = false;
       
       // Update projectile positions and remove expired ones
       const updatedProjectiles = state.projectiles.filter(projectile => {
@@ -1919,21 +1931,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           { ...projectile.position, ...projectile.size },
           { ...state.player.position, ...state.player.size }
         )) {
-          // Player hit by projectile - reduce health by 1
-          const currentPlayer = get().player;
-          const updatedPlayer = {
-            ...currentPlayer,
-            health: currentPlayer.health - 1,
-            isInvincible: true,
-            invincibilityEndTime: performance.now() + 1000 // 1 second invincibility
-          };
-          
-          if (updatedPlayer.health <= 0) {
-            // Player is dead - game over
-            set({ gameState: 'gameOver', player: updatedPlayer });
-          } else {
-            // Player still alive - just update player state
-            set({ player: updatedPlayer });
+          // Player hit by projectile
+          playerHit = true;
+          if (state.player.health <= 1) {
+            playerKilled = true;
           }
           
           return false; // Remove projectile
@@ -2044,6 +2045,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         projectiles: allProjectiles,
         snakes: updatedSnakes
       });
+      
+      return { playerHit, playerKilled };
     },
 
     spawnSpitterSnake: (position: Position) => {
