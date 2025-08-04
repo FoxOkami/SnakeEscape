@@ -1914,13 +1914,28 @@ export const useSnakeGame = create<SnakeGameState>()(
         projectile.position.x += projectile.velocity.x * deltaTime;
         projectile.position.y += projectile.velocity.y * deltaTime;
         
-        // Check collision with player
-        if (checkAABBCollision(
+        // Check collision with player (only if not invincible)
+        if (!state.player.isInvincible && checkAABBCollision(
           { ...projectile.position, ...projectile.size },
           { ...state.player.position, ...state.player.size }
         )) {
-          // Player hit by projectile - game over
-          set({ gameState: 'gameOver' });
+          // Player hit by projectile - reduce health by 1
+          const currentPlayer = get().player;
+          const updatedPlayer = {
+            ...currentPlayer,
+            health: currentPlayer.health - 1,
+            isInvincible: true,
+            invincibilityEndTime: Date.now() + 1000 // 1 second invincibility
+          };
+          
+          if (updatedPlayer.health <= 0) {
+            // Player is dead - game over
+            set({ gameState: 'gameOver', player: updatedPlayer });
+          } else {
+            // Player still alive - just update player state
+            set({ player: updatedPlayer });
+          }
+          
           return false; // Remove projectile
         }
         
