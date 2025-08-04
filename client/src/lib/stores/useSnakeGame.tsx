@@ -1951,10 +1951,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           console.log(`[DEBUG] Projectile hit player! Current health: ${state.player.health}, isInvincible: ${state.player.isInvincible}`);
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
+          console.log(`[DEBUG] Set hitCount to ${hitCount}, playerHitThisFrame to ${playerHitThisFrame}`);
           
           if (state.player.health - hitCount <= 0) {
             playerKilled = true;
-            console.log(`[DEBUG] Player will be killed by this hit (${hitCount} hits this frame)`);
+            console.log(`[DEBUG] Player will be killed by this hit (${hitCount} hits this frame), playerKilled set to ${playerKilled}`);
           }
           
           return false; // Remove projectile
@@ -2066,6 +2067,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         snakes: updatedSnakes
       });
       
+      console.log(`[DEBUG] updateProjectiles final return: hitCount=${hitCount}, playerKilled=${playerKilled}`);
       return { hitCount, playerKilled };
     },
 
