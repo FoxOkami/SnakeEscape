@@ -1921,6 +1921,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       let hitCount = 0;
       let playerKilled = false;
       let playerHitThisFrame = false; // Track if player was hit this frame
+      let collisionDetected = false; // Track if any collision was detected
       
       // Update projectile positions and remove expired ones
       const updatedProjectiles = state.projectiles.filter(projectile => {
@@ -1942,20 +1943,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Player is invincible either from before this frame or from a hit earlier in this frame
         const isInvincible = state.player.isInvincible || playerHitThisFrame;
         
-        if (collision && isInvincible) {
-          console.log(`[DEBUG] Projectile hit player but blocked by invincibility (ends at: ${state.player.invincibilityEndTime}, current: ${performance.now()})`);
-        }
-        
         if (!isInvincible && collision) {
           // Player hit by projectile - first hit this frame
-          console.log(`[DEBUG] Projectile hit player! Current health: ${state.player.health}, isInvincible: ${state.player.isInvincible}`);
+          collisionDetected = true;
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
-          console.log(`[DEBUG] Set hitCount to ${hitCount}, playerHitThisFrame to ${playerHitThisFrame}`);
           
           if (state.player.health - hitCount <= 0) {
             playerKilled = true;
-            console.log(`[DEBUG] Player will be killed by this hit (${hitCount} hits this frame), playerKilled set to ${playerKilled}`);
           }
           
           return false; // Remove projectile
@@ -2067,7 +2062,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         snakes: updatedSnakes
       });
       
-      console.log(`[DEBUG] updateProjectiles final return: hitCount=${hitCount}, playerKilled=${playerKilled}`);
+      // Debug only when there's a mismatch
+      if (collisionDetected && hitCount === 0) {
+        console.log(`[DEBUG] MISMATCH: Collision detected but hitCount is 0!`);
+        console.log(`[DEBUG] collisionDetected: ${collisionDetected}, hitCount: ${hitCount}, playerKilled: ${playerKilled}`);
+      }
+      
       return { hitCount, playerKilled };
     },
 
