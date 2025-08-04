@@ -1341,7 +1341,7 @@ const GameCanvas: React.FC = () => {
             const baseY = switchObj.y + switchObj.height - 5;
             
             // Draw base plate silhouette
-            ctx.fillStyle = 'rgba(120, 120, 120, 0.6)';
+            ctx.fillStyle = 'rgba(120, 120, 120, 0.45)';
             ctx.fillRect(switchObj.x, baseY, switchObj.width, 5);
             
             // Draw lever arm silhouette
@@ -1350,7 +1350,7 @@ const GameCanvas: React.FC = () => {
             const leverEndX = centerX + Math.sin(leverAngle) * leverLength;
             const leverEndY = baseY - Math.cos(leverAngle) * leverLength;
             
-            ctx.strokeStyle = 'rgba(140, 140, 140, 0.7)';
+            ctx.strokeStyle = 'rgba(140, 140, 140, 0.525)';
             ctx.lineWidth = 4;
             ctx.lineCap = 'round';
             ctx.beginPath();
@@ -1359,7 +1359,7 @@ const GameCanvas: React.FC = () => {
             ctx.stroke();
             
             // Draw lever handle silhouette
-            ctx.fillStyle = 'rgba(160, 160, 160, 0.8)';
+            ctx.fillStyle = 'rgba(160, 160, 160, 0.6)';
             ctx.beginPath();
             ctx.arc(leverEndX, leverEndY, 3, 0, 2 * Math.PI);
             ctx.fill();
@@ -1375,14 +1375,14 @@ const GameCanvas: React.FC = () => {
           
           if (isInDarkQuadrant(teleporterCenterX, teleporterCenterY)) {
             // Draw receiver silhouette with subtle visibility
-            const staticAlpha = 0.5; // Dimmer than normal for silhouette effect
+            const staticAlpha = 0.375; // Reduced by 25% from 0.5
             
             // Outer ring silhouette
             ctx.fillStyle = `rgba(180, 180, 180, ${staticAlpha})`;
             ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
             
             // Inner circle silhouette
-            ctx.fillStyle = `rgba(200, 200, 200, ${staticAlpha + 0.2})`;
+            ctx.fillStyle = `rgba(200, 200, 200, ${staticAlpha + 0.15})`;
             const innerSize = teleporter.width * 0.6;
             const innerOffset = (teleporter.width - innerSize) / 2;
             ctx.fillRect(
