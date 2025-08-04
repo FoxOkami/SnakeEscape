@@ -1431,6 +1431,21 @@ const GameCanvas: React.FC = () => {
         }
       });
       
+      // Redraw snake eyes on top of darkness overlay (Level 5 only)
+      snakes.forEach(snake => {
+        if (snake.type !== 'stalker') {
+          const snakeCenterX = snake.position.x + snake.size.width / 2;
+          const snakeCenterY = snake.position.y + snake.size.height / 2;
+          
+          if (isInDarkQuadrant(snakeCenterX, snakeCenterY)) {
+            // Draw bright yellow eyes for snakes in dark areas
+            ctx.fillStyle = '#ffff00';
+            ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
+            ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
+          }
+        }
+      });
+      
       // Redraw player on top of darkness overlay (Level 5 only)
       // Implement flashing effect when invincible
       const shouldFlash = player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
