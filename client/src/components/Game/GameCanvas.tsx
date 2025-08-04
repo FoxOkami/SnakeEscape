@@ -1367,6 +1367,34 @@ const GameCanvas: React.FC = () => {
         }
       });
       
+      // Draw teleporter receiver silhouettes in dark areas
+      teleporters.forEach(teleporter => {
+        if (teleporter.type === 'receiver') {
+          const teleporterCenterX = teleporter.x + teleporter.width / 2;
+          const teleporterCenterY = teleporter.y + teleporter.height / 2;
+          
+          if (isInDarkQuadrant(teleporterCenterX, teleporterCenterY)) {
+            // Draw receiver silhouette with subtle visibility
+            const staticAlpha = 0.5; // Dimmer than normal for silhouette effect
+            
+            // Outer ring silhouette
+            ctx.fillStyle = `rgba(180, 180, 180, ${staticAlpha})`;
+            ctx.fillRect(teleporter.x, teleporter.y, teleporter.width, teleporter.height);
+            
+            // Inner circle silhouette
+            ctx.fillStyle = `rgba(200, 200, 200, ${staticAlpha + 0.2})`;
+            const innerSize = teleporter.width * 0.6;
+            const innerOffset = (teleporter.width - innerSize) / 2;
+            ctx.fillRect(
+              teleporter.x + innerOffset, 
+              teleporter.y + innerOffset, 
+              innerSize, 
+              innerSize
+            );
+          }
+        }
+      });
+      
       // Redraw player on top of darkness overlay (Level 5 only)
       // Implement flashing effect when invincible
       const shouldFlash = player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
