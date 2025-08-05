@@ -46,6 +46,7 @@ interface SnakeGameState extends GameData {
 
   // Input state
   keysPressed: Set<string>;
+  keyStates: Map<string, number>; // Key state with timestamps
   setKeyPressed: (key: string, pressed: boolean) => void;
 
   // Movement state
@@ -184,49 +185,69 @@ export const useSnakeGame = create<SnakeGameState>()(
     currentVelocity: { x: 0, y: 0 },
     targetVelocity: { x: 0, y: 0 },
     isWalking: false,
+    keyStates: new Map(), // Track key state with timestamps
 
     setKeyPressed: (key: string, pressed: boolean) => {
       set((state) => {
         const newKeysPressed = new Set(state.keysPressed);
+        const newKeyStates = new Map(state.keyStates);
+        const currentTime = Date.now();
+        
         if (pressed) {
           newKeysPressed.add(key);
+          newKeyStates.set(key, currentTime);
         } else {
           newKeysPressed.delete(key);
+          newKeyStates.delete(key);
         }
+
+        // Clean up old key states to prevent memory leaks
+        for (const [k, timestamp] of newKeyStates.entries()) {
+          if (currentTime - timestamp > 1000) { // Remove keys older than 1 second
+            newKeyStates.delete(k);
+          }
+        }
+
+        // Enhanced key detection for problematic combinations
+        // Check for recent key presses to handle missed key events
+        const isKeyActiveRecently = (keyCode: string) => {
+          return newKeysPressed.has(keyCode) || 
+                 (newKeyStates.has(keyCode) && currentTime - newKeyStates.get(keyCode)! < 50);
+        };
 
         // Check if walking (Shift key held)
-        const isWalking =
-          newKeysPressed.has("ShiftLeft") || newKeysPressed.has("ShiftRight");
+        const isWalking = isKeyActiveRecently("ShiftLeft") || isKeyActiveRecently("ShiftRight");
         const moveSpeed = isWalking ? WALKING_SPEED : PLAYER_SPEED;
 
-        // Calculate target velocity based on current pressed keys
+        // Calculate target velocity with enhanced key detection
         const targetVelocity = { x: 0, y: 0 };
 
-        if (newKeysPressed.has("ArrowUp") || newKeysPressed.has("KeyW")) {
+        if (isKeyActiveRecently("ArrowUp") || isKeyActiveRecently("KeyW")) {
           targetVelocity.y -= moveSpeed;
         }
-        if (newKeysPressed.has("ArrowDown") || newKeysPressed.has("KeyS")) {
+        if (isKeyActiveRecently("ArrowDown") || isKeyActiveRecently("KeyS")) {
           targetVelocity.y += moveSpeed;
         }
-        if (newKeysPressed.has("ArrowLeft") || newKeysPressed.has("KeyA")) {
+        if (isKeyActiveRecently("ArrowLeft") || isKeyActiveRecently("KeyA")) {
           targetVelocity.x -= moveSpeed;
         }
-        if (newKeysPressed.has("ArrowRight") || newKeysPressed.has("KeyD")) {
+        if (isKeyActiveRecently("ArrowRight") || isKeyActiveRecently("KeyD")) {
           targetVelocity.x += moveSpeed;
         }
 
         // Debug logging for movement issues - focus on arrow keys
         if (key.startsWith('Arrow') && (targetVelocity.x !== 0 || targetVelocity.y !== 0)) {
-          console.log('[DEBUG] Arrow key movement:', {
+          console.log('[DEBUG] Enhanced Arrow key movement:', {
             pressedKey: key,
             pressed: pressed,
             allKeys: Array.from(newKeysPressed),
+            keyStates: Array.from(newKeyStates.keys()),
             targetVelocity: { ...targetVelocity },
             isWalking,
-            upPressed: newKeysPressed.has("ArrowUp"),
-            downPressed: newKeysPressed.has("ArrowDown"),
-            leftPressed: newKeysPressed.has("ArrowLeft"),
-            rightPressed: newKeysPressed.has("ArrowRight")
+            upActive: isKeyActiveRecently("ArrowUp"),
+            downActive: isKeyActiveRecently("ArrowDown"),
+            leftActive: isKeyActiveRecently("ArrowLeft"),
+            rightActive: isKeyActiveRecently("ArrowRight")
           });
         }
 
@@ -239,6 +260,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
         return {
           keysPressed: newKeysPressed,
+          keyStates: newKeyStates,
           targetVelocity: targetVelocity,
           isWalking: isWalking,
         };
