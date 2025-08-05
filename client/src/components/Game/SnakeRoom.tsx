@@ -46,8 +46,17 @@ const SnakeRoom: React.FC = () => {
   // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle game keys when game is playing
+      if (gameState !== "playing") return;
+      
+      // Debug logging for keyboard interference issues
+      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "KeyW", "KeyA", "KeyS", "KeyD", "ShiftLeft", "ShiftRight", "KeyE", "KeyQ"].includes(event.code)) {
+        // Log non-game keys being pressed to help debug interference
+        console.log(`[DEBUG] Non-game key pressed: ${event.code}. This should not interfere with movement.`);
+      }
+      
       // Handle Q key for counterclockwise rotation (mirrors, light source, and tiles)
-      if (event.code === "KeyQ" && gameState === "playing") {
+      if (event.code === "KeyQ") {
         event.preventDefault();
         const gameState_current = useSnakeGame.getState();
         if (gameState_current.currentLevel === 2) {
@@ -64,7 +73,7 @@ const SnakeRoom: React.FC = () => {
       }
 
       // Handle E key for clockwise rotation (mirrors and light source) or item interaction
-      if (event.code === "KeyE" && gameState === "playing") {
+      if (event.code === "KeyE") {
         event.preventDefault();
         setKeyPressed(event.code, true);
 
@@ -140,43 +149,46 @@ const SnakeRoom: React.FC = () => {
         }
       }
 
-      // Handle movement keys
-      if (
-        [
-          "ArrowUp",
-          "ArrowDown",
-          "ArrowLeft",
-          "ArrowRight",
-          "KeyW",
-          "KeyA",
-          "KeyS",
-          "KeyD",
-          "ShiftLeft",
-          "ShiftRight",
-          "KeyE",
-        ].includes(event.code)
-      ) {
+      // Handle movement keys - only prevent default for game keys
+      const gameKeys = [
+        "ArrowUp",
+        "ArrowDown", 
+        "ArrowLeft",
+        "ArrowRight",
+        "KeyW",
+        "KeyA", 
+        "KeyS",
+        "KeyD",
+        "ShiftLeft",
+        "ShiftRight",
+        "KeyE",
+      ];
+      
+      if (gameKeys.includes(event.code)) {
         event.preventDefault();
         setKeyPressed(event.code, true);
       }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
-      if (
-        [
-          "ArrowUp",
-          "ArrowDown",
-          "ArrowLeft",
-          "ArrowRight",
-          "KeyW",
-          "KeyA",
-          "KeyS",
-          "KeyD",
-          "ShiftLeft",
-          "ShiftRight",
-          "KeyE",
-        ].includes(event.code)
-      ) {
+      // Only handle game keys when game is playing
+      if (gameState !== "playing") return;
+      
+      const gameKeys = [
+        "ArrowUp",
+        "ArrowDown", 
+        "ArrowLeft",
+        "ArrowRight",
+        "KeyW",
+        "KeyA",
+        "KeyS", 
+        "KeyD",
+        "ShiftLeft",
+        "ShiftRight",
+        "KeyE",
+      ];
+      
+      if (gameKeys.includes(event.code)) {
         event.preventDefault();
         setKeyPressed(event.code, false);
       }
