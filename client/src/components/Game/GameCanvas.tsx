@@ -1020,18 +1020,29 @@ const GameCanvas: React.FC = () => {
       }
     }
 
-    // Show "E to start" message if player is on the start tile in Level 4
+    // Show tooltips for Level 4 tiles
     if (currentLevel === 3 && currentTile && levels[currentLevel]) {
       const currentLevelData = levels[currentLevel];
       const startTileId = currentLevelData.startTilePos 
         ? `grid_tile_${currentLevelData.startTilePos.row}_${currentLevelData.startTilePos.col}` 
         : 'grid_tile_3_0';
+      const endTileId = currentLevelData.endTilePos 
+        ? `grid_tile_${currentLevelData.endTilePos.row}_${currentLevelData.endTilePos.col}` 
+        : 'grid_tile_6_7';
       
       if (currentTile.id === startTileId) {
+        // Show "E to start" on start tile
         ctx.fillStyle = '#ffffff';
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('E to start', player.position.x + player.size.width / 2, player.position.y - 10);
+        ctx.textAlign = 'left';
+      } else if (currentTile.id !== endTileId) {
+        // Show "Q/E to rotate" on rotatable tiles (not start or end)
+        ctx.fillStyle = '#ffff00'; // Yellow color
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Q/E to rotate', player.position.x + player.size.width / 2, player.position.y - 10);
         ctx.textAlign = 'left';
       }
     }
