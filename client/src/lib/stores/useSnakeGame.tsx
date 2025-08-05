@@ -2103,6 +2103,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       
 
+      console.log(`[DEBUG] updateProjectiles returning: hitCount=${hitCount}, playerKilled=${playerKilled}, collisionDetected=${collisionDetected}`);
       
       return { hitCount, playerKilled };
     },
