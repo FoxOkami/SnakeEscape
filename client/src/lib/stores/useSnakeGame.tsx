@@ -678,12 +678,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
 
       if (hitBySnake) {
-        console.log(`[DEBUG] Snake hit player! Current health: ${updatedPlayer.health}`);
         updatedPlayer.health -= 1;
         
         if (updatedPlayer.health <= 0) {
           // Player is dead - game over
-          console.log(`[DEBUG] Game over triggered by snake hit`);
           set({ gameState: "gameOver", player: updatedPlayer });
           return;
         } else {
@@ -1073,21 +1071,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Update projectiles and spitter snake firing
       const projectileResult = get().updateProjectiles(deltaTime);
       
-      // Only log when there are projectiles or meaningful activity
-      if (get().projectiles.length > 0 || projectileResult.hitCount > 0 || projectileResult.playerKilled) {
-        console.log(`[DEBUG] Projectile system returned: hitCount=${projectileResult.hitCount}, playerKilled=${projectileResult.playerKilled}, projectileCount=${get().projectiles.length}`);
-      }
-      
       // Handle projectile hits to player
       if (projectileResult.hitCount > 0) {
-        console.log(`[DEBUG] Processing ${projectileResult.hitCount} projectile hit(s) - Health before: ${updatedPlayer.health}`);
         updatedPlayer.health -= projectileResult.hitCount;
         updatedPlayer.isInvincible = true;
         updatedPlayer.invincibilityEndTime = performance.now() + 1000;
-        console.log(`[DEBUG] Health after hit: ${updatedPlayer.health}, invincible until: ${updatedPlayer.invincibilityEndTime}`);
         
         if (updatedPlayer.health <= 0 || projectileResult.playerKilled) {
-          console.log(`[DEBUG] Game over triggered by projectile hit`);
           set({ gameState: "gameOver", player: updatedPlayer });
           return;
         }
@@ -1974,11 +1964,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           Math.pow(projectile.position.y - state.player.position.y, 2)
         );
         
-        if (distance < 50) { // Only log when projectile is close to player
-          console.log(`[DEBUG] Close projectile - Distance: ${distance.toFixed(1)}, Collision: ${collision}`);
-          console.log(`[DEBUG] Projectile: x=${projectileRect.x.toFixed(1)}, y=${projectileRect.y.toFixed(1)}, w=${projectileRect.width}, h=${projectileRect.height}`);
-          console.log(`[DEBUG] Player: x=${playerRect.x.toFixed(1)}, y=${playerRect.y.toFixed(1)}, w=${playerRect.width}, h=${playerRect.height}`);
-        }
+
         
         // Player is invincible either from before this frame or from a hit earlier in this frame
         const isInvincible = state.player.isInvincible || playerHitThisFrame;
@@ -2102,11 +2088,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         snakes: updatedSnakes
       });
       
-      // Debug only when there's a mismatch
-      if (collisionDetected && hitCount === 0) {
-        console.log(`[DEBUG] MISMATCH: Collision detected but hitCount is 0!`);
-        console.log(`[DEBUG] collisionDetected: ${collisionDetected}, hitCount: ${hitCount}, playerKilled: ${playerKilled}`);
-      }
+
       
       return { hitCount, playerKilled };
     },

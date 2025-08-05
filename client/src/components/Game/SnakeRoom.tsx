@@ -49,11 +49,7 @@ const SnakeRoom: React.FC = () => {
       // Only handle game keys when game is playing
       if (gameState !== "playing") return;
       
-      // Debug logging for keyboard interference issues
-      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "KeyW", "KeyA", "KeyS", "KeyD", "ControlLeft", "ControlRight", "KeyE", "KeyQ"].includes(event.code)) {
-        // Log non-game keys being pressed to help debug interference
-        console.log(`[DEBUG] Non-game key pressed: ${event.code}. This should not interfere with movement.`);
-      }
+
       
       // Handle Q key for counterclockwise rotation (mirrors, light source, and tiles)
       if (event.code === "KeyQ") {
