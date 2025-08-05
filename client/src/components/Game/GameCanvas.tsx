@@ -38,6 +38,7 @@ const GameCanvas: React.FC = () => {
     updateFlow,
     projectiles,
     updateProjectiles,
+    projectileHitCount,
 
     puzzleShards,
     puzzlePedestal,
@@ -1005,6 +1006,17 @@ const GameCanvas: React.FC = () => {
           ctx.fillStyle = '#ffd700';
           ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
         }
+        
+        // Debug: Show projectile hit counter above player
+        ctx.fillStyle = '#ff0000'; // Red color
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(
+          `Hits: ${projectileHitCount}`, 
+          player.position.x + player.size.width / 2, 
+          player.position.y - 10
+        );
+        ctx.textAlign = 'start'; // Reset text alignment
       }
     }
 

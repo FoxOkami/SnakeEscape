@@ -53,6 +53,9 @@ interface SnakeGameState extends GameData {
   currentVelocity: Position;
   targetVelocity: Position;
   isWalking: boolean;
+  
+  // Debug state
+  projectileHitCount: number;
 
   // Item actions
   pickupItem: (itemId: string) => void;
@@ -186,6 +189,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     targetVelocity: { x: 0, y: 0 },
     isWalking: false,
     keyStates: new Map(), // Track key state with timestamps
+    projectileHitCount: 0, // Debug counter
 
     setKeyPressed: (key: string, pressed: boolean) => {
       set((state) => {
@@ -301,6 +305,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+        projectileHitCount: 0, // Reset debug counter
       });
     },
 
@@ -354,6 +359,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+        projectileHitCount: 0, // Reset debug counter
       });
     },
 
@@ -1976,6 +1982,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
           projectile.hasHitPlayer = true; // Mark this projectile as having hit the player
+          
+          // Increment debug counter
+          const currentCount = get().projectileHitCount + 1;
+          set({ projectileHitCount: currentCount });
           
           if (player.health - hitCount <= 0) {
             playerKilled = true;
