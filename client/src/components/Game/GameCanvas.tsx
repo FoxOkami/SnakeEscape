@@ -1650,7 +1650,6 @@ const GameCanvas: React.FC = () => {
       if (clampedDeltaTime > 0) {
         updateGame(clampedDeltaTime);
         updateFlow(clampedDeltaTime);
-        updateProjectiles(clampedDeltaTime);
       }
     } else {
       lastTimeRef.current = currentTime;
