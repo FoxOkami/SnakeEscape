@@ -1032,14 +1032,14 @@ const GameCanvas: React.FC = () => {
       
       if (currentTile.id === startTileId) {
         // Show "E to start" on start tile
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = '#4299e1'; // Blue color
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('E to start', player.position.x + player.size.width / 2, player.position.y - 10);
         ctx.textAlign = 'left';
       } else if (currentTile.id !== endTileId) {
         // Show "Q/E to rotate" on rotatable tiles (not start or end)
-        ctx.fillStyle = '#ffff00'; // Yellow color
+        ctx.fillStyle = '#4299e1'; // Blue color
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('Q/E to rotate', player.position.x + player.size.width / 2, player.position.y - 10);
