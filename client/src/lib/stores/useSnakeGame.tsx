@@ -1071,11 +1071,18 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Update projectiles and spitter snake firing
       const projectileResult = get().updateProjectiles(deltaTime, updatedPlayer);
       
+      // Temporary debug logging
+      if (projectileResult.hitCount > 0) {
+        console.log(`[DEBUG] Projectile hit detected! hitCount: ${projectileResult.hitCount}, player health before: ${updatedPlayer.health}, invincible: ${updatedPlayer.isInvincible}`);
+      }
+      
       // Handle projectile hits to player
       if (projectileResult.hitCount > 0) {
         updatedPlayer.health -= projectileResult.hitCount;
         updatedPlayer.isInvincible = true;
         updatedPlayer.invincibilityEndTime = performance.now() + 1000;
+        
+        console.log(`[DEBUG] After hit - player health: ${updatedPlayer.health}, invincible: ${updatedPlayer.isInvincible}`);
         
         if (updatedPlayer.health <= 0 || projectileResult.playerKilled) {
           set({ gameState: "gameOver", player: updatedPlayer });
@@ -1970,8 +1977,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Player is invincible either from before this frame or from a hit earlier in this frame
         const isInvincible = player.isInvincible || playerHitThisFrame;
         
+        // Debug invincibility check
+        if (collision) {
+          console.log(`[DEBUG] Collision found - player.isInvincible: ${player.isInvincible}, playerHitThisFrame: ${playerHitThisFrame}, combined isInvincible: ${isInvincible}`);
+        }
+        
         if (!isInvincible && collision) {
           // Player hit by projectile - first hit this frame
+          console.log(`[DEBUG] Projectile collision detected! Player invincible: ${isInvincible}, collision: ${collision}`);
           collisionDetected = true;
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
