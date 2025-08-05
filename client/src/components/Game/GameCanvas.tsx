@@ -257,15 +257,27 @@ const GameCanvas: React.FC = () => {
       const isLockedTile = flowState && flowState.lockedTiles.includes(tile.id);
       
       // Add highlight overlay for rotatable tiles with 20% opacity
-      if (currentTile && currentTile.id === tile.id && currentTile.id !== 'grid_tile_3_0' && currentTile.id !== 'grid_tile_6_7') {
-        if (isLockedTile) {
-          // Red overlay for locked tiles
-          ctx.fillStyle = 'rgba(255, 99, 99, 0.3)'; // Light red with 30% opacity
-        } else {
-          // Light blue overlay for rotatable tiles
-          ctx.fillStyle = 'rgba(173, 216, 230, 0.2)'; // Light blue with 20% opacity
+      // Only show highlight on Level 4 and exclude start/end tiles
+      if (currentLevel === 3 && currentTile && currentTile.id === tile.id && levels[currentLevel]) {
+        const currentLevelData = levels[currentLevel];
+        const startTileId = currentLevelData.startTilePos 
+          ? `grid_tile_${currentLevelData.startTilePos.row}_${currentLevelData.startTilePos.col}` 
+          : 'grid_tile_3_0';
+        const endTileId = currentLevelData.endTilePos 
+          ? `grid_tile_${currentLevelData.endTilePos.row}_${currentLevelData.endTilePos.col}` 
+          : 'grid_tile_6_7';
+        
+        // Don't highlight start or end tiles
+        if (currentTile.id !== startTileId && currentTile.id !== endTileId) {
+          if (isLockedTile) {
+            // Red overlay for locked tiles
+            ctx.fillStyle = 'rgba(255, 99, 99, 0.3)'; // Light red with 30% opacity
+          } else {
+            // Light blue overlay for rotatable tiles
+            ctx.fillStyle = 'rgba(173, 216, 230, 0.2)'; // Light blue with 20% opacity
+          }
+          ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
         }
-        ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
       }
       
       // Add border
