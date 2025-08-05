@@ -1970,17 +1970,18 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Player is invincible either from before this frame or from a hit earlier in this frame
         const isInvincible = player.isInvincible || playerHitThisFrame;
         
-        if (!isInvincible && collision) {
+        if (!isInvincible && collision && !projectile.hasHitPlayer) {
           // Player hit by projectile - first hit this frame
           collisionDetected = true;
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
+          projectile.hasHitPlayer = true; // Mark this projectile as having hit the player
           
           if (player.health - hitCount <= 0) {
             playerKilled = true;
           }
           
-          return false; // Remove projectile
+          // Don't remove projectile - let it continue to wall
         }
         
         // Check collision with walls
@@ -2074,7 +2075,8 @@ export const useSnakeGame = create<SnakeGameState>()(
             size: projectileSize,
             createdAt: Date.now(),
             lifespan,
-            color: '#00ff41' // Neon green
+            color: '#00ff41', // Neon green
+            hasHitPlayer: false // Track if this projectile has already hit the player
           }));
           
           newProjectilesToAdd = [...newProjectilesToAdd, ...newProjectiles];
