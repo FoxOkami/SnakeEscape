@@ -1069,7 +1069,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // --- PROJECTILE SYSTEM ---
       // Update projectiles and spitter snake firing
-      const projectileResult = get().updateProjectiles(deltaTime);
+      const projectileResult = get().updateProjectiles(deltaTime, updatedPlayer);
       
       // Handle projectile hits to player
       if (projectileResult.hitCount > 0) {
@@ -1934,8 +1934,9 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     // Projectile system functions
-    updateProjectiles: (deltaTime: number) => {
+    updateProjectiles: (deltaTime: number, currentPlayer?: any) => {
       const state = get();
+      const player = currentPlayer || state.player; // Use provided player state or fall back to state
       const currentTime = Date.now();
       let hitCount = 0;
       let playerKilled = false;
@@ -1955,19 +1956,19 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // Check collision with player
         const projectileRect = { ...projectile.position, ...projectile.size };
-        const playerRect = { ...state.player.position, ...state.player.size };
+        const playerRect = { ...player.position, ...player.size };
         const collision = checkAABBCollision(projectileRect, playerRect);
         
         // Debug collision detection for projectiles very close to player
         const distance = Math.sqrt(
-          Math.pow(projectile.position.x - state.player.position.x, 2) + 
-          Math.pow(projectile.position.y - state.player.position.y, 2)
+          Math.pow(projectile.position.x - player.position.x, 2) + 
+          Math.pow(projectile.position.y - player.position.y, 2)
         );
         
 
         
         // Player is invincible either from before this frame or from a hit earlier in this frame
-        const isInvincible = state.player.isInvincible || playerHitThisFrame;
+        const isInvincible = player.isInvincible || playerHitThisFrame;
         
         if (!isInvincible && collision) {
           // Player hit by projectile - first hit this frame
@@ -1975,7 +1976,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
           
-          if (state.player.health - hitCount <= 0) {
+          if (player.health - hitCount <= 0) {
             playerKilled = true;
           }
           
