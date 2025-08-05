@@ -2032,7 +2032,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       snakesToFire.forEach(snakeId => {
         const snake = updatedSnakes.find(s => s.id === snakeId);
         if (snake && snake.type === 'spitter') {
-          const projectileSpeed = 0.3; // pixels per ms
+          const projectileSpeed = 0.6; // pixels per ms
           const projectileSize = { width: 6, height: 6 };
           const lifespan = 5000; // 5 seconds
           
