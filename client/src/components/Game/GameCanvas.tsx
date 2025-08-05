@@ -711,9 +711,20 @@ const GameCanvas: React.FC = () => {
               Math.pow(player.position.y - item.y, 2),
           );
           if (distance < 50) {
-            ctx.fillStyle = "#ffffff";
+            // Draw white text with black outline
             ctx.font = "12px Arial";
-            ctx.fillText("E", item.x + item.width / 2 - 4, item.y - 5);
+            ctx.textAlign = "center";
+            
+            // Draw black outline (stroke)
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.strokeText("E", item.x + item.width / 2, item.y - 5);
+            
+            // Draw white fill
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText("E", item.x + item.width / 2, item.y - 5);
+            
+            ctx.textAlign = "left";
           }
         }
       });
