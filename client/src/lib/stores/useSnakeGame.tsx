@@ -215,9 +215,21 @@ export const useSnakeGame = create<SnakeGameState>()(
                  (newKeyStates.has(keyCode) && currentTime - newKeyStates.get(keyCode)! < 50);
         };
 
-        // Check if walking (Shift key held)
-        const isWalking = isKeyActiveRecently("ShiftLeft") || isKeyActiveRecently("ShiftRight");
+        // Check if walking (Shift key or P key held)
+        const isWalking = isKeyActiveRecently("ShiftLeft") || isKeyActiveRecently("ShiftRight") || isKeyActiveRecently("KeyP");
         const moveSpeed = isWalking ? WALKING_SPEED : PLAYER_SPEED;
+
+        // Debug logging for P key testing
+        if (key === "KeyP" || isKeyActiveRecently("KeyP")) {
+          console.log(`[DEBUG] P key walking test:`, {
+            key,
+            pressed,
+            pKeyActive: isKeyActiveRecently("KeyP"),
+            isWalking,
+            moveSpeed,
+            allKeys: Array.from(newKeysPressed)
+          });
+        }
 
         // Calculate target velocity with enhanced key detection
         const targetVelocity = { x: 0, y: 0 };
