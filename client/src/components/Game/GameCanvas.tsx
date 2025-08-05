@@ -926,9 +926,14 @@ const GameCanvas: React.FC = () => {
       });
 
       // Draw snakes with different visuals for each type
+      // On Level 3, skip snakes here so they render on top of mirrors
       snakes.forEach((snake) => {
         // Skip drawing rattlesnakes that are in the pit
         if (snake.type === "rattlesnake" && snake.isInPit) {
+          return;
+        }
+        // Skip drawing snakes on Level 3 - they'll be drawn after mirrors
+        if (currentLevel === 2) {
           return;
         }
         // Skip rendering phase-restricted snakes that aren't in their active phase
@@ -1401,6 +1406,275 @@ const GameCanvas: React.FC = () => {
           );
         }
       });
+
+      // Draw snakes on Level 3 after mirrors (so they appear on top)
+      if (currentLevel === 2) {
+        snakes.forEach((snake) => {
+          // Skip drawing rattlesnakes that are in the pit
+          if (snake.type === "rattlesnake" && snake.isInPit) {
+            return;
+          }
+          
+          let baseColor = "#2d3748";
+          let accentColor = "#ff6b6b";
+          let eyeColor = "#ff6b6b";
+
+          // Different colors and indicators for each snake type
+          switch (snake.type) {
+            case "stalker":
+              baseColor = snake.isChasing ? "#805ad5" : "#553c9a"; // Purple
+              accentColor = "#d69e2e"; // Gold accents
+              eyeColor = "#2d3748"; // No visible eyes (blind)
+              break;
+            case "guard":
+              baseColor = snake.isChasing ? "#e53e3e" : "#c53030"; // Red
+              accentColor = "#f56565";
+              eyeColor = "#ff6b6b"; // Red eyes (good sight)
+              break;
+            case "burster":
+              baseColor = snake.isDashing ? "#f6ad55" : "#dd6b20"; // Orange
+              accentColor = snake.isDashing ? "#fbb6ce" : "#e53e3e";
+              eyeColor = "#f6ad55"; // Orange eyes
+              break;
+            case "screensaver":
+              baseColor = "#38b2ac"; // Teal/cyan
+              accentColor = "#4fd1c7"; // Lighter teal
+              eyeColor = "#2d3748"; // Dark eyes
+              break;
+            case "plumber":
+              baseColor = "#8b4513"; // Brown/copper color for plumber
+              accentColor = "#ffd700"; // Gold accent for pipe-like appearance
+              eyeColor = "#4682b4"; // Steel blue eyes
+              break;
+            case "spitter":
+              baseColor = "#2d7d32"; // Dark green for spitter
+              accentColor = "#00ff41"; // Neon green accent
+              eyeColor = "#00ff41"; // Neon green eyes
+              break;
+            case "photophobic":
+              // Change colors based on state
+              if (snake.isInDarkness) {
+                baseColor = "#4a5568"; // Dark gray when in darkness
+                accentColor = "#718096"; // Lighter gray
+                eyeColor = "#a0aec0"; // Light gray eyes
+              } else if (snake.isBerserk) {
+                baseColor = snake.isCharging ? "#ff0000" : "#cc0000"; // Bright red when berserk
+                accentColor = snake.isCharging ? "#ff6b6b" : "#e53e3e";
+                eyeColor = "#ffff00"; // Yellow eyes when aggressive
+              } else {
+                baseColor = "#805ad5"; // Purple default
+                accentColor = "#b794f6";
+                eyeColor = "#d69e2e";
+              }
+              break;
+            case "rattlesnake":
+              baseColor = "#8b4513"; // Brown color
+              accentColor = "#daa520"; // Golden rod accent
+              eyeColor = "#ff4500"; // Orange red eyes
+              break;
+          }
+
+          // Base snake body
+          ctx.fillStyle = baseColor;
+          ctx.fillRect(
+            snake.position.x,
+            snake.position.y,
+            snake.size.width,
+            snake.size.height,
+          );
+
+          // Add snake pattern/details based on type
+          ctx.fillStyle = accentColor;
+          if (snake.type === "stalker") {
+            // Chevron pattern for stalkers (stealth pattern)
+            ctx.fillRect(
+              snake.position.x + 4,
+              snake.position.y + 4,
+              snake.size.width - 8,
+              3,
+            );
+            ctx.fillRect(
+              snake.position.x + 8,
+              snake.position.y + 9,
+              snake.size.width - 16,
+              3,
+            );
+            ctx.fillRect(
+              snake.position.x + 4,
+              snake.position.y + 14,
+              snake.size.width - 8,
+              3,
+            );
+          } else if (snake.type === "guard") {
+            // Stripe pattern for guards (uniform-like pattern)
+            ctx.fillRect(
+              snake.position.x + 2,
+              snake.position.y + 2,
+              snake.size.width - 4,
+              4,
+            );
+            ctx.fillRect(
+              snake.position.x + 2,
+              snake.position.y + snake.size.height - 6,
+              snake.size.width - 4,
+              4,
+            );
+          } else if (snake.type === "burster") {
+            // Diamond shape for bursters (dash pattern)
+            ctx.fillRect(
+              snake.position.x + snake.size.width / 2 - 4,
+              snake.position.y + 2,
+              8,
+              8,
+            );
+            ctx.fillRect(
+              snake.position.x + snake.size.width / 2 - 4,
+              snake.position.y + snake.size.height - 10,
+              8,
+              8,
+            );
+          } else if (snake.type === "screensaver") {
+            // Grid pattern for screensaver (screensaver-like pattern)
+            ctx.fillRect(snake.position.x + 3, snake.position.y + 3, 6, 6);
+            ctx.fillRect(snake.position.x + 15, snake.position.y + 3, 6, 6);
+            ctx.fillRect(snake.position.x + 3, snake.position.y + 15, 6, 6);
+            ctx.fillRect(snake.position.x + 15, snake.position.y + 15, 6, 6);
+          } else if (snake.type === "plumber") {
+            // Pipe junction pattern for plumber (cross shape like pipe fittings)
+            const centerX = snake.position.x + snake.size.width / 2;
+            const centerY = snake.position.y + snake.size.height / 2;
+            // Horizontal pipe
+            ctx.fillRect(
+              snake.position.x + 2,
+              centerY - 2,
+              snake.size.width - 4,
+              4,
+            );
+            // Vertical pipe
+            ctx.fillRect(
+              centerX - 2,
+              snake.position.y + 2,
+              4,
+              snake.size.height - 4,
+            );
+          } else if (snake.type === "spitter") {
+            // Star/explosion pattern for spitter (represents projectile firing)
+            const centerX = snake.position.x + snake.size.width / 2;
+            const centerY = snake.position.y + snake.size.height / 2;
+            // 8-pointed star pattern
+            ctx.fillRect(
+              centerX - 1,
+              snake.position.y + 2,
+              2,
+              snake.size.height - 4,
+            ); // Vertical
+            ctx.fillRect(
+              snake.position.x + 2,
+              centerY - 1,
+              snake.size.width - 4,
+              2,
+            ); // Horizontal
+            // Diagonal lines
+            ctx.fillRect(centerX - 5, centerY - 1, 10, 2); // Diagonal 1
+            ctx.fillRect(centerX - 1, centerY - 5, 2, 10); // Diagonal 2
+          } else if (snake.type === "photophobic") {
+            // Lightning/energy pattern for photophobic (represents light sensitivity)
+            const centerX = snake.position.x + snake.size.width / 2;
+            const centerY = snake.position.y + snake.size.height / 2;
+
+            if (snake.isInDarkness) {
+              // Subtle dots pattern when in darkness
+              ctx.fillRect(snake.position.x + 4, snake.position.y + 4, 2, 2);
+              ctx.fillRect(snake.position.x + 12, snake.position.y + 8, 2, 2);
+              ctx.fillRect(snake.position.x + 8, snake.position.y + 16, 2, 2);
+              ctx.fillRect(snake.position.x + 20, snake.position.y + 20, 2, 2);
+            } else {
+              // Jagged lightning pattern when berserk
+              ctx.fillRect(
+                snake.position.x + 3,
+                snake.position.y + 3,
+                snake.size.width - 6,
+                3,
+              );
+              ctx.fillRect(
+                snake.position.x + 8,
+                snake.position.y + 8,
+                snake.size.width - 16,
+                2,
+              );
+              ctx.fillRect(
+                snake.position.x + 5,
+                snake.position.y + 13,
+                snake.size.width - 10,
+                3,
+              );
+              ctx.fillRect(
+                snake.position.x + 10,
+                snake.position.y + 18,
+                snake.size.width - 20,
+                2,
+              );
+            }
+          } else if (snake.type === "rattlesnake") {
+            // Diamond/rattle pattern for rattlesnake
+            const centerX = snake.position.x + snake.size.width / 2;
+            const centerY = snake.position.y + snake.size.height / 2;
+
+            // Diamond pattern to represent rattle segments
+            ctx.fillRect(centerX - 3, snake.position.y + 3, 6, 4);
+            ctx.fillRect(centerX - 4, snake.position.y + 8, 8, 4);
+            ctx.fillRect(centerX - 3, snake.position.y + 13, 6, 4);
+            ctx.fillRect(centerX - 2, snake.position.y + 18, 4, 4);
+
+            // Add rattle sound indicator when chasing
+            if (snake.isChasing) {
+              ctx.strokeStyle = "#ffd700";
+              ctx.lineWidth = 1;
+              ctx.setLineDash([2, 2]);
+              ctx.beginPath();
+              ctx.arc(centerX, centerY, snake.size.width / 2 + 8, 0, 2 * Math.PI);
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
+          }
+
+          // Add snake eyes (stalkers have no visible eyes)
+          if (snake.type !== "stalker") {
+            ctx.fillStyle = eyeColor;
+            ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
+            ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
+          }
+
+          // Special dash indicator for bursters
+          if (snake.type === "burster" && snake.isDashing) {
+            ctx.fillStyle = "#fff5b4";
+            ctx.strokeStyle = "#f6ad55";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(
+              snake.position.x + snake.size.width / 2,
+              snake.position.y + snake.size.height / 2,
+              snake.size.width / 2 + 5,
+              0,
+              2 * Math.PI,
+            );
+            ctx.stroke();
+          }
+
+          // Draw sight range when chasing (for visual feedback) - not for stalkers
+          if (snake.isChasing && snake.type !== "stalker") {
+            ctx.strokeStyle = baseColor;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            const centerX = snake.position.x + snake.size.width / 2;
+            const centerY = snake.position.y + snake.size.height / 2;
+            ctx.arc(centerX, centerY, snake.sightRange, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset line dash
+          }
+        });
+      }
 
       // Draw crystal
       if (crystal) {
