@@ -153,7 +153,6 @@ const SnakeRoom: React.FC = () => {
           "KeyD",
           "ShiftLeft",
           "ShiftRight",
-          "KeyP", // Alternative walking key
           "KeyE",
         ].includes(event.code)
       ) {
@@ -175,7 +174,6 @@ const SnakeRoom: React.FC = () => {
           "KeyD",
           "ShiftLeft",
           "ShiftRight",
-          "KeyP", // Alternative walking key
           "KeyE",
         ].includes(event.code)
       ) {
