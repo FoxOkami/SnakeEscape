@@ -1071,6 +1071,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Update projectiles and spitter snake firing
       const projectileResult = get().updateProjectiles(deltaTime, updatedPlayer);
       
+      // Debug the result object itself
+      console.log(`[DEBUG] Main game loop received projectileResult:`, projectileResult);
+      
       // Temporary debug logging
       if (projectileResult.hitCount > 0) {
         console.log(`[DEBUG] Projectile hit detected! hitCount: ${projectileResult.hitCount}, player health before: ${updatedPlayer.health}, invincible: ${updatedPlayer.isInvincible}`);
