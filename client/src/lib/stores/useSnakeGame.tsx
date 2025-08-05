@@ -53,9 +53,6 @@ interface SnakeGameState extends GameData {
   currentVelocity: Position;
   targetVelocity: Position;
   isWalking: boolean;
-  
-  // Debug state
-  projectileHitCount: number;
 
   // Item actions
   pickupItem: (itemId: string) => void;
@@ -189,7 +186,6 @@ export const useSnakeGame = create<SnakeGameState>()(
     targetVelocity: { x: 0, y: 0 },
     isWalking: false,
     keyStates: new Map(), // Track key state with timestamps
-    projectileHitCount: 0, // Debug counter
 
     setKeyPressed: (key: string, pressed: boolean) => {
       set((state) => {
@@ -305,7 +301,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
-        projectileHitCount: 0, // Reset debug counter
       });
     },
 
@@ -359,7 +354,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
-        projectileHitCount: 0, // Reset debug counter
       });
     },
 
@@ -1976,25 +1970,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Player is invincible either from before this frame or from a hit earlier in this frame
         const isInvincible = player.isInvincible || playerHitThisFrame;
         
-        if (!isInvincible && collision && !projectile.hasHitPlayer) {
+        if (!isInvincible && collision) {
           // Player hit by projectile - first hit this frame
           collisionDetected = true;
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
-          projectile.hasHitPlayer = true; // Mark this projectile as having hit the player
           
-          // Increment debug counter
-          const currentCount = get().projectileHitCount + 1;
-          set({ projectileHitCount: currentCount });
-          
-          // Actually reduce player health
-          player.health -= hitCount;
-          
-          if (player.health <= 0) {
+          if (player.health - hitCount <= 0) {
             playerKilled = true;
           }
           
-          // Don't remove projectile - let it continue to wall
+          return false; // Remove projectile
         }
         
         // Check collision with walls
@@ -2088,8 +2074,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             size: projectileSize,
             createdAt: Date.now(),
             lifespan,
-            color: '#00ff41', // Neon green
-            hasHitPlayer: false // Track if this projectile has already hit the player
+            color: '#00ff41' // Neon green
           }));
           
           newProjectilesToAdd = [...newProjectilesToAdd, ...newProjectiles];
