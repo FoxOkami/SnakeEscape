@@ -1987,7 +1987,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           const currentCount = get().projectileHitCount + 1;
           set({ projectileHitCount: currentCount });
           
-          if (player.health - hitCount <= 0) {
+          // Actually reduce player health
+          player.health -= hitCount;
+          
+          if (player.health <= 0) {
             playerKilled = true;
           }
           
