@@ -235,21 +235,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           targetVelocity.x += moveSpeed;
         }
 
-        // Debug logging for movement issues - focus on arrow keys
-        if (key.startsWith('Arrow') && (targetVelocity.x !== 0 || targetVelocity.y !== 0)) {
-          console.log('[DEBUG] Enhanced Arrow key movement:', {
-            pressedKey: key,
-            pressed: pressed,
-            allKeys: Array.from(newKeysPressed),
-            keyStates: Array.from(newKeyStates.keys()),
-            targetVelocity: { ...targetVelocity },
-            isWalking,
-            upActive: isKeyActiveRecently("ArrowUp"),
-            downActive: isKeyActiveRecently("ArrowDown"),
-            leftActive: isKeyActiveRecently("ArrowLeft"),
-            rightActive: isKeyActiveRecently("ArrowRight")
-          });
-        }
+
 
         // Normalize diagonal movement to maintain consistent speed
         if (targetVelocity.x !== 0 && targetVelocity.y !== 0) {
@@ -1084,7 +1070,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- PROJECTILE SYSTEM ---
       // Update projectiles and spitter snake firing
       const projectileResult = get().updateProjectiles(deltaTime);
-      console.log(`[DEBUG] Projectile system returned: hitCount=${projectileResult.hitCount}, playerKilled=${projectileResult.playerKilled}`);
+      
+      // Only log when there are projectiles or meaningful activity
+      if (get().projectiles.length > 0 || projectileResult.hitCount > 0 || projectileResult.playerKilled) {
+        console.log(`[DEBUG] Projectile system returned: hitCount=${projectileResult.hitCount}, playerKilled=${projectileResult.playerKilled}, projectileCount=${get().projectiles.length}`);
+      }
       
       // Handle projectile hits to player
       if (projectileResult.hitCount > 0) {
