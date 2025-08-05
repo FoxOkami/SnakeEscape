@@ -50,7 +50,7 @@ const SnakeRoom: React.FC = () => {
       if (gameState !== "playing") return;
       
       // Debug logging for keyboard interference issues
-      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "KeyW", "KeyA", "KeyS", "KeyD", "ShiftLeft", "ShiftRight", "KeyE", "KeyQ"].includes(event.code)) {
+      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "KeyW", "KeyA", "KeyS", "KeyD", "Space", "KeyE", "KeyQ"].includes(event.code)) {
         // Log non-game keys being pressed to help debug interference
         console.log(`[DEBUG] Non-game key pressed: ${event.code}. This should not interfere with movement.`);
       }
@@ -159,8 +159,7 @@ const SnakeRoom: React.FC = () => {
         "KeyA", 
         "KeyS",
         "KeyD",
-        "ShiftLeft",
-        "ShiftRight",
+        "Space",
         "KeyE",
       ];
       
@@ -183,8 +182,7 @@ const SnakeRoom: React.FC = () => {
         "KeyA",
         "KeyS", 
         "KeyD",
-        "ShiftLeft",
-        "ShiftRight",
+        "Space",
         "KeyE",
       ];
       
