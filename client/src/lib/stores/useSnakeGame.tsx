@@ -1084,7 +1084,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         console.log(`[DEBUG] After hit - player health: ${updatedPlayer.health}, invincible: ${updatedPlayer.isInvincible}`);
         
-        if (updatedPlayer.health <= 0 || projectileResult.playerKilled) {
+        if (updatedPlayer.health <= 0) {
           set({ gameState: "gameOver", player: updatedPlayer });
           return;
         }
@@ -1946,7 +1946,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       const player = currentPlayer || state.player; // Use provided player state or fall back to state
       const currentTime = Date.now();
       let hitCount = 0;
-      let playerKilled = false;
       let playerHitThisFrame = false; // Track if player was hit this frame
       let collisionDetected = false; // Track if any collision was detected
       
@@ -1989,9 +1988,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
           
-          if (player.health - hitCount <= 0) {
-            playerKilled = true;
-          }
+          // Don't check for player death here - let the main game loop handle it
           
           return false; // Remove projectile
         }
@@ -2103,9 +2100,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       
 
-      console.log(`[DEBUG] updateProjectiles returning: hitCount=${hitCount}, playerKilled=${playerKilled}, collisionDetected=${collisionDetected}`);
+      console.log(`[DEBUG] updateProjectiles returning: hitCount=${hitCount}, collisionDetected=${collisionDetected}`);
       
-      return { hitCount, playerKilled };
+      return { hitCount };
     },
 
     spawnSpitterSnake: (position: Position) => {
