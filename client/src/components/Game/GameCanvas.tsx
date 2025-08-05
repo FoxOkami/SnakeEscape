@@ -382,9 +382,20 @@ const GameCanvas: React.FC = () => {
 
         // Add sequence number for debugging (optional) - only if sequenceIndex >= 0
         if (tile.sequenceIndex >= 0) {
-          ctx.fillStyle = "#ffffff";
           ctx.font = "12px Arial";
           ctx.textAlign = "center";
+          
+          // Draw black outline (stroke)
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 3;
+          ctx.strokeText(
+            (tile.sequenceIndex + 1).toString(),
+            tile.x + tile.width / 2,
+            tile.y + tile.height / 2 + 4,
+          );
+          
+          // Draw white fill
+          ctx.fillStyle = "#ffffff";
           ctx.fillText(
             (tile.sequenceIndex + 1).toString(),
             tile.x + tile.width / 2,
@@ -1638,9 +1649,20 @@ const GameCanvas: React.FC = () => {
           );
 
           // Show collected shards count
-          ctx.fillStyle = "#ffffff";
           ctx.font = "12px Arial";
           ctx.textAlign = "center";
+          
+          // Draw black outline (stroke)
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 3;
+          ctx.strokeText(
+            `${puzzlePedestal.collectedShards}/${puzzlePedestal.requiredShards}`,
+            puzzlePedestal.x + puzzlePedestal.width / 2,
+            puzzlePedestal.y + puzzlePedestal.height / 2 + 4,
+          );
+          
+          // Draw white fill
+          ctx.fillStyle = "#ffffff";
           ctx.fillText(
             `${puzzlePedestal.collectedShards}/${puzzlePedestal.requiredShards}`,
             puzzlePedestal.x + puzzlePedestal.width / 2,
