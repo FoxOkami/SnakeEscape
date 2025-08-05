@@ -38,7 +38,7 @@ const GameCanvas: React.FC = () => {
     updateFlow,
     projectiles,
     updateProjectiles,
-
+    levels,
     puzzleShards,
     puzzlePedestal,
     getCurrentWalls,
@@ -1009,12 +1009,19 @@ const GameCanvas: React.FC = () => {
     }
 
     // Show "E to start" message if player is on the start tile in Level 4
-    if (currentLevel === 3 && currentTile && currentTile.id === 'grid_tile_3_0') {
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('E to start', player.position.x + player.size.width / 2, player.position.y - 10);
-      ctx.textAlign = 'left';
+    if (currentLevel === 3 && currentTile && levels[currentLevel]) {
+      const currentLevelData = levels[currentLevel];
+      const startTileId = currentLevelData.startTilePos 
+        ? `grid_tile_${currentLevelData.startTilePos.row}_${currentLevelData.startTilePos.col}` 
+        : 'grid_tile_3_0';
+      
+      if (currentTile.id === startTileId) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('E to start', player.position.x + player.size.width / 2, player.position.y - 10);
+        ctx.textAlign = 'left';
+      }
     }
 
     // Draw projectiles
