@@ -215,8 +215,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                  (newKeyStates.has(keyCode) && currentTime - newKeyStates.get(keyCode)! < 50);
         };
 
-        // Check if walking (Space key held)
-        const isWalking = isKeyActiveRecently("Space");
+        // Check if walking (Ctrl key held)
+        const isWalking = isKeyActiveRecently("ControlLeft") || isKeyActiveRecently("ControlRight");
         const moveSpeed = isWalking ? WALKING_SPEED : PLAYER_SPEED;
 
 
