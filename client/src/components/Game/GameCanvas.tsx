@@ -416,13 +416,20 @@ const GameCanvas: React.FC = () => {
           const hasEmoji = displaySymbol.includes("🛥️") || displaySymbol.includes("👁️") || displaySymbol.includes("♥️");
           
           if (hasEmoji) {
-            // For emojis: use stroke method with thicker line for better visibility
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 4;
-            ctx.strokeText(displaySymbol, centerX, centerY);
+            // For emojis: create a tight outline by drawing black copies with minimal offset
+            ctx.fillStyle = "#000000";
+            // Draw outline with 1px offset in 8 directions for a tight black border
+            ctx.fillText(displaySymbol, centerX - 1, centerY - 1);
+            ctx.fillText(displaySymbol, centerX, centerY - 1);
+            ctx.fillText(displaySymbol, centerX + 1, centerY - 1);
+            ctx.fillText(displaySymbol, centerX - 1, centerY);
+            ctx.fillText(displaySymbol, centerX + 1, centerY);
+            ctx.fillText(displaySymbol, centerX - 1, centerY + 1);
+            ctx.fillText(displaySymbol, centerX, centerY + 1);
+            ctx.fillText(displaySymbol, centerX + 1, centerY + 1);
             
-            // Draw the main emoji in default color (emojis look better without forced white)
-            ctx.fillStyle = "transparent"; // Let emoji keep its natural colors
+            // Draw the main emoji in its natural colors
+            ctx.fillStyle = "#ffffff"; // This won't affect emoji colors but ensures proper rendering
             ctx.fillText(displaySymbol, centerX, centerY);
           } else {
             // For text: use traditional stroke method
