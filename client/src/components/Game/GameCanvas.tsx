@@ -289,13 +289,23 @@ const GameCanvas: React.FC = () => {
 
       // Draw pattern tiles
       patternTiles.forEach((tile) => {
-        // Base tile color
-        if (tile.isGlowing) {
-          ctx.fillStyle = "#ffd700"; // Gold when glowing
-        } else if (tile.hasBeenActivated) {
-          ctx.fillStyle = "#48bb78"; // Green when activated correctly
+        // Base tile color - no highlighting for Level 1
+        if (currentLevel === 0) {
+          // Level 1: No yellow highlighting, just gray or green
+          if (tile.hasBeenActivated) {
+            ctx.fillStyle = "#48bb78"; // Green when activated correctly
+          } else {
+            ctx.fillStyle = "#4a5568"; // Gray when inactive
+          }
         } else {
-          ctx.fillStyle = "#4a5568"; // Gray when inactive
+          // Other levels: Keep the original glowing effect
+          if (tile.isGlowing) {
+            ctx.fillStyle = "#ffd700"; // Gold when glowing
+          } else if (tile.hasBeenActivated) {
+            ctx.fillStyle = "#48bb78"; // Green when activated correctly
+          } else {
+            ctx.fillStyle = "#4a5568"; // Gray when inactive
+          }
         }
 
         ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
@@ -338,8 +348,8 @@ const GameCanvas: React.FC = () => {
         ctx.lineWidth = 2;
         ctx.strokeRect(tile.x, tile.y, tile.width, tile.height);
 
-        // Add glow effect when tile is glowing
-        if (tile.isGlowing) {
+        // Add glow effect when tile is glowing (skip for Level 1)
+        if (tile.isGlowing && currentLevel !== 0) {
           ctx.shadowColor = "#ffd700";
           ctx.shadowBlur = 20;
           ctx.fillStyle = "#ffeb3b";
