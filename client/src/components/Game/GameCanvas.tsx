@@ -2424,18 +2424,29 @@ const GameCanvas: React.FC = () => {
           // All other phases (waiting, visible, disappearing) remain at alpha = 0
           
           // Check if this is an emoji (specifically check for the ones we use: ♥️, 👁️, 🛥️)
-          const isEmoji = ['♥️', '👁️', '🛥️', '❤️', '👀'].includes(char);
+          const hasEmoji = char.includes("🛥️") || char.includes("👁️") || char.includes("♥️");
           
-          if (isEmoji) {
-            // For emojis, use shadow for visibility instead of outline
+          if (hasEmoji) {
+            // For emojis: Use the same approach as tile rendering with multiple fills and shadow
             ctx.save();
-            ctx.shadowColor = `rgba(0, 0, 0, ${alpha})`;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-            ctx.shadowBlur = 4;
+            
+            // Create a black shadow that appears as an outline
+            ctx.shadowColor = "#000000";
+            ctx.shadowBlur = 3;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Draw the emoji multiple times to strengthen the shadow effect, with alpha
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
             ctx.fillText(char, charCenterX, topY);
+            ctx.fillText(char, charCenterX, topY);
+            ctx.fillText(char, charCenterX, topY);
+            
             ctx.restore();
+            
+            // Draw the main emoji without shadow, with alpha
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.fillText(char, charCenterX, topY);
           } else {
             // For regular text, use outline approach
             ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
