@@ -2869,33 +2869,12 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     showHint: () => {
-      const state = get();
-      
-      // Only show hints for Level 1
-      if (state.currentLevel !== 0) return;
-      
-      // Generate hint string from pattern sequence
-      const level1Symbols = [
-        "b", "u", "2", "♥️", "iy", "👁️", "im", "🛥️", "50/50"
-      ];
-      
-      const hintString = state.patternSequence
-        .map(index => level1Symbols[index] || (index + 1).toString())
-        .join(" ");
-      
-      set({
-        hintState: {
-          isActive: true,
-          startTime: Date.now(),
-          currentPhase: 'waiting',
-          visibleCharacterCount: 0,
-          hintString: hintString
-        }
-      });
+      // No longer needed - help text is always displayed on Level 1
+      return;
     },
 
     updateHint: (deltaTime: number) => {
-      // Static hint display - no updates needed
+      // No longer needed - help text is always displayed on Level 1
       return;
     },
 

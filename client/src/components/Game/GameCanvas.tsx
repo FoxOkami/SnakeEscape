@@ -44,6 +44,7 @@ const GameCanvas: React.FC = () => {
     snakePits,
     hintState,
     updateHint,
+    patternSequence,
   } = useSnakeGame();
 
   const draw = useCallback(
@@ -190,19 +191,26 @@ const GameCanvas: React.FC = () => {
         ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
       });
 
-      // Draw static hint text (Level 1 only) - simple display without animation
-      if (currentLevel === 0 && hintState && hintState.isActive) {
+      // Draw static help text for Level 1 - always visible
+      if (currentLevel === 0) {
         const centerX = levelSize.width / 2;
         const topY = 50;
-        const fullText = hintState.hintString;
+        
+        // Generate the help text directly from pattern sequence
+        const level1Symbols = [
+          "b", "u", "2", "♥️", "iy", "👁️", "im", "🛥️", "50/50"
+        ];
+        const helpText = patternSequence
+          .map(index => level1Symbols[index] || (index + 1).toString())
+          .join(" ");
         
         // Set font with emoji support
         ctx.font = "24px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
         ctx.textAlign = "center";
         
-        // Simple static display - no animation
+        // Always visible static display
         ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-        ctx.fillText(fullText, centerX, topY);
+        ctx.fillText(helpText, centerX, topY);
         
         // Reset text alignment
         ctx.textAlign = "left";
