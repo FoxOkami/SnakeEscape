@@ -190,6 +190,121 @@ const GameCanvas: React.FC = () => {
         ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
       });
 
+      // Draw hint text with wave effect (Level 1 only) - render early so player/snakes appear over it
+      if (currentLevel === 0 && hintState && hintState.isActive) {
+        const centerX = levelSize.width / 2;
+        const topY = 50; // Position near top of screen to avoid player/snakes
+        const fullText = hintState.hintString;
+        
+        // Set large font for visibility with emoji support
+        ctx.font = "28px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
+        ctx.textAlign = "center";
+        
+        // Measure text width to center it properly
+        const textMetrics = ctx.measureText(fullText);
+        const textWidth = textMetrics.width;
+        const startX = centerX - textWidth / 2;
+        
+        // Calculate wave position based on animation phase
+        let waveProgress = 0;
+        const currentTime = Date.now();
+        const elapsedTime = currentTime - hintState.startTime;
+        
+        // Phase timing constants
+        const WAIT_TIME = 0; // No initial wait
+        const WAVE_DURATION = 6000; // 6 seconds for wave to cross (twice as slow)
+        const VISIBLE_TIME = 3000;
+        const FADE_OUT_TIME = 1000;
+        const PAUSE_TIME = 1000; // 1 second pause between cycles
+        
+        switch (hintState.currentPhase) {
+          case 'waiting':
+            waveProgress = -0.5; // Wave hasn't started yet
+            break;
+          case 'appearing':
+            const appearProgress = (elapsedTime - WAIT_TIME) / WAVE_DURATION;
+            waveProgress = Math.max(-0.5, Math.min(1.5, appearProgress));
+            break;
+          case 'visible':
+            waveProgress = 1.5; // Wave has passed completely
+            break;
+          case 'disappearing':
+            waveProgress = 1.5; // Keep visible during fade out
+            break;
+        }
+        
+        // Draw each character with wave effect - handle emojis properly
+        let currentX = startX;
+        const characters = [...fullText]; // Use spread operator to properly handle emojis
+        for (let i = 0; i < characters.length; i++) {
+          const char = characters[i];
+          const charMetrics = ctx.measureText(char);
+          const charWidth = charMetrics.width;
+          const charCenterX = currentX + charWidth / 2;
+          
+          // Calculate character's position relative to wave (0 to 1)
+          const charRelativePos = (charCenterX - startX) / textWidth;
+          
+          // Calculate wave influence on this character
+          const waveDistance = Math.abs(charRelativePos - waveProgress);
+          const waveRadius = 0.15; // Wave affects 15% of text width
+          
+          let alpha = 0; // Completely transparent by default
+          
+          // Only show text when wave is directly over it
+          if (hintState.currentPhase === 'appearing') {
+            // During wave animation - only visible when wave passes over
+            if (waveDistance < waveRadius) {
+              // Character is within wave radius - make it visible
+              const waveIntensity = 1 - (waveDistance / waveRadius);
+              alpha = waveIntensity; // From 0 to 1.0 based on wave position
+            }
+            // No else clause - characters not in wave remain at alpha = 0
+          }
+          // All other phases (waiting, visible, disappearing) remain at alpha = 0
+          
+          // Check if this is an emoji (specifically check for the ones we use: ♥️, 👁️, 🛥️)
+          const hasEmoji = char.includes("🛥️") || char.includes("👁️") || char.includes("♥️");
+          
+          if (hasEmoji) {
+            // For emojis: Use the same approach as tile rendering with multiple fills and shadow
+            ctx.save();
+            
+            // Create a black shadow that appears as an outline
+            ctx.shadowColor = "#000000";
+            ctx.shadowBlur = 3;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Draw the emoji multiple times to strengthen the shadow effect, with alpha
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.fillText(char, charCenterX, topY);
+            ctx.fillText(char, charCenterX, topY);
+            ctx.fillText(char, charCenterX, topY);
+            
+            ctx.restore();
+            
+            // Draw the main emoji without shadow, with alpha
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.fillText(char, charCenterX, topY);
+          } else {
+            // For regular text, use outline approach
+            ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
+            ctx.lineWidth = 4;
+            ctx.strokeText(char, charCenterX, topY);
+            
+            // Draw white fill with alpha
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.fillText(char, charCenterX, topY);
+          }
+          
+          currentX += charWidth;
+        }
+        
+        // Reset text alignment
+        ctx.textAlign = "left";
+      }
+
       // Draw switches and pressure plates
       switches.forEach((switchObj) => {
         if (switchObj.id.startsWith("pressure")) {
@@ -2351,122 +2466,7 @@ const GameCanvas: React.FC = () => {
         });
       }
 
-      // Draw hint text with wave effect (Level 1 only)
-      if (currentLevel === 0 && hintState && hintState.isActive) {
-        const centerX = levelSize.width / 2;
-        const topY = 50; // Position near top of screen to avoid player/snakes
-        const fullText = hintState.hintString;
-        
-        // Set large font for visibility with emoji support
-        ctx.font = "28px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
-        ctx.textAlign = "center";
-        
-        // Measure text width to center it properly
-        const textMetrics = ctx.measureText(fullText);
-        const textWidth = textMetrics.width;
-        const startX = centerX - textWidth / 2;
-        
-        // Calculate wave position based on animation phase
-        let waveProgress = 0;
-        const currentTime = Date.now();
-        const elapsedTime = currentTime - hintState.startTime;
-        
-        // Phase timing constants
-        const WAIT_TIME = 0; // No initial wait
-        const WAVE_DURATION = 6000; // 6 seconds for wave to cross (twice as slow)
-        const VISIBLE_TIME = 3000;
-        const FADE_OUT_TIME = 1000;
-        const PAUSE_TIME = 1000; // 1 second pause between cycles
-        
-        switch (hintState.currentPhase) {
-          case 'waiting':
-            waveProgress = -0.5; // Wave hasn't started yet
-            break;
-          case 'appearing':
-            const appearProgress = (elapsedTime - WAIT_TIME) / WAVE_DURATION;
-            waveProgress = Math.max(-0.5, Math.min(1.5, appearProgress));
-            break;
-          case 'visible':
-            waveProgress = 1.5; // Wave has passed completely
-            break;
-          case 'disappearing':
-            waveProgress = 1.5; // Keep visible during fade out
-            break;
-        }
-        
-        // Now using emoji-capable fonts for proper rendering
-        
-        // Draw each character with wave effect - handle emojis properly
-        let currentX = startX;
-        const characters = [...fullText]; // Use spread operator to properly handle emojis
-        for (let i = 0; i < characters.length; i++) {
-          const char = characters[i];
-          const charMetrics = ctx.measureText(char);
-          const charWidth = charMetrics.width;
-          const charCenterX = currentX + charWidth / 2;
-          
-          // Calculate character's position relative to wave (0 to 1)
-          const charRelativePos = (charCenterX - startX) / textWidth;
-          
-          // Calculate wave influence on this character
-          const waveDistance = Math.abs(charRelativePos - waveProgress);
-          const waveRadius = 0.15; // Wave affects 15% of text width
-          
-          let alpha = 0; // Completely transparent by default
-          
-          // Only show text when wave is directly over it
-          if (hintState.currentPhase === 'appearing') {
-            // During wave animation - only visible when wave passes over
-            if (waveDistance < waveRadius) {
-              // Character is within wave radius - make it visible
-              const waveIntensity = 1 - (waveDistance / waveRadius);
-              alpha = waveIntensity; // From 0 to 1.0 based on wave position
-            }
-            // No else clause - characters not in wave remain at alpha = 0
-          }
-          // All other phases (waiting, visible, disappearing) remain at alpha = 0
-          
-          // Check if this is an emoji (specifically check for the ones we use: ♥️, 👁️, 🛥️)
-          const hasEmoji = char.includes("🛥️") || char.includes("👁️") || char.includes("♥️");
-          
-          if (hasEmoji) {
-            // For emojis: Use the same approach as tile rendering with multiple fills and shadow
-            ctx.save();
-            
-            // Create a black shadow that appears as an outline
-            ctx.shadowColor = "#000000";
-            ctx.shadowBlur = 3;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-            
-            // Draw the emoji multiple times to strengthen the shadow effect, with alpha
-            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-            ctx.fillText(char, charCenterX, topY);
-            ctx.fillText(char, charCenterX, topY);
-            ctx.fillText(char, charCenterX, topY);
-            
-            ctx.restore();
-            
-            // Draw the main emoji without shadow, with alpha
-            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-            ctx.fillText(char, charCenterX, topY);
-          } else {
-            // For regular text, use outline approach
-            ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
-            ctx.lineWidth = 4;
-            ctx.strokeText(char, charCenterX, topY);
-            
-            // Draw white fill with alpha
-            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-            ctx.fillText(char, charCenterX, topY);
-          }
-          
-          currentX += charWidth;
-        }
-        
-        // Reset text alignment
-        ctx.textAlign = "left";
-      }
+
     },
     [
       player,
