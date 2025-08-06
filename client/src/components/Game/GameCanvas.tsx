@@ -238,9 +238,13 @@ const GameCanvas: React.FC = () => {
           ctx.fillRect(rectX, 30, rectWidth, 40);
         }
         
-        // Draw purple rectangle after black rectangle
-        ctx.fillStyle = "#800080";
-        ctx.fillRect(20, 30, 760, 40);
+        // Draw purple rectangle after black rectangle - grows from left
+        const purpleWidth = Math.min(760, animationOffset); // Grows as black shrinks
+        
+        if (purpleWidth > 0) {
+          ctx.fillStyle = "#800080";
+          ctx.fillRect(20, 30, purpleWidth, 40);
+        }
       }
 
       // Draw switches and pressure plates
