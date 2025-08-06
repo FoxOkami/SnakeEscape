@@ -219,34 +219,35 @@ const GameCanvas: React.FC = () => {
         
         // Simplified phase timing - no complex wave calculations needed
         
-        // Simplified rendering - show text based on phase only, no complex wave calculations
-        let alpha = 0;
+        // Simple character-by-character rendering with basic alpha fade
+        const characters = [...fullText];
+        let currentX = startX;
         
-        if (hintState.currentPhase === 'appearing') {
-          // Simple fade in based on time progress
-          const fadeProgress = Math.min(1, (elapsedTime - WAIT_TIME) / 2000); // 2 second fade in
-          alpha = fadeProgress;
-        } else if (hintState.currentPhase === 'visible') {
-          alpha = 1; // Fully visible
-        } else if (hintState.currentPhase === 'disappearing') {
-          const fadeOutProgress = Math.min(1, (elapsedTime - (WAIT_TIME + WAVE_DURATION + VISIBLE_TIME)) / FADE_OUT_TIME);
-          alpha = 1 - fadeOutProgress;
-        }
-        
-        // Skip rendering if completely transparent
-        if (alpha > 0) {
-          // Set up shadow for better visibility
-          ctx.save();
-          ctx.shadowColor = "#000000";
-          ctx.shadowBlur = 3;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
+        for (let i = 0; i < characters.length; i++) {
+          const char = characters[i];
+          const charWidth = ctx.measureText(char).width;
+          const charCenterX = currentX + charWidth / 2;
           
-          // Draw the entire text at once with alpha
-          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-          ctx.fillText(fullText, centerX, topY);
+          // Simple alpha calculation based on phase
+          let alpha = 0;
+          if (hintState.currentPhase === 'appearing') {
+            const fadeProgress = Math.min(1, (elapsedTime - WAIT_TIME) / 1000); // 1 second fade in
+            alpha = fadeProgress;
+          } else if (hintState.currentPhase === 'visible') {
+            alpha = 1;
+          } else if (hintState.currentPhase === 'disappearing') {
+            const fadeOutProgress = Math.min(1, (elapsedTime - (WAIT_TIME + 2000 + VISIBLE_TIME)) / 1000);
+            alpha = 1 - fadeOutProgress;
+          }
           
-          ctx.restore();
+          // Only render if visible
+          if (alpha > 0) {
+            // Simple text rendering without complex effects
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.fillText(char, charCenterX, topY);
+          }
+          
+          currentX += charWidth;
         }
         
         // Reset text alignment
