@@ -45,12 +45,14 @@ const GameCanvas: React.FC = () => {
     hintState,
     updateHint,
     patternSequence,
+    randomizedSymbols,
   } = useSnakeGame();
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D) => {
       // Clear canvas with default background
-      ctx.fillStyle = "#1a1a2e";
+      const backgroundColor = "#1a1a2e";
+      ctx.fillStyle = backgroundColor;
       ctx.fillRect(0, 0, levelSize.width, levelSize.height);
 
       // Helper function to check if a position is in a dark quadrant (Level 5 only)
@@ -197,17 +199,23 @@ const GameCanvas: React.FC = () => {
         const topY = 50;
 
         // Generate the help text directly from pattern sequence
-        const level1Symbols = [
-          "  b  ",
-          "  u  ",
-          "  2  ",
-          "  ♥️  ",
-          "  iy  ",
-          "  👁️  ",
-          "  im  ",
-          "  🛥️  ",
-          "  50/50  ",
-        ];
+        // Use randomized symbols if available, otherwise fall back to default
+        let level1Symbols;
+        if (randomizedSymbols) {
+          level1Symbols = randomizedSymbols.map(symbol => `  ${symbol}  `);
+        } else {
+          level1Symbols = [
+            "  b  ",
+            "  u  ",
+            "  2  ",
+            "  ♥️  ",
+            "  iy  ",
+            "  👁️  ",
+            "  im  ",
+            "  🛥️  ",
+            "  50/50  ",
+          ];
+        }
         const helpText = patternSequence
           .map((index) => level1Symbols[index] || (index + 1).toString())
           .join(" ");
@@ -226,24 +234,27 @@ const GameCanvas: React.FC = () => {
 
         // Draw animated black rectangle after help text
         // Calculate animation progress - use game time for consistent animation
+        const barHeight = 30;
+        const barY = 30;
         const animationSpeed = 1; // pixels per frame
         const currentTime = Date.now();
-        const animationOffset = Math.floor((currentTime / 16.67) * animationSpeed) % 660; // Reset every 660 frames
-        
+        const animationOffset =
+          Math.floor((currentTime / 16.67) * animationSpeed) % 660; // Reset every 660 frames
+
         const rectX = 120 + animationOffset;
         const rectWidth = Math.max(0, 660 - animationOffset);
-        
+
         if (rectWidth > 0) {
-          ctx.fillStyle = "#000000";
-          ctx.fillRect(rectX, 30, rectWidth, 40);
+          ctx.fillStyle = backgroundColor;
+          ctx.fillRect(rectX, barY, rectWidth, barHeight);
         }
-        
+
         // Draw purple rectangle after black rectangle - grows from left
         const purpleWidth = Math.min(660, animationOffset); // Grows as black shrinks
-        
+
         if (purpleWidth > 0) {
-          ctx.fillStyle = "#800080";
-          ctx.fillRect(120, 30, purpleWidth, 40);
+          ctx.fillStyle = backgroundColor;
+          ctx.fillRect(20, barY, purpleWidth, barHeight);
         }
       }
 
@@ -458,18 +469,23 @@ const GameCanvas: React.FC = () => {
           // Custom symbols for Level 1, numbers for other levels
           let displaySymbol;
           if (currentLevel === 0) {
-            // Level 1 custom symbols: "b","2","iy","im","50/50","🛥️","👁️","♥️","u"
-            const level1Symbols = [
-              "b",
-              "u",
-              "2",
-              "♥️",
-              "iy",
-              "👁️",
-              "im",
-              "🛥️",
-              "50/50",
-            ];
+            // Use randomized symbols if available, otherwise fall back to default
+            let level1Symbols;
+            if (randomizedSymbols) {
+              level1Symbols = randomizedSymbols;
+            } else {
+              level1Symbols = [
+                "b",
+                "u",
+                "2",
+                "♥️",
+                "iy",
+                "👁️",
+                "im",
+                "🛥️",
+                "50/50",
+              ];
+            }
             displaySymbol =
               level1Symbols[tile.sequenceIndex] ||
               (tile.sequenceIndex + 1).toString();

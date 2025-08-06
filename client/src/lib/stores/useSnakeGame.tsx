@@ -102,11 +102,42 @@ interface SnakeGameState extends GameData {
   // Hint system actions
   showHint: () => void;
   updateHint: (deltaTime: number) => void;
+  
+  // Level 1 randomization
+  randomizedSymbols?: string[] | null;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
 const WALKING_SPEED = 0.1; // pixels per second when walking (shift held)
 const ACCELERATION = 1; // pixels per second squared
+
+// Helper function to randomize Level 1
+function randomizeLevel1() {
+  const solutionSequence = ["b", "2", "iy", "im", "50/50", "🛥️", "👁️", "♥️", "u"];
+  const allSymbols = [...solutionSequence];
+  
+  // Shuffle the symbols randomly
+  for (let i = allSymbols.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allSymbols[i], allSymbols[j]] = [allSymbols[j], allSymbols[i]];
+  }
+  
+  // Create mapping from symbol to tile index
+  const symbolToTileIndex = new Map();
+  allSymbols.forEach((symbol, index) => {
+    symbolToTileIndex.set(symbol, index);
+  });
+  
+  // Generate new pattern sequence that follows the solution order
+  const newPatternSequence = solutionSequence.map(symbol => 
+    symbolToTileIndex.get(symbol)
+  );
+  
+  return {
+    randomizedSymbols: allSymbols,
+    newPatternSequence
+  };
+}
 
 // Helper function for line-rectangle intersection
 function lineIntersectsRect(
@@ -191,6 +222,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     targetVelocity: { x: 0, y: 0 },
     isWalking: false,
     keyStates: new Map(), // Track key state with timestamps
+    randomizedSymbols: null, // Level 1 randomization
 
     setKeyPressed: (key: string, pressed: boolean) => {
       set((state) => {
@@ -262,6 +294,10 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     startGame: () => {
       const level = LEVELS[0];
+      
+      // Randomize Level 1 symbols and pattern sequence
+      const randomization = randomizeLevel1();
+      
       set({
         currentLevel: 0,
         gameState: "playing",
@@ -284,7 +320,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           ? level.throwableItems.map((item) => ({ ...item }))
           : [],
         patternTiles: level.patternTiles ? level.patternTiles.map((tile) => ({ ...tile })) : [],
-        patternSequence: level.patternSequence ? [...level.patternSequence] : [],
+        patternSequence: randomization.newPatternSequence,
         currentPatternStep: 0,
         carriedItem: null,
         levelSize: { ...level.size },
@@ -307,6 +343,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         keysPressed: new Set(),
         isWalking: false,
         hintState: null, // Initialize hint state
+        randomizedSymbols: randomization.randomizedSymbols, // Store randomized symbols
       });
       
       // Auto-trigger hint for Level 1 after a short delay
@@ -324,6 +361,17 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
       
       const level = LEVELS[levelIndex];
+      
+      // Handle Level 1 randomization
+      let patternSequence = level.patternSequence ? [...level.patternSequence] : [];
+      let randomizedSymbols = null;
+      
+      if (levelIndex === 0) {
+        const randomization = randomizeLevel1();
+        patternSequence = randomization.newPatternSequence;
+        randomizedSymbols = randomization.randomizedSymbols;
+      }
+      
       set({
         currentLevel: levelIndex,
         gameState: "playing",
@@ -346,7 +394,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           ? level.throwableItems.map((item) => ({ ...item }))
           : [],
         patternTiles: level.patternTiles ? level.patternTiles.map((tile) => ({ ...tile })) : [],
-        patternSequence: level.patternSequence ? [...level.patternSequence] : [],
+        patternSequence,
         currentPatternStep: 0,
         carriedItem: null,
         levelSize: { ...level.size },
@@ -369,6 +417,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         keysPressed: new Set(),
         isWalking: false,
         hintState: null, // Initialize hint state
+        randomizedSymbols, // Store randomized symbols for Level 1
       });
       
       // Auto-trigger hint for Level 1 only

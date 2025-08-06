@@ -670,7 +670,7 @@ export const LEVELS: Level[] = [
         { x: 0, y: 580, width: 800, height: 20 },
         { x: 0, y: 0, width: 20, height: 600 },
         { x: 780, y: 0, width: 20, height: 600 },
-        // Key chamber walls (similar to level 1)
+        // Key chamber walls
         { x: 660, y: 40, width: 100, height: 20 }, // top wall
         { x: 660, y: 120, width: 100, height: 20 }, // bottom wall
         { x: 660, y: 50, width: 20, height: 70 }, // left wall
