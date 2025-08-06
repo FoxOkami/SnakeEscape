@@ -190,65 +190,19 @@ const GameCanvas: React.FC = () => {
         ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
       });
 
-      // Draw hint text with wave effect (Level 1 only) - render early so player/snakes appear over it
+      // Draw static hint text (Level 1 only) - simple display without animation
       if (currentLevel === 0 && hintState && hintState.isActive) {
         const centerX = levelSize.width / 2;
-        const topY = 50; // Position near top of screen to avoid player/snakes
+        const topY = 50;
         const fullText = hintState.hintString;
         
-        // Set large font for visibility with emoji support
-        ctx.font = "28px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
+        // Set font with emoji support
+        ctx.font = "24px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
         ctx.textAlign = "center";
         
-        // Measure text width to center it properly
-        const textMetrics = ctx.measureText(fullText);
-        const textWidth = textMetrics.width;
-        const startX = centerX - textWidth / 2;
-        
-        // Calculate wave position based on animation phase
-        let waveProgress = 0;
-        const currentTime = Date.now();
-        const elapsedTime = currentTime - hintState.startTime;
-        
-        // Phase timing constants
-        const WAIT_TIME = 0; // No initial wait
-        const WAVE_DURATION = 6000; // 6 seconds for wave to cross (twice as slow)
-        const VISIBLE_TIME = 3000;
-        const FADE_OUT_TIME = 1000;
-        const PAUSE_TIME = 1000; // 1 second pause between cycles
-        
-        // Simplified phase timing - no complex wave calculations needed
-        
-        // Simple character-by-character rendering with basic alpha fade
-        const characters = [...fullText];
-        let currentX = startX;
-        
-        for (let i = 0; i < characters.length; i++) {
-          const char = characters[i];
-          const charWidth = ctx.measureText(char).width;
-          const charCenterX = currentX + charWidth / 2;
-          
-          // Simple alpha calculation based on phase
-          let alpha = 0;
-          if (hintState.currentPhase === 'appearing') {
-            const fadeProgress = Math.min(1, (elapsedTime - WAIT_TIME) / 1000); // 1 second fade in
-            alpha = fadeProgress;
-          } else if (hintState.currentPhase === 'visible') {
-            alpha = 1;
-          } else if (hintState.currentPhase === 'disappearing') {
-            const fadeOutProgress = Math.min(1, (elapsedTime - (WAIT_TIME + 2000 + VISIBLE_TIME)) / 1000);
-            alpha = 1 - fadeOutProgress;
-          }
-          
-          // Only render if visible
-          if (alpha > 0) {
-            // Simple text rendering without complex effects
-            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-            ctx.fillText(char, charCenterX, topY);
-          }
-          
-          currentX += charWidth;
-        }
+        // Simple static display - no animation
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fillText(fullText, centerX, topY);
         
         // Reset text alignment
         ctx.textAlign = "left";

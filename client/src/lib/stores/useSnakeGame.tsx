@@ -2895,78 +2895,8 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     updateHint: (deltaTime: number) => {
-      const state = get();
-      if (!state.hintState || !state.hintState.isActive) return;
-      
-      const currentTime = Date.now();
-      const elapsedTime = currentTime - state.hintState.startTime;
-      
-      let newPhase = state.hintState.currentPhase;
-      
-      // Simplified phase timing constants
-      const WAIT_TIME = 0; // No initial wait
-      const FADE_IN_DURATION = 2000; // 2 seconds to fade in
-      const VISIBLE_DURATION = 3000; // 3 seconds fully visible
-      const FADE_OUT_DURATION = 1000; // 1 second to fade out
-      const CYCLE_PAUSE_TIME = 2000; // 2 second pause between cycles
-      
-      switch (state.hintState.currentPhase) {
-        case 'waiting':
-          if (elapsedTime >= WAIT_TIME) {
-            newPhase = 'appearing';
-          }
-          break;
-          
-        case 'appearing':
-          const fadeInEndTime = WAIT_TIME + FADE_IN_DURATION;
-          if (elapsedTime >= fadeInEndTime) {
-            newPhase = 'visible';
-          }
-          break;
-          
-        case 'visible':
-          const visibleEndTime = WAIT_TIME + FADE_IN_DURATION + VISIBLE_DURATION;
-          if (elapsedTime >= visibleEndTime) {
-            newPhase = 'disappearing';
-          }
-          break;
-          
-        case 'disappearing':
-          const disappearEndTime = WAIT_TIME + FADE_IN_DURATION + VISIBLE_DURATION + FADE_OUT_DURATION;
-          if (elapsedTime >= disappearEndTime) {
-            // Cycle finished, restart after pause
-            set({
-              hintState: {
-                ...state.hintState,
-                startTime: Date.now() + CYCLE_PAUSE_TIME,
-                currentPhase: 'waiting',
-                visibleCharacterCount: 0
-              }
-            });
-            return;
-          }
-          break;
-          
-        case 'finished':
-          // This case should not be reached anymore, but restart if it does
-          set({
-            hintState: {
-              ...state.hintState,
-              startTime: Date.now(),
-              currentPhase: 'waiting',
-              visibleCharacterCount: 0
-            }
-          });
-          return;
-      }
-      
-      set({
-        hintState: {
-          ...state.hintState,
-          currentPhase: newPhase,
-          visibleCharacterCount: state.hintState.visibleCharacterCount // Keep this for compatibility but not used in wave effect
-        }
-      });
+      // Static hint display - no updates needed
+      return;
     },
 
   })),
