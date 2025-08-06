@@ -270,6 +270,14 @@ export interface Level {
 
 export type GameState = 'menu' | 'playing' | 'gameOver' | 'victory' | 'levelComplete';
 
+export interface HintState {
+  isActive: boolean; // Whether hint is currently showing
+  startTime: number; // When the hint started
+  currentPhase: 'waiting' | 'appearing' | 'visible' | 'disappearing' | 'finished'; // Current animation phase
+  visibleCharacterCount: number; // How many characters are currently visible
+  hintString: string; // The full hint string to display
+}
+
 export interface GameData {
   currentLevel: number;
   gameState: GameState;
@@ -297,4 +305,5 @@ export interface GameData {
   puzzlePedestal: PuzzlePedestal | null;
   phaseWalls: PhaseWall[];
   snakePits: SnakePit[];
+  hintState: HintState | null;
 }

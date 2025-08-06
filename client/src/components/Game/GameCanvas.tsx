@@ -42,6 +42,8 @@ const GameCanvas: React.FC = () => {
     getCurrentWalls,
     teleporters,
     snakePits,
+    hintState,
+    updateHint,
   } = useSnakeGame();
 
   const draw = useCallback(
@@ -2338,6 +2340,33 @@ const GameCanvas: React.FC = () => {
           }
         });
       }
+
+      // Draw hint text for Level 1 (always on top of everything else)
+      if (currentLevel === 0 && hintState && hintState.isActive) {
+        const centerX = levelSize.width / 2;
+        const centerY = levelSize.height / 2;
+        
+        // Get visible portion of hint string
+        const visibleText = hintState.hintString.substring(0, hintState.visibleCharacterCount);
+        
+        if (visibleText.length > 0) {
+          // Set large font for visibility
+          ctx.font = "28px Arial";
+          ctx.textAlign = "center";
+          
+          // Draw black outline for readability
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 4;
+          ctx.strokeText(visibleText, centerX, centerY);
+          
+          // Draw white fill text
+          ctx.fillStyle = "#ffffff";
+          ctx.fillText(visibleText, centerX, centerY);
+          
+          // Reset text alignment
+          ctx.textAlign = "left";
+        }
+      }
     },
     [
       player,
@@ -2363,6 +2392,8 @@ const GameCanvas: React.FC = () => {
       puzzlePedestal,
       getCurrentWalls,
       teleporters,
+      hintState,
+      updateHint,
     ],
   );
 
@@ -2414,6 +2445,7 @@ const GameCanvas: React.FC = () => {
         if (clampedDeltaTime > 0) {
           updateGame(clampedDeltaTime);
           updateFlow(clampedDeltaTime);
+          updateHint(clampedDeltaTime);
         }
       } else {
         lastTimeRef.current = currentTime;
@@ -2421,7 +2453,7 @@ const GameCanvas: React.FC = () => {
 
       animationFrameRef.current = requestAnimationFrame(gameLoop);
     },
-    [gameState, updateGame, draw],
+    [gameState, updateGame, updateHint, draw],
   );
 
   useEffect(() => {

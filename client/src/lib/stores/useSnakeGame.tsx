@@ -98,6 +98,10 @@ interface SnakeGameState extends GameData {
   // Snake pit system actions
   updateSnakePits: (deltaTime: number) => void;
   emergeSnakeFromPit: (pitId: string) => void;
+  
+  // Hint system actions
+  showHint: () => void;
+  updateHint: (deltaTime: number) => void;
 }
 
 const PLAYER_SPEED = 0.2; // pixels per second
@@ -181,6 +185,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     puzzleShards: [],
     puzzlePedestal: null,
     phaseWalls: [],
+    hintState: null,
     keysPressed: new Set(),
     currentVelocity: { x: 0, y: 0 },
     targetVelocity: { x: 0, y: 0 },
@@ -1086,6 +1091,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- SNAKE PIT SYSTEM ---
       // Update snake pits and rattlesnake emergence
       get().updateSnakePits(deltaTime);
+      
+      // --- HINT SYSTEM ---
+      // Update hint animation
+      get().updateHint(deltaTime);
 
       // --- UPDATE STATE ---
       // Get the most up-to-date snakes after all processing (snake pits, projectiles, etc.)
@@ -2839,8 +2848,101 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
     },
 
+    showHint: () => {
+      const state = get();
+      
+      // Only show hints for Level 1
+      if (state.currentLevel !== 0) return;
+      
+      // Generate hint string from pattern sequence
+      const level1Symbols = [
+        "b", "u", "2", "♥️", "iy", "👁️", "im", "🛥️", "50/50"
+      ];
+      
+      const hintString = state.patternSequence
+        .map(index => level1Symbols[index] || (index + 1).toString())
+        .join(" ");
+      
+      set({
+        hintState: {
+          isActive: true,
+          startTime: Date.now(),
+          currentPhase: 'waiting',
+          visibleCharacterCount: 0,
+          hintString: hintString
+        }
+      });
+    },
 
-
+    updateHint: (deltaTime: number) => {
+      const state = get();
+      if (!state.hintState || !state.hintState.isActive) return;
+      
+      const currentTime = Date.now();
+      const elapsedTime = currentTime - state.hintState.startTime;
+      const hintString = state.hintState.hintString;
+      const totalChars = hintString.length;
+      
+      let newPhase = state.hintState.currentPhase;
+      let newVisibleCount = state.hintState.visibleCharacterCount;
+      
+      // Phase timing constants
+      const WAIT_TIME = 2000; // 2 seconds initial wait
+      const CHAR_APPEAR_TIME = 150; // 150ms per character appearing
+      const VISIBLE_TIME = 3000; // 3 seconds fully visible
+      const CHAR_DISAPPEAR_TIME = 100; // 100ms per character disappearing
+      
+      switch (state.hintState.currentPhase) {
+        case 'waiting':
+          if (elapsedTime >= WAIT_TIME) {
+            newPhase = 'appearing';
+            newVisibleCount = 0;
+          }
+          break;
+          
+        case 'appearing':
+          const appearProgress = elapsedTime - WAIT_TIME;
+          newVisibleCount = Math.min(totalChars, Math.floor(appearProgress / CHAR_APPEAR_TIME));
+          
+          if (newVisibleCount >= totalChars) {
+            newPhase = 'visible';
+          }
+          break;
+          
+        case 'visible':
+          const visibleStartTime = WAIT_TIME + (totalChars * CHAR_APPEAR_TIME);
+          if (elapsedTime >= visibleStartTime + VISIBLE_TIME) {
+            newPhase = 'disappearing';
+            newVisibleCount = totalChars;
+          }
+          break;
+          
+        case 'disappearing':
+          const disappearStartTime = WAIT_TIME + (totalChars * CHAR_APPEAR_TIME) + VISIBLE_TIME;
+          const disappearProgress = elapsedTime - disappearStartTime;
+          const charsToHide = Math.floor(disappearProgress / CHAR_DISAPPEAR_TIME);
+          newVisibleCount = Math.max(0, totalChars - charsToHide);
+          
+          if (newVisibleCount <= 0) {
+            newPhase = 'finished';
+            set({ hintState: null });
+            return;
+          }
+          break;
+          
+        case 'finished':
+          set({ hintState: null });
+          return;
+      }
+      
+      set({
+        hintState: {
+          ...state.hintState,
+          currentPhase: newPhase,
+          visibleCharacterCount: newVisibleCount
+        }
+      });
+    },
 
   })),
 );
