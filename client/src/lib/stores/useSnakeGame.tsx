@@ -114,9 +114,34 @@ const ACCELERATION = 1; // pixels per second squared
 // Helper function to randomize Level 1
 function randomizeLevel1() {
   const solutionSequence = ["b", "2", "iy", "im", "50/50", "🛥️", "👁️", "♥️", "u"];
-  const allSymbols = [...solutionSequence];
+  
+  // All possible tile positions (13 total, 9 will be used)
+  const allTilePositions = [
+    { x: 80, y: 50 },    // Original positions
+    { x: 250, y: 80 },
+    { x: 450, y: 60 },
+    { x: 120, y: 250 },
+    { x: 350, y: 220 },
+    { x: 550, y: 250 },
+    { x: 60, y: 480 },
+    { x: 300, y: 500 },
+    { x: 480, y: 380 },
+    { x: 260, y: 327 },  // New positions
+    { x: 620, y: 131 },
+    { x: 629, y: 476 },
+    { x: 457, y: 519 }
+  ];
+  
+  // Shuffle all positions and take only 9
+  const shuffledPositions = [...allTilePositions];
+  for (let i = shuffledPositions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledPositions[i], shuffledPositions[j]] = [shuffledPositions[j], shuffledPositions[i]];
+  }
+  const selectedPositions = shuffledPositions.slice(0, 9);
   
   // Shuffle the symbols randomly
+  const allSymbols = [...solutionSequence];
   for (let i = allSymbols.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [allSymbols[i], allSymbols[j]] = [allSymbols[j], allSymbols[i]];
@@ -133,9 +158,22 @@ function randomizeLevel1() {
     symbolToTileIndex.get(symbol)
   );
   
+  // Create new pattern tiles with selected positions
+  const newPatternTiles = selectedPositions.map((position, index) => ({
+    id: `tile${index + 1}`,
+    x: position.x,
+    y: position.y,
+    width: 40,
+    height: 40,
+    isGlowing: false,
+    sequenceIndex: index,
+    hasBeenActivated: false,
+  }));
+  
   return {
     randomizedSymbols: allSymbols,
-    newPatternSequence
+    newPatternSequence,
+    newPatternTiles
   };
 }
 
@@ -319,7 +357,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         throwableItems: level.throwableItems
           ? level.throwableItems.map((item) => ({ ...item }))
           : [],
-        patternTiles: level.patternTiles ? level.patternTiles.map((tile) => ({ ...tile })) : [],
+        patternTiles: randomization.newPatternTiles,
         patternSequence: randomization.newPatternSequence,
         currentPatternStep: 0,
         carriedItem: null,
@@ -365,11 +403,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Handle Level 1 randomization
       let patternSequence = level.patternSequence ? [...level.patternSequence] : [];
       let randomizedSymbols = null;
+      let newPatternTiles = level.patternTiles ? level.patternTiles.map((tile) => ({ ...tile })) : [];
       
       if (levelIndex === 0) {
         const randomization = randomizeLevel1();
         patternSequence = randomization.newPatternSequence;
         randomizedSymbols = randomization.randomizedSymbols;
+        newPatternTiles = randomization.newPatternTiles;
       }
       
       set({
@@ -393,7 +433,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         throwableItems: level.throwableItems
           ? level.throwableItems.map((item) => ({ ...item }))
           : [],
-        patternTiles: level.patternTiles ? level.patternTiles.map((tile) => ({ ...tile })) : [],
+        patternTiles: newPatternTiles,
         patternSequence,
         currentPatternStep: 0,
         carriedItem: null,
