@@ -306,7 +306,16 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+        hintState: null, // Initialize hint state
       });
+      
+      // Auto-trigger hint for Level 1 after a short delay
+      setTimeout(() => {
+        const currentState = get();
+        if (currentState.currentLevel === 0 && currentState.gameState === 'playing') {
+          currentState.showHint();
+        }
+      }, 3000); // 3 second delay before hint appears
     },
 
     startFromLevel: (levelIndex: number) => {
@@ -359,7 +368,18 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+        hintState: null, // Initialize hint state
       });
+      
+      // Auto-trigger hint for Level 1 only
+      if (levelIndex === 0) {
+        setTimeout(() => {
+          const currentState = get();
+          if (currentState.currentLevel === 0 && currentState.gameState === 'playing') {
+            currentState.showHint();
+          }
+        }, 3000); // 3 second delay before hint appears
+      }
     },
 
     resetGame: () => {

@@ -19,8 +19,7 @@ const GameUI: React.FC = () => {
     isWalking,
     carriedItem,
     mirrors,
-    crystal,
-    showHint
+    crystal
   } = useSnakeGame();
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
@@ -292,16 +291,6 @@ const GameUI: React.FC = () => {
       </div>
       
       <div className="flex gap-2">
-        {currentLevel === 0 && ( // Level 1 hint button
-          <Button
-            onClick={showHint}
-            variant="outline"
-            size="sm"
-            className="bg-blue-800 text-white border-blue-600 hover:bg-blue-700"
-          >
-            💡 Hint
-          </Button>
-        )}
         <Button
           onClick={toggleMute}
           variant="outline"
