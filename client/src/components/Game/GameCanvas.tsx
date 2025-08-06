@@ -416,20 +416,13 @@ const GameCanvas: React.FC = () => {
           const hasEmoji = displaySymbol.includes("🛥️") || displaySymbol.includes("👁️") || displaySymbol.includes("♥️");
           
           if (hasEmoji) {
-            // For emojis: create a dark shadow effect by drawing the emoji multiple times offset
-            ctx.fillStyle = "#000000";
-            // Draw shadow in 8 directions
-            ctx.fillText(displaySymbol, centerX - 2, centerY - 2);
-            ctx.fillText(displaySymbol, centerX, centerY - 2);
-            ctx.fillText(displaySymbol, centerX + 2, centerY - 2);
-            ctx.fillText(displaySymbol, centerX - 2, centerY);
-            ctx.fillText(displaySymbol, centerX + 2, centerY);
-            ctx.fillText(displaySymbol, centerX - 2, centerY + 2);
-            ctx.fillText(displaySymbol, centerX, centerY + 2);
-            ctx.fillText(displaySymbol, centerX + 2, centerY + 2);
+            // For emojis: use stroke method with thicker line for better visibility
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 4;
+            ctx.strokeText(displaySymbol, centerX, centerY);
             
-            // Draw the main emoji in white/default color
-            ctx.fillStyle = "#ffffff";
+            // Draw the main emoji in default color (emojis look better without forced white)
+            ctx.fillStyle = "transparent"; // Let emoji keep its natural colors
             ctx.fillText(displaySymbol, centerX, centerY);
           } else {
             // For text: use traditional stroke method
