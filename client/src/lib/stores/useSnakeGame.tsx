@@ -2904,9 +2904,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       let newPhase = state.hintState.currentPhase;
       
       // Phase timing constants for wave effect
-      const WAIT_TIME = 2000; // 2 seconds initial wait
+      const WAIT_TIME = 0; // No initial wait
       const WAVE_DURATION = 6000; // 6 seconds for wave to cross (twice as slow)
-      const CYCLE_PAUSE_TIME = 5000; // 5 seconds pause between cycles
+      const CYCLE_PAUSE_TIME = 1000; // 1 second pause between cycles
       
       switch (state.hintState.currentPhase) {
         case 'waiting':

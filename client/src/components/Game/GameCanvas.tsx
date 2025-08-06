@@ -2372,11 +2372,11 @@ const GameCanvas: React.FC = () => {
         const elapsedTime = currentTime - hintState.startTime;
         
         // Phase timing constants
-        const WAIT_TIME = 2000;
+        const WAIT_TIME = 0; // No initial wait
         const WAVE_DURATION = 6000; // 6 seconds for wave to cross (twice as slow)
         const VISIBLE_TIME = 3000;
         const FADE_OUT_TIME = 1000;
-        const PAUSE_TIME = 5000;
+        const PAUSE_TIME = 1000; // 1 second pause between cycles
         
         switch (hintState.currentPhase) {
           case 'waiting':
