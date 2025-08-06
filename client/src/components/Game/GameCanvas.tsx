@@ -2373,7 +2373,7 @@ const GameCanvas: React.FC = () => {
         
         // Phase timing constants
         const WAIT_TIME = 2000;
-        const WAVE_DURATION = 3000; // 3 seconds for wave to cross
+        const WAVE_DURATION = 6000; // 6 seconds for wave to cross (twice as slow)
         const VISIBLE_TIME = 3000;
         const FADE_OUT_TIME = 1000;
         const PAUSE_TIME = 5000;
