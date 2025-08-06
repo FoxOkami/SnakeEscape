@@ -384,34 +384,48 @@ const GameCanvas: React.FC = () => {
         if (tile.sequenceIndex >= 0) {
           ctx.font = "12px Arial";
           ctx.textAlign = "center";
-          
+
           // Custom symbols for Level 1, numbers for other levels
           let displaySymbol;
           if (currentLevel === 0) {
             // Level 1 custom symbols: "b","2","iy","im","50/50","🛥️","👁️","♥️","u"
-            const level1Symbols = ["b", "2", "iy", "im", "50/50", "🛥️", "👁️", "♥️", "u"];
-            displaySymbol = level1Symbols[tile.sequenceIndex] || (tile.sequenceIndex + 1).toString();
+            const level1Symbols = [
+              "b",
+              "u",
+              "2",
+              "♥️",
+              "iy",
+              "👁️",
+              "im",
+              "🛥️",
+              "50/50",
+            ];
+            displaySymbol =
+              level1Symbols[tile.sequenceIndex] ||
+              (tile.sequenceIndex + 1).toString();
           } else {
             // Other levels use numbers
             displaySymbol = (tile.sequenceIndex + 1).toString();
           }
+
+          // Enhanced black outline rendering - especially for emojis
+          const centerX = tile.x + tile.width / 2;
+          const centerY = tile.y + tile.height / 2 + 4;
           
-          // Draw black outline (stroke)
+          // Draw multiple stroke passes for better visibility on emojis
           ctx.strokeStyle = "#000000";
-          ctx.lineWidth = 3;
-          ctx.strokeText(
-            displaySymbol,
-            tile.x + tile.width / 2,
-            tile.y + tile.height / 2 + 4,
-          );
+          ctx.lineWidth = 4;
+          ctx.strokeText(displaySymbol, centerX, centerY);
           
+          ctx.lineWidth = 3;
+          ctx.strokeText(displaySymbol, centerX, centerY);
+          
+          ctx.lineWidth = 2;
+          ctx.strokeText(displaySymbol, centerX, centerY);
+
           // Draw white fill
           ctx.fillStyle = "#ffffff";
-          ctx.fillText(
-            displaySymbol,
-            tile.x + tile.width / 2,
-            tile.y + tile.height / 2 + 4,
-          );
+          ctx.fillText(displaySymbol, centerX, centerY);
         }
 
         // Add directional markers for Level 4 grid tiles
@@ -736,16 +750,16 @@ const GameCanvas: React.FC = () => {
             // Draw white text with black outline
             ctx.font = "12px Arial";
             ctx.textAlign = "center";
-            
+
             // Draw black outline (stroke)
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 3;
             ctx.strokeText("E", item.x + item.width / 2, item.y - 5);
-            
+
             // Draw white fill
             ctx.fillStyle = "#ffffff";
             ctx.fillText("E", item.x + item.width / 2, item.y - 5);
-            
+
             ctx.textAlign = "left";
           }
         }
@@ -1298,16 +1312,16 @@ const GameCanvas: React.FC = () => {
       const drawTooltipText = (text: string, x: number, y: number) => {
         ctx.font = "12px Arial";
         ctx.textAlign = "center";
-        
+
         // Draw black outline (stroke)
         ctx.strokeStyle = "#000000";
         ctx.lineWidth = 3;
         ctx.strokeText(text, x, y);
-        
+
         // Draw white fill
         ctx.fillStyle = "#ffffff";
         ctx.fillText(text, x, y);
-        
+
         ctx.textAlign = "left";
       };
 
@@ -1425,7 +1439,7 @@ const GameCanvas: React.FC = () => {
           if (snake.type === "rattlesnake" && snake.isInPit) {
             return;
           }
-          
+
           let baseColor = "#2d3748";
           let accentColor = "#ff6b6b";
           let eyeColor = "#ff6b6b";
@@ -1643,7 +1657,13 @@ const GameCanvas: React.FC = () => {
               ctx.lineWidth = 1;
               ctx.setLineDash([2, 2]);
               ctx.beginPath();
-              ctx.arc(centerX, centerY, snake.size.width / 2 + 8, 0, 2 * Math.PI);
+              ctx.arc(
+                centerX,
+                centerY,
+                snake.size.width / 2 + 8,
+                0,
+                2 * Math.PI,
+              );
               ctx.stroke();
               ctx.setLineDash([]);
             }
@@ -1936,7 +1956,7 @@ const GameCanvas: React.FC = () => {
           // Show collected shards count
           ctx.font = "12px Arial";
           ctx.textAlign = "center";
-          
+
           // Draw black outline (stroke)
           ctx.strokeStyle = "#000000";
           ctx.lineWidth = 3;
@@ -1945,7 +1965,7 @@ const GameCanvas: React.FC = () => {
             puzzlePedestal.x + puzzlePedestal.width / 2,
             puzzlePedestal.y + puzzlePedestal.height / 2 + 4,
           );
-          
+
           // Draw white fill
           ctx.fillStyle = "#ffffff";
           ctx.fillText(
