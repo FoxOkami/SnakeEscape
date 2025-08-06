@@ -214,6 +214,10 @@ const GameCanvas: React.FC = () => {
         
         // Reset text alignment
         ctx.textAlign = "left";
+        
+        // Draw black rectangle after help text
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 50, 800, 40);
       }
 
       // Draw switches and pressure plates
