@@ -2911,6 +2911,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       const CHAR_APPEAR_TIME = 150; // 150ms per character appearing
       const VISIBLE_TIME = 3000; // 3 seconds fully visible
       const CHAR_DISAPPEAR_TIME = 100; // 100ms per character disappearing
+      const CYCLE_PAUSE_TIME = 5000; // 5 seconds pause between cycles
       
       switch (state.hintState.currentPhase) {
         case 'waiting':
@@ -2944,14 +2945,32 @@ export const useSnakeGame = create<SnakeGameState>()(
           newVisibleCount = Math.max(0, totalChars - charsToHide);
           
           if (newVisibleCount <= 0) {
-            newPhase = 'finished';
-            set({ hintState: null });
+            // Restart the hint cycle after a pause
+            newPhase = 'waiting';
+            newVisibleCount = 0;
+            // Reset start time for new cycle with pause
+            set({
+              hintState: {
+                ...state.hintState,
+                startTime: Date.now() + CYCLE_PAUSE_TIME,
+                currentPhase: 'waiting',
+                visibleCharacterCount: 0
+              }
+            });
             return;
           }
           break;
           
         case 'finished':
-          set({ hintState: null });
+          // This case should not be reached anymore, but restart if it does
+          set({
+            hintState: {
+              ...state.hintState,
+              startTime: Date.now(),
+              currentPhase: 'waiting',
+              visibleCharacterCount: 0
+            }
+          });
           return;
       }
       
