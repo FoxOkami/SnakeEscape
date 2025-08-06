@@ -2409,18 +2409,28 @@ const GameCanvas: React.FC = () => {
           const waveDistance = Math.abs(charRelativePos - waveProgress);
           const waveRadius = 0.15; // Wave affects 15% of text width
           
-          let alpha = 0.1; // Very low transparency when not in wave
+          let alpha = 0; // Completely transparent by default
           
-          if (waveDistance < waveRadius) {
-            // Character is within wave radius - make it more visible
-            const waveIntensity = 1 - (waveDistance / waveRadius);
-            alpha = 0.1 + (0.9 * waveIntensity); // From 0.1 to 1.0
-          }
-          
-          // During visible phase, all text should be fully visible
-          if (hintState.currentPhase === 'visible') {
+          // Only show text during appearing and visible phases
+          if (hintState.currentPhase === 'appearing') {
+            // During wave animation
+            if (waveDistance < waveRadius) {
+              // Character is within wave radius - make it more visible
+              const waveIntensity = 1 - (waveDistance / waveRadius);
+              alpha = waveIntensity; // From 0 to 1.0 based on wave position
+            } else {
+              alpha = 0.05; // Very faint transparency for text not yet hit by wave
+            }
+          } else if (hintState.currentPhase === 'visible') {
+            // During visible phase, all text should be fully visible
             alpha = 1.0;
+          } else if (hintState.currentPhase === 'disappearing') {
+            // During fade out, gradually reduce alpha
+            const disappearStartTime = WAIT_TIME + WAVE_DURATION + VISIBLE_TIME;
+            const fadeProgress = Math.min(1.0, (elapsedTime - disappearStartTime) / FADE_OUT_TIME);
+            alpha = 1.0 * (1.0 - fadeProgress);
           }
+          // For 'waiting' phase, alpha remains 0 (completely transparent)
           
           // Draw black outline with alpha
           ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
