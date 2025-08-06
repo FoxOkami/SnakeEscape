@@ -408,24 +408,38 @@ const GameCanvas: React.FC = () => {
             displaySymbol = (tile.sequenceIndex + 1).toString();
           }
 
-          // Enhanced black outline rendering - especially for emojis
+          // Enhanced rendering for all symbols with better emoji support
           const centerX = tile.x + tile.width / 2;
           const centerY = tile.y + tile.height / 2 + 4;
           
-          // Draw multiple stroke passes for better visibility on emojis
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = 4;
-          ctx.strokeText(displaySymbol, centerX, centerY);
+          // Check if symbol contains emojis (specific ones we use)
+          const hasEmoji = displaySymbol.includes("🛥️") || displaySymbol.includes("👁️") || displaySymbol.includes("♥️");
           
-          ctx.lineWidth = 3;
-          ctx.strokeText(displaySymbol, centerX, centerY);
-          
-          ctx.lineWidth = 2;
-          ctx.strokeText(displaySymbol, centerX, centerY);
-
-          // Draw white fill
-          ctx.fillStyle = "#ffffff";
-          ctx.fillText(displaySymbol, centerX, centerY);
+          if (hasEmoji) {
+            // For emojis: create a dark shadow effect by drawing the emoji multiple times offset
+            ctx.fillStyle = "#000000";
+            // Draw shadow in 8 directions
+            ctx.fillText(displaySymbol, centerX - 2, centerY - 2);
+            ctx.fillText(displaySymbol, centerX, centerY - 2);
+            ctx.fillText(displaySymbol, centerX + 2, centerY - 2);
+            ctx.fillText(displaySymbol, centerX - 2, centerY);
+            ctx.fillText(displaySymbol, centerX + 2, centerY);
+            ctx.fillText(displaySymbol, centerX - 2, centerY + 2);
+            ctx.fillText(displaySymbol, centerX, centerY + 2);
+            ctx.fillText(displaySymbol, centerX + 2, centerY + 2);
+            
+            // Draw the main emoji in white/default color
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(displaySymbol, centerX, centerY);
+          } else {
+            // For text: use traditional stroke method
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.strokeText(displaySymbol, centerX, centerY);
+            
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(displaySymbol, centerX, centerY);
+          }
         }
 
         // Add directional markers for Level 4 grid tiles
