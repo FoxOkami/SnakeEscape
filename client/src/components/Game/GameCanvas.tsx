@@ -195,29 +195,48 @@ const GameCanvas: React.FC = () => {
       if (currentLevel === 0) {
         const centerX = levelSize.width / 2;
         const topY = 50;
-        
+
         // Generate the help text directly from pattern sequence
         const level1Symbols = [
-          "b", "u", "2", "♥️", "iy", "👁️", "im", "🛥️", "50/50"
+          "  b  ",
+          "  u  ",
+          "  2  ",
+          "  ♥️  ",
+          "  iy  ",
+          "  👁️  ",
+          "  im  ",
+          "  🛥️  ",
+          "  50/50  ",
         ];
         const helpText = patternSequence
-          .map(index => level1Symbols[index] || (index + 1).toString())
+          .map((index) => level1Symbols[index] || (index + 1).toString())
           .join(" ");
-        
+
         // Set font with emoji support
-        ctx.font = "24px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
+        ctx.font =
+          "24px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
         ctx.textAlign = "center";
-        
+
         // Always visible static display
         ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
         ctx.fillText(helpText, centerX, topY);
-        
+
         // Reset text alignment
         ctx.textAlign = "left";
+
+        // Draw animated black rectangle after help text
+        // Calculate animation progress - use game time for consistent animation
+        const animationSpeed = 1; // pixels per frame
+        const currentTime = Date.now();
+        const animationOffset = Math.floor((currentTime / 16.67) * animationSpeed) % 760; // Reset every 760 frames
         
-        // Draw black rectangle after help text
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(0, 50, 800, 40);
+        const rectX = 20 + animationOffset;
+        const rectWidth = Math.max(0, 760 - animationOffset);
+        
+        if (rectWidth > 0) {
+          ctx.fillStyle = "#000000";
+          ctx.fillRect(rectX, 30, rectWidth, 40);
+        }
       }
 
       // Draw switches and pressure plates
@@ -424,7 +443,8 @@ const GameCanvas: React.FC = () => {
 
         // Add sequence number/symbol - only if sequenceIndex >= 0
         if (tile.sequenceIndex >= 0) {
-          ctx.font = "12px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
+          ctx.font =
+            "12px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
           ctx.textAlign = "center";
 
           // Custom symbols for Level 1, numbers for other levels
@@ -453,28 +473,31 @@ const GameCanvas: React.FC = () => {
           // Enhanced rendering for all symbols with better emoji support
           const centerX = tile.x + tile.width / 2;
           const centerY = tile.y + tile.height / 2 + 4;
-          
+
           // Check if symbol contains emojis (specific ones we use)
-          const hasEmoji = displaySymbol.includes("🛥️") || displaySymbol.includes("👁️") || displaySymbol.includes("♥️");
-          
+          const hasEmoji =
+            displaySymbol.includes("🛥️") ||
+            displaySymbol.includes("👁️") ||
+            displaySymbol.includes("♥️");
+
           if (hasEmoji) {
             // For emojis: Use shadowBlur to create an outline effect
             ctx.save(); // Save current context state
-            
+
             // Create a black shadow that appears as an outline
             ctx.shadowColor = "#000000";
             ctx.shadowBlur = 3;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
-            
+
             // Draw the emoji multiple times to strengthen the shadow effect
             ctx.fillStyle = "#ffffff";
             ctx.fillText(displaySymbol, centerX, centerY);
             ctx.fillText(displaySymbol, centerX, centerY);
             ctx.fillText(displaySymbol, centerX, centerY);
-            
+
             ctx.restore(); // Restore context state
-            
+
             // Draw the main emoji without shadow
             ctx.fillStyle = "#ffffff";
             ctx.fillText(displaySymbol, centerX, centerY);
@@ -483,7 +506,7 @@ const GameCanvas: React.FC = () => {
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 3;
             ctx.strokeText(displaySymbol, centerX, centerY);
-            
+
             ctx.fillStyle = "#ffffff";
             ctx.fillText(displaySymbol, centerX, centerY);
           }
@@ -2380,8 +2403,6 @@ const GameCanvas: React.FC = () => {
           }
         });
       }
-
-
     },
     [
       player,
