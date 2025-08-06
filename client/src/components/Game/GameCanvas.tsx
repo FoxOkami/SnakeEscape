@@ -228,10 +228,10 @@ const GameCanvas: React.FC = () => {
         // Calculate animation progress - use game time for consistent animation
         const animationSpeed = 1; // pixels per frame
         const currentTime = Date.now();
-        const animationOffset = Math.floor((currentTime / 16.67) * animationSpeed) % 760; // Reset every 760 frames
+        const animationOffset = Math.floor((currentTime / 16.67) * animationSpeed) % 660; // Reset every 660 frames
         
-        const rectX = 20 + animationOffset;
-        const rectWidth = Math.max(0, 760 - animationOffset);
+        const rectX = 120 + animationOffset;
+        const rectWidth = Math.max(0, 660 - animationOffset);
         
         if (rectWidth > 0) {
           ctx.fillStyle = "#000000";
@@ -239,11 +239,11 @@ const GameCanvas: React.FC = () => {
         }
         
         // Draw purple rectangle after black rectangle - grows from left
-        const purpleWidth = Math.min(760, animationOffset); // Grows as black shrinks
+        const purpleWidth = Math.min(660, animationOffset); // Grows as black shrinks
         
         if (purpleWidth > 0) {
           ctx.fillStyle = "#800080";
-          ctx.fillRect(20, 30, purpleWidth, 40);
+          ctx.fillRect(120, 30, purpleWidth, 40);
         }
       }
 
