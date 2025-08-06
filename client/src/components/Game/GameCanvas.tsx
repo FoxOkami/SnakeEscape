@@ -237,6 +237,10 @@ const GameCanvas: React.FC = () => {
           ctx.fillStyle = "#000000";
           ctx.fillRect(rectX, 30, rectWidth, 40);
         }
+        
+        // Draw purple rectangle after black rectangle
+        ctx.fillStyle = "#800080";
+        ctx.fillRect(20, 30, 760, 40);
       }
 
       // Draw switches and pressure plates
