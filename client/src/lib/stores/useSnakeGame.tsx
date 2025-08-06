@@ -2903,10 +2903,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       let newPhase = state.hintState.currentPhase;
       
-      // Phase timing constants for wave effect
+      // Simplified phase timing constants
       const WAIT_TIME = 0; // No initial wait
-      const WAVE_DURATION = 6000; // 6 seconds for wave to cross (twice as slow)
-      const CYCLE_PAUSE_TIME = 1000; // 1 second pause between cycles
+      const FADE_IN_DURATION = 2000; // 2 seconds to fade in
+      const VISIBLE_DURATION = 3000; // 3 seconds fully visible
+      const FADE_OUT_DURATION = 1000; // 1 second to fade out
+      const CYCLE_PAUSE_TIME = 2000; // 2 second pause between cycles
       
       switch (state.hintState.currentPhase) {
         case 'waiting':
@@ -2916,9 +2918,23 @@ export const useSnakeGame = create<SnakeGameState>()(
           break;
           
         case 'appearing':
-          const waveEndTime = WAIT_TIME + WAVE_DURATION;
-          if (elapsedTime >= waveEndTime) {
-            // Wave finished, restart cycle after pause
+          const fadeInEndTime = WAIT_TIME + FADE_IN_DURATION;
+          if (elapsedTime >= fadeInEndTime) {
+            newPhase = 'visible';
+          }
+          break;
+          
+        case 'visible':
+          const visibleEndTime = WAIT_TIME + FADE_IN_DURATION + VISIBLE_DURATION;
+          if (elapsedTime >= visibleEndTime) {
+            newPhase = 'disappearing';
+          }
+          break;
+          
+        case 'disappearing':
+          const disappearEndTime = WAIT_TIME + FADE_IN_DURATION + VISIBLE_DURATION + FADE_OUT_DURATION;
+          if (elapsedTime >= disappearEndTime) {
+            // Cycle finished, restart after pause
             set({
               hintState: {
                 ...state.hintState,

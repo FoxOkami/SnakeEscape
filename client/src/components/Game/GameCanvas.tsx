@@ -217,88 +217,36 @@ const GameCanvas: React.FC = () => {
         const FADE_OUT_TIME = 1000;
         const PAUSE_TIME = 1000; // 1 second pause between cycles
         
-        switch (hintState.currentPhase) {
-          case 'waiting':
-            waveProgress = -0.5; // Wave hasn't started yet
-            break;
-          case 'appearing':
-            const appearProgress = (elapsedTime - WAIT_TIME) / WAVE_DURATION;
-            waveProgress = Math.max(-0.5, Math.min(1.5, appearProgress));
-            break;
-          case 'visible':
-            waveProgress = 1.5; // Wave has passed completely
-            break;
-          case 'disappearing':
-            waveProgress = 1.5; // Keep visible during fade out
-            break;
+        // Simplified phase timing - no complex wave calculations needed
+        
+        // Simplified rendering - show text based on phase only, no complex wave calculations
+        let alpha = 0;
+        
+        if (hintState.currentPhase === 'appearing') {
+          // Simple fade in based on time progress
+          const fadeProgress = Math.min(1, (elapsedTime - WAIT_TIME) / 2000); // 2 second fade in
+          alpha = fadeProgress;
+        } else if (hintState.currentPhase === 'visible') {
+          alpha = 1; // Fully visible
+        } else if (hintState.currentPhase === 'disappearing') {
+          const fadeOutProgress = Math.min(1, (elapsedTime - (WAIT_TIME + WAVE_DURATION + VISIBLE_TIME)) / FADE_OUT_TIME);
+          alpha = 1 - fadeOutProgress;
         }
         
-        // Draw each character with wave effect - handle emojis properly
-        let currentX = startX;
-        const characters = [...fullText]; // Use spread operator to properly handle emojis
-        for (let i = 0; i < characters.length; i++) {
-          const char = characters[i];
-          const charMetrics = ctx.measureText(char);
-          const charWidth = charMetrics.width;
-          const charCenterX = currentX + charWidth / 2;
+        // Skip rendering if completely transparent
+        if (alpha > 0) {
+          // Set up shadow for better visibility
+          ctx.save();
+          ctx.shadowColor = "#000000";
+          ctx.shadowBlur = 3;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
           
-          // Calculate character's position relative to wave (0 to 1)
-          const charRelativePos = (charCenterX - startX) / textWidth;
+          // Draw the entire text at once with alpha
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+          ctx.fillText(fullText, centerX, topY);
           
-          // Calculate wave influence on this character
-          const waveDistance = Math.abs(charRelativePos - waveProgress);
-          const waveRadius = 0.15; // Wave affects 15% of text width
-          
-          let alpha = 0; // Completely transparent by default
-          
-          // Only show text when wave is directly over it
-          if (hintState.currentPhase === 'appearing') {
-            // During wave animation - only visible when wave passes over
-            if (waveDistance < waveRadius) {
-              // Character is within wave radius - make it visible
-              const waveIntensity = 1 - (waveDistance / waveRadius);
-              alpha = waveIntensity; // From 0 to 1.0 based on wave position
-            }
-            // No else clause - characters not in wave remain at alpha = 0
-          }
-          // All other phases (waiting, visible, disappearing) remain at alpha = 0
-          
-          // Check if this is an emoji (specifically check for the ones we use: ♥️, 👁️, 🛥️)
-          const hasEmoji = char.includes("🛥️") || char.includes("👁️") || char.includes("♥️");
-          
-          if (hasEmoji) {
-            // For emojis: Use the same approach as tile rendering with multiple fills and shadow
-            ctx.save();
-            
-            // Create a black shadow that appears as an outline
-            ctx.shadowColor = "#000000";
-            ctx.shadowBlur = 3;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-            
-            // Draw the emoji multiple times to strengthen the shadow effect, with alpha
-            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-            ctx.fillText(char, charCenterX, topY);
-            ctx.fillText(char, charCenterX, topY);
-            ctx.fillText(char, charCenterX, topY);
-            
-            ctx.restore();
-            
-            // Draw the main emoji without shadow, with alpha
-            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-            ctx.fillText(char, charCenterX, topY);
-          } else {
-            // For regular text, use outline approach
-            ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
-            ctx.lineWidth = 4;
-            ctx.strokeText(char, charCenterX, topY);
-            
-            // Draw white fill with alpha
-            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-            ctx.fillText(char, charCenterX, topY);
-          }
-          
-          currentX += charWidth;
+          ctx.restore();
         }
         
         // Reset text alignment
