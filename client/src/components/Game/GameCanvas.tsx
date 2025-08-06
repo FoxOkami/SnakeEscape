@@ -202,7 +202,7 @@ const GameCanvas: React.FC = () => {
         // Use randomized symbols if available, otherwise fall back to default
         let level1Symbols;
         if (randomizedSymbols) {
-          level1Symbols = randomizedSymbols.map(symbol => `  ${symbol}  `);
+          level1Symbols = randomizedSymbols.map((symbol) => `  ${symbol}  `);
         } else {
           level1Symbols = [
             "  b  ",
@@ -232,29 +232,30 @@ const GameCanvas: React.FC = () => {
         // Reset text alignment
         ctx.textAlign = "left";
 
-        // Draw animated black rectangle after help text
-        // Calculate animation progress - use game time for consistent animation
-        const barHeight = 30;
-        const barY = 30;
-        const animationSpeed = 1; // pixels per frame
-        const currentTime = Date.now();
-        const animationOffset =
-          Math.floor((currentTime / 16.67) * animationSpeed) % 660; // Reset every 660 frames
+        // Draw animated rectangles only when Level 1 is playing (not paused/menu)
+        if (gameState === "playing") {
+          const barHeight = 30;
+          const barY = 30;
+          const animationSpeed = 1; // pixels per frame
+          const currentTime = Date.now();
+          const animationOffset =
+            Math.floor((currentTime / 16.67) * animationSpeed) % 660; // Reset every 660 frames
 
-        const rectX = 120 + animationOffset;
-        const rectWidth = Math.max(0, 660 - animationOffset);
+          const rectX = 120 + animationOffset;
+          const shrinkRectWidth = Math.max(0, 660 - animationOffset);
 
-        if (rectWidth > 0) {
-          ctx.fillStyle = backgroundColor;
-          ctx.fillRect(rectX, barY, rectWidth, barHeight);
-        }
+          // Draw shrinking black rectangle
+          if (shrinkRectWidth > 0) {
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(rectX, barY, shrinkRectWidth, barHeight);
+          }
 
-        // Draw purple rectangle after black rectangle - grows from left
-        const purpleWidth = Math.min(660, animationOffset); // Grows as black shrinks
-
-        if (purpleWidth > 0) {
-          ctx.fillStyle = backgroundColor;
-          ctx.fillRect(20, barY, purpleWidth, barHeight);
+          // Draw growing purple rectangle
+          const growRectWidth = Math.min(660, animationOffset);
+          if (growRectWidth > 0) {
+            ctx.fillStyle = "#800080";
+            ctx.fillRect(120, barY, growRectWidth, barHeight);
+          }
         }
       }
 
