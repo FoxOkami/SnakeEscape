@@ -14,7 +14,7 @@ export const LEVELS: Level[] = [
   // Level 1: Pattern-matching puzzle
   {
     id: 1,
-    name: "Pattern Memory",
+    name: "Shallow Peaks and Low Valleys",
     player: { x: 50, y: 350 },
     size: { width: 800, height: 600 },
     walls: [
@@ -187,7 +187,7 @@ export const LEVELS: Level[] = [
   // Level 2: More complex with switches
   {
     id: 2,
-    name: "The Switch",
+    name: "MacGruber",
     player: { x: 50, y: 550 },
     size: { width: 800, height: 600 },
     walls: [
@@ -351,7 +351,7 @@ export const LEVELS: Level[] = [
   // Level 3: Light Reflection Puzzle
   {
     id: 3,
-    name: "Light Reflection",
+    name: "Desert Slasher",
     player: { x: 25, y: 25 },
     size: { width: 800, height: 600 },
     walls: [
@@ -659,7 +659,7 @@ export const LEVELS: Level[] = [
 
     return {
       id: 4,
-      name: "Venom Pipes",
+      name: "Alignment Issues",
       player: { x: 50, y: 300 },
       size: { width: 800, height: 600 },
       startTilePos: { row: startRow, col: startCol },
@@ -894,7 +894,7 @@ export const LEVELS: Level[] = [
   // Level 5: Final Challenge with teleportation system
   {
     id: 5,
-    name: "Final Challenge",
+    name: "Amish Corner",
     player: { x: 25, y: 315 },
     size: { width: 800, height: 600 },
     walls: [

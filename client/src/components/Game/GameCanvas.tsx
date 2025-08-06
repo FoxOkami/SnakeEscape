@@ -380,16 +380,27 @@ const GameCanvas: React.FC = () => {
           }
         }
 
-        // Add sequence number for debugging (optional) - only if sequenceIndex >= 0
+        // Add sequence number/symbol - only if sequenceIndex >= 0
         if (tile.sequenceIndex >= 0) {
           ctx.font = "12px Arial";
           ctx.textAlign = "center";
+          
+          // Custom symbols for Level 1, numbers for other levels
+          let displaySymbol;
+          if (currentLevel === 0) {
+            // Level 1 custom symbols: "b","2","iy","im","50/50","🛥️","👁️","♥️","u"
+            const level1Symbols = ["b", "2", "iy", "im", "50/50", "🛥️", "👁️", "♥️", "u"];
+            displaySymbol = level1Symbols[tile.sequenceIndex] || (tile.sequenceIndex + 1).toString();
+          } else {
+            // Other levels use numbers
+            displaySymbol = (tile.sequenceIndex + 1).toString();
+          }
           
           // Draw black outline (stroke)
           ctx.strokeStyle = "#000000";
           ctx.lineWidth = 3;
           ctx.strokeText(
-            (tile.sequenceIndex + 1).toString(),
+            displaySymbol,
             tile.x + tile.width / 2,
             tile.y + tile.height / 2 + 4,
           );
@@ -397,7 +408,7 @@ const GameCanvas: React.FC = () => {
           // Draw white fill
           ctx.fillStyle = "#ffffff";
           ctx.fillText(
-            (tile.sequenceIndex + 1).toString(),
+            displaySymbol,
             tile.x + tile.width / 2,
             tile.y + tile.height / 2 + 4,
           );
