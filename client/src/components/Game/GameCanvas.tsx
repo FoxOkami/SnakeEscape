@@ -394,7 +394,7 @@ const GameCanvas: React.FC = () => {
 
         // Add sequence number/symbol - only if sequenceIndex >= 0
         if (tile.sequenceIndex >= 0) {
-          ctx.font = "12px Arial";
+          ctx.font = "12px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
           ctx.textAlign = "center";
 
           // Custom symbols for Level 1, numbers for other levels
@@ -2357,8 +2357,8 @@ const GameCanvas: React.FC = () => {
         const topY = 50; // Position near top of screen to avoid player/snakes
         const fullText = hintState.hintString;
         
-        // Set large font for visibility
-        ctx.font = "28px Arial";
+        // Set large font for visibility with emoji support
+        ctx.font = "28px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Arial, sans-serif";
         ctx.textAlign = "center";
         
         // Measure text width to center it properly
@@ -2394,10 +2394,13 @@ const GameCanvas: React.FC = () => {
             break;
         }
         
-        // Draw each character with wave effect
+        // Now using emoji-capable fonts for proper rendering
+        
+        // Draw each character with wave effect - handle emojis properly
         let currentX = startX;
-        for (let i = 0; i < fullText.length; i++) {
-          const char = fullText[i];
+        const characters = [...fullText]; // Use spread operator to properly handle emojis
+        for (let i = 0; i < characters.length; i++) {
+          const char = characters[i];
           const charMetrics = ctx.measureText(char);
           const charWidth = charMetrics.width;
           const charCenterX = currentX + charWidth / 2;
