@@ -2411,26 +2411,17 @@ const GameCanvas: React.FC = () => {
           
           let alpha = 0; // Completely transparent by default
           
-          // Only show text during appearing and visible phases
+          // Only show text when wave is directly over it
           if (hintState.currentPhase === 'appearing') {
-            // During wave animation
+            // During wave animation - only visible when wave passes over
             if (waveDistance < waveRadius) {
-              // Character is within wave radius - make it more visible
+              // Character is within wave radius - make it visible
               const waveIntensity = 1 - (waveDistance / waveRadius);
               alpha = waveIntensity; // From 0 to 1.0 based on wave position
-            } else {
-              alpha = 0.05; // Very faint transparency for text not yet hit by wave
             }
-          } else if (hintState.currentPhase === 'visible') {
-            // During visible phase, all text should be fully visible
-            alpha = 1.0;
-          } else if (hintState.currentPhase === 'disappearing') {
-            // During fade out, gradually reduce alpha
-            const disappearStartTime = WAIT_TIME + WAVE_DURATION + VISIBLE_TIME;
-            const fadeProgress = Math.min(1.0, (elapsedTime - disappearStartTime) / FADE_OUT_TIME);
-            alpha = 1.0 * (1.0 - fadeProgress);
+            // No else clause - characters not in wave remain at alpha = 0
           }
-          // For 'waiting' phase, alpha remains 0 (completely transparent)
+          // All other phases (waiting, visible, disappearing) remain at alpha = 0
           
           // Draw black outline with alpha
           ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
