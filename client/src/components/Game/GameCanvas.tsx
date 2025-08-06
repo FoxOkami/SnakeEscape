@@ -2351,31 +2351,91 @@ const GameCanvas: React.FC = () => {
         });
       }
 
-      // Draw hint text for Level 1 (always on top of everything else)
+      // Draw hint text with wave effect (Level 1 only)
       if (currentLevel === 0 && hintState && hintState.isActive) {
         const centerX = levelSize.width / 2;
         const centerY = levelSize.height / 2;
+        const fullText = hintState.hintString;
         
-        // Get visible portion of hint string
-        const visibleText = hintState.hintString.substring(0, hintState.visibleCharacterCount);
+        // Set large font for visibility
+        ctx.font = "28px Arial";
+        ctx.textAlign = "center";
         
-        if (visibleText.length > 0) {
-          // Set large font for visibility
-          ctx.font = "28px Arial";
-          ctx.textAlign = "center";
-          
-          // Draw black outline for readability
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = 4;
-          ctx.strokeText(visibleText, centerX, centerY);
-          
-          // Draw white fill text
-          ctx.fillStyle = "#ffffff";
-          ctx.fillText(visibleText, centerX, centerY);
-          
-          // Reset text alignment
-          ctx.textAlign = "left";
+        // Measure text width to center it properly
+        const textMetrics = ctx.measureText(fullText);
+        const textWidth = textMetrics.width;
+        const startX = centerX - textWidth / 2;
+        
+        // Calculate wave position based on animation phase
+        let waveProgress = 0;
+        const currentTime = Date.now();
+        const elapsedTime = currentTime - hintState.startTime;
+        
+        // Phase timing constants
+        const WAIT_TIME = 2000;
+        const WAVE_DURATION = 3000; // 3 seconds for wave to cross
+        const VISIBLE_TIME = 3000;
+        const FADE_OUT_TIME = 1000;
+        const PAUSE_TIME = 5000;
+        
+        switch (hintState.currentPhase) {
+          case 'waiting':
+            waveProgress = -0.5; // Wave hasn't started yet
+            break;
+          case 'appearing':
+            const appearProgress = (elapsedTime - WAIT_TIME) / WAVE_DURATION;
+            waveProgress = Math.max(-0.5, Math.min(1.5, appearProgress));
+            break;
+          case 'visible':
+            waveProgress = 1.5; // Wave has passed completely
+            break;
+          case 'disappearing':
+            waveProgress = 1.5; // Keep visible during fade out
+            break;
         }
+        
+        // Draw each character with wave effect
+        let currentX = startX;
+        for (let i = 0; i < fullText.length; i++) {
+          const char = fullText[i];
+          const charMetrics = ctx.measureText(char);
+          const charWidth = charMetrics.width;
+          const charCenterX = currentX + charWidth / 2;
+          
+          // Calculate character's position relative to wave (0 to 1)
+          const charRelativePos = (charCenterX - startX) / textWidth;
+          
+          // Calculate wave influence on this character
+          const waveDistance = Math.abs(charRelativePos - waveProgress);
+          const waveRadius = 0.15; // Wave affects 15% of text width
+          
+          let alpha = 0.1; // Very low transparency when not in wave
+          
+          if (waveDistance < waveRadius) {
+            // Character is within wave radius - make it more visible
+            const waveIntensity = 1 - (waveDistance / waveRadius);
+            alpha = 0.1 + (0.9 * waveIntensity); // From 0.1 to 1.0
+          }
+          
+          // During visible phase, all text should be fully visible
+          if (hintState.currentPhase === 'visible') {
+            alpha = 1.0;
+          }
+          
+          // Draw black outline with alpha
+          ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
+          ctx.lineWidth = 4;
+          ctx.strokeText(char, charCenterX, centerY);
+          
+          // Draw white fill with alpha
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+          ctx.fillText(char, charCenterX, centerY);
+          
+          currentX += charWidth;
+        }
+        
+        // Reset text alignment
+        ctx.textAlign = "left";
       }
     },
     [

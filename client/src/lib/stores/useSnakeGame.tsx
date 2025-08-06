@@ -2900,55 +2900,41 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       const currentTime = Date.now();
       const elapsedTime = currentTime - state.hintState.startTime;
-      const hintString = state.hintState.hintString;
-      const totalChars = hintString.length;
       
       let newPhase = state.hintState.currentPhase;
-      let newVisibleCount = state.hintState.visibleCharacterCount;
       
-      // Phase timing constants
+      // Phase timing constants for wave effect
       const WAIT_TIME = 2000; // 2 seconds initial wait
-      const CHAR_APPEAR_TIME = 150; // 150ms per character appearing
+      const WAVE_DURATION = 3000; // 3 seconds for wave to cross
       const VISIBLE_TIME = 3000; // 3 seconds fully visible
-      const CHAR_DISAPPEAR_TIME = 100; // 100ms per character disappearing
+      const FADE_OUT_TIME = 1000; // 1 second fade out
       const CYCLE_PAUSE_TIME = 5000; // 5 seconds pause between cycles
       
       switch (state.hintState.currentPhase) {
         case 'waiting':
           if (elapsedTime >= WAIT_TIME) {
             newPhase = 'appearing';
-            newVisibleCount = 0;
           }
           break;
           
         case 'appearing':
-          const appearProgress = elapsedTime - WAIT_TIME;
-          newVisibleCount = Math.min(totalChars, Math.floor(appearProgress / CHAR_APPEAR_TIME));
-          
-          if (newVisibleCount >= totalChars) {
+          const waveEndTime = WAIT_TIME + WAVE_DURATION;
+          if (elapsedTime >= waveEndTime) {
             newPhase = 'visible';
           }
           break;
           
         case 'visible':
-          const visibleStartTime = WAIT_TIME + (totalChars * CHAR_APPEAR_TIME);
-          if (elapsedTime >= visibleStartTime + VISIBLE_TIME) {
+          const visibleEndTime = WAIT_TIME + WAVE_DURATION + VISIBLE_TIME;
+          if (elapsedTime >= visibleEndTime) {
             newPhase = 'disappearing';
-            newVisibleCount = totalChars;
           }
           break;
           
         case 'disappearing':
-          const disappearStartTime = WAIT_TIME + (totalChars * CHAR_APPEAR_TIME) + VISIBLE_TIME;
-          const disappearProgress = elapsedTime - disappearStartTime;
-          const charsToHide = Math.floor(disappearProgress / CHAR_DISAPPEAR_TIME);
-          newVisibleCount = Math.max(0, totalChars - charsToHide);
-          
-          if (newVisibleCount <= 0) {
+          const disappearEndTime = WAIT_TIME + WAVE_DURATION + VISIBLE_TIME + FADE_OUT_TIME;
+          if (elapsedTime >= disappearEndTime) {
             // Restart the hint cycle after a pause
-            newPhase = 'waiting';
-            newVisibleCount = 0;
-            // Reset start time for new cycle with pause
             set({
               hintState: {
                 ...state.hintState,
@@ -2978,7 +2964,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         hintState: {
           ...state.hintState,
           currentPhase: newPhase,
-          visibleCharacterCount: newVisibleCount
+          visibleCharacterCount: state.hintState.visibleCharacterCount // Keep this for compatibility but not used in wave effect
         }
       });
     },
