@@ -2354,7 +2354,7 @@ const GameCanvas: React.FC = () => {
       // Draw hint text with wave effect (Level 1 only)
       if (currentLevel === 0 && hintState && hintState.isActive) {
         const centerX = levelSize.width / 2;
-        const centerY = levelSize.height / 2;
+        const topY = 50; // Position near top of screen to avoid player/snakes
         const fullText = hintState.hintString;
         
         // Set large font for visibility
@@ -2426,11 +2426,11 @@ const GameCanvas: React.FC = () => {
           // Draw black outline with alpha
           ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
           ctx.lineWidth = 4;
-          ctx.strokeText(char, charCenterX, centerY);
+          ctx.strokeText(char, charCenterX, topY);
           
           // Draw white fill with alpha
           ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-          ctx.fillText(char, charCenterX, centerY);
+          ctx.fillText(char, charCenterX, topY);
           
           currentX += charWidth;
         }
