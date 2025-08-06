@@ -2423,14 +2423,29 @@ const GameCanvas: React.FC = () => {
           }
           // All other phases (waiting, visible, disappearing) remain at alpha = 0
           
-          // Draw black outline with alpha
-          ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
-          ctx.lineWidth = 4;
-          ctx.strokeText(char, charCenterX, topY);
+          // Check if this is an emoji (specifically check for the ones we use: ♥️, 👁️, 🛥️)
+          const isEmoji = ['♥️', '👁️', '🛥️', '❤️', '👀'].includes(char);
           
-          // Draw white fill with alpha
-          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-          ctx.fillText(char, charCenterX, topY);
+          if (isEmoji) {
+            // For emojis, use shadow for visibility instead of outline
+            ctx.save();
+            ctx.shadowColor = `rgba(0, 0, 0, ${alpha})`;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            ctx.shadowBlur = 4;
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.fillText(char, charCenterX, topY);
+            ctx.restore();
+          } else {
+            // For regular text, use outline approach
+            ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
+            ctx.lineWidth = 4;
+            ctx.strokeText(char, charCenterX, topY);
+            
+            // Draw white fill with alpha
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.fillText(char, charCenterX, topY);
+          }
           
           currentX += charWidth;
         }
