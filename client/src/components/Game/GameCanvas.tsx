@@ -416,20 +416,25 @@ const GameCanvas: React.FC = () => {
           const hasEmoji = displaySymbol.includes("🛥️") || displaySymbol.includes("👁️") || displaySymbol.includes("♥️");
           
           if (hasEmoji) {
-            // For emojis: create a tight outline by drawing black copies with minimal offset
-            ctx.fillStyle = "#000000";
-            // Draw outline with 1px offset in 8 directions for a tight black border
-            ctx.fillText(displaySymbol, centerX - 1, centerY - 1);
-            ctx.fillText(displaySymbol, centerX, centerY - 1);
-            ctx.fillText(displaySymbol, centerX + 1, centerY - 1);
-            ctx.fillText(displaySymbol, centerX - 1, centerY);
-            ctx.fillText(displaySymbol, centerX + 1, centerY);
-            ctx.fillText(displaySymbol, centerX - 1, centerY + 1);
-            ctx.fillText(displaySymbol, centerX, centerY + 1);
-            ctx.fillText(displaySymbol, centerX + 1, centerY + 1);
+            // For emojis: Use shadowBlur to create an outline effect
+            ctx.save(); // Save current context state
             
-            // Draw the main emoji in its natural colors
-            ctx.fillStyle = "#ffffff"; // This won't affect emoji colors but ensures proper rendering
+            // Create a black shadow that appears as an outline
+            ctx.shadowColor = "#000000";
+            ctx.shadowBlur = 3;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Draw the emoji multiple times to strengthen the shadow effect
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(displaySymbol, centerX, centerY);
+            ctx.fillText(displaySymbol, centerX, centerY);
+            ctx.fillText(displaySymbol, centerX, centerY);
+            
+            ctx.restore(); // Restore context state
+            
+            // Draw the main emoji without shadow
+            ctx.fillStyle = "#ffffff";
             ctx.fillText(displaySymbol, centerX, centerY);
           } else {
             // For text: use traditional stroke method
