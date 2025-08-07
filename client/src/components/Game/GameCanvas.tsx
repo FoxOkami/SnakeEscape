@@ -935,11 +935,11 @@ const GameCanvas: React.FC = () => {
             // Draw black outline (stroke)
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 3;
-            ctx.strokeText("E", item.x + item.width / 2, item.y - 5);
+            ctx.strokeText("E to pick up", item.x + item.width / 2, item.y - 5);
 
             // Draw white fill
             ctx.fillStyle = "#ffffff";
-            ctx.fillText("E", item.x + item.width / 2, item.y - 5);
+            ctx.fillText("E to pick up", item.x + item.width / 2, item.y - 5);
 
             ctx.textAlign = "left";
           }
