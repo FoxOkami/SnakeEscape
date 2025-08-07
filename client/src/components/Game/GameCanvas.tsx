@@ -254,7 +254,7 @@ const GameCanvas: React.FC = () => {
           const growRectWidth = Math.min(660, animationOffset);
           if (growRectWidth > 0) {
             ctx.fillStyle = "#800080";
-            ctx.fillRect(120, barY, growRectWidth, barHeight);
+            ctx.fillRect(20, barY, growRectWidth, barHeight);
           }
         }
       }
