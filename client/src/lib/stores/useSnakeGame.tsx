@@ -29,6 +29,10 @@ interface SnakeGameState extends GameData {
   // Levels data
   levels: any[];
   
+  // Pre-randomized Level 2 data (set when starting game)
+  level2RandomizedSwitches?: Switch[];
+  level2RandomizedThrowableItems?: any[];
+  
   // Performance optimization
   lastLightCheckTime?: number;
   lastLightBeamHash?: string;
@@ -334,7 +338,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       const level = LEVELS[0];
       
       // Randomize Level 1 symbols and pattern sequence
-      const randomization = randomizeLevel1();
+      const level1Randomization = randomizeLevel1();
+      
+      // Pre-randomize Level 2 data for when player progresses
+      const level2Randomization = randomizeLevel2();
       
       set({
         currentLevel: 0,
@@ -357,8 +364,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         throwableItems: level.throwableItems
           ? level.throwableItems.map((item) => ({ ...item }))
           : [],
-        patternTiles: randomization.newPatternTiles,
-        patternSequence: randomization.newPatternSequence,
+        patternTiles: level1Randomization.newPatternTiles,
+        patternSequence: level1Randomization.newPatternSequence,
         currentPatternStep: 0,
         carriedItem: null,
         levelSize: { ...level.size },
@@ -381,7 +388,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         keysPressed: new Set(),
         isWalking: false,
         hintState: null, // Initialize hint state
-        randomizedSymbols: randomization.randomizedSymbols, // Store randomized symbols
+        randomizedSymbols: level1Randomization.randomizedSymbols, // Store randomized symbols
+        // Store pre-randomized Level 2 data
+        level2RandomizedSwitches: level2Randomization.randomizedSwitches,
+        level2RandomizedThrowableItems: level2Randomization.randomizedThrowableItems,
       });
       
       // Auto-trigger hint for Level 1 after a short delay
@@ -415,9 +425,16 @@ export const useSnakeGame = create<SnakeGameState>()(
         randomizedSymbols = randomization.randomizedSymbols;
         newPatternTiles = randomization.newPatternTiles;
       } else if (levelIndex === 1) {
-        const randomization = randomizeLevel2();
-        levelSwitches = randomization.randomizedSwitches;
-        levelThrowableItems = randomization.randomizedThrowableItems;
+        // Use pre-stored randomization if available (from startGame), otherwise generate new
+        const currentState = get();
+        if (currentState.level2RandomizedSwitches && currentState.level2RandomizedThrowableItems) {
+          levelSwitches = currentState.level2RandomizedSwitches.map((s) => ({ ...s }));
+          levelThrowableItems = currentState.level2RandomizedThrowableItems.map((item) => ({ ...item }));
+        } else {
+          const randomization = randomizeLevel2();
+          levelSwitches = randomization.randomizedSwitches;
+          levelThrowableItems = randomization.randomizedThrowableItems;
+        }
       }
       
       set({
@@ -464,6 +481,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         isWalking: false,
         hintState: null, // Initialize hint state
         randomizedSymbols, // Store randomized symbols for Level 1
+        // Clear pre-stored Level 2 data when directly selecting Level 2
+        level2RandomizedSwitches: levelIndex === 1 ? undefined : get().level2RandomizedSwitches,
+        level2RandomizedThrowableItems: levelIndex === 1 ? undefined : get().level2RandomizedThrowableItems,
       });
       
       // Auto-trigger hint for Level 1 only
@@ -533,6 +553,24 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       const level = LEVELS[nextLevelIndex];
+      
+      // Handle Level 2 randomization for nextLevel progression
+      let levelSwitches = level.switches ? level.switches.map((s) => ({ ...s })) : [];
+      let levelThrowableItems = level.throwableItems ? level.throwableItems.map((item) => ({ ...item })) : [];
+      
+      if (nextLevelIndex === 1) {
+        // Use pre-stored randomization from startGame if available
+        if (state.level2RandomizedSwitches && state.level2RandomizedThrowableItems) {
+          levelSwitches = state.level2RandomizedSwitches.map((s) => ({ ...s }));
+          levelThrowableItems = state.level2RandomizedThrowableItems.map((item) => ({ ...item }));
+        } else {
+          // Fallback: generate new randomization
+          const randomization = randomizeLevel2();
+          levelSwitches = randomization.randomizedSwitches;
+          levelThrowableItems = randomization.randomizedThrowableItems;
+        }
+      }
+      
       set({
         currentLevel: nextLevelIndex,
         gameState: "playing",
@@ -550,10 +588,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         walls: level.walls.map((wall) => ({ ...wall })),
         door: { ...level.door },
         key: { ...level.key },
-        switches: level.switches ? level.switches.map((s) => ({ ...s })) : [],
-        throwableItems: level.throwableItems
-          ? level.throwableItems.map((item) => ({ ...item }))
-          : [],
+        switches: levelSwitches,
+        throwableItems: levelThrowableItems,
+        // Clear pre-stored Level 2 data after using it
+        level2RandomizedSwitches: undefined,
+        level2RandomizedThrowableItems: undefined,
         patternTiles: level.patternTiles ? level.patternTiles.map((tile) => ({ ...tile })) : [],
         patternSequence: level.patternSequence ? [...level.patternSequence] : [],
         currentPatternStep: 0,
