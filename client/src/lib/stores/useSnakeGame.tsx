@@ -903,10 +903,9 @@ export const useSnakeGame = create<SnakeGameState>()(
             isPressed = true;
           }
           
-          // Check if any of the special items are on the pressure plate
+          // Check if any throwable items are on the pressure plate
           for (const item of updatedThrowableItems) {
-            if (!item.isPickedUp && !item.isThrown && 
-                ['chubbs_hand', 'elis_hip', 'barbra_hat'].includes(item.type)) {
+            if (!item.isPickedUp && !item.isThrown) {
               const itemRect = { x: item.x, y: item.y, width: item.width, height: item.height };
               if (checkAABBCollision(itemRect, switchObj)) {
                 isPressed = true;
