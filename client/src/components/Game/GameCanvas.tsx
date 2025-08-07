@@ -923,11 +923,19 @@ const GameCanvas: React.FC = () => {
 
         // Add pickup indicator if player is nearby and not carrying anything
         if (!item.isPickedUp && !carriedItem) {
+          // Check if player is close enough using a distance that matches pickup range
+          const playerCenterX = player.position.x + player.size.width / 2;
+          const playerCenterY = player.position.y + player.size.height / 2;
+          const itemCenterX = item.x + item.width / 2;
+          const itemCenterY = item.y + item.height / 2;
+          
           const distance = Math.sqrt(
-            Math.pow(player.position.x - item.x, 2) +
-              Math.pow(player.position.y - item.y, 2),
+            Math.pow(playerCenterX - itemCenterX, 2) +
+              Math.pow(playerCenterY - itemCenterY, 2),
           );
-          if (distance < 50) {
+          
+          // Use distance that ensures pickup will work when tooltip shows
+          if (distance < 40) {
             // Draw white text with black outline
             ctx.font = "12px Arial";
             ctx.textAlign = "center";

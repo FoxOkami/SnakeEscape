@@ -26,19 +26,19 @@ function getRandomizedLevel2ItemPositions(): Array<{ x: number; y: number }> {
     { x: 45, y: 360 },
     { x: 650, y: 70 },
   ];
-  
+
   // Shuffle array and take first 3 positions
   const shuffled = [...allSpawnLocations].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, 3);
 }
 
 // Helper function to get randomized item names for level 2
-function getRandomizedLevel2ItemNames(): Array<ThrowableItem['type']> {
+function getRandomizedLevel2ItemNames(): Array<ThrowableItem["type"]> {
   // All possible item names (3 original + 10 new)
-  const allItemNames: ThrowableItem['type'][] = [
+  const allItemNames: ThrowableItem["type"][] = [
     // Original names
     "chubbs_hand",
-    "elis_hip", 
+    "elis_hip",
     "barbra_hat",
     // New names
     "box_of_golf_balls",
@@ -50,9 +50,9 @@ function getRandomizedLevel2ItemNames(): Array<ThrowableItem['type']> {
     "the_blue_album",
     "origami_book",
     "tennis_racket",
-    "yoga_block"
+    "yoga_block",
   ];
-  
+
   // Shuffle array and take first 3 names
   const shuffled = [...allItemNames].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, 3);
@@ -62,13 +62,13 @@ function getRandomizedLevel2ItemNames(): Array<ThrowableItem['type']> {
 export function randomizeLevel2() {
   // Get randomized item positions
   const itemPositions = getRandomizedLevel2ItemPositions();
-  
+
   // Get randomized item names
   const itemNames = getRandomizedLevel2ItemNames();
-  
+
   // Get randomized pressure plate positions
   const platePositions = getRandomizedLevel2PressurePlatePositions();
-  
+
   // Create randomized switches
   const randomizedSwitches = platePositions.map((plate) => ({
     x: plate.x,
@@ -78,7 +78,7 @@ export function randomizeLevel2() {
     isPressed: false,
     id: plate.id,
   }));
-  
+
   // Create randomized throwable items
   const randomizedThrowableItems = [
     {
@@ -92,7 +92,7 @@ export function randomizeLevel2() {
       isThrown: false,
     },
     {
-      id: "item2", 
+      id: "item2",
       type: itemNames[1],
       x: itemPositions[1].x,
       y: itemPositions[1].y,
@@ -112,7 +112,7 @@ export function randomizeLevel2() {
       isThrown: false,
     },
   ];
-  
+
   return {
     randomizedSwitches,
     randomizedThrowableItems,
@@ -120,7 +120,11 @@ export function randomizeLevel2() {
 }
 
 // Helper function to get randomized pressure plate positions for level 2
-function getRandomizedLevel2PressurePlatePositions(): Array<{ x: number; y: number; id: string }> {
+function getRandomizedLevel2PressurePlatePositions(): Array<{
+  x: number;
+  y: number;
+  id: string;
+}> {
   // All 6 potential pressure plate locations (3 original + 3 new)
   const allPlateLocations = [
     // Original locations
@@ -132,7 +136,7 @@ function getRandomizedLevel2PressurePlatePositions(): Array<{ x: number; y: numb
     { x: 635, y: 243, id: "pressure5" },
     { x: 446, y: 525, id: "pressure6" },
   ];
-  
+
   // Shuffle array and take first 3 positions
   const shuffled = [...allPlateLocations].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, 3);
@@ -339,15 +343,15 @@ export const LEVELS: Level[] = [
       {
         id: "stalker1",
         type: "stalker" as const,
-        position: { x: 200, y: 400 },
+        position: { x: 257, y: 502 },
         size: { width: 30, height: 30 },
         speed: 75,
         direction: { x: 0, y: 1 },
         patrolPoints: [
-          { x: 200, y: 400 },
-          { x: 200, y: 500 },
-          { x: 350, y: 500 },
-          { x: 350, y: 400 },
+          { x: 257, y: 502 },
+          { x: 264, y: 364 },
+          { x: 440, y: 364 },
+          { x: 500, y: 500 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -360,15 +364,15 @@ export const LEVELS: Level[] = [
       {
         id: "stalker2",
         type: "stalker" as const,
-        position: { x: 500, y: 100 },
+        position: { x: 241, y: 96 },
         size: { width: 30, height: 30 },
         speed: 75,
         direction: { x: 0, y: 1 },
         patrolPoints: [
-          { x: 500, y: 100 },
-          { x: 400, y: 200 },
-          { x: 500, y: 200 },
-          { x: 400, y: 100 },
+          { x: 241, y: 96 },
+          { x: 211, y: 239 },
+          { x: 496, y: 103 },
+          { x: 445, y: 248 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -381,13 +385,15 @@ export const LEVELS: Level[] = [
       {
         id: "burster1",
         type: "burster" as const,
-        position: { x: 600, y: 200 },
+        position: { x: 651, y: 74 },
         size: { width: 30, height: 30 },
         speed: 50,
         direction: { x: 1, y: 0 },
         patrolPoints: [
-          { x: 600, y: 200 },
-          { x: 700, y: 200 },
+          { x: 651, y: 74 },
+          { x: 632, y: 244 },
+          { x: 719, y: 264 },
+          { x: 724, y: 435 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -404,7 +410,7 @@ export const LEVELS: Level[] = [
         type: "screensaver" as const,
         position: { x: 300, y: 100 },
         size: { width: 30, height: 30 },
-        speed: 135,
+        speed: 165,
         direction: { x: 0, y: 0 }, // Will be randomly set on first update
         patrolPoints: [], // Not used for screensaver
         currentPatrolIndex: 0,
