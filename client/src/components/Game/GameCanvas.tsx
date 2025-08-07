@@ -935,7 +935,7 @@ const GameCanvas: React.FC = () => {
           );
           
           // Use distance that ensures pickup will work when tooltip shows
-          if (distance < 40) {
+          if (distance < 20) {
             // Draw white text with black outline
             ctx.font = "12px Arial";
             ctx.textAlign = "center";
