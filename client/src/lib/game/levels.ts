@@ -15,7 +15,7 @@ export const LEVELS: Level[] = [
   {
     id: 1,
     name: "Shallow Peaks and Low Valleys",
-    player: { x: 50, y: 350 },
+    player: { x: 35, y: 135 },
     size: { width: 800, height: 600 },
     walls: [
       // Outer walls
@@ -86,7 +86,7 @@ export const LEVELS: Level[] = [
         soundCooldown: 0,
       },
     ],
-    door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
+    door: { x: 770, y: 280, width: 30, height: 40, isOpen: false },
     key: { x: 640, y: 300, width: 20, height: 20, collected: false }, // Key in small chamber
     patternTiles: [
       {
@@ -188,7 +188,7 @@ export const LEVELS: Level[] = [
   {
     id: 2,
     name: "MacGruber",
-    player: { x: 50, y: 550 },
+    player: { x: 30, y: 300 },
     size: { width: 800, height: 600 },
     walls: [
       // Outer walls
@@ -286,7 +286,7 @@ export const LEVELS: Level[] = [
         isChasing: false,
       },
     ],
-    door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
+    door: { x: 770, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 650, y: 350, width: 20, height: 20, collected: false },
     switches: [
       {

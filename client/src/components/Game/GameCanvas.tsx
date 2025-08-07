@@ -232,41 +232,29 @@ const GameCanvas: React.FC = () => {
         // Reset text alignment
         ctx.textAlign = "left";
 
-        // Draw rectangles on Level 1 - animate when playing, static when menu is open
+        // Draw animated rectangle after help text
+        // Calculate animation progress - use game time for consistent animation
         const barHeight = 30;
         const barY = 30;
-        
-        if (gameState === "playing") {
-          // Animated rectangles during gameplay
-          const animationSpeed = 1; // pixels per frame
-          const currentTime = Date.now();
-          const animationOffset =
-            Math.floor((currentTime / 16.67) * animationSpeed) % 660; // Reset every 660 frames
+        const animationSpeed = 1; // pixels per frame
+        const currentTime = Date.now();
+        const animationOffset =
+          Math.floor((currentTime / 16.67) * animationSpeed) % 660; // Reset every 660 frames
 
-          const rectX = 120 + animationOffset;
-          const shrinkRectWidth = Math.max(0, 660 - animationOffset);
+        const rectX = 120 + animationOffset;
+        const shrinkRectWidth = Math.max(0, 660 - animationOffset);
 
-          // Draw shrinking rectangle (same color as background)
-          if (shrinkRectWidth > 0) {
-            ctx.fillStyle = backgroundColor;
-            ctx.fillRect(rectX, barY, shrinkRectWidth, barHeight);
-          }
-
-          // Draw growing rectangle (same color as background)
-          const growRectWidth = Math.min(660, animationOffset);
-          if (growRectWidth > 0) {
-            ctx.fillStyle = backgroundColor;
-            ctx.fillRect(20, barY, growRectWidth, barHeight);
-          }
-        } else {
-          // Static rectangles when menu is open - show partial coverage
+        if (shrinkRectWidth > 0) {
           ctx.fillStyle = backgroundColor;
-          
-          // Draw static shrinking rectangle (partial coverage)
-          ctx.fillRect(450, barY, 330, barHeight);
-          
-          // Draw static growing rectangle (partial coverage)
-          ctx.fillRect(20, barY, 330, barHeight);
+          ctx.fillRect(rectX, barY, shrinkRectWidth, barHeight);
+        }
+
+        // Draw a 2nd rectangle after the 1st rectangle - grows from left
+        const growRectWidth = Math.min(660, animationOffset); // Grows as other shrinks
+
+        if (growRectWidth > 0) {
+          ctx.fillStyle = backgroundColor;
+          ctx.fillRect(20, barY, growRectWidth, barHeight);
         }
       }
 
@@ -2438,6 +2426,29 @@ const GameCanvas: React.FC = () => {
             }
           }
         });
+      }
+
+      // Health indicator - red edges creeping inward based on damage taken
+      const maxHealth = 9;
+      const healthLost = maxHealth - player.health;
+      if (healthLost > 0) {
+        const damagePercentage = healthLost / maxHealth;
+        const maxInset = 80; // Maximum inward creep in pixels
+        const currentInset = Math.floor(damagePercentage * maxInset);
+        
+        ctx.fillStyle = "rgba(255, 0, 0, 0.5)"; // 50% opacity red
+        
+        // Top edge
+        ctx.fillRect(0, 0, levelSize.width, currentInset);
+        
+        // Bottom edge  
+        ctx.fillRect(0, levelSize.height - currentInset, levelSize.width, currentInset);
+        
+        // Left edge (accounting for top/bottom overlap)
+        ctx.fillRect(0, currentInset, currentInset, levelSize.height - (2 * currentInset));
+        
+        // Right edge (accounting for top/bottom overlap)
+        ctx.fillRect(levelSize.width - currentInset, currentInset, currentInset, levelSize.height - (2 * currentInset));
       }
     },
     [
