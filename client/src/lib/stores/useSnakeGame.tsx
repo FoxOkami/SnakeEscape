@@ -1301,7 +1301,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (!state.carriedItem) return; // Not carrying anything
 
       // Check if the carried item is one of the non-throwable items
-      const nonThrowableTypes = ['chubbs_hand', 'elis_hip', 'barbra_hat'];
+      const nonThrowableTypes = ['chubbs_hand', 'elis_hip', 'barbra_hat', 'box_of_golf_balls', '4_iron', 'the_prophecy', 'hammer', 'box_of_nails', 'bag_of_concrete', 'the_blue_album', 'origami_book', 'tennis_racket', 'yoga_block'];
       if (nonThrowableTypes.includes(state.carriedItem.type)) {
         // Instead of throwing, just drop the item at the player's position
         const itemIndex = state.throwableItems.findIndex(

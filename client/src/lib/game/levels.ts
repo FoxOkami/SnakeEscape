@@ -90,7 +90,6 @@ export function randomizeLevel2() {
       height: 25,
       isPickedUp: false,
       isThrown: false,
-      throwable: false,
     },
     {
       id: "item2",
@@ -101,7 +100,6 @@ export function randomizeLevel2() {
       height: 25,
       isPickedUp: false,
       isThrown: false,
-      throwable: false,
     },
     {
       id: "item3",
@@ -112,7 +110,6 @@ export function randomizeLevel2() {
       height: 25,
       isPickedUp: false,
       isThrown: false,
-      throwable: false,
     },
   ];
 
