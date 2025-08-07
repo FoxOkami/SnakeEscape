@@ -363,7 +363,7 @@ const GameCanvas: React.FC = () => {
           if (tile.hasBeenActivated) {
             ctx.fillStyle = "#48bb78"; // Green when activated correctly
           } else {
-            ctx.fillStyle = "#4a5568"; // Gray when inactive
+            ctx.fillStyle = "#a0a0a0"; // Lighter gray when inactive
           }
         } else {
           // Other levels: Keep the original glowing effect
