@@ -244,16 +244,16 @@ const GameCanvas: React.FC = () => {
           const rectX = 120 + animationOffset;
           const shrinkRectWidth = Math.max(0, 660 - animationOffset);
 
-          // Draw shrinking black rectangle
+          // Draw shrinking rectangle (same color as background)
           if (shrinkRectWidth > 0) {
-            ctx.fillStyle = "#000000";
+            ctx.fillStyle = backgroundColor;
             ctx.fillRect(rectX, barY, shrinkRectWidth, barHeight);
           }
 
-          // Draw growing purple rectangle
+          // Draw growing rectangle (same color as background)
           const growRectWidth = Math.min(660, animationOffset);
           if (growRectWidth > 0) {
-            ctx.fillStyle = "#800080";
+            ctx.fillStyle = backgroundColor;
             ctx.fillRect(20, barY, growRectWidth, barHeight);
           }
         }
