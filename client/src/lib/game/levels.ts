@@ -10,6 +10,28 @@ import {
   Teleporter,
 } from "./types";
 
+// Helper function to get randomized spawn positions for level 2 items
+function getRandomizedLevel2ItemPositions(): Array<{ x: number; y: number }> {
+  // All 9 potential spawn locations (3 original + 6 new)
+  const allSpawnLocations = [
+    // Original locations
+    { x: 250, y: 100 },
+    { x: 450, y: 250 },
+    { x: 550, y: 450 },
+    // New locations
+    { x: 65, y: 57 },
+    { x: 53, y: 395 },
+    { x: 224, y: 378 },
+    { x: 330, y: 520 },
+    { x: 45, y: 360 },
+    { x: 650, y: 70 },
+  ];
+  
+  // Shuffle array and take first 3 positions
+  const shuffled = [...allSpawnLocations].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 3);
+}
+
 export const LEVELS: Level[] = [
   // Level 1: Pattern-matching puzzle
   {
@@ -314,38 +336,41 @@ export const LEVELS: Level[] = [
         id: "pressure3",
       },
     ],
-    throwableItems: [
-      {
-        id: "chubbshand1",
-        type: "chubbs_hand" as const,
-        x: 250,
-        y: 100,
-        width: 25,
-        height: 25,
-        isPickedUp: false,
-        isThrown: false,
-      },
-      {
-        id: "eliship1",
-        type: "elis_hip" as const,
-        x: 450,
-        y: 250,
-        width: 25,
-        height: 25,
-        isPickedUp: false,
-        isThrown: false,
-      },
-      {
-        id: "barbrahat1",
-        type: "barbra_hat" as const,
-        x: 550,
-        y: 450,
-        width: 25,
-        height: 25,
-        isPickedUp: false,
-        isThrown: false,
-      },
-    ],
+    throwableItems: (() => {
+      const positions = getRandomizedLevel2ItemPositions();
+      return [
+        {
+          id: "chubbshand1",
+          type: "chubbs_hand" as const,
+          x: positions[0].x,
+          y: positions[0].y,
+          width: 25,
+          height: 25,
+          isPickedUp: false,
+          isThrown: false,
+        },
+        {
+          id: "eliship1",
+          type: "elis_hip" as const,
+          x: positions[1].x,
+          y: positions[1].y,
+          width: 25,
+          height: 25,
+          isPickedUp: false,
+          isThrown: false,
+        },
+        {
+          id: "barbrahat1",
+          type: "barbra_hat" as const,
+          x: positions[2].x,
+          y: positions[2].y,
+          width: 25,
+          height: 25,
+          isPickedUp: false,
+          isThrown: false,
+        },
+      ];
+    })(),
   },
 
   // Level 3: Light Reflection Puzzle
