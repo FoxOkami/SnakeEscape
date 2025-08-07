@@ -846,6 +846,79 @@ const GameCanvas: React.FC = () => {
           // Hat decoration
           ctx.fillStyle = "#ffd700";
           ctx.fillRect(item.x + 8, item.y + 3, 9, 3);
+        } else if (item.type === "box_of_golf_balls") {
+          // Draw box of golf balls
+          ctx.fillStyle = "#8b4513";
+          ctx.fillRect(item.x, item.y, item.width, item.height);
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(item.x + 6, item.y + 6, 3, 0, 2 * Math.PI);
+          ctx.arc(item.x + 16, item.y + 6, 3, 0, 2 * Math.PI);
+          ctx.arc(item.x + 6, item.y + 16, 3, 0, 2 * Math.PI);
+          ctx.fill();
+        } else if (item.type === "4_iron") {
+          // Draw 4 iron golf club
+          ctx.fillStyle = "#c0c0c0";
+          ctx.fillRect(item.x + 8, item.y, 4, item.height);
+          ctx.fillStyle = "#8b4513";
+          ctx.fillRect(item.x, item.y + item.height - 8, 15, 8);
+        } else if (item.type === "the_prophecy") {
+          // Draw ancient scroll
+          ctx.fillStyle = "#f5deb3";
+          ctx.fillRect(item.x, item.y + 3, item.width, item.height - 6);
+          ctx.fillStyle = "#8b4513";
+          ctx.fillRect(item.x, item.y, item.width, 3);
+          ctx.fillRect(item.x, item.y + item.height - 3, item.width, 3);
+        } else if (item.type === "hammer") {
+          // Draw hammer
+          ctx.fillStyle = "#8b4513";
+          ctx.fillRect(item.x + 8, item.y + 5, 4, 15);
+          ctx.fillStyle = "#696969";
+          ctx.fillRect(item.x, item.y, item.width, 8);
+        } else if (item.type === "box_of_nails") {
+          // Draw box of nails
+          ctx.fillStyle = "#8b4513";
+          ctx.fillRect(item.x, item.y, item.width, item.height);
+          ctx.fillStyle = "#c0c0c0";
+          for (let i = 0; i < 3; i++) {
+            ctx.fillRect(item.x + 3 + i * 6, item.y + 3, 2, 8);
+          }
+        } else if (item.type === "bag_of_concrete") {
+          // Draw concrete bag
+          ctx.fillStyle = "#a0a0a0";
+          ctx.fillRect(item.x, item.y, item.width, item.height);
+          ctx.fillStyle = "#696969";
+          ctx.fillRect(item.x + 2, item.y + 2, item.width - 4, 3);
+        } else if (item.type === "the_blue_album") {
+          // Draw blue album
+          ctx.fillStyle = "#4169e1";
+          ctx.fillRect(item.x, item.y, item.width, item.height);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(item.x + 5, item.y + 5, item.width - 10, 3);
+          ctx.fillRect(item.x + 5, item.y + 10, item.width - 10, 2);
+        } else if (item.type === "origami_book") {
+          // Draw origami book
+          ctx.fillStyle = "#ff6347";
+          ctx.fillRect(item.x, item.y, item.width, item.height);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(item.x + 3, item.y + 3, 8, 8);
+          ctx.fillStyle = "#ff6347";
+          ctx.fillRect(item.x + 5, item.y + 5, 4, 4);
+        } else if (item.type === "tennis_racket") {
+          // Draw tennis racket
+          ctx.fillStyle = "#8b4513";
+          ctx.fillRect(item.x + 8, item.y + 10, 4, 15);
+          ctx.strokeStyle = "#8b4513";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(item.x + 10, item.y + 8, 8, 0, 2 * Math.PI);
+          ctx.stroke();
+        } else if (item.type === "yoga_block") {
+          // Draw yoga block
+          ctx.fillStyle = "#9370db";
+          ctx.fillRect(item.x, item.y, item.width, item.height);
+          ctx.fillStyle = "#8a2be2";
+          ctx.fillRect(item.x + 2, item.y + 2, item.width - 4, item.height - 4);
         }
 
         // Add pickup indicator if player is nearby and not carrying anything
