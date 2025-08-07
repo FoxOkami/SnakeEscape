@@ -923,14 +923,30 @@ const GameCanvas: React.FC = () => {
 
         // Add pickup indicator if player is nearby and not carrying anything
         if (!item.isPickedUp && !carriedItem) {
-          // Use much smaller distance that matches actual pickup capability
-          const distance = Math.sqrt(
-            Math.pow(player.position.x - item.x, 2) +
-              Math.pow(player.position.y - item.y, 2),
+          // Use the exact same AABB collision detection as the pickup logic
+          const playerRect = {
+            x: player.position.x,
+            y: player.position.y,
+            width: player.size.width,
+            height: player.size.height,
+          };
+          
+          const itemRect = {
+            x: item.x,
+            y: item.y,
+            width: item.width,
+            height: item.height,
+          };
+          
+          // Check AABB collision - exact same logic as pickupItem function
+          const canPickup = (
+            playerRect.x < itemRect.x + itemRect.width &&
+            playerRect.x + playerRect.width > itemRect.x &&
+            playerRect.y < itemRect.y + itemRect.height &&
+            playerRect.y + playerRect.height > itemRect.y
           );
           
-          // Only show tooltip when player is very close - close enough that pickup will definitely work
-          if (distance < 35) {
+          if (canPickup) {
             // Draw white text with black outline
             ctx.font = "12px Arial";
             ctx.textAlign = "center";
