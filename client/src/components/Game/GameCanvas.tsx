@@ -2428,28 +2428,7 @@ const GameCanvas: React.FC = () => {
         });
       }
 
-      // Health indicator - red edges creeping inward based on damage taken
-      const maxHealth = 9;
-      const healthLost = maxHealth - player.health;
-      if (healthLost > 0) {
-        const damagePercentage = healthLost / maxHealth;
-        const maxInset = 80; // Maximum inward creep in pixels
-        const currentInset = Math.floor(damagePercentage * maxInset);
-        
-        ctx.fillStyle = "rgba(255, 0, 0, 0.5)"; // 50% opacity red
-        
-        // Top edge
-        ctx.fillRect(0, 0, levelSize.width, currentInset);
-        
-        // Bottom edge  
-        ctx.fillRect(0, levelSize.height - currentInset, levelSize.width, currentInset);
-        
-        // Left edge (accounting for top/bottom overlap)
-        ctx.fillRect(0, currentInset, currentInset, levelSize.height - (2 * currentInset));
-        
-        // Right edge (accounting for top/bottom overlap)
-        ctx.fillRect(levelSize.width - currentInset, currentInset, currentInset, levelSize.height - (2 * currentInset));
-      }
+
     },
     [
       player,
