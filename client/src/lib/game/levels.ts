@@ -90,6 +90,7 @@ export function randomizeLevel2() {
       height: 25,
       isPickedUp: false,
       isThrown: false,
+      throwable: !['chubbs_hand', 'elis_hip', 'barbra_hat'].includes(itemNames[0]),
     },
     {
       id: "item2",
@@ -100,6 +101,7 @@ export function randomizeLevel2() {
       height: 25,
       isPickedUp: false,
       isThrown: false,
+      throwable: !['chubbs_hand', 'elis_hip', 'barbra_hat'].includes(itemNames[1]),
     },
     {
       id: "item3",
@@ -110,6 +112,7 @@ export function randomizeLevel2() {
       height: 25,
       isPickedUp: false,
       isThrown: false,
+      throwable: !['chubbs_hand', 'elis_hip', 'barbra_hat'].includes(itemNames[2]),
     },
   ];
 
