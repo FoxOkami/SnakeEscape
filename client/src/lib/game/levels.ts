@@ -58,6 +58,25 @@ function getRandomizedLevel2ItemNames(): Array<ThrowableItem['type']> {
   return shuffled.slice(0, 3);
 }
 
+// Helper function to get randomized pressure plate positions for level 2
+function getRandomizedLevel2PressurePlatePositions(): Array<{ x: number; y: number; id: string }> {
+  // All 6 potential pressure plate locations (3 original + 3 new)
+  const allPlateLocations = [
+    // Original locations
+    { x: 200, y: 500, id: "pressure1" },
+    { x: 500, y: 100, id: "pressure2" },
+    { x: 680, y: 450, id: "pressure3" },
+    // New locations
+    { x: 211, y: 236, id: "pressure4" },
+    { x: 635, y: 243, id: "pressure5" },
+    { x: 446, y: 525, id: "pressure6" },
+  ];
+  
+  // Shuffle array and take first 3 positions
+  const shuffled = [...allPlateLocations].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 3);
+}
+
 export const LEVELS: Level[] = [
   // Level 1: Pattern-matching puzzle
   {
@@ -336,32 +355,17 @@ export const LEVELS: Level[] = [
     ],
     door: { x: 770, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 650, y: 350, width: 20, height: 20, collected: false },
-    switches: [
-      {
-        x: 200,
-        y: 500,
+    switches: (() => {
+      const platePositions = getRandomizedLevel2PressurePlatePositions();
+      return platePositions.map((plate) => ({
+        x: plate.x,
+        y: plate.y,
         width: 30,
         height: 30,
         isPressed: false,
-        id: "pressure1",
-      },
-      {
-        x: 500,
-        y: 100,
-        width: 30,
-        height: 30,
-        isPressed: false,
-        id: "pressure2",
-      },
-      {
-        x: 680,
-        y: 450,
-        width: 30,
-        height: 30,
-        isPressed: false,
-        id: "pressure3",
-      },
-    ],
+        id: plate.id,
+      }));
+    })(),
     throwableItems: (() => {
       const positions = getRandomizedLevel2ItemPositions();
       const names = getRandomizedLevel2ItemNames();
