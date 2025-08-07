@@ -204,8 +204,8 @@ const SnakeRoom: React.FC = () => {
     const handleMouseClick = (event: MouseEvent) => {
       if (gameState !== "playing" || !carriedItem) return;
 
-      // Only allow clicking to throw for throwable items (not chubbs_hand, elis_hip, barbra_hat)
-      const nonThrowableTypes = ["chubbs_hand", "elis_hip", "barbra_hat"];
+      // Only allow clicking to throw for throwable items (not chubbs_hand, elis_hip, barbra_hat and all new Level 2 items)
+      const nonThrowableTypes = ["chubbs_hand", "elis_hip", "barbra_hat", "box_of_golf_balls", "4_iron", "the_prophecy", "hammer", "box_of_nails", "bag_of_concrete", "the_blue_album", "origami_book", "tennis_racket", "yoga_block"];
       if (nonThrowableTypes.includes(carriedItem.type)) {
         return; // Don't allow clicking to throw non-throwable items
       }
