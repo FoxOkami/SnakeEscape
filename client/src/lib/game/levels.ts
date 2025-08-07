@@ -32,6 +32,32 @@ function getRandomizedLevel2ItemPositions(): Array<{ x: number; y: number }> {
   return shuffled.slice(0, 3);
 }
 
+// Helper function to get randomized item names for level 2
+function getRandomizedLevel2ItemNames(): Array<ThrowableItem['type']> {
+  // All possible item names (3 original + 10 new)
+  const allItemNames: ThrowableItem['type'][] = [
+    // Original names
+    "chubbs_hand",
+    "elis_hip", 
+    "barbra_hat",
+    // New names
+    "box_of_golf_balls",
+    "4_iron",
+    "the_prophecy",
+    "hammer",
+    "box_of_nails",
+    "bag_of_concrete",
+    "the_blue_album",
+    "origami_book",
+    "tennis_racket",
+    "yoga_block"
+  ];
+  
+  // Shuffle array and take first 3 names
+  const shuffled = [...allItemNames].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 3);
+}
+
 export const LEVELS: Level[] = [
   // Level 1: Pattern-matching puzzle
   {
@@ -338,10 +364,11 @@ export const LEVELS: Level[] = [
     ],
     throwableItems: (() => {
       const positions = getRandomizedLevel2ItemPositions();
+      const names = getRandomizedLevel2ItemNames();
       return [
         {
-          id: "chubbshand1",
-          type: "chubbs_hand" as const,
+          id: "item1",
+          type: names[0],
           x: positions[0].x,
           y: positions[0].y,
           width: 25,
@@ -350,8 +377,8 @@ export const LEVELS: Level[] = [
           isThrown: false,
         },
         {
-          id: "eliship1",
-          type: "elis_hip" as const,
+          id: "item2",
+          type: names[1],
           x: positions[1].x,
           y: positions[1].y,
           width: 25,
@@ -360,8 +387,8 @@ export const LEVELS: Level[] = [
           isThrown: false,
         },
         {
-          id: "barbrahat1",
-          type: "barbra_hat" as const,
+          id: "item3",
+          type: names[2],
           x: positions[2].x,
           y: positions[2].y,
           width: 25,

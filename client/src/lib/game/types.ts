@@ -167,7 +167,9 @@ export interface FlowState {
 
 export interface ThrowableItem extends Rectangle {
   id: string;
-  type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat';
+  type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat' | 
+        'box_of_golf_balls' | '4_iron' | 'the_prophecy' | 'hammer' | 'box_of_nails' | 
+        'bag_of_concrete' | 'the_blue_album' | 'origami_book' | 'tennis_racket' | 'yoga_block';
   isPickedUp: boolean;
   isThrown: boolean;
   velocity?: Position;

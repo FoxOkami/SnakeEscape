@@ -30,6 +30,7 @@ Preferred communication style: Simple, everyday language.
 - **Level System**: JSON-based definitions for scalable and complex level designs
 - **Audio**: HTML5 Audio API for immersive soundscapes and effects
 - **Health System**: 2-hit player health with 1-second invincibility, health persists between levels
+- **Randomization**: Level 2 features randomized item spawning (9 potential locations) and randomized item names (13 different item types)
 
 ### UI/UX Decisions
 - **Components**: Utilizes Radix UI for accessible and performant UI elements.
