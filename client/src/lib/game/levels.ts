@@ -58,6 +58,67 @@ function getRandomizedLevel2ItemNames(): Array<ThrowableItem['type']> {
   return shuffled.slice(0, 3);
 }
 
+// Helper function to randomize Level 2 data
+export function randomizeLevel2() {
+  // Get randomized item positions
+  const itemPositions = getRandomizedLevel2ItemPositions();
+  
+  // Get randomized item names
+  const itemNames = getRandomizedLevel2ItemNames();
+  
+  // Get randomized pressure plate positions
+  const platePositions = getRandomizedLevel2PressurePlatePositions();
+  
+  // Create randomized switches
+  const randomizedSwitches = platePositions.map((plate) => ({
+    x: plate.x,
+    y: plate.y,
+    width: 30,
+    height: 30,
+    isPressed: false,
+    id: plate.id,
+  }));
+  
+  // Create randomized throwable items
+  const randomizedThrowableItems = [
+    {
+      id: "item1",
+      type: itemNames[0],
+      x: itemPositions[0].x,
+      y: itemPositions[0].y,
+      width: 25,
+      height: 25,
+      isPickedUp: false,
+      isThrown: false,
+    },
+    {
+      id: "item2", 
+      type: itemNames[1],
+      x: itemPositions[1].x,
+      y: itemPositions[1].y,
+      width: 25,
+      height: 25,
+      isPickedUp: false,
+      isThrown: false,
+    },
+    {
+      id: "item3",
+      type: itemNames[2],
+      x: itemPositions[2].x,
+      y: itemPositions[2].y,
+      width: 25,
+      height: 25,
+      isPickedUp: false,
+      isThrown: false,
+    },
+  ];
+  
+  return {
+    randomizedSwitches,
+    randomizedThrowableItems,
+  };
+}
+
 // Helper function to get randomized pressure plate positions for level 2
 function getRandomizedLevel2PressurePlatePositions(): Array<{ x: number; y: number; id: string }> {
   // All 6 potential pressure plate locations (3 original + 3 new)
@@ -355,53 +416,64 @@ export const LEVELS: Level[] = [
     ],
     door: { x: 770, y: 50, width: 30, height: 40, isOpen: false },
     key: { x: 650, y: 350, width: 20, height: 20, collected: false },
-    switches: (() => {
-      const platePositions = getRandomizedLevel2PressurePlatePositions();
-      return platePositions.map((plate) => ({
-        x: plate.x,
-        y: plate.y,
+    switches: [
+      {
+        x: 200,
+        y: 500,
         width: 30,
         height: 30,
         isPressed: false,
-        id: plate.id,
-      }));
-    })(),
-    throwableItems: (() => {
-      const positions = getRandomizedLevel2ItemPositions();
-      const names = getRandomizedLevel2ItemNames();
-      return [
-        {
-          id: "item1",
-          type: names[0],
-          x: positions[0].x,
-          y: positions[0].y,
-          width: 25,
-          height: 25,
-          isPickedUp: false,
-          isThrown: false,
-        },
-        {
-          id: "item2",
-          type: names[1],
-          x: positions[1].x,
-          y: positions[1].y,
-          width: 25,
-          height: 25,
-          isPickedUp: false,
-          isThrown: false,
-        },
-        {
-          id: "item3",
-          type: names[2],
-          x: positions[2].x,
-          y: positions[2].y,
-          width: 25,
-          height: 25,
-          isPickedUp: false,
-          isThrown: false,
-        },
-      ];
-    })(),
+        id: "pressure1",
+      },
+      {
+        x: 500,
+        y: 100,
+        width: 30,
+        height: 30,
+        isPressed: false,
+        id: "pressure2",
+      },
+      {
+        x: 680,
+        y: 450,
+        width: 30,
+        height: 30,
+        isPressed: false,
+        id: "pressure3",
+      },
+    ],
+    throwableItems: [
+      {
+        id: "item1",
+        type: "chubbs_hand" as const,
+        x: 250,
+        y: 100,
+        width: 25,
+        height: 25,
+        isPickedUp: false,
+        isThrown: false,
+      },
+      {
+        id: "item2",
+        type: "elis_hip" as const,
+        x: 450,
+        y: 250,
+        width: 25,
+        height: 25,
+        isPickedUp: false,
+        isThrown: false,
+      },
+      {
+        id: "item3",
+        type: "barbra_hat" as const,
+        x: 550,
+        y: 450,
+        width: 25,
+        height: 25,
+        isPickedUp: false,
+        isThrown: false,
+      },
+    ],
   },
 
   // Level 3: Light Reflection Puzzle

@@ -19,7 +19,7 @@ import {
   Teleporter,
   SnakePit,
 } from "../game/types";
-import { LEVELS } from "../game/levels";
+import { LEVELS, randomizeLevel2 } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
 import { updateSnake } from "../game/entities";
 import { calculateLightBeam } from "../game/lightBeam";
@@ -405,11 +405,19 @@ export const useSnakeGame = create<SnakeGameState>()(
       let randomizedSymbols = null;
       let newPatternTiles = level.patternTiles ? level.patternTiles.map((tile) => ({ ...tile })) : [];
       
+      // Handle Level 2 randomization
+      let levelSwitches = level.switches ? level.switches.map((s) => ({ ...s })) : [];
+      let levelThrowableItems = level.throwableItems ? level.throwableItems.map((item) => ({ ...item })) : [];
+      
       if (levelIndex === 0) {
         const randomization = randomizeLevel1();
         patternSequence = randomization.newPatternSequence;
         randomizedSymbols = randomization.randomizedSymbols;
         newPatternTiles = randomization.newPatternTiles;
+      } else if (levelIndex === 1) {
+        const randomization = randomizeLevel2();
+        levelSwitches = randomization.randomizedSwitches;
+        levelThrowableItems = randomization.randomizedThrowableItems;
       }
       
       set({
@@ -429,10 +437,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         walls: level.walls.map((wall) => ({ ...wall })),
         door: { ...level.door },
         key: { ...level.key },
-        switches: level.switches ? level.switches.map((s) => ({ ...s })) : [],
-        throwableItems: level.throwableItems
-          ? level.throwableItems.map((item) => ({ ...item }))
-          : [],
+        switches: levelSwitches,
+        throwableItems: levelThrowableItems,
         patternTiles: newPatternTiles,
         patternSequence,
         currentPatternStep: 0,
