@@ -232,10 +232,12 @@ const GameCanvas: React.FC = () => {
         // Reset text alignment
         ctx.textAlign = "left";
 
-        // Draw animated rectangles only when Level 1 is playing (not paused/menu)
+        // Draw rectangles on Level 1 - animate when playing, static when menu is open
+        const barHeight = 30;
+        const barY = 30;
+        
         if (gameState === "playing") {
-          const barHeight = 30;
-          const barY = 30;
+          // Animated rectangles during gameplay
           const animationSpeed = 1; // pixels per frame
           const currentTime = Date.now();
           const animationOffset =
@@ -256,6 +258,15 @@ const GameCanvas: React.FC = () => {
             ctx.fillStyle = backgroundColor;
             ctx.fillRect(20, barY, growRectWidth, barHeight);
           }
+        } else {
+          // Static rectangles when menu is open - show partial coverage
+          ctx.fillStyle = backgroundColor;
+          
+          // Draw static shrinking rectangle (partial coverage)
+          ctx.fillRect(450, barY, 330, barHeight);
+          
+          // Draw static growing rectangle (partial coverage)
+          ctx.fillRect(20, barY, 330, barHeight);
         }
       }
 
