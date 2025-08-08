@@ -499,14 +499,6 @@ export const LEVELS: Level[] = [
       { x: 650, y: 340, width: 100, height: 20 }, // Bottom wall
       { x: 650, y: 260, width: 20, height: 100 }, // Left wall
       { x: 730, y: 260, width: 20, height: 100 }, // Right wall
-      // Some internal walls for layout
-      // { x: 125, y: 20, width: 20, height: 80 },
-      // { x: 145, y: 150, width: 80, height: 20 },
-      // { x: 125, y: 220, width: 20, height: 80 },
-      // { x: 125, y: 300, width: 80, height: 20 },
-      // { x: 205, y: 300, width: 20, height: 100 },
-      // { x: 660, y: 450, width: 60, height: 20 },
-      // { x: 390, y: 260, width: 20, height: 40 },
     ],
     snakes: [
       {
@@ -523,47 +515,6 @@ export const LEVELS: Level[] = [
         sightRange: 0,
         isChasing: false,
       },
-      // {
-      //   id: "guard1",
-      //   type: "guard" as const,
-      //   position: { x: 700, y: 500 },
-      //   size: { width: 30, height: 30 },
-      //   speed: 80,
-      //   direction: { x: 1, y: 0 },
-      //   patrolPoints: [
-      //     { x: 50, y: 500 },
-      //     { x: 50, y: 400 },
-      //     { x: 700, y: 400 },
-      //     { x: 700, y: 500 },
-      //     { x: 50, y: 500 },
-      //   ],
-      //   currentPatrolIndex: 0,
-      //   patrolDirection: 1,
-      //   chaseSpeed: 120,
-      //   sightRange: 150,
-      //   isChasing: false,
-      //   lostSightCooldown: 0,
-      // },
-      // {
-      //   id: "guard2",
-      //   type: "guard" as const,
-      //   position: { x: 200, y: 80 },
-      //   size: { width: 30, height: 30 },
-      //   speed: 80,
-      //   direction: { x: 1, y: 0 },
-      //   patrolPoints: [
-      //     { x: 200, y: 80 },
-      //     { x: 500, y: 80 },
-      //     { x: 350, y: 330 },
-      //     { x: 200, y: 80 },
-      //   ],
-      //   currentPatrolIndex: 0,
-      //   patrolDirection: 1,
-      //   chaseSpeed: 120,
-      //   sightRange: 150,
-      //   isChasing: false,
-      //   lostSightCooldown: 0,
-      // },
       {
         id: "guard3",
         type: "guard" as const,
