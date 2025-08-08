@@ -348,7 +348,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         gameState: "playing",
         player: {
           position: { ...level.player },
-          size: { width: 25, height: 25 },
+          size: { width: 64, height: 64 },
           speed: PLAYER_SPEED,
           hasKey: false,
           health: 9,
@@ -442,7 +442,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         gameState: "playing",
         player: {
           position: { ...level.player },
-          size: { width: 25, height: 25 },
+          size: { width: 64, height: 64 },
           speed: PLAYER_SPEED,
           hasKey: false,
           health: 9,
@@ -504,7 +504,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         gameState: "playing",
         player: {
           position: { ...level.player },
-          size: { width: 25, height: 25 },
+          size: { width: 64, height: 64 },
           speed: PLAYER_SPEED,
           hasKey: false,
           health: 9,
@@ -576,7 +576,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         gameState: "playing",
         player: {
           position: { ...level.player },
-          size: { width: 25, height: 25 },
+          size: { width: 64, height: 64 },
           speed: PLAYER_SPEED,
           hasKey: false,
           health: state.player.health, // Preserve current health
