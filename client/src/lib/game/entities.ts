@@ -61,7 +61,7 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     snake.soundCooldown -= dt;
   }
   
-  if (nearestSound) {
+  if (nearestSound && typeof nearestSound.x === 'number' && typeof nearestSound.y === 'number') {
     // Continuously follow current sounds with no cooldown
     snake.lastHeardSound = nearestSound;
     snake.isChasing = true;
@@ -69,7 +69,8 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     
     // Reset sound cooldown since we're actively hearing the player
     snake.soundCooldown = 0;
-  } else if (snake.lastHeardSound && snake.isChasing) {
+  } else if (snake.lastHeardSound && snake.isChasing && 
+             typeof snake.lastHeardSound.x === 'number' && typeof snake.lastHeardSound.y === 'number') {
     // Continue chasing toward last heard sound
     targetPoint = snake.lastHeardSound;
     
@@ -139,17 +140,20 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
   
 
 
-  if (canSeePlayer && player) {
+  if (canSeePlayer && player && player.position && 
+      typeof player.position.x === 'number' && typeof player.position.y === 'number') {
     // Chase the player
     snake.isChasing = true;
     snake.chaseTarget = { ...player.position };
     snake.lastSeenPlayer = { ...player.position };
     snake.lostSightCooldown = 3.0; // Keep chasing for 3 seconds after losing sight
     targetPoint = player.position;
-  } else if (snake.isChasing && snake.lastSeenPlayer && snake.lostSightCooldown && snake.lostSightCooldown > 0) {
+  } else if (snake.isChasing && snake.lastSeenPlayer && snake.lostSightCooldown && snake.lostSightCooldown > 0 &&
+             typeof snake.lastSeenPlayer.x === 'number' && typeof snake.lastSeenPlayer.y === 'number') {
     // Continue chasing last seen position for a while
     targetPoint = snake.lastSeenPlayer;
-  } else if (snake.isChasing && snake.chaseTarget) {
+  } else if (snake.isChasing && snake.chaseTarget && 
+             typeof snake.chaseTarget.x === 'number' && typeof snake.chaseTarget.y === 'number') {
     // Move to last known position briefly
     targetPoint = snake.chaseTarget;
     
@@ -317,12 +321,21 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
 }
 
 function getPatrolTarget(snake: Snake): Position {
-  if (snake.patrolPoints.length === 0) {
+  if (!snake.patrolPoints || snake.patrolPoints.length === 0) {
     return snake.position;
   }
   
-  // Get current patrol target
+  // Ensure currentPatrolIndex is valid
+  if (typeof snake.currentPatrolIndex !== 'number' || snake.currentPatrolIndex < 0 || snake.currentPatrolIndex >= snake.patrolPoints.length) {
+    snake.currentPatrolIndex = 0;
+  }
+  
+  // Get current patrol target and validate it
   const currentTarget = snake.patrolPoints[snake.currentPatrolIndex];
+  if (!currentTarget || typeof currentTarget.x !== 'number' || typeof currentTarget.y !== 'number') {
+    console.warn('Invalid patrol point found:', currentTarget, 'for snake:', snake.id);
+    return snake.position;
+  }
   
   // Check if we've reached the current patrol point
   const distanceToPatrol = getDistance(snake.position, currentTarget);
@@ -332,11 +345,18 @@ function getPatrolTarget(snake: Snake): Position {
     
     // Reverse direction if we've reached the end
     if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
-      snake.currentPatrolIndex = snake.patrolPoints.length - 2;
+      snake.currentPatrolIndex = Math.max(0, snake.patrolPoints.length - 2);
       snake.patrolDirection = -1;
     } else if (snake.currentPatrolIndex < 0) {
-      snake.currentPatrolIndex = 1;
+      snake.currentPatrolIndex = Math.min(1, snake.patrolPoints.length - 1);
       snake.patrolDirection = 1;
+    }
+    
+    // Validate the new target
+    const newTarget = snake.patrolPoints[snake.currentPatrolIndex];
+    if (!newTarget || typeof newTarget.x !== 'number' || typeof newTarget.y !== 'number') {
+      console.warn('Invalid new patrol target:', newTarget, 'for snake:', snake.id);
+      return snake.position;
     }
   }
   
