@@ -226,7 +226,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     levels: LEVELS, // Add levels to store
     player: {
       position: { x: 50, y: 350 },
-      size: { width: 32, height: 32 },
+      size: { width: 64, height: 64 },
       speed: PLAYER_SPEED,
       hasKey: false,
       health: 9,
