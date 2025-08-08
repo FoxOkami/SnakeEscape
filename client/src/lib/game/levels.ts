@@ -156,16 +156,16 @@ export const LEVELS: Level[] = [
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
       // Key room walls (small chamber on the right, closer to key)
-      { x: 600, y: 270, width: 100, height: 20 }, // top wall
-      { x: 600, y: 330, width: 100, height: 20 }, // bottom wall
-      { x: 600, y: 290, width: 20, height: 40 }, // left wall
-      { x: 680, y: 290, width: 20, height: 40 }, // right wall
+      { x: 610, y: 270, width: 80, height: 20 }, // top wall
+      { x: 610, y: 330, width: 80, height: 20 }, // bottom wall
+      { x: 610, y: 270, width: 20, height: 80 }, // left wall
+      { x: 670, y: 270, width: 20, height: 80 }, // right wall
       // Some obstacle walls scattered around
       { x: 150, y: 100, width: 20, height: 80 },
       { x: 300, y: 150, width: 80, height: 20 },
       { x: 500, y: 100, width: 20, height: 100 },
       { x: 100, y: 400, width: 100, height: 20 },
-      { x: 400, y: 450, width: 20, height: 100 },
+      { x: 400, y: 450, width: 20, height: 130 },
     ],
     snakes: [
       {
@@ -336,7 +336,7 @@ export const LEVELS: Level[] = [
       // Key room walls (enclose the key)
       { x: 620, y: 320, width: 80, height: 20 }, // Top wall
       { x: 620, y: 380, width: 80, height: 20 }, // Bottom wall
-      { x: 620, y: 320, width: 20, height: 80 }, // Left wall (removable)
+      { x: 620, y: 320, width: 20, height: 80 }, // Left wall
       { x: 680, y: 320, width: 20, height: 80 }, // Right wall
     ],
     snakes: [
