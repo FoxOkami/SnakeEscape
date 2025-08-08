@@ -495,10 +495,10 @@ export const LEVELS: Level[] = [
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
       // Key room walls (enclose the key)
-      { x: 650, y: 260, width: 100, height: 20 }, // Top wall
-      { x: 650, y: 340, width: 100, height: 20 }, // Bottom wall
-      { x: 650, y: 260, width: 20, height: 100 }, // Left wall
-      { x: 730, y: 260, width: 20, height: 100 }, // Right wall
+      // { x: 650, y: 260, width: 100, height: 20 }, // Top wall
+      // { x: 650, y: 340, width: 100, height: 20 }, // Bottom wall
+      // { x: 650, y: 260, width: 20, height: 100 }, // Left wall
+      // { x: 730, y: 260, width: 20, height: 100 }, // Right wall
     ],
     snakes: [
       {
@@ -545,10 +545,10 @@ export const LEVELS: Level[] = [
         speed: 60,
         direction: { x: 0, y: 0 },
         patrolPoints: [
-          { x: 520, y: 420 },
-          { x: 580, y: 420 },
-          { x: 580, y: 480 },
-          { x: 520, y: 480 },
+          { x: 450, y: 250 },
+          // { x: 580, y: 420 },
+          // { x: 580, y: 480 },
+          // { x: 520, y: 480 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -558,7 +558,7 @@ export const LEVELS: Level[] = [
         isChasing: false,
         pitId: "pit1",
         isInPit: true,
-        patrolDuration: 4000, // 4 seconds patrol
+        patrolDuration: 8000, // 4 seconds patrol
         lostSightCooldown: 0,
       },
       {
@@ -658,7 +658,7 @@ export const LEVELS: Level[] = [
         lostSightCooldown: 0,
       },
     ],
-    door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
+    door: { x: 150, y: -10, width: 30, height: 40, isOpen: false },
     key: { x: 690, y: 300, width: 20, height: 20, collected: false },
     snakePits: [
       {
