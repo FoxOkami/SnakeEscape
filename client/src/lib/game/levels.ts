@@ -546,7 +546,7 @@ export const LEVELS: Level[] = [
         direction: { x: 0, y: 0 },
         patrolPoints: [
           { x: 450, y: 250 },
-          // { x: 580, y: 420 },
+          { x: 580, y: 420 },
           // { x: 580, y: 480 },
           // { x: 520, y: 480 },
         ],
