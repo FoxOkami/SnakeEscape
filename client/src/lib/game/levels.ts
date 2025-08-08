@@ -494,19 +494,11 @@ export const LEVELS: Level[] = [
       { x: 0, y: 580, width: 800, height: 20 },
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
-      // Key room walls (enclose the key)
-      { x: 650, y: 260, width: 100, height: 20 }, // Top wall
-      { x: 650, y: 340, width: 100, height: 20 }, // Bottom wall
-      { x: 650, y: 260, width: 20, height: 100 }, // Left wall
-      { x: 730, y: 260, width: 20, height: 100 }, // Right wall
-      // Some internal walls for layout
-      // { x: 125, y: 20, width: 20, height: 80 },
-      // { x: 145, y: 150, width: 80, height: 20 },
-      // { x: 125, y: 220, width: 20, height: 80 },
-      // { x: 125, y: 300, width: 80, height: 20 },
-      // { x: 205, y: 300, width: 20, height: 100 },
-      // { x: 660, y: 450, width: 60, height: 20 },
-      // { x: 390, y: 260, width: 20, height: 40 },
+      // Key room walls (enclose the key) // these aren't needed here because they are handled in useSnakeGame.tsx
+      // { x: 660, y: 270, width: 80, height: 20 }, // Top wall
+      // { x: 660, y: 330, width: 80, height: 20 }, // Bottom wall
+      // { x: 660, y: 270, width: 20, height: 80 }, // Left wall
+      // { x: 720, y: 270, width: 20, height: 80 }, // Right wall
     ],
     snakes: [
       {
@@ -523,47 +515,6 @@ export const LEVELS: Level[] = [
         sightRange: 0,
         isChasing: false,
       },
-      // {
-      //   id: "guard1",
-      //   type: "guard" as const,
-      //   position: { x: 700, y: 500 },
-      //   size: { width: 30, height: 30 },
-      //   speed: 80,
-      //   direction: { x: 1, y: 0 },
-      //   patrolPoints: [
-      //     { x: 50, y: 500 },
-      //     { x: 50, y: 400 },
-      //     { x: 700, y: 400 },
-      //     { x: 700, y: 500 },
-      //     { x: 50, y: 500 },
-      //   ],
-      //   currentPatrolIndex: 0,
-      //   patrolDirection: 1,
-      //   chaseSpeed: 120,
-      //   sightRange: 150,
-      //   isChasing: false,
-      //   lostSightCooldown: 0,
-      // },
-      // {
-      //   id: "guard2",
-      //   type: "guard" as const,
-      //   position: { x: 200, y: 80 },
-      //   size: { width: 30, height: 30 },
-      //   speed: 80,
-      //   direction: { x: 1, y: 0 },
-      //   patrolPoints: [
-      //     { x: 200, y: 80 },
-      //     { x: 500, y: 80 },
-      //     { x: 350, y: 330 },
-      //     { x: 200, y: 80 },
-      //   ],
-      //   currentPatrolIndex: 0,
-      //   patrolDirection: 1,
-      //   chaseSpeed: 120,
-      //   sightRange: 150,
-      //   isChasing: false,
-      //   lostSightCooldown: 0,
-      // },
       {
         id: "guard3",
         type: "guard" as const,
@@ -594,10 +545,11 @@ export const LEVELS: Level[] = [
         speed: 60,
         direction: { x: 0, y: 0 },
         patrolPoints: [
-          { x: 520, y: 420 },
-          { x: 580, y: 420 },
-          { x: 580, y: 480 },
-          { x: 520, y: 480 },
+          { x: 550, y: 550 },
+          { x: 450, y: 450 },
+          { x: 550, y: 350 },
+          { x: 650, y: 450 },
+          { x: 550, y: 550 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -607,7 +559,7 @@ export const LEVELS: Level[] = [
         isChasing: false,
         pitId: "pit1",
         isInPit: true,
-        patrolDuration: 4000, // 4 seconds patrol
+        patrolDuration: 10000, // 4 seconds patrol
         lostSightCooldown: 0,
       },
       {
@@ -618,10 +570,10 @@ export const LEVELS: Level[] = [
         speed: 65,
         direction: { x: 0, y: 0 },
         patrolPoints: [
-          { x: 520, y: 420 },
-          { x: 580, y: 420 },
-          { x: 580, y: 480 },
-          { x: 520, y: 480 },
+          { x: 300, y: 450 },
+          { x: 200, y: 350 },
+          { x: 200, y: 550 },
+          { x: 300, y: 450 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -642,10 +594,11 @@ export const LEVELS: Level[] = [
         speed: 55,
         direction: { x: 0, y: 0 },
         patrolPoints: [
-          { x: 520, y: 420 },
-          { x: 580, y: 420 },
-          { x: 580, y: 480 },
-          { x: 520, y: 480 },
+          { x: 650, y: 350 },
+          { x: 400, y: 350 },
+          { x: 400, y: 550 },
+          { x: 650, y: 550 },
+          { x: 650, y: 350 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -666,10 +619,10 @@ export const LEVELS: Level[] = [
         speed: 55,
         direction: { x: 0, y: 0 },
         patrolPoints: [
-          { x: 360, y: 120 },
-          { x: 420, y: 120 },
-          { x: 420, y: 180 },
-          { x: 360, y: 180 },
+          { x: 185, y: 225 },
+          { x: 580, y: 50 },
+          { x: 185, y: 225 },
+          { x: 580, y: 50 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -690,10 +643,10 @@ export const LEVELS: Level[] = [
         speed: 55,
         direction: { x: 0, y: 0 },
         patrolPoints: [
-          { x: 360, y: 120 },
-          { x: 420, y: 120 },
-          { x: 420, y: 180 },
-          { x: 360, y: 180 },
+          { x: 264, y: 41 },
+          { x: 537, y: 258 },
+          { x: 264, y: 41 },
+          { x: 537, y: 258 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -707,7 +660,7 @@ export const LEVELS: Level[] = [
         lostSightCooldown: 0,
       },
     ],
-    door: { x: 750, y: 50, width: 30, height: 40, isOpen: false },
+    door: { x: 150, y: -30, width: 30, height: 40, isOpen: false },
     key: { x: 690, y: 300, width: 20, height: 20, collected: false },
     snakePits: [
       {
