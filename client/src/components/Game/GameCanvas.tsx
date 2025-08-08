@@ -1497,6 +1497,7 @@ const GameCanvas: React.FC = () => {
         if (!shouldFlash) {
           if (imageLoaded && playerImageRef.current) {
             // Draw custom player image
+            console.log('Drawing player at size:', player.size.width + 'x' + player.size.height);
             ctx.drawImage(
               playerImageRef.current,
               player.position.x,
@@ -2123,6 +2124,7 @@ const GameCanvas: React.FC = () => {
         if (!shouldFlash) {
           if (imageLoaded && playerImageRef.current) {
             // Draw custom player image on top of light beam
+            console.log('Drawing player (level 3) at size:', player.size.width + 'x' + player.size.height);
             ctx.drawImage(
               playerImageRef.current,
               player.position.x,
@@ -2436,6 +2438,7 @@ const GameCanvas: React.FC = () => {
         if (!shouldFlash) {
           if (imageLoaded && playerImageRef.current) {
             // Draw custom player image on top
+            console.log('Drawing player (level 5) at size:', player.size.width + 'x' + player.size.height);
             ctx.drawImage(
               playerImageRef.current,
               player.position.x,
@@ -2771,8 +2774,6 @@ const GameCanvas: React.FC = () => {
         style={{
           width: `${levelSize.width}px`,
           height: `${levelSize.height}px`,
-          maxWidth: "90vw",
-          maxHeight: "90vh",
           imageRendering: "pixelated",
           backgroundColor: "#1a1a2e",
         }}
