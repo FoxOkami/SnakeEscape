@@ -1425,8 +1425,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Find mirror within interaction range
       const nearbyMirror = state.mirrors.find(mirror => {
         const distance = Math.sqrt(
-          Math.pow(state.player.position.x - (mirror.x + mirror.width / 2), 2) + 
-          Math.pow(state.player.position.y - (mirror.y + mirror.height / 2), 2)
+          Math.pow(state.player.position.x + state.player.size.width / 2 - (mirror.x + mirror.width / 2), 2) + 
+          Math.pow(state.player.position.y + state.player.size.height / 2 - (mirror.y + mirror.height / 2), 2)
         );
         return distance < 60; // Interaction range
       });
@@ -1451,9 +1451,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (state.gameState !== 'playing' || state.currentLevel !== 2 || !state.lightSource) return; // Only on level 3 (0-indexed)
 
       // Check if player is near light source
+      const centerX = state.lightSource.x;
+      const centerY = state.lightSource.y;
       const distance = Math.sqrt(
-        Math.pow(state.player.position.x - state.lightSource.x, 2) + 
-        Math.pow(state.player.position.y - state.lightSource.y, 2)
+        Math.pow(state.player.position.x + state.player.size.width / 2 - centerX, 2) + 
+        Math.pow(state.player.position.y + state.player.size.height / 2 - centerY, 2)
       );
 
       if (distance > 60) return; // Must be within interaction range

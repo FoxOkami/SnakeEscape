@@ -54,18 +54,18 @@ const GameCanvas: React.FC = () => {
   useEffect(() => {
     const img = new Image();
     img.onload = () => {
-      console.log('Custom player image loaded successfully!');
+      console.log("Custom player image loaded successfully!");
       playerImageRef.current = img;
       setImageLoaded(true);
     };
     img.onerror = (error) => {
-      console.error('Failed to load custom player image:', error);
-      console.log('Attempted to load from:', img.src);
+      console.error("Failed to load custom player image:", error);
+      console.log("Attempted to load from:", img.src);
       setImageLoaded(false);
     };
     // Add cache busting parameter to ensure fresh load
-    img.src = '/player-character.png?' + Date.now();
-    console.log('Attempting to load player image from:', img.src);
+    img.src = "/player-character.png?" + Date.now();
+    console.log("Attempting to load player image from:", img.src);
   }, []);
 
   const draw = useCallback(
@@ -950,22 +950,21 @@ const GameCanvas: React.FC = () => {
             width: player.size.width,
             height: player.size.height,
           };
-          
+
           const itemRect = {
             x: item.x,
             y: item.y,
             width: item.width,
             height: item.height,
           };
-          
+
           // Check AABB collision - exact same logic as pickupItem function
-          const canPickup = (
+          const canPickup =
             playerRect.x < itemRect.x + itemRect.width &&
             playerRect.x + playerRect.width > itemRect.x &&
             playerRect.y < itemRect.y + itemRect.height &&
-            playerRect.y + playerRect.height > itemRect.y
-          );
-          
+            playerRect.y + playerRect.height > itemRect.y;
+
           if (canPickup) {
             // Draw white text with black outline
             ctx.font = "12px Arial";
@@ -1502,20 +1501,20 @@ const GameCanvas: React.FC = () => {
               player.position.x,
               player.position.y,
               player.size.width,
-              player.size.height
+              player.size.height,
             );
-            
+
             // Apply color tint for walking state if needed
             if (isWalking) {
-              ctx.globalCompositeOperation = 'multiply';
-              ctx.fillStyle = 'rgba(56, 161, 105, 0.3)'; // Green tint when walking
+              ctx.globalCompositeOperation = "multiply";
+              ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
               ctx.fillRect(
                 player.position.x,
                 player.position.y,
                 player.size.width,
-                player.size.height
+                player.size.height,
               );
-              ctx.globalCompositeOperation = 'source-over';
+              ctx.globalCompositeOperation = "source-over";
             }
           } else {
             // Fallback to original rectangle drawing
@@ -1659,8 +1658,8 @@ const GameCanvas: React.FC = () => {
 
         // Show interaction hint if player is nearby
         const distance = Math.sqrt(
-          Math.pow(player.position.x - (mirror.x + mirror.width / 2), 2) +
-            Math.pow(player.position.y - (mirror.y + mirror.height / 2), 2),
+          Math.pow(player.position.x + player.size.width / 2 - (mirror.x + mirror.width / 2), 2) +
+            Math.pow(player.position.y + player.size.height / 2 - (mirror.y + mirror.height / 2), 2),
         );
 
         if (distance < 60) {
@@ -1668,11 +1667,6 @@ const GameCanvas: React.FC = () => {
             "Q/E to rotate",
             mirror.x + mirror.width / 2,
             mirror.y - 10,
-          );
-          drawTooltipText(
-            "(1° increments)",
-            mirror.x + mirror.width / 2,
-            mirror.y + mirror.height + 15,
           );
         }
       });
@@ -2110,7 +2104,6 @@ const GameCanvas: React.FC = () => {
 
         if (distance < 60) {
           drawTooltipText("Q/E to rotate light", centerX, centerY - 20);
-          drawTooltipText("(10° increments)", centerX, centerY + 25);
         }
       }
 
@@ -2128,20 +2121,20 @@ const GameCanvas: React.FC = () => {
               player.position.x,
               player.position.y,
               player.size.width,
-              player.size.height
+              player.size.height,
             );
-            
+
             // Apply color tint for walking state if needed
             if (isWalking) {
-              ctx.globalCompositeOperation = 'multiply';
-              ctx.fillStyle = 'rgba(56, 161, 105, 0.3)'; // Green tint when walking
+              ctx.globalCompositeOperation = "multiply";
+              ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
               ctx.fillRect(
                 player.position.x,
                 player.position.y,
                 player.size.width,
-                player.size.height
+                player.size.height,
               );
-              ctx.globalCompositeOperation = 'source-over';
+              ctx.globalCompositeOperation = "source-over";
             }
           } else {
             // Fallback to original rectangle drawing
@@ -2441,20 +2434,20 @@ const GameCanvas: React.FC = () => {
               player.position.x,
               player.position.y,
               player.size.width,
-              player.size.height
+              player.size.height,
             );
-            
+
             // Apply color tint for walking state if needed
             if (isWalking) {
-              ctx.globalCompositeOperation = 'multiply';
-              ctx.fillStyle = 'rgba(56, 161, 105, 0.3)'; // Green tint when walking
+              ctx.globalCompositeOperation = "multiply";
+              ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
               ctx.fillRect(
                 player.position.x,
                 player.position.y,
                 player.size.width,
-                player.size.height
+                player.size.height,
               );
-              ctx.globalCompositeOperation = 'source-over';
+              ctx.globalCompositeOperation = "source-over";
             }
           } else {
             // Fallback to original rectangle drawing
@@ -2614,8 +2607,6 @@ const GameCanvas: React.FC = () => {
           }
         });
       }
-
-
     },
     [
       player,
