@@ -9,6 +9,8 @@ const GameCanvas: React.FC = () => {
   const fpsRef = useRef<number>(0);
   const frameTimesRef = useRef<number[]>([]);
   const lastFpsUpdateRef = useRef<number>(0);
+  const playerImageRef = useRef<HTMLImageElement | null>(null);
+  const [imageLoaded, setImageLoaded] = React.useState(false);
 
   const {
     gameState,
@@ -47,6 +49,20 @@ const GameCanvas: React.FC = () => {
     patternSequence,
     randomizedSymbols,
   } = useSnakeGame();
+
+  // Load player image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      playerImageRef.current = img;
+      setImageLoaded(true);
+    };
+    img.onerror = () => {
+      console.warn('Failed to load custom player image, falling back to default drawing');
+      setImageLoaded(false);
+    };
+    img.src = '/player-character.jpg';
+  }, []);
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D) => {
@@ -1475,22 +1491,47 @@ const GameCanvas: React.FC = () => {
         const shouldFlash =
           player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
         if (!shouldFlash) {
-          ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
-          ctx.fillRect(
-            player.position.x,
-            player.position.y,
-            player.size.width,
-            player.size.height,
-          );
+          if (imageLoaded && playerImageRef.current) {
+            // Draw custom player image
+            ctx.drawImage(
+              playerImageRef.current,
+              player.position.x,
+              player.position.y,
+              player.size.width,
+              player.size.height
+            );
+            
+            // Apply color tint for walking state if needed
+            if (isWalking) {
+              ctx.globalCompositeOperation = 'multiply';
+              ctx.fillStyle = 'rgba(56, 161, 105, 0.3)'; // Green tint when walking
+              ctx.fillRect(
+                player.position.x,
+                player.position.y,
+                player.size.width,
+                player.size.height
+              );
+              ctx.globalCompositeOperation = 'source-over';
+            }
+          } else {
+            // Fallback to original rectangle drawing
+            ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
+            ctx.fillRect(
+              player.position.x,
+              player.position.y,
+              player.size.width,
+              player.size.height,
+            );
 
-          // Add player details
-          ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
-          ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
+            // Add player details
+            ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
+            ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
 
-          // Player eyes
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
-          ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+            // Player eyes
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
+            ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+          }
 
           // Walking indicator - small stealth icon
           if (isWalking) {
@@ -2076,22 +2117,47 @@ const GameCanvas: React.FC = () => {
         const shouldFlash =
           player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
         if (!shouldFlash) {
-          ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
-          ctx.fillRect(
-            player.position.x,
-            player.position.y,
-            player.size.width,
-            player.size.height,
-          );
+          if (imageLoaded && playerImageRef.current) {
+            // Draw custom player image on top of light beam
+            ctx.drawImage(
+              playerImageRef.current,
+              player.position.x,
+              player.position.y,
+              player.size.width,
+              player.size.height
+            );
+            
+            // Apply color tint for walking state if needed
+            if (isWalking) {
+              ctx.globalCompositeOperation = 'multiply';
+              ctx.fillStyle = 'rgba(56, 161, 105, 0.3)'; // Green tint when walking
+              ctx.fillRect(
+                player.position.x,
+                player.position.y,
+                player.size.width,
+                player.size.height
+              );
+              ctx.globalCompositeOperation = 'source-over';
+            }
+          } else {
+            // Fallback to original rectangle drawing
+            ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
+            ctx.fillRect(
+              player.position.x,
+              player.position.y,
+              player.size.width,
+              player.size.height,
+            );
 
-          // Add player details
-          ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
-          ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
+            // Add player details
+            ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
+            ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
 
-          // Player eyes
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
-          ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+            // Player eyes
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
+            ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+          }
 
           // Walking indicator - small stealth icon
           if (isWalking) {
@@ -2364,22 +2430,47 @@ const GameCanvas: React.FC = () => {
         const shouldFlash =
           player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
         if (!shouldFlash) {
-          ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
-          ctx.fillRect(
-            player.position.x,
-            player.position.y,
-            player.size.width,
-            player.size.height,
-          );
+          if (imageLoaded && playerImageRef.current) {
+            // Draw custom player image on top
+            ctx.drawImage(
+              playerImageRef.current,
+              player.position.x,
+              player.position.y,
+              player.size.width,
+              player.size.height
+            );
+            
+            // Apply color tint for walking state if needed
+            if (isWalking) {
+              ctx.globalCompositeOperation = 'multiply';
+              ctx.fillStyle = 'rgba(56, 161, 105, 0.3)'; // Green tint when walking
+              ctx.fillRect(
+                player.position.x,
+                player.position.y,
+                player.size.width,
+                player.size.height
+              );
+              ctx.globalCompositeOperation = 'source-over';
+            }
+          } else {
+            // Fallback to original rectangle drawing
+            ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
+            ctx.fillRect(
+              player.position.x,
+              player.position.y,
+              player.size.width,
+              player.size.height,
+            );
 
-          // Add player details on top
-          ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
-          ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
+            // Add player details on top
+            ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
+            ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
 
-          // Player eyes on top
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
-          ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+            // Player eyes on top
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
+            ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+          }
 
           // Walking indicator - small stealth icon on top
           if (isWalking) {
