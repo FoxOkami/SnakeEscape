@@ -77,9 +77,6 @@ export interface Snake {
   // Light emergence properties
   isLightEmergence?: boolean; // Whether this snake emerged due to light detection
   lightEmergenceDirection?: 'north' | 'south' | 'east' | 'west'; // Cardinal direction for light emergence
-  // Patrol cycle tracking properties
-  patrolCycleStarted?: boolean; // Whether the patrol cycle has been initialized
-  hasReachedEnd?: boolean; // Whether snake has reached the end of patrol points
 }
 
 export interface Wall extends Rectangle {}
