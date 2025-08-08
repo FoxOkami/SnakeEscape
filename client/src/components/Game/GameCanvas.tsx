@@ -61,7 +61,7 @@ const GameCanvas: React.FC = () => {
       console.warn('Failed to load custom player image, falling back to default drawing');
       setImageLoaded(false);
     };
-    img.src = '/player-character.jpg';
+    img.src = '/player-character.png';
   }, []);
 
   const draw = useCallback(
