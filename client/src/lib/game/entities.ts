@@ -32,7 +32,7 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
     case 'photophobic':
       return updatePhotophobicSnake(snake, walls, dt, player, sounds, currentTime, gameState);
     case 'rattlesnake':
-      return updateRattlesnakeSnake(snake, walls, dt, player, gameState?.snakePits);
+      return updateRattlesnakeSnake(snake, walls, dt, player);
     default:
       return snake;
   }
@@ -739,32 +739,14 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
   return snake;
 }
 
-function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, snakePits?: any[]): Snake {
-  // Check if this snake's pit is currently lit up
-  const associatedPit = snakePits?.find(pit => pit.snakeIds?.includes(snake.id));
-  const isPitLitUp = associatedPit?.isLightHit || false;
-  
-  // Skip processing if snake is in pit AND the pit is not lit up
-  if (snake.isInPit && !isPitLitUp) {
+function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?: Player): Snake {
+  // Skip processing if snake is still in pit
+  if (snake.isInPit) {
     return snake;
   }
-  
-  // If snake is in pit but pit is lit up, allow patrolling behavior
-  const shouldPatrolFromPit = snake.isInPit && isPitLitUp;
 
-  // Rattlesnakes patrol when emerged (or when pit is lit) and can chase if they see the player
+  // Rattlesnakes patrol when emerged and can chase if they see the player
   let targetPoint: Position = snake.position;
-  
-  // If patrolling from pit, start from pit position and follow patrol route
-  if (shouldPatrolFromPit && associatedPit) {
-    // Move snake from pit center to patrol route
-    const pitCenter = { x: associatedPit.x, y: associatedPit.y };
-    if (getDistance(snake.position, pitCenter) < 5) {
-      // Snake is still at pit center, move to first patrol point
-      snake.position = { ...snake.patrolPoints[0] };
-      snake.currentPatrolIndex = 0;
-    }
-  }
   
   // Check if can see player and start chasing
   if (player && snake.sightRange && snake.hearingRange) {

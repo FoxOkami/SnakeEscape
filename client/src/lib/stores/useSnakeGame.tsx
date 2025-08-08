@@ -782,20 +782,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
       
       const updatedSnakes = state.snakes.map((snake) => {
-        // Skip updating rattlesnakes that are returning to pit or pausing - they'll be handled by updateSnakePits
-        // Allow rattlesnakes in lit pits to be processed for patrolling
-        if (snake.type === 'rattlesnake' && (snake.rattlesnakeState === 'returningToPit' || snake.rattlesnakeState === 'pausing')) {
+        // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
+        // Allow patrolling and chasing rattlesnakes to be processed by normal AI
+        if (snake.type === 'rattlesnake' && (snake.isInPit || snake.rattlesnakeState === 'returningToPit' || snake.rattlesnakeState === 'pausing')) {
           return snake;
         }
-        // Also skip rattlesnakes in dark pits (not lit up)
-        if (snake.type === 'rattlesnake' && snake.isInPit) {
-          const associatedPit = state.snakePits?.find(pit => pit.snakeIds?.includes(snake.id));
-          const isPitLitUp = associatedPit?.isLightHit || false;
-          if (!isPitLitUp) {
-            return snake; // Skip if in pit and pit is not lit
-          }
-        }
-        return updateSnake(snake, currentWalls, deltaTime, updatedPlayer, playerSounds, { ...state, quadrantLighting, snakePits: state.snakePits });
+        return updateSnake(snake, currentWalls, deltaTime, updatedPlayer, playerSounds, { ...state, quadrantLighting });
       });
 
       // Handle plumber snake tile rotations
@@ -2575,10 +2567,10 @@ export const useSnakeGame = create<SnakeGameState>()(
             isLightHit: isCurrentlyHitByLight
           };
         
-          // Light just started hitting the pit (activate snakes for patrolling)
+          // Light just started hitting the pit (trigger emergence)
           if (isCurrentlyHitByLight && !wasHitByLight) {
             
-            // Find all snakes in this pit that can be activated for patrolling
+            // Find all snakes in this pit that can emerge
             const snakesInPit = updatedSnakes.filter(snake => 
               pit.snakeIds && pit.snakeIds.includes(snake.id) && 
               snake.type === 'rattlesnake' && 
@@ -2586,21 +2578,44 @@ export const useSnakeGame = create<SnakeGameState>()(
             );
             
             if (snakesInPit.length > 0) {
-              // Activate snakes for patrolling while keeping them in the pit
+              // Emerge all snakes in different cardinal directions
+              const cardinalDirections = ['north', 'south', 'east', 'west'];
+              
               snakesInPit.forEach((snake, index) => {
+                const direction = cardinalDirections[index % cardinalDirections.length];
                 const snakeIndex = updatedSnakes.findIndex(s => s.id === snake.id);
                 
                 if (snakeIndex !== -1) {
-                  // Keep snake in pit but activate for patrolling
+                  // Calculate position based on direction
+                  let emergenceX = pit.x - 14;
+                  let emergenceY = pit.y - 14;
+                  
+                  switch (direction) {
+                    case 'north':
+                      emergenceY -= 30;
+                      break;
+                    case 'south':
+                      emergenceY += 30;
+                      break;
+                    case 'east':
+                      emergenceX += 30;
+                      break;
+                    case 'west':
+                      emergenceX -= 30;
+                      break;
+                  }
+                  
+                  // Snake emerging from light trigger
                   updatedSnakes[snakeIndex] = {
                     ...snake,
-                    isInPit: true, // Keep in pit
+                    isInPit: false,
                     emergenceTime: currentTime,
                     rattlesnakeState: 'patrolling' as const,
                     isLightEmergence: true,
+                    lightEmergenceDirection: direction as 'north' | 'south' | 'east' | 'west',
                     patrolStartTime: currentTime,
                     isChasing: false,
-                    position: { x: pit.x, y: pit.y } // Start from pit center
+                    position: { x: emergenceX, y: emergenceY }
                   };
                 }
               });
@@ -2613,29 +2628,8 @@ export const useSnakeGame = create<SnakeGameState>()(
               };
             }
           } 
-          // Light stopped hitting the pit (return snakes to inactive state)
+          // Light stopped hitting the pit
           else if (!isCurrentlyHitByLight && wasHitByLight) {
-            // Find all snakes associated with this pit and return them to inactive state
-            const snakesInPit = updatedSnakes.filter(snake => 
-              pit.snakeIds && pit.snakeIds.includes(snake.id) && 
-              snake.type === 'rattlesnake'
-            );
-            
-            snakesInPit.forEach((snake) => {
-              const snakeIndex = updatedSnakes.findIndex(s => s.id === snake.id);
-              if (snakeIndex !== -1) {
-                updatedSnakes[snakeIndex] = {
-                  ...snake,
-                  isInPit: true,
-                  rattlesnakeState: 'inPit' as const,
-                  isLightEmergence: false,
-                  isChasing: false,
-                  position: { x: pit.x, y: pit.y }, // Return to pit center
-                  currentPatrolIndex: 0 // Reset patrol
-                };
-              }
-            });
-            
             updatedSnakePits[pitIndex] = {
               ...updatedSnakePits[pitIndex],
               isLightEmergence: false
