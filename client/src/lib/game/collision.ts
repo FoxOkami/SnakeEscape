@@ -19,6 +19,13 @@ export function checkPointInRect(point: Position, rect: Rectangle): boolean {
 }
 
 export function getDistance(pos1: Position, pos2: Position): number {
+  // Safety check for undefined positions
+  if (!pos1 || !pos2 || typeof pos1.x !== 'number' || typeof pos1.y !== 'number' || 
+      typeof pos2.x !== 'number' || typeof pos2.y !== 'number') {
+    console.warn('getDistance called with invalid positions:', pos1, pos2);
+    return 0;
+  }
+  
   const dx = pos1.x - pos2.x;
   const dy = pos1.y - pos2.y;
   return Math.sqrt(dx * dx + dy * dy);

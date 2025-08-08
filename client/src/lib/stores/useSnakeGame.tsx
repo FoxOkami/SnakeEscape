@@ -872,7 +872,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Generate player sounds for stalker snakes when not walking stealthily
       const playerSounds: Position[] = [];
       const isMoving = newVelocity.x !== 0 || newVelocity.y !== 0;
-      if (isMoving && !state.isWalking) {
+      if (isMoving && !state.isWalking && updatedPlayer.position && 
+          typeof updatedPlayer.position.x === 'number' && typeof updatedPlayer.position.y === 'number') {
         // Player makes sound when moving normally (not walking stealthily)
         playerSounds.push(updatedPlayer.position);
       }
