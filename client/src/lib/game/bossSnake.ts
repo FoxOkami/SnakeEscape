@@ -47,8 +47,11 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
   // Boss "Valerie" attack pattern state machine
   switch (snake.bossState) {
     case 'tracking':
-      // Take snapshot of player position and start pause
-      snake.playerSnapshot = { x: player.position.x, y: player.position.y };
+      // Take snapshot of player center position and start pause
+      snake.playerSnapshot = { 
+        x: player.position.x + player.size.width / 2, 
+        y: player.position.y + player.size.height / 2 
+      };
       snake.pauseStartTime = currentTime;
       snake.bossState = 'pausing';
       snake.bossColor = 'normal';
@@ -65,7 +68,12 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         snake.isChargingAtSnapshot = true;
         // Calculate and store the charge direction once at the start
         if (snake.playerSnapshot) {
-          snake.direction = getDirectionVector(snake.position, snake.playerSnapshot);
+          // Calculate direction from Valerie's center to player snapshot
+          const valerieCenter = {
+            x: snake.position.x + snake.size.width / 2,
+            y: snake.position.y + snake.size.height / 2
+          };
+          snake.direction = getDirectionVector(valerieCenter, snake.playerSnapshot);
           console.log(`Valerie: Pausing → Charging. Direction: (${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)})`);
         }
       }
