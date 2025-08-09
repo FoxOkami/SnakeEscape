@@ -1257,6 +1257,18 @@ const GameCanvas: React.FC = () => {
             accentColor = "#daa520"; // Golden accents
             eyeColor = snake.isChasing ? "#ff4500" : "#ffd700"; // Orange/gold eyes
             break;
+          case "boss":
+            // Boss "Valerie" - changes color based on charging state
+            if (snake.bossColor === 'charging') {
+              baseColor = "#ff1493"; // Deep pink when charging
+              accentColor = "#ff69b4"; // Hot pink accents
+              eyeColor = "#ffffff"; // White eyes when charging
+            } else {
+              baseColor = "#4b0082"; // Indigo/purple (regal boss color)
+              accentColor = "#8a2be2"; // Blue violet accents
+              eyeColor = "#ffd700"; // Gold eyes (intimidating)
+            }
+            break;
         }
 
         // Main body

@@ -25,7 +25,7 @@ function getPatrolTarget(snake: Snake): Position {
 }
 
 export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number): Snake {
-  if (!player) {
+  if (!player || !currentTime) {
     // Default patrol behavior when no player is present
     const targetPoint = getPatrolTarget(snake);
     const newPosition = moveTowards(snake.position, targetPoint, snake.speed * dt);
@@ -38,38 +38,80 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
     return snake;
   }
 
-  // Boss "Valerie" has map-wide awareness - always knows where the player is
-  const distanceToPlayer = getDistance(snake.position, player.position);
-  
-  // Always chase the player (boss doesn't patrol normally)
-  let targetPoint = player.position;
-  snake.isChasing = true;
-  
-  // Use higher speed when chasing
-  const moveSpeed = snake.chaseSpeed || snake.speed;
-  
-  // Move directly toward player with smart pathfinding
-  let newPosition = moveTowards(snake.position, targetPoint, moveSpeed * dt);
-  
-  // Check collision and update position
-  if (!checkWallCollision(snake, newPosition, walls)) {
-    snake.position = newPosition;
-  } else {
-    // If blocked by wall, try sliding along the wall
-    const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
-    if (!checkWallCollision(snake, slidePosition, walls)) {
-      snake.position = slidePosition;
-    } else {
-      // If still blocked, use smart pathfinding
-      const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
-      const smartNewPosition = moveTowards(snake.position, smartTarget, moveSpeed * dt);
-      
-      if (!checkWallCollision(snake, smartNewPosition, walls)) {
-        snake.position = smartNewPosition;
-      }
-    }
+  // Initialize boss state if not set
+  if (!snake.bossState) {
+    snake.bossState = 'tracking';
+    snake.bossColor = 'normal';
   }
 
-  snake.direction = getDirectionVector(snake.position, targetPoint);
+  // Boss "Valerie" attack pattern state machine
+  switch (snake.bossState) {
+    case 'tracking':
+      // Take snapshot of player position and start pause
+      snake.playerSnapshot = { x: player.position.x, y: player.position.y };
+      snake.pauseStartTime = currentTime;
+      snake.bossState = 'pausing';
+      snake.bossColor = 'normal';
+      break;
+
+    case 'pausing':
+      // Pause for 100ms
+      if (currentTime - (snake.pauseStartTime || 0) >= 100) {
+        // Start charging after pause
+        snake.bossState = 'charging';
+        snake.chargeStartTime = currentTime;
+        snake.bossColor = 'charging'; // Change to pink color
+        snake.isChargingAtSnapshot = true;
+      }
+      // Stay in current position during pause
+      break;
+
+    case 'charging':
+      // Charge directly at the snapshot position until hitting a wall
+      if (snake.playerSnapshot) {
+        const targetPoint = snake.playerSnapshot;
+        const moveSpeed = snake.chaseSpeed * 2 || snake.speed * 2; // Faster charge speed
+        
+        // Calculate direction to snapshot
+        const direction = getDirectionVector(snake.position, targetPoint);
+        
+        // Move in straight line toward snapshot at high speed
+        const chargeDistance = moveSpeed * dt;
+        const newPosition = {
+          x: snake.position.x + direction.x * chargeDistance,
+          y: snake.position.y + direction.y * chargeDistance
+        };
+        
+        // Check for wall collision
+        if (checkWallCollision(snake, newPosition, walls)) {
+          // Hit a wall - stop charging and enter recovery
+          snake.bossState = 'recovering';
+          snake.bossColor = 'normal'; // Change back to normal color
+          snake.isChargingAtSnapshot = false;
+          snake.playerSnapshot = undefined;
+          // Add brief recovery time before next attack
+          snake.pauseStartTime = currentTime;
+        } else {
+          // Continue charging
+          snake.position = newPosition;
+          snake.direction = direction;
+        }
+      }
+      break;
+
+    case 'recovering':
+      // Brief recovery period before starting next attack cycle
+      if (currentTime - (snake.pauseStartTime || 0) >= 500) { // 500ms recovery
+        snake.bossState = 'tracking'; // Start next cycle
+      }
+      // Stay still during recovery
+      break;
+
+    default:
+      snake.bossState = 'tracking';
+      break;
+  }
+
+  snake.isChasing = true;
   return snake;
 }

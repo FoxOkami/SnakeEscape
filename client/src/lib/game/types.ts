@@ -77,6 +77,13 @@ export interface Snake {
   // Light emergence properties
   isLightEmergence?: boolean; // Whether this snake emerged due to light detection
   lightEmergenceDirection?: 'north' | 'south' | 'east' | 'west'; // Cardinal direction for light emergence
+  // Boss-specific properties (Valerie)
+  bossState?: 'tracking' | 'pausing' | 'charging' | 'recovering'; // Current boss behavior state
+  playerSnapshot?: Position; // Snapshot of player position when starting charge
+  chargeStartTime?: number; // When the charge started
+  pauseStartTime?: number; // When the pause started (100ms pause)
+  isChargingAtSnapshot?: boolean; // Whether currently charging at snapshot location
+  bossColor?: 'normal' | 'charging'; // Color state for boss
 }
 
 export interface Wall extends Rectangle {}
