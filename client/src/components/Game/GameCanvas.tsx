@@ -429,7 +429,11 @@ const GameCanvas: React.FC = () => {
               ctx.fillStyle = "rgba(255, 99, 99, 0.3)"; // Light red with 30% opacity
               ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
             }
-          } else if (currentTile.id !== endTileId) {
+          } else if (currentTile.id === endTileId) {
+            // Always highlight end tile in red since it has no interactions
+            ctx.fillStyle = "rgba(255, 99, 99, 0.3)"; // Light red with 30% opacity
+            ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+          } else {
             // Normal highlighting for other tiles (not start or end)
             if (isLockedTile) {
               // Red overlay for locked tiles
