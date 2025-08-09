@@ -1580,12 +1580,17 @@ const GameCanvas: React.FC = () => {
           : "grid_tile_6_7";
 
         if (currentTile.id === startTileId) {
-          // Show "E to start" on start tile
-          drawTooltipText(
-            "E to start",
-            player.position.x + player.size.width / 2,
-            player.position.y - 10,
-          );
+          // Only show "E to start" if flow can actually be started
+          const currentFlowState = flowState;
+          const canStartFlow = !currentFlowState || (!currentFlowState.isActive && !currentFlowState.isEmptying);
+          
+          if (canStartFlow) {
+            drawTooltipText(
+              "E to start",
+              player.position.x + player.size.width / 2,
+              player.position.y - 10,
+            );
+          }
         } else if (currentTile.id !== endTileId) {
           // Show "Q/E to rotate" on rotatable tiles (not start or end)
           drawTooltipText(

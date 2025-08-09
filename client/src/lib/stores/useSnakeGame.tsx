@@ -872,8 +872,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Generate player sounds for stalker snakes when not walking stealthily
       const playerSounds: Position[] = [];
       const isMoving = newVelocity.x !== 0 || newVelocity.y !== 0;
-      if (isMoving && !state.isWalking && updatedPlayer.position && 
-          typeof updatedPlayer.position.x === 'number' && typeof updatedPlayer.position.y === 'number') {
+      if (
+        isMoving &&
+        !state.isWalking &&
+        updatedPlayer.position &&
+        typeof updatedPlayer.position.x === "number" &&
+        typeof updatedPlayer.position.y === "number"
+      ) {
         // Player makes sound when moving normally (not walking stealthily)
         playerSounds.push(updatedPlayer.position);
       }
@@ -1304,22 +1309,24 @@ export const useSnakeGame = create<SnakeGameState>()(
             const newWalls = state.walls.filter(
               (wall) =>
                 !(
-                  (wall.x === 100 &&
-                    wall.y === 75 &&
-                    wall.width === 600 &&
-                    wall.height === 20) || // Top middle
-                  (wall.x === 100 &&
-                    wall.y === 505 &&
-                    wall.width === 600 &&
-                    wall.height === 20) || // Bottom middle
-                  (wall.x === 100 &&
-                    wall.y === 75 &&
-                    wall.width === 20 &&
-                    wall.height === 450) || // Left middle
-                  (wall.x === 680 &&
-                    wall.y === 75 &&
-                    wall.width === 20 &&
-                    wall.height === 450) // Right middle
+                  (
+                    (wall.x === 100 &&
+                      wall.y === 75 &&
+                      wall.width === 600 &&
+                      wall.height === 20) || // Top middle
+                    (wall.x === 100 &&
+                      wall.y === 505 &&
+                      wall.width === 600 &&
+                      wall.height === 20) || // Bottom middle
+                    (wall.x === 100 &&
+                      wall.y === 75 &&
+                      wall.width === 20 &&
+                      wall.height === 450) || // Left middle
+                    (wall.x === 680 &&
+                      wall.y === 75 &&
+                      wall.width === 20 &&
+                      wall.height === 450)
+                  ) // Right middle
                 ),
             );
             set({ walls: newWalls });
@@ -1341,22 +1348,24 @@ export const useSnakeGame = create<SnakeGameState>()(
             const newWalls = state.walls.filter(
               (wall) =>
                 !(
-                  (wall.x === 200 &&
-                    wall.y === 150 &&
-                    wall.width === 400 &&
-                    wall.height === 20) || // Top inner
-                  (wall.x === 200 &&
-                    wall.y === 430 &&
-                    wall.width === 400 &&
-                    wall.height === 20) || // Bottom inner
-                  (wall.x === 200 &&
-                    wall.y === 150 &&
-                    wall.width === 20 &&
-                    wall.height === 300) || // Left inner
-                  (wall.x === 580 &&
-                    wall.y === 150 &&
-                    wall.width === 20 &&
-                    wall.height === 300) // Right inner
+                  (
+                    (wall.x === 200 &&
+                      wall.y === 150 &&
+                      wall.width === 400 &&
+                      wall.height === 20) || // Top inner
+                    (wall.x === 200 &&
+                      wall.y === 430 &&
+                      wall.width === 400 &&
+                      wall.height === 20) || // Bottom inner
+                    (wall.x === 200 &&
+                      wall.y === 150 &&
+                      wall.width === 20 &&
+                      wall.height === 300) || // Left inner
+                    (wall.x === 580 &&
+                      wall.y === 150 &&
+                      wall.width === 20 &&
+                      wall.height === 300)
+                  ) // Right inner
                 ),
             );
             set({ walls: newWalls });
@@ -2493,10 +2502,10 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Remove the key chamber walls
       const keyWallIds = [
-        { x: 660, y: 40, width: 100, height: 20 }, // top wall
-        { x: 660, y: 120, width: 100, height: 20 }, // bottom wall
-        { x: 660, y: 50, width: 20, height: 70 }, // left wall
-        { x: 740, y: 50, width: 20, height: 70 }, // right wall
+        { x: 720, y: 0, width: 80, height: 20 }, // top wall
+        { x: 720, y: 60, width: 80, height: 20 }, // bottom wall
+        { x: 720, y: 0, width: 20, height: 80 }, // left wall
+        { x: 780, y: 0, width: 20, height: 80 }, // right wall
       ];
 
       set({

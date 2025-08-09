@@ -545,10 +545,10 @@ export const LEVELS: Level[] = [
         speed: 60,
         direction: { x: 0, y: 0 },
         patrolPoints: [
-          { x: 450, y: 250 },
-          { x: 580, y: 420 },
-          // { x: 580, y: 480 },
-          // { x: 520, y: 480 },
+          { x: 510, y: 410 },
+          { x: 590, y: 410 },
+          { x: 590, y: 490 },
+          { x: 510, y: 490 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -569,10 +569,10 @@ export const LEVELS: Level[] = [
         speed: 65,
         direction: { x: 0, y: 0 },
         patrolPoints: [
-          { x: 520, y: 420 },
-          { x: 580, y: 420 },
-          { x: 580, y: 480 },
-          { x: 520, y: 480 },
+          { x: 450, y: 370 },
+          { x: 570, y: 370 },
+          { x: 570, y: 470 },
+          { x: 470, y: 470 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -593,10 +593,10 @@ export const LEVELS: Level[] = [
         speed: 55,
         direction: { x: 0, y: 0 },
         patrolPoints: [
-          { x: 520, y: 420 },
-          { x: 580, y: 420 },
-          { x: 580, y: 480 },
-          { x: 520, y: 480 },
+          { x: 480, y: 400 },
+          { x: 600, y: 400 },
+          { x: 600, y: 500 },
+          { x: 500, y: 500 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -641,10 +641,10 @@ export const LEVELS: Level[] = [
         speed: 55,
         direction: { x: 0, y: 0 },
         patrolPoints: [
-          { x: 360, y: 120 },
-          { x: 420, y: 120 },
-          { x: 420, y: 180 },
-          { x: 360, y: 180 },
+          { x: 330, y: 90 },
+          { x: 450, y: 90 },
+          { x: 450, y: 240 },
+          { x: 330, y: 240 },
         ],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -745,7 +745,7 @@ export const LEVELS: Level[] = [
     return {
       id: 4,
       name: "Alignment Issues",
-      player: { x: 50, y: 300 },
+      player: { x: 80, y: 530 },
       size: { width: 800, height: 600 },
       startTilePos: { row: startRow, col: startCol },
       endTilePos: { row: endRow, col: endCol },
@@ -756,10 +756,10 @@ export const LEVELS: Level[] = [
         { x: 0, y: 0, width: 20, height: 600 },
         { x: 780, y: 0, width: 20, height: 600 },
         // Key chamber walls
-        { x: 660, y: 40, width: 100, height: 20 }, // top wall
-        { x: 660, y: 120, width: 100, height: 20 }, // bottom wall
-        { x: 660, y: 50, width: 20, height: 70 }, // left wall
-        { x: 740, y: 50, width: 20, height: 70 }, // right wall
+        { x: 720, y: 0, width: 80, height: 20 }, // top wall
+        { x: 720, y: 60, width: 80, height: 20 }, // bottom wall
+        { x: 720, y: 0, width: 20, height: 80 }, // left wall
+        { x: 780, y: 0, width: 20, height: 80 }, // right wall
       ],
       snakes: [
         // Helper function to calculate tile center position
@@ -894,8 +894,8 @@ export const LEVELS: Level[] = [
           ];
         })(),
       ],
-      door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
-      key: { x: 700, y: 80, width: 20, height: 20, collected: false },
+      door: { x: 70, y: -10, width: 30, height: 40, isOpen: false },
+      key: { x: 750, y: 30, width: 20, height: 20, collected: false },
       // 8x8 centered tile grid with randomized start and end positions
       patternTiles: (() => {
         const tiles: PatternTile[] = [];
