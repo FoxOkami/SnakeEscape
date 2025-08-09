@@ -1,5 +1,6 @@
 import { Snake, Player, Wall, Position } from "./types";
 import { checkAABBCollision, getDistance, moveTowards, hasLineOfSight, getDirectionVector, findPathAroundWalls, slideAlongWall } from "./collision";
+import { updateBossSnake } from "./bossSnake";
 
 export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[], gameState?: any): Snake {
   const currentTime = Date.now();
@@ -33,6 +34,8 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
       return updatePhotophobicSnake(snake, walls, dt, player, sounds, currentTime, gameState);
     case 'rattlesnake':
       return updateRattlesnakeSnake(snake, walls, dt, player);
+    case 'boss':
+      return updateBossSnake(snake, walls, dt, player, currentTime);
     default:
       return snake;
   }

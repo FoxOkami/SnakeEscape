@@ -1319,10 +1319,10 @@ export const LEVELS: Level[] = [
     },
   },
 
-  // Level 6: Simple Key and Door Challenge
+  // Level 6: Boss Battle with Valerie
   {
     id: 6,
-    name: "Final Escape",
+    name: "Face Valerie",
     player: { x: 50, y: 300 },
     size: { width: 800, height: 600 },
     walls: [
@@ -1332,9 +1332,30 @@ export const LEVELS: Level[] = [
       { x: 0, y: 0, width: 20, height: 600 },     // Left wall
       { x: 780, y: 0, width: 20, height: 600 },   // Right wall
     ],
-    snakes: [], // No enemies in this level
+    snakes: [
+      {
+        id: "valerie",
+        type: "boss" as const,
+        position: { x: 400, y: 150 }, // Center-ish starting position
+        size: { width: 175, height: 175 },
+        speed: 100,
+        direction: { x: 1, y: 0 },
+        patrolPoints: [
+          { x: 200, y: 150 },
+          { x: 600, y: 150 },
+          { x: 600, y: 400 },
+          { x: 200, y: 400 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 150,
+        sightRange: 800, // Entire level width
+        hearingRange: 600, // Entire level height
+        isChasing: false,
+      },
+    ],
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
-    key: { x: 400, y: 300, width: 20, height: 20, collected: false },
+    key: { x: 400, y: 500, width: 20, height: 20, collected: false },
     patternTiles: [],
     patternSequence: [],
     switches: [],
