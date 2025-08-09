@@ -2688,18 +2688,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       const spitterId = `spitter_${Date.now()}`;
 
-      // Get patrol points from existing spitter1 if it exists
-      const existingSpitter = state.snakes.find(snake => snake.id === "spitter1" && snake.type === "spitter");
-      const patrolPoints = existingSpitter?.patrolPoints || [
-        // Fallback to spitter1's default patrol points from level 4
-        { x: 640, y: 290 },
-        { x: 640, y: 540 },
-        { x: 135, y: 540 },
-        { x: 135, y: 35 },
-        { x: 640, y: 35 },
-        { x: 640, y: 290 },
-      ];
-
       const spitterSnake: Snake = {
         id: spitterId,
         type: "spitter",
@@ -2707,7 +2695,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         size: { width: 25, height: 25 },
         speed: 50, // Moving snake
         direction: { x: 0, y: 0 }, // Will be set by movement logic
-        patrolPoints: [...patrolPoints], // Use the same patrol points as spitter1
+        patrolPoints: [],
         currentPatrolIndex: 0,
         patrolDirection: 1,
         chaseSpeed: 0,
@@ -2715,7 +2703,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         isChasing: false,
         lastFireTime: Date.now(),
         fireInterval: 3000, // 3 seconds
-        movementAxis: undefined, // Not needed when using patrol points
+        movementAxis: undefined, // Will be randomly assigned on first update
         shotCount: 0, // Start at 0 shots
       };
 
