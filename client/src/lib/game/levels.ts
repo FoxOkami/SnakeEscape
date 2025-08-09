@@ -1319,29 +1319,72 @@ export const LEVELS: Level[] = [
     },
   },
 
-  // Level 6: Simple Key and Door Challenge
+  // Level 6: Boss Battle - The Shadow Giant
   {
     id: 6,
-    name: "Final Escape",
+    name: "The Shadow Giant",
     player: { x: 50, y: 300 },
     size: { width: 800, height: 600 },
     walls: [
       // Outer boundary walls only
-      { x: 0, y: 0, width: 800, height: 20 },     // Top wall
-      { x: 0, y: 580, width: 800, height: 20 },   // Bottom wall
-      { x: 0, y: 0, width: 20, height: 600 },     // Left wall
-      { x: 780, y: 0, width: 20, height: 600 },   // Right wall
+      { x: 0, y: 0, width: 800, height: 20 }, // Top wall
+      { x: 0, y: 580, width: 800, height: 20 }, // Bottom wall
+      { x: 0, y: 0, width: 20, height: 600 }, // Left wall
+      { x: 780, y: 0, width: 20, height: 600 }, // Right wall
     ],
-    snakes: [], // No enemies in this level
+    snakes: [
+      {
+        id: "shadow_giant_boss",
+        type: "photophobic" as const,
+        position: { x: 400, y: 300 }, // Center of the map
+        size: { width: 320, height: 320 }, // 10x bigger than normal (32x10)
+        speed: 80, // Same base speed as normal photophobic
+        direction: { x: 1, y: 0 },
+        patrolPoints: [
+          { x: 200, y: 150 },
+          { x: 600, y: 150 },
+          { x: 600, y: 450 },
+          { x: 200, y: 450 },
+        ],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 250, // Same chase speed as normal photophobic
+        sightRange: 800, // Entire map width
+        hearingRange: 800, // Entire map coverage
+        isChasing: false,
+        isInDarkness: true, // Start in darkness state
+        isBerserk: false,
+        isPaused: false,
+        isCharging: false,
+      },
+    ],
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
-    key: { x: 400, y: 300, width: 20, height: 20, collected: false },
+    key: { x: 100, y: 100, width: 20, height: 20, collected: false }, // Moved key to corner for challenge
     patternTiles: [],
     patternSequence: [],
-    switches: [],
+    switches: [
+      {
+        // Light switch to control the boss
+        id: "boss_light_switch",
+        x: 700,
+        y: 500,
+        width: 20,
+        height: 30,
+        isPressed: false,
+        switchType: "lever",
+      },
+    ],
     throwableItems: [],
     mirrors: [],
     crystal: undefined,
-    lightSource: undefined,
+    lightSource: {
+      x: 400,
+      y: 100,
+      rotation: 180, // Point downward toward center
+      isOn: false,
+      brightness: 0.9,
+      radius: 300, // Large radius to cover significant area
+    },
     teleporters: [],
   },
 ];
