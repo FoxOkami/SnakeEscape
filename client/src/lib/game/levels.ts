@@ -876,11 +876,18 @@ export const LEVELS: Level[] = [
             {
               id: "spitter1",
               type: "spitter" as const,
-              position: calculateTileCenter(7, 7), // Grid position (7,7)
+              position: { x: 640, y: 290 },
               size: { width: 25, height: 25 },
               speed: 50,
-              direction: { x: 0, y: 0 }, // Will be set by movement logic
-              patrolPoints: [],
+              direction: { x: 0, y: 1 },
+              patrolPoints: [
+                { x: 640, y: 290 },
+                { x: 640, y: 540 },
+                { x: 135, y: 540 },
+                { x: 135, y: 35 },
+                { x: 640, y: 35 },
+                { x: 640, y: 290 },
+              ],
               currentPatrolIndex: 0,
               patrolDirection: 1,
               chaseSpeed: 0,
@@ -888,7 +895,6 @@ export const LEVELS: Level[] = [
               isChasing: false,
               lastFireTime: Date.now(),
               fireInterval: 3000, // 3 seconds
-              movementAxis: undefined, // Will be randomly assigned on first update
               shotCount: 0, // Start at 0 shots
             },
           ];

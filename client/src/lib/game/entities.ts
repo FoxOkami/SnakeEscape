@@ -512,46 +512,84 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
 }
 
 function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number): Snake {
-  // Initialize movement axis if not set
-  if (!snake.movementAxis) {
-    // Randomly choose horizontal or vertical movement
-    snake.movementAxis = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+  // If snake has patrol points, follow them (like guard/stalker snakes)
+  if (snake.patrolPoints && snake.patrolPoints.length > 0) {
+    // Use patrol behavior like other snakes
+    const targetPoint = getPatrolTarget(snake);
     
-    // Set initial direction based on movement axis
-    if (snake.movementAxis === 'horizontal') {
-      snake.direction = { x: 1, y: 0 }; // Start moving east
+    // Move toward patrol target
+    const newPosition = moveTowards(snake.position, targetPoint, snake.speed * dt);
+    
+    // Check collision and update position
+    if (!checkWallCollision(snake, newPosition, walls)) {
+      snake.position = newPosition;
     } else {
-      snake.direction = { x: 0, y: 1 }; // Start moving south
+      // Use smart pathfinding for patrol behavior
+      const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
+      const smartNewPosition = moveTowards(snake.position, smartTarget, snake.speed * dt);
+      
+      if (!checkWallCollision(snake, smartNewPosition, walls)) {
+        snake.position = smartNewPosition;
+      } else {
+        // If still blocked during patrol, skip to next patrol point
+        snake.currentPatrolIndex += snake.patrolDirection;
+        
+        // Reverse direction if we've reached the end
+        if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
+          snake.currentPatrolIndex = Math.max(0, snake.patrolPoints.length - 2);
+          snake.patrolDirection = -1;
+        } else if (snake.currentPatrolIndex < 0) {
+          snake.currentPatrolIndex = Math.min(1, snake.patrolPoints.length - 1);
+          snake.patrolDirection = 1;
+        }
+      }
     }
-  }
-
-  // Calculate new position
-  const newPosition = {
-    x: snake.position.x + snake.direction.x * snake.speed * dt,
-    y: snake.position.y + snake.direction.y * snake.speed * dt
-  };
-
-  // Check for wall collision
-  if (checkWallCollision(snake, newPosition, walls)) {
-    // Hit a wall, reverse direction
-    snake.direction = {
-      x: -snake.direction.x,
-      y: -snake.direction.y
-    };
     
-    // Try moving in the reversed direction
-    const reversedPosition = {
+    // Update direction for visual purposes
+    snake.direction = getDirectionVector(snake.position, targetPoint);
+  } else {
+    // Fallback to old behavior if no patrol points
+    // Initialize movement axis if not set
+    if (!snake.movementAxis) {
+      // Randomly choose horizontal or vertical movement
+      snake.movementAxis = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+      
+      // Set initial direction based on movement axis
+      if (snake.movementAxis === 'horizontal') {
+        snake.direction = { x: 1, y: 0 }; // Start moving east
+      } else {
+        snake.direction = { x: 0, y: 1 }; // Start moving south
+      }
+    }
+
+    // Calculate new position
+    const newPosition = {
       x: snake.position.x + snake.direction.x * snake.speed * dt,
       y: snake.position.y + snake.direction.y * snake.speed * dt
     };
-    
-    // Only move if the reversed direction is clear
-    if (!checkWallCollision(snake, reversedPosition, walls)) {
-      snake.position = reversedPosition;
+
+    // Check for wall collision
+    if (checkWallCollision(snake, newPosition, walls)) {
+      // Hit a wall, reverse direction
+      snake.direction = {
+        x: -snake.direction.x,
+        y: -snake.direction.y
+      };
+      
+      // Try moving in the reversed direction
+      const reversedPosition = {
+        x: snake.position.x + snake.direction.x * snake.speed * dt,
+        y: snake.position.y + snake.direction.y * snake.speed * dt
+      };
+      
+      // Only move if the reversed direction is clear
+      if (!checkWallCollision(snake, reversedPosition, walls)) {
+        snake.position = reversedPosition;
+      }
+    } else {
+      // No collision, move normally
+      snake.position = newPosition;
     }
-  } else {
-    // No collision, move normally
-    snake.position = newPosition;
   }
 
   return snake;
