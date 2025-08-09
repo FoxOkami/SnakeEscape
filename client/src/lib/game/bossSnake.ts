@@ -94,8 +94,19 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         
         // Check for wall collision
         if (checkWallCollision(snake, newPosition, walls)) {
-          // Hit a wall - stop charging and enter recovery
-          console.log(`Valerie: Hit wall! Charging → Recovering. Position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
+          // Hit a wall - bounce back along same trajectory
+          const recoilDistance = snake.size.width / 2; // Half her width
+          const recoilPosition = {
+            x: snake.position.x - snake.direction.x * recoilDistance,
+            y: snake.position.y - snake.direction.y * recoilDistance
+          };
+          
+          // Apply recoil if it doesn't cause collision
+          if (!checkWallCollision(snake, recoilPosition, walls)) {
+            snake.position = recoilPosition;
+          }
+          
+          console.log(`Valerie: Hit wall! Charging → Recovering. Recoiled to: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
           snake.bossState = 'recovering';
           snake.bossColor = 'normal'; // Change back to normal color
           snake.isChargingAtSnapshot = false;
