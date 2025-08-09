@@ -1337,7 +1337,7 @@ export const LEVELS: Level[] = [
         id: "shadow_giant_boss",
         type: "photophobic" as const,
         position: { x: 400, y: 300 }, // Center of the map
-        size: { width: 320, height: 320 }, // 10x bigger than normal (32x10)
+        size: { width: 200, height: 200 }, // ~6x bigger than normal (32x6.25)
         speed: 80, // Same base speed as normal photophobic
         direction: { x: 1, y: 0 },
         patrolPoints: [

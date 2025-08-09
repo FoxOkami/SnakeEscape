@@ -885,7 +885,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       const currentWalls = get().getCurrentWalls();
 
-      // Calculate quadrant lighting for photophobic snakes (Level 5)
+      // Calculate quadrant lighting for photophobic snakes (Level 5 and 6)
       let quadrantLighting = {};
       if (state.currentLevel === 4) {
         // Level 5 (0-indexed as 4)
@@ -908,6 +908,22 @@ export const useSnakeGame = create<SnakeGameState>()(
           topRight: C && D, // C AND D
           bottomLeft: !(E && F), // NOT (E AND F)
           bottomRight: ((A && !B) || (!A && B)) && C && D, // (A XOR B) AND (C AND D)
+        };
+      } else if (state.currentLevel === 5) {
+        // Level 6 (0-indexed as 5) - Simple light switch controls entire map
+        const lightSwitchPressed =
+          state.switches.find((s) => s.id === "boss_light_switch")?.isPressed ||
+          false;
+        const isLightOn = state.lightSource?.isOn || false;
+        
+        // Boss responds to the light source being on (controlled by the switch)
+        const mapIsLit = lightSwitchPressed && isLightOn;
+        
+        quadrantLighting = {
+          topLeft: mapIsLit,
+          topRight: mapIsLit,
+          bottomLeft: mapIsLit,
+          bottomRight: mapIsLit,
         };
       }
 
@@ -3495,9 +3511,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       };
       const newState = !nearbyLeverSwitch.isPressed;
 
-      // Only toggle the light source if it's the main light switch
+      // Only toggle the light source if it's the main light switch or boss light switch
       let updatedLightSource = state.lightSource;
-      if (nearbyLeverSwitch.id === "light_switch") {
+      if (nearbyLeverSwitch.id === "light_switch" || nearbyLeverSwitch.id === "boss_light_switch") {
         updatedLightSource = state.lightSource
           ? {
               ...state.lightSource,

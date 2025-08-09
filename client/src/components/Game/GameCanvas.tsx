@@ -2092,14 +2092,15 @@ const GameCanvas: React.FC = () => {
         ctx.stroke();
       }
 
-      // Draw light source rhombus (Level 3 only)
-      if (currentLevel === 2 && lightSource) {
-        // Level 3 (0-indexed as 2)
+      // Draw light source rhombus (Level 3 and Level 6)
+      if ((currentLevel === 2 || currentLevel === 5) && lightSource) {
+        // Level 3 (0-indexed as 2) or Level 6 (0-indexed as 5)
         const centerX = lightSource.x;
         const centerY = lightSource.y;
         const size = 8; // Half the rhombus size
 
-        ctx.fillStyle = "#ffff00"; // Yellow color
+        // Change color based on whether light is on
+        ctx.fillStyle = lightSource.isOn ? "#ffff00" : "#666666"; // Yellow when on, gray when off
         ctx.beginPath();
 
         // Draw rhombus (diamond) shape centered at light source
@@ -2112,9 +2113,21 @@ const GameCanvas: React.FC = () => {
         ctx.fill();
 
         // Add a subtle border
-        ctx.strokeStyle = "#ffcc00";
+        ctx.strokeStyle = lightSource.isOn ? "#ffcc00" : "#444444";
         ctx.lineWidth = 1;
         ctx.stroke();
+
+        // Add light circle effect when on (Level 6 only)
+        if (currentLevel === 5 && lightSource.isOn) {
+          // Draw a light circle to show the area of effect
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, lightSource.radius || 300, 0, 2 * Math.PI);
+          ctx.fillStyle = "rgba(255, 255, 0, 0.1)"; // Very transparent yellow
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255, 255, 0, 0.3)";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
 
         // Show helper text when player is nearby
         const distance = Math.sqrt(
