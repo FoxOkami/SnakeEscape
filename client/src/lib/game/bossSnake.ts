@@ -52,6 +52,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       snake.pauseStartTime = currentTime;
       snake.bossState = 'pausing';
       snake.bossColor = 'normal';
+      console.log(`Valerie: Tracking → Pausing. Snapshot: (${snake.playerSnapshot.x.toFixed(1)}, ${snake.playerSnapshot.y.toFixed(1)})`);
       break;
 
     case 'pausing':
@@ -62,39 +63,42 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         snake.chargeStartTime = currentTime;
         snake.bossColor = 'charging'; // Change to pink color
         snake.isChargingAtSnapshot = true;
+        // Calculate and store the charge direction once at the start
+        if (snake.playerSnapshot) {
+          snake.direction = getDirectionVector(snake.position, snake.playerSnapshot);
+          console.log(`Valerie: Pausing → Charging. Direction: (${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)})`);
+        }
       }
       // Stay in current position during pause
       break;
 
     case 'charging':
-      // Charge directly at the snapshot position until hitting a wall
-      if (snake.playerSnapshot) {
-        const targetPoint = snake.playerSnapshot;
+      // Charge in a straight line using stored direction until hitting a wall
+      if (snake.direction && snake.playerSnapshot) {
         const moveSpeed = snake.chaseSpeed * 2 || snake.speed * 2; // Faster charge speed
         
-        // Calculate direction to snapshot
-        const direction = getDirectionVector(snake.position, targetPoint);
-        
-        // Move in straight line toward snapshot at high speed
+        // Move in straight line using the stored direction (don't recalculate)
         const chargeDistance = moveSpeed * dt;
         const newPosition = {
-          x: snake.position.x + direction.x * chargeDistance,
-          y: snake.position.y + direction.y * chargeDistance
+          x: snake.position.x + snake.direction.x * chargeDistance,
+          y: snake.position.y + snake.direction.y * chargeDistance
         };
         
         // Check for wall collision
         if (checkWallCollision(snake, newPosition, walls)) {
           // Hit a wall - stop charging and enter recovery
+          console.log(`Valerie: Hit wall! Charging → Recovering. Position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
           snake.bossState = 'recovering';
           snake.bossColor = 'normal'; // Change back to normal color
           snake.isChargingAtSnapshot = false;
           snake.playerSnapshot = undefined;
+          snake.direction = { x: 0, y: 0 }; // Reset direction
           // Add brief recovery time before next attack
           snake.pauseStartTime = currentTime;
         } else {
-          // Continue charging
+          // Continue charging in same direction
           snake.position = newPosition;
-          snake.direction = direction;
+          // Keep the same direction (don't recalculate)
         }
       }
       break;
