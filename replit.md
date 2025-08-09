@@ -31,7 +31,6 @@ Preferred communication style: Simple, everyday language.
 - **Audio**: HTML5 Audio API for immersive soundscapes and effects
 - **Health System**: 2-hit player health with 1-second invincibility, health persists between levels
 - **Randomization**: Level 2 features complete randomization: item spawning (9 potential locations), item names (13 different item types), and pressure plate locations (6 potential locations)
-- **Boss System**: Level 6 features "The Shadow Giant" - a massive 200x200px photophobic boss with full map awareness (800px sight/hearing range)
 
 ### UI/UX Decisions
 - **Components**: Utilizes Radix UI for accessible and performant UI elements.
