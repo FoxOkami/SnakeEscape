@@ -418,8 +418,19 @@ const GameCanvas: React.FC = () => {
             ? `grid_tile_${currentLevelData.endTilePos.row}_${currentLevelData.endTilePos.col}`
             : "grid_tile_6_7";
 
-          // Don't highlight start or end tiles
-          if (currentTile.id !== startTileId && currentTile.id !== endTileId) {
+          // Handle different tile highlighting
+          if (currentTile.id === startTileId) {
+            // Highlight start tile in red when flow cannot be started
+            const currentFlowState = flowState;
+            const canStartFlow = !currentFlowState || (!currentFlowState.isActive && !currentFlowState.isEmptying);
+            
+            if (!canStartFlow) {
+              // Red overlay for start tile when it cannot be interacted with
+              ctx.fillStyle = "rgba(255, 99, 99, 0.3)"; // Light red with 30% opacity
+              ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+            }
+          } else if (currentTile.id !== endTileId) {
+            // Normal highlighting for other tiles (not start or end)
             if (isLockedTile) {
               // Red overlay for locked tiles
               ctx.fillStyle = "rgba(255, 99, 99, 0.3)"; // Light red with 30% opacity
