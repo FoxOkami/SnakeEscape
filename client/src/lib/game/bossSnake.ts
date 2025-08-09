@@ -94,30 +94,80 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         
         // Check for wall collision
         if (checkWallCollision(snake, newPosition, walls)) {
-          // Hit a wall - bounce back along same trajectory
+          // Hit a wall - start animated recoil
           const recoilDistance = snake.size.width / 2; // Half her width
-          const recoilPosition = {
+          const recoilTargetPosition = {
             x: snake.position.x - snake.direction.x * recoilDistance,
             y: snake.position.y - snake.direction.y * recoilDistance
           };
           
-          // Apply recoil if it doesn't cause collision
-          if (!checkWallCollision(snake, recoilPosition, walls)) {
-            snake.position = recoilPosition;
+          // Check if recoil target is valid
+          if (!checkWallCollision(snake, recoilTargetPosition, walls)) {
+            // Start recoil animation
+            snake.bossState = 'recoiling';
+            snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
+            snake.recoilTargetPosition = recoilTargetPosition;
+            snake.recoilStartTime = currentTime;
+            snake.recoilDirection = {
+              x: -snake.direction.x, // Opposite direction
+              y: -snake.direction.y
+            };
+            console.log(`Valerie: Hit wall! Charging → Recoiling. Target: (${recoilTargetPosition.x.toFixed(1)}, ${recoilTargetPosition.y.toFixed(1)})`);
+          } else {
+            // Can't recoil, go directly to recovery
+            snake.bossState = 'recovering';
+            snake.bossColor = 'normal';
+            snake.isChargingAtSnapshot = false;
+            snake.playerSnapshot = undefined;
+            snake.direction = { x: 0, y: 0 };
+            snake.pauseStartTime = currentTime;
+            console.log(`Valerie: Hit wall! No space to recoil → Recovering directly`);
           }
-          
-          console.log(`Valerie: Hit wall! Charging → Recovering. Recoiled to: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
-          snake.bossState = 'recovering';
-          snake.bossColor = 'normal'; // Change back to normal color
-          snake.isChargingAtSnapshot = false;
-          snake.playerSnapshot = undefined;
-          snake.direction = { x: 0, y: 0 }; // Reset direction
-          // Add brief recovery time before next attack
-          snake.pauseStartTime = currentTime;
         } else {
           // Continue charging in same direction
           snake.position = newPosition;
           // Keep the same direction (don't recalculate)
+        }
+      }
+      break;
+
+    case 'recoiling':
+      // Animate recoil movement at 3/4 chase speed
+      if (snake.recoilStartTime && snake.recoilTargetPosition && snake.recoilDirection) {
+        const recoilSpeed = (snake.chaseSpeed || snake.speed) * 0.75; // 3/4 chase speed
+        const recoilDistance = recoilSpeed * dt;
+        
+        // Move toward recoil target
+        const newRecoilPosition = {
+          x: snake.position.x + snake.recoilDirection.x * recoilDistance,
+          y: snake.position.y + snake.recoilDirection.y * recoilDistance
+        };
+        
+        // Check if we've reached the target or hit something
+        const distanceToTarget = Math.sqrt(
+          Math.pow(snake.recoilTargetPosition.x - snake.position.x, 2) +
+          Math.pow(snake.recoilTargetPosition.y - snake.position.y, 2)
+        );
+        
+        if (distanceToTarget <= recoilDistance || checkWallCollision(snake, newRecoilPosition, walls)) {
+          // Finished recoiling - snap to target and enter recovery
+          snake.position = snake.recoilTargetPosition;
+          snake.bossState = 'recovering';
+          snake.bossColor = 'normal'; // Change back to normal color
+          snake.isChargingAtSnapshot = false;
+          snake.playerSnapshot = undefined;
+          snake.direction = { x: 0, y: 0 };
+          // Clear recoil properties
+          snake.recoilStartPosition = undefined;
+          snake.recoilTargetPosition = undefined;
+          snake.recoilStartTime = undefined;
+          snake.recoilDirection = undefined;
+          // Add brief recovery time before next attack
+          snake.pauseStartTime = currentTime;
+          console.log(`Valerie: Recoiling → Recovering. Final position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
+        } else {
+          // Continue recoiling
+          snake.position = newRecoilPosition;
         }
       }
       break;
