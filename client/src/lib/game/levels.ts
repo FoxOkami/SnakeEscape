@@ -1318,4 +1318,30 @@ export const LEVELS: Level[] = [
       radius: 150,
     },
   },
+
+  // Level 6: Simple Key and Door Challenge
+  {
+    id: 6,
+    name: "Final Escape",
+    player: { x: 50, y: 300 },
+    size: { width: 800, height: 600 },
+    walls: [
+      // Outer boundary walls only
+      { x: 0, y: 0, width: 800, height: 20 },     // Top wall
+      { x: 0, y: 580, width: 800, height: 20 },   // Bottom wall
+      { x: 0, y: 0, width: 20, height: 600 },     // Left wall
+      { x: 780, y: 0, width: 20, height: 600 },   // Right wall
+    ],
+    snakes: [], // No enemies in this level
+    door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
+    key: { x: 400, y: 300, width: 20, height: 20, collected: false },
+    patternTiles: [],
+    patternSequence: [],
+    switches: [],
+    throwableItems: [],
+    mirrors: [],
+    crystal: undefined,
+    lightSource: undefined,
+    teleporters: [],
+  },
 ];
