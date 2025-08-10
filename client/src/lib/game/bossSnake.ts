@@ -111,16 +111,22 @@ function getPatrolTarget(snake: Snake): Position {
   return snake.patrolPoints[index];
 }
 
-// Helper function to calculate ramped speed during current charge
+// Helper function to calculate exponential ramped speed during current charge
 function calculateChargeRampedSpeed(snake: Snake, currentTime: number): number {
-  if (!snake.chargeRampStartTime || !snake.chargeBaseSpeed || !snake.chargeMaxSpeed || !snake.chargeRampRate) {
+  if (!snake.chargeRampStartTime || !snake.chargeBaseSpeed || !snake.chargeMaxSpeed) {
     return snake.chaseSpeed; // Fallback to current speed if ramping not initialized
   }
   
   const chargeTime = (currentTime - snake.chargeRampStartTime) / 1000; // Convert to seconds
-  const rampedSpeed = snake.chargeBaseSpeed + (snake.chargeRampRate * chargeTime);
   
-  // Cap at maximum speed
+  // Exponential curve: speed = baseSpeed + (maxSpeed - baseSpeed) * (1 - e^(-rate * time))
+  // This creates a curve that starts slow and accelerates rapidly, then levels off at max speed
+  const exponentialRate = 3.0; // Controls how steep the curve is (higher = faster initial acceleration)
+  const speedRange = snake.chargeMaxSpeed - snake.chargeBaseSpeed;
+  const exponentialFactor = 1 - Math.exp(-exponentialRate * chargeTime);
+  const rampedSpeed = snake.chargeBaseSpeed + (speedRange * exponentialFactor);
+  
+  // Cap at maximum speed (though exponential curve naturally approaches it)
   return Math.min(rampedSpeed, snake.chargeMaxSpeed);
 }
 
@@ -149,9 +155,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
     }
     if (!snake.chargeMaxSpeed) {
       snake.chargeMaxSpeed = snake.chaseSpeed * 2.5; // Max speed is 2.5x normal chase speed
-    }
-    if (!snake.chargeRampRate) {
-      snake.chargeRampRate = snake.chaseSpeed * 1.5; // Accelerate by 1.5x chase speed per second
     }
   }
 
@@ -422,7 +425,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             // Also update the charge speed parameters based on new chase speed
             snake.chargeBaseSpeed = snake.chaseSpeed * 0.3;
             snake.chargeMaxSpeed = snake.chaseSpeed * 2.5;
-            snake.chargeRampRate = snake.chaseSpeed * 1.5;
             snake.speedBoostApplied = true;
           }
         } else if (!checkWallCollision(snake, newPosition, walls)) {

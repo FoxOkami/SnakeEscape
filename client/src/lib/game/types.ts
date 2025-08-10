@@ -98,7 +98,6 @@ export interface Snake {
   chargeRampStartTime?: number; // When current charge ramp began
   chargeBaseSpeed?: number; // Starting speed for current charge
   chargeMaxSpeed?: number; // Maximum speed for charge
-  chargeRampRate?: number; // Speed increase per second during charge
 }
 
 export interface Wall extends Rectangle {}
