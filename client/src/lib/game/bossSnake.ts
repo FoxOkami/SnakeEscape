@@ -136,6 +136,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         snake.chargeStartTime = currentTime;
         snake.bossColor = 'charging'; // Change to pink color
         snake.isChargingAtSnapshot = true;
+        snake.chargeDistanceTraveled = 0; // Reset charge distance counter
         // Calculate and store the charge direction once at the start
         if (snake.playerSnapshot) {
           // Calculate direction from Valerie's center to player snapshot
@@ -155,12 +156,20 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       if (snake.direction && snake.playerSnapshot) {
         const moveSpeed = snake.chaseSpeed * 2 || snake.speed * 2; // Faster charge speed
         
+        // Track total charge distance for proportional recoil
+        if (!snake.chargeDistanceTraveled) {
+          snake.chargeDistanceTraveled = 0;
+        }
+        
         // Move in straight line using the stored direction (don't recalculate)
         const chargeDistance = moveSpeed * dt;
         const newPosition = {
           x: snake.position.x + snake.direction.x * chargeDistance,
           y: snake.position.y + snake.direction.y * chargeDistance
         };
+        
+        // Add to total charge distance
+        snake.chargeDistanceTraveled += chargeDistance;
         
         // Check for wall collision with detailed info
         const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);
@@ -169,15 +178,21 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           const reflectedDirection = reflectVector(snake.direction, collisionInfo.normal);
           
           // Start animated recoil using reflection
-          // Use a longer recoil distance to ensure we move away from walls
-          let recoilDistance = snake.size.width * 2; // Start with 2x her width
+          // Use 1/4 of the charge distance traveled for proportional recoil
+          let recoilDistance = (snake.chargeDistanceTraveled || 0) * 0.25;
+          
+          // Ensure minimum recoil distance (half her width) and maximum (2x her width)
+          const minRecoil = snake.size.width * 0.5;
+          const maxRecoil = snake.size.width * 2;
+          recoilDistance = Math.max(minRecoil, Math.min(maxRecoil, recoilDistance));
+          
           let recoilTargetPosition = {
             x: snake.position.x + reflectedDirection.x * recoilDistance,
             y: snake.position.y + reflectedDirection.y * recoilDistance
           };
           
           // Find a safe recoil distance by checking progressively shorter distances
-          while (recoilDistance > snake.size.width * 0.5 && checkWallCollision(snake, recoilTargetPosition, walls)) {
+          while (recoilDistance > minRecoil && checkWallCollision(snake, recoilTargetPosition, walls)) {
             recoilDistance *= 0.8; // Reduce by 20% each time
             recoilTargetPosition = {
               x: snake.position.x + reflectedDirection.x * recoilDistance,
@@ -196,7 +211,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilTargetPosition = recoilTargetPosition;
           snake.recoilStartTime = currentTime;
           snake.recoilDirection = reflectedDirection;
-          console.log(`Valerie: Hit wall! Charging → Recoiling. Reflected direction: (${reflectedDirection.x.toFixed(3)}, ${reflectedDirection.y.toFixed(3)}) Target: (${recoilTargetPosition.x.toFixed(1)}, ${recoilTargetPosition.y.toFixed(1)})`);
+          console.log(`Valerie: Hit wall! Charged ${(snake.chargeDistanceTraveled || 0).toFixed(1)}px → Recoiling ${recoilDistance.toFixed(1)}px. Reflected direction: (${reflectedDirection.x.toFixed(3)}, ${reflectedDirection.y.toFixed(3)}) Target: (${recoilTargetPosition.x.toFixed(1)}, ${recoilTargetPosition.y.toFixed(1)})`);
         
         } else {
           // Continue charging in same direction
@@ -237,6 +252,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilTargetPosition = undefined;
           snake.recoilStartTime = undefined;
           snake.recoilDirection = undefined;
+          snake.chargeDistanceTraveled = 0; // Reset for next charge
           // Add brief recovery time before next attack
           snake.pauseStartTime = currentTime;
           console.log(`Valerie: Recoiling → Recovering. Final position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
@@ -252,6 +268,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilTargetPosition = undefined;
           snake.recoilStartTime = undefined;
           snake.recoilDirection = undefined;
+          snake.chargeDistanceTraveled = 0; // Reset for next charge
           // Add brief recovery time before next attack
           snake.pauseStartTime = currentTime;
           console.log(`Valerie: Hit wall during recoil! Stopping at current position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
