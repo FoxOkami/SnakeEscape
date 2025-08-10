@@ -249,6 +249,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilDuration = 200;
           snake.bossColor = 'stunned';
           snake.isChargingAtSnapshot = false;
+          snake.recoilFromBoulder = true; // Mark this recoil as boulder-caused
         } else {
           // Check for wall collision with detailed info
           const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);
@@ -320,9 +321,25 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         );
         
         if (distanceToTarget <= recoilDistance) {
-          // Reached target normally - snap to target and enter recovery
+          // Reached target normally - snap to target
           snake.position = snake.recoilTargetPosition;
-          snake.bossState = 'recovering';
+          
+          // Check if this recoil was from a boulder collision
+          if (snake.recoilFromBoulder && levelBounds) {
+            // Transition to moving to center
+            const centerPosition = {
+              x: (levelBounds.width / 2) - (snake.size.width / 2),
+              y: (levelBounds.height / 2) - (snake.size.height / 2)
+            };
+            snake.bossState = 'movingToCenter';
+            snake.centerTargetPosition = centerPosition;
+            snake.recoilFromBoulder = false; // Clear the flag
+          } else {
+            // Normal recoil completion - enter recovery
+            snake.bossState = 'recovering';
+            snake.pauseStartTime = currentTime;
+          }
+          
           snake.bossColor = 'normal'; // Change back to normal color
           snake.isChargingAtSnapshot = false;
           snake.playerSnapshot = undefined;
@@ -333,8 +350,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilStartTime = undefined;
           snake.recoilDirection = undefined;
           snake.chargeDistanceTraveled = 0; // Reset for next charge
-          // Add brief recovery time before next attack
-          snake.pauseStartTime = currentTime;
 
         } else if (checkWallCollision(snake, newRecoilPosition, walls)) {
           // Hit another wall during recoil - stop at current position and enter recovery
@@ -357,6 +372,43 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.position = newRecoilPosition;
         }
       }
+      break;
+
+    case 'movingToCenter':
+      // Move to center at double speed after boulder collision
+      if (snake.centerTargetPosition) {
+        const doubleSpeed = (snake.chaseSpeed || snake.speed) * 2;
+        const newPosition = moveTowards(snake.position, snake.centerTargetPosition, doubleSpeed * dt);
+        
+        // Check if we've reached the center
+        const distanceToCenter = getDistance(snake.position, snake.centerTargetPosition);
+        if (distanceToCenter <= doubleSpeed * dt) {
+          // Reached center - snap to position and start pause
+          snake.position = snake.centerTargetPosition;
+          snake.bossState = 'centerPause';
+          snake.centerPauseStartTime = currentTime;
+          snake.centerTargetPosition = undefined; // Clear target
+          
+          // Increase speed by 5% for future chases
+          if (!snake.speedBoostApplied) {
+            snake.chaseSpeed = (snake.chaseSpeed || snake.speed) * 1.05;
+            snake.speedBoostApplied = true;
+          }
+        } else if (!checkWallCollision(snake, newPosition, walls)) {
+          // Continue moving toward center
+          snake.position = newPosition;
+          snake.direction = getDirectionVector(snake.position, snake.centerTargetPosition);
+        }
+      }
+      break;
+
+    case 'centerPause':
+      // Pause at center for 1 second
+      if (currentTime - (snake.centerPauseStartTime || 0) >= 1000) { // 1000ms pause
+        snake.bossState = 'tracking'; // Resume tracking player
+        snake.centerPauseStartTime = undefined;
+      }
+      // Stay still during pause
       break;
 
     case 'recovering':

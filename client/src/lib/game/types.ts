@@ -78,17 +78,22 @@ export interface Snake {
   isLightEmergence?: boolean; // Whether this snake emerged due to light detection
   lightEmergenceDirection?: 'north' | 'south' | 'east' | 'west'; // Cardinal direction for light emergence
   // Boss-specific properties (Valerie)
-  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering'; // Current boss behavior state
+  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause'; // Current boss behavior state
   playerSnapshot?: Position; // Snapshot of player position when starting charge
   chargeStartTime?: number; // When the charge started
   pauseStartTime?: number; // When the pause started (100ms pause)
   isChargingAtSnapshot?: boolean; // Whether currently charging at snapshot location
-  bossColor?: 'normal' | 'charging'; // Color state for boss
+  bossColor?: 'normal' | 'charging' | 'stunned'; // Color state for boss
   // Recoil properties
   recoilStartPosition?: Position; // Where recoil started from
   recoilTargetPosition?: Position; // Where recoil should end
   recoilStartTime?: number; // When recoil animation started
   recoilDirection?: Position; // Direction of recoil movement
+  recoilFromBoulder?: boolean; // Whether recoil was caused by boulder collision
+  // Enhanced boss behavior properties
+  centerTargetPosition?: Position; // Target position when moving to center
+  centerPauseStartTime?: number; // When center pause started
+  speedBoostApplied?: boolean; // Whether 5% speed boost has been applied
 }
 
 export interface Wall extends Rectangle {}
