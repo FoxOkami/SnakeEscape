@@ -154,7 +154,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       snake.chargeBaseSpeed = snake.chaseSpeed * 0.3; // Start each charge at 30% of normal speed
     }
     if (!snake.chargeMaxSpeed) {
-      snake.chargeMaxSpeed = snake.chaseSpeed * 2.5; // Max speed is 2.5x normal chase speed
+      snake.chargeMaxSpeed = snake.chaseSpeed * 4.0; // Max speed is 4x normal chase speed
     }
   }
 
@@ -424,7 +424,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             snake.chaseSpeed = (snake.chaseSpeed || snake.speed) * 1.05;
             // Also update the charge speed parameters based on new chase speed
             snake.chargeBaseSpeed = snake.chaseSpeed * 0.3;
-            snake.chargeMaxSpeed = snake.chaseSpeed * 2.5;
+            snake.chargeMaxSpeed = snake.chaseSpeed * 4.0;
             snake.speedBoostApplied = true;
           }
         } else if (!checkWallCollision(snake, newPosition, walls)) {
