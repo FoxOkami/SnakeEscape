@@ -336,7 +336,6 @@ function getPatrolTarget(snake: Snake): Position {
   // Get current patrol target and validate it
   const currentTarget = snake.patrolPoints[snake.currentPatrolIndex];
   if (!currentTarget || typeof currentTarget.x !== 'number' || typeof currentTarget.y !== 'number') {
-    console.warn('Invalid patrol point found:', currentTarget, 'for snake:', snake.id);
     return snake.position;
   }
   
@@ -358,7 +357,6 @@ function getPatrolTarget(snake: Snake): Position {
     // Validate the new target
     const newTarget = snake.patrolPoints[snake.currentPatrolIndex];
     if (!newTarget || typeof newTarget.x !== 'number' || typeof newTarget.y !== 'number') {
-      console.warn('Invalid new patrol target:', newTarget, 'for snake:', snake.id);
       return snake.position;
     }
   }

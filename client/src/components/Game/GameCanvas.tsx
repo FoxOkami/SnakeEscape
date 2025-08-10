@@ -54,18 +54,14 @@ const GameCanvas: React.FC = () => {
   useEffect(() => {
     const img = new Image();
     img.onload = () => {
-      console.log("Custom player image loaded successfully!");
       playerImageRef.current = img;
       setImageLoaded(true);
     };
     img.onerror = (error) => {
-      console.error("Failed to load custom player image:", error);
-      console.log("Attempted to load from:", img.src);
       setImageLoaded(false);
     };
     // Add cache busting parameter to ensure fresh load
     img.src = "/player-character.png?" + Date.now();
-    console.log("Attempting to load player image from:", img.src);
   }, []);
 
   const draw = useCallback(

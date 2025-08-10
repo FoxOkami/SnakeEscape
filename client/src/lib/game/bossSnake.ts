@@ -125,7 +125,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       snake.pauseStartTime = currentTime;
       snake.bossState = 'pausing';
       snake.bossColor = 'normal';
-      console.log(`Valerie: Tracking → Pausing. Snapshot: (${snake.playerSnapshot.x.toFixed(1)}, ${snake.playerSnapshot.y.toFixed(1)})`);
+
       break;
 
     case 'pausing':
@@ -145,7 +145,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             y: snake.position.y + snake.size.height / 2
           };
           snake.direction = getDirectionVector(valerieCenter, snake.playerSnapshot);
-          console.log(`Valerie: Pausing → Charging. Direction: (${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)})`);
+
         }
       }
       // Stay in current position during pause
@@ -211,7 +211,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilTargetPosition = recoilTargetPosition;
           snake.recoilStartTime = currentTime;
           snake.recoilDirection = reflectedDirection;
-          console.log(`Valerie: Hit wall! Charged ${(snake.chargeDistanceTraveled || 0).toFixed(1)}px → Recoiling ${recoilDistance.toFixed(1)}px. Reflected direction: (${reflectedDirection.x.toFixed(3)}, ${reflectedDirection.y.toFixed(3)}) Target: (${recoilTargetPosition.x.toFixed(1)}, ${recoilTargetPosition.y.toFixed(1)})`);
+
         
         } else {
           // Continue charging in same direction
@@ -255,7 +255,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.chargeDistanceTraveled = 0; // Reset for next charge
           // Add brief recovery time before next attack
           snake.pauseStartTime = currentTime;
-          console.log(`Valerie: Recoiling → Recovering. Final position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
+
         } else if (checkWallCollision(snake, newRecoilPosition, walls)) {
           // Hit another wall during recoil - stop at current position and enter recovery
           snake.bossState = 'recovering';
@@ -271,7 +271,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.chargeDistanceTraveled = 0; // Reset for next charge
           // Add brief recovery time before next attack
           snake.pauseStartTime = currentTime;
-          console.log(`Valerie: Hit wall during recoil! Stopping at current position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
+
         } else {
           // Continue recoiling safely
           snake.position = newRecoilPosition;
