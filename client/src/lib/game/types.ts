@@ -270,6 +270,7 @@ export interface Boulder extends Rectangle {
   hitCount: number; // Number of times hit by Valerie
   maxHits: number; // Number of hits required to break (2 for level 6)
   isDestroyed: boolean; // Whether the boulder has been destroyed
+  destructionTime?: number; // When the boulder was destroyed (timestamp)
 }
 
 export interface Level {

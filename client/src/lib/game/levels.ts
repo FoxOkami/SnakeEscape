@@ -1322,21 +1322,21 @@ export const LEVELS: Level[] = [
   // Level 6: Boss Battle with Valerie
   {
     id: 6,
-    name: "Face Valerie",
-    player: { x: 50, y: 300 },
+    name: "Skate Rink",
+    player: { x: 680, y: 540 },
     size: { width: 800, height: 600 },
     walls: [
       // Outer boundary walls only
-      { x: 0, y: 0, width: 800, height: 20 },     // Top wall
-      { x: 0, y: 580, width: 800, height: 20 },   // Bottom wall
-      { x: 0, y: 0, width: 20, height: 600 },     // Left wall
-      { x: 780, y: 0, width: 20, height: 600 },   // Right wall
+      { x: 0, y: 0, width: 800, height: 20 }, // Top wall
+      { x: 0, y: 580, width: 800, height: 20 }, // Bottom wall
+      { x: 0, y: 0, width: 20, height: 600 }, // Left wall
+      { x: 780, y: 0, width: 20, height: 600 }, // Right wall
     ],
     snakes: [
       {
         id: "valerie",
         type: "boss" as const,
-        position: { x: 400, y: 150 }, // Center-ish starting position
+        position: { x: 100, y: 213 },
         size: { width: 175, height: 175 },
         speed: 100,
         direction: { x: 1, y: 0 },

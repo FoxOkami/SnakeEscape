@@ -195,6 +195,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           hitBoulder.hitCount += 1;
           if (hitBoulder.hitCount >= hitBoulder.maxHits) {
             hitBoulder.isDestroyed = true;
+            hitBoulder.destructionTime = currentTime; // Record when it was destroyed
           }
           
           // Calculate reflection direction from boulder
