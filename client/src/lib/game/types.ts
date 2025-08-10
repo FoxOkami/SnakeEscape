@@ -98,6 +98,7 @@ export interface Snake {
   chargeRampStartTime?: number; // When current charge ramp began
   chargeBaseSpeed?: number; // Starting speed for current charge
   chargeMaxSpeed?: number; // Maximum speed for charge
+  isInitialPause?: boolean; // Whether this is the first pause to let player adjust
 }
 
 export interface Wall extends Rectangle {}

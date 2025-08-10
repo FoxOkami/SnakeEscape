@@ -146,8 +146,10 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
 
   // Initialize boss state if not set
   if (!snake.bossState) {
-    snake.bossState = 'tracking';
+    snake.bossState = 'recovering'; // Start with a pause to let player adjust
+    snake.pauseStartTime = currentTime;
     snake.bossColor = 'normal';
+    snake.isInitialPause = true; // Mark this as the initial pause
     
     // Initialize per-charge ramping speed system for level 6
     if (!snake.chargeBaseSpeed) {
@@ -445,9 +447,11 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'recovering':
-      // Brief recovery period before starting next attack cycle
-      if (currentTime - (snake.pauseStartTime || 0) >= 500) { // 500ms recovery
+      // Recovery period before starting next attack cycle
+      const recoveryDuration = snake.isInitialPause ? 3000 : 500; // 3 seconds initial, 500ms normal
+      if (currentTime - (snake.pauseStartTime || 0) >= recoveryDuration) {
         snake.bossState = 'tracking'; // Start next cycle
+        snake.isInitialPause = false; // Clear initial pause flag
       }
       // Stay still during recovery
       break;
