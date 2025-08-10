@@ -2870,19 +2870,35 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     getCurrentWalls: () => {
       const state = get();
-      if (state.currentLevel !== 4) return state.walls; // Level 5 is 0-indexed as 4
+      let walls = [...state.walls];
 
-      // Combine regular walls with active phase walls
-      const activePhaseWalls = state.phaseWalls
-        .filter((wall) => wall.activePhases.includes(state.currentPhase))
-        .map((wall) => ({
-          x: wall.x,
-          y: wall.y,
-          width: wall.width,
-          height: wall.height,
-        }));
+      // Level 5 (currentLevel === 4): Add phase-specific walls
+      if (state.currentLevel === 4) {
+        const activePhaseWalls = state.phaseWalls
+          .filter((wall) => wall.activePhases.includes(state.currentPhase))
+          .map((wall) => ({
+            x: wall.x,
+            y: wall.y,
+            width: wall.width,
+            height: wall.height,
+          }));
+        walls = [...walls, ...activePhaseWalls];
+      }
 
-      return [...state.walls, ...activePhaseWalls];
+      // Level 6 (currentLevel === 5): Add non-destroyed boulders as walls
+      if (state.currentLevel === 5 && state.boulders.length > 0) {
+        const boulderWalls = state.boulders
+          .filter((boulder) => !boulder.isDestroyed)
+          .map((boulder) => ({
+            x: boulder.x,
+            y: boulder.y,
+            width: boulder.width,
+            height: boulder.height,
+          }));
+        walls = [...walls, ...boulderWalls];
+      }
+
+      return walls;
     },
 
     checkTeleporterCollision: () => {
