@@ -94,6 +94,10 @@ export interface Snake {
   centerTargetPosition?: Position; // Target position when moving to center
   centerPauseStartTime?: number; // When center pause started
   speedBoostApplied?: boolean; // Whether 5% speed boost has been applied
+  // Ramping speed properties
+  chaseStartTime?: number; // When current chase phase began
+  baseChaseSpeed?: number; // Original chase speed before ramping
+  rampSpeedRate?: number; // Speed increase per second (e.g., 5 = 5 units/second increase)
 }
 
 export interface Wall extends Rectangle {}
