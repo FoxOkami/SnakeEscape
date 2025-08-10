@@ -13,6 +13,60 @@ function checkWallCollision(snake: Snake, newPosition: Position, walls: Wall[]):
   return walls.some(wall => checkAABBCollision(snakeRect, wall));
 }
 
+function getWallCollisionInfo(snake: Snake, newPosition: Position, walls: Wall[]): { hit: boolean; wall?: Wall; normal?: { x: number; y: number } } {
+  const snakeRect = {
+    x: newPosition.x,
+    y: newPosition.y,
+    width: snake.size.width,
+    height: snake.size.height
+  };
+  
+  for (const wall of walls) {
+    if (checkAABBCollision(snakeRect, wall)) {
+      // Calculate which side of the wall was hit to determine normal
+      const snakeCenter = {
+        x: snakeRect.x + snakeRect.width / 2,
+        y: snakeRect.y + snakeRect.height / 2
+      };
+      
+      const wallCenter = {
+        x: wall.x + wall.width / 2,
+        y: wall.y + wall.height / 2
+      };
+      
+      // Calculate overlap on each axis
+      const overlapX = Math.min(snakeRect.x + snakeRect.width - wall.x, wall.x + wall.width - snakeRect.x);
+      const overlapY = Math.min(snakeRect.y + snakeRect.height - wall.y, wall.y + wall.height - snakeRect.y);
+      
+      let normal = { x: 0, y: 0 };
+      
+      // Determine collision normal based on smallest overlap
+      if (overlapX < overlapY) {
+        // Horizontal collision (left or right side of wall)
+        normal.x = snakeCenter.x < wallCenter.x ? -1 : 1;
+        normal.y = 0;
+      } else {
+        // Vertical collision (top or bottom side of wall)
+        normal.x = 0;
+        normal.y = snakeCenter.y < wallCenter.y ? -1 : 1;
+      }
+      
+      return { hit: true, wall, normal };
+    }
+  }
+  
+  return { hit: false };
+}
+
+function reflectVector(incident: { x: number; y: number }, normal: { x: number; y: number }): { x: number; y: number } {
+  // Formula: reflected = incident - 2 * (incident · normal) * normal
+  const dotProduct = incident.x * normal.x + incident.y * normal.y;
+  return {
+    x: incident.x - 2 * dotProduct * normal.x,
+    y: incident.y - 2 * dotProduct * normal.y
+  };
+}
+
 // Helper function to get patrol target
 function getPatrolTarget(snake: Snake): Position {
   if (snake.patrolPoints.length === 0) {
@@ -92,13 +146,17 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           y: snake.position.y + snake.direction.y * chargeDistance
         };
         
-        // Check for wall collision
-        if (checkWallCollision(snake, newPosition, walls)) {
-          // Hit a wall - start animated recoil
+        // Check for wall collision with detailed info
+        const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);
+        if (collisionInfo.hit && collisionInfo.normal) {
+          // Hit a wall - calculate reflection direction
+          const reflectedDirection = reflectVector(snake.direction, collisionInfo.normal);
+          
+          // Start animated recoil using reflection
           const recoilDistance = snake.size.width / 2; // Half her width
           const recoilTargetPosition = {
-            x: snake.position.x - snake.direction.x * recoilDistance,
-            y: snake.position.y - snake.direction.y * recoilDistance
+            x: snake.position.x + reflectedDirection.x * recoilDistance,
+            y: snake.position.y + reflectedDirection.y * recoilDistance
           };
           
           // Check if recoil target is valid
@@ -108,20 +166,34 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
             snake.recoilTargetPosition = recoilTargetPosition;
             snake.recoilStartTime = currentTime;
-            snake.recoilDirection = {
-              x: -snake.direction.x, // Opposite direction
-              y: -snake.direction.y
-            };
-            console.log(`Valerie: Hit wall! Charging → Recoiling. Target: (${recoilTargetPosition.x.toFixed(1)}, ${recoilTargetPosition.y.toFixed(1)})`);
+            snake.recoilDirection = reflectedDirection; // Use reflection instead of opposite direction
+            console.log(`Valerie: Hit wall! Charging → Recoiling. Reflected direction: (${reflectedDirection.x.toFixed(3)}, ${reflectedDirection.y.toFixed(3)}) Target: (${recoilTargetPosition.x.toFixed(1)}, ${recoilTargetPosition.y.toFixed(1)})`);
           } else {
-            // Can't recoil, go directly to recovery
-            snake.bossState = 'recovering';
-            snake.bossColor = 'normal';
-            snake.isChargingAtSnapshot = false;
-            snake.playerSnapshot = undefined;
-            snake.direction = { x: 0, y: 0 };
-            snake.pauseStartTime = currentTime;
-            console.log(`Valerie: Hit wall! No space to recoil → Recovering directly`);
+            // Can't recoil in reflected direction, try opposite direction as fallback
+            const fallbackDirection = { x: -snake.direction.x, y: -snake.direction.y };
+            const fallbackTargetPosition = {
+              x: snake.position.x + fallbackDirection.x * recoilDistance,
+              y: snake.position.y + fallbackDirection.y * recoilDistance
+            };
+            
+            if (!checkWallCollision(snake, fallbackTargetPosition, walls)) {
+              // Use fallback recoil
+              snake.bossState = 'recoiling';
+              snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
+              snake.recoilTargetPosition = fallbackTargetPosition;
+              snake.recoilStartTime = currentTime;
+              snake.recoilDirection = fallbackDirection;
+              console.log(`Valerie: Hit wall! Using fallback recoil direction. Target: (${fallbackTargetPosition.x.toFixed(1)}, ${fallbackTargetPosition.y.toFixed(1)})`);
+            } else {
+              // Can't recoil at all, go directly to recovery
+              snake.bossState = 'recovering';
+              snake.bossColor = 'normal';
+              snake.isChargingAtSnapshot = false;
+              snake.playerSnapshot = undefined;
+              snake.direction = { x: 0, y: 0 };
+              snake.pauseStartTime = currentTime;
+              console.log(`Valerie: Hit wall! No space to recoil → Recovering directly`);
+            }
           }
         } else {
           // Continue charging in same direction
