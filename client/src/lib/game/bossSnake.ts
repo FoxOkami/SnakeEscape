@@ -190,12 +190,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         
         // Check for boulder collision first
         const hitBoulder = boulders ? checkBoulderCollision(snake, newPosition, boulders) : null;
-        console.log('Boss charging - Boulder collision check:', {
-          bouldersProvided: !!boulders,
-          boulderCount: boulders?.length || 0,
-          hitBoulder: !!hitBoulder,
-          boulderStates: boulders?.map(b => ({ id: b.id, isDestroyed: b.isDestroyed, x: b.x, y: b.y }))
-        });
         if (hitBoulder) {
           // Hit a boulder - damage it
           hitBoulder.hitCount += 1;
@@ -251,17 +245,10 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilStartTime = currentTime;
           snake.recoilStartPosition = { ...snake.position };
           snake.recoilTargetPosition = recoilTargetPosition;
-          snake.recoilDirection = reflectedDirection; // THIS WAS MISSING!
+          snake.recoilDirection = reflectedDirection;
           snake.recoilDuration = 200;
           snake.bossColor = 'stunned';
           snake.isChargingAtSnapshot = false;
-          
-          console.log('Boulder recoil setup:', {
-            startPos: snake.recoilStartPosition,
-            targetPos: recoilTargetPosition,
-            direction: reflectedDirection,
-            distance: recoilDistance
-          });
         } else {
           // Check for wall collision with detailed info
           const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);

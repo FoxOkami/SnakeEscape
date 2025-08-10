@@ -1512,8 +1512,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         const destroyedBoulders = state.boulders.filter(boulder => boulder.isDestroyed);
         const allBouldersDestroyed = destroyedBoulders.length === state.boulders.length;
         
-        // If all boulders are destroyed and key hasn't been spawned yet
-        if (allBouldersDestroyed && updatedKey.collected) {
+        // If all boulders are destroyed and key hasn't been spawned yet (key starts hidden)
+        if (allBouldersDestroyed && updatedKey.x === -100 && updatedKey.y === -100) {
           // Find the last destroyed boulder to spawn key at its location
           const lastDestroyedBoulder = destroyedBoulders[destroyedBoulders.length - 1];
           if (lastDestroyedBoulder) {
