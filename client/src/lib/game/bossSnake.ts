@@ -251,9 +251,17 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilStartTime = currentTime;
           snake.recoilStartPosition = { ...snake.position };
           snake.recoilTargetPosition = recoilTargetPosition;
+          snake.recoilDirection = reflectedDirection; // THIS WAS MISSING!
           snake.recoilDuration = 200;
           snake.bossColor = 'stunned';
           snake.isChargingAtSnapshot = false;
+          
+          console.log('Boulder recoil setup:', {
+            startPos: snake.recoilStartPosition,
+            targetPos: recoilTargetPosition,
+            direction: reflectedDirection,
+            distance: recoilDistance
+          });
         } else {
           // Check for wall collision with detailed info
           const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);
