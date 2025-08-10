@@ -111,19 +111,17 @@ function getPatrolTarget(snake: Snake): Position {
   return snake.patrolPoints[index];
 }
 
-// Helper function to calculate ramped speed for level 6 boss
-function calculateRampedSpeed(snake: Snake, currentTime: number): number {
-  if (!snake.chaseStartTime || !snake.baseChaseSpeed || !snake.rampSpeedRate) {
+// Helper function to calculate ramped speed during current charge
+function calculateChargeRampedSpeed(snake: Snake, currentTime: number): number {
+  if (!snake.chargeRampStartTime || !snake.chargeBaseSpeed || !snake.chargeMaxSpeed || !snake.chargeRampRate) {
     return snake.chaseSpeed; // Fallback to current speed if ramping not initialized
   }
   
-  const chaseTime = (currentTime - snake.chaseStartTime) / 1000; // Convert to seconds
-  const rampedSpeed = snake.baseChaseSpeed + (snake.rampSpeedRate * chaseTime);
+  const chargeTime = (currentTime - snake.chargeRampStartTime) / 1000; // Convert to seconds
+  const rampedSpeed = snake.chargeBaseSpeed + (snake.chargeRampRate * chargeTime);
   
-  // Apply the ramped speed to snake's chaseSpeed for consistency
-  snake.chaseSpeed = rampedSpeed;
-  
-  return rampedSpeed;
+  // Cap at maximum speed
+  return Math.min(rampedSpeed, snake.chargeMaxSpeed);
 }
 
 export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number, levelBounds?: { width: number; height: number }, boulders?: Boulder[]): Snake {
@@ -145,14 +143,16 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
     snake.bossState = 'tracking';
     snake.bossColor = 'normal';
     
-    // Initialize ramping speed system for level 6
-    if (!snake.baseChaseSpeed) {
-      snake.baseChaseSpeed = snake.chaseSpeed; // Store original chase speed
+    // Initialize per-charge ramping speed system for level 6
+    if (!snake.chargeBaseSpeed) {
+      snake.chargeBaseSpeed = snake.chaseSpeed * 0.3; // Start each charge at 30% of normal speed
     }
-    if (!snake.rampSpeedRate) {
-      snake.rampSpeedRate = 8; // Increase speed by 8 units per second during chase
+    if (!snake.chargeMaxSpeed) {
+      snake.chargeMaxSpeed = snake.chaseSpeed * 2.5; // Max speed is 2.5x normal chase speed
     }
-    snake.chaseStartTime = currentTime; // Start ramping immediately
+    if (!snake.chargeRampRate) {
+      snake.chargeRampRate = snake.chaseSpeed * 1.5; // Accelerate by 1.5x chase speed per second
+    }
   }
 
   // Boss "Valerie" attack pattern state machine
@@ -175,6 +175,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         // Start charging after pause
         snake.bossState = 'charging';
         snake.chargeStartTime = currentTime;
+        snake.chargeRampStartTime = currentTime; // Initialize ramping for this charge
         snake.bossColor = 'charging'; // Change to pink color
         snake.isChargingAtSnapshot = true;
         snake.chargeDistanceTraveled = 0; // Reset charge distance counter
@@ -195,8 +196,8 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
     case 'charging':
       // Charge in a straight line using stored direction until hitting a wall
       if (snake.direction && snake.playerSnapshot) {
-        const rampedChaseSpeed = calculateRampedSpeed(snake, currentTime);
-        const moveSpeed = rampedChaseSpeed * 2 || snake.speed * 2; // Faster charge speed with ramping
+        const currentChargeSpeed = calculateChargeRampedSpeed(snake, currentTime);
+        const moveSpeed = currentChargeSpeed; // Use the ramped charge speed directly
         
         // Track total charge distance for proportional recoil
         if (!snake.chargeDistanceTraveled) {
@@ -331,8 +332,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
     case 'recoiling':
       // Animate recoil movement at 3/4 chase speed
       if (snake.recoilStartTime && snake.recoilTargetPosition && snake.recoilDirection) {
-        const rampedChaseSpeed = calculateRampedSpeed(snake, currentTime);
-        const recoilSpeed = rampedChaseSpeed * 0.75; // 3/4 chase speed
+        const recoilSpeed = (snake.chaseSpeed || snake.speed) * 0.75; // 3/4 chase speed
         const recoilDistance = recoilSpeed * dt;
         
         // Move toward recoil target
@@ -404,8 +404,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
     case 'movingToCenter':
       // Move to center at double speed after boulder collision
       if (snake.centerTargetPosition) {
-        const rampedChaseSpeed = calculateRampedSpeed(snake, currentTime);
-        const doubleSpeed = rampedChaseSpeed * 2;
+        const doubleSpeed = (snake.chaseSpeed || snake.speed) * 2;
         const newPosition = moveTowards(snake.position, snake.centerTargetPosition, doubleSpeed * dt);
         
         // Check if we've reached the center
@@ -417,13 +416,13 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.centerPauseStartTime = currentTime;
           snake.centerTargetPosition = undefined; // Clear target
           
-          // Increase base speed by 5% for future chases
+          // Increase chase speed by 5% for future chases
           if (!snake.speedBoostApplied) {
-            if (snake.baseChaseSpeed) {
-              snake.baseChaseSpeed = snake.baseChaseSpeed * 1.05;
-            } else {
-              snake.chaseSpeed = (snake.chaseSpeed || snake.speed) * 1.05;
-            }
+            snake.chaseSpeed = (snake.chaseSpeed || snake.speed) * 1.05;
+            // Also update the charge speed parameters based on new chase speed
+            snake.chargeBaseSpeed = snake.chaseSpeed * 0.3;
+            snake.chargeMaxSpeed = snake.chaseSpeed * 2.5;
+            snake.chargeRampRate = snake.chaseSpeed * 1.5;
             snake.speedBoostApplied = true;
           }
         } else if (!checkWallCollision(snake, newPosition, walls)) {
