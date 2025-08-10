@@ -18,6 +18,7 @@ import {
   Projectile,
   Teleporter,
   SnakePit,
+  Boulder,
 } from "../game/types";
 import { LEVELS, randomizeLevel2 } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
@@ -277,6 +278,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     projectiles: [],
     teleporters: [],
     snakePits: [],
+    boulders: [],
     lastLightCheckTime: 0,
 
     puzzleShards: [],
@@ -548,6 +550,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+        boulders: level.boulders
+          ? level.boulders.map((boulder) => ({ ...boulder }))
+          : [],
         hintState: null, // Initialize hint state
         randomizedSymbols, // Store randomized symbols for Level 1
         // Clear pre-stored Level 2 data when directly selecting Level 2
@@ -621,6 +626,9 @@ export const useSnakeGame = create<SnakeGameState>()(
           : null,
         phaseWalls: level.phaseWalls
           ? level.phaseWalls.map((wall) => ({ ...wall }))
+          : [],
+        boulders: level.boulders
+          ? level.boulders.map((boulder) => ({ ...boulder }))
           : [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
@@ -722,6 +730,9 @@ export const useSnakeGame = create<SnakeGameState>()(
           : null,
         phaseWalls: level.phaseWalls
           ? level.phaseWalls.map((wall) => ({ ...wall }))
+          : [],
+        boulders: level.boulders
+          ? level.boulders.map((boulder) => ({ ...boulder }))
           : [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
@@ -930,6 +941,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           playerSounds,
           { ...state, quadrantLighting },
           LEVELS[state.currentLevel]?.size,
+          state.boulders,
         );
       });
 
@@ -1492,6 +1504,29 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
 
+      // --- LEVEL 6 BOULDER MECHANICS ---
+      // Check if all boulders are destroyed and spawn key if needed
+      let updatedBoulders = state.boulders;
+      if (state.currentLevel === 5 && state.boulders.length > 0) {
+        // Level 6 (0-indexed as 5)
+        const destroyedBoulders = state.boulders.filter(boulder => boulder.isDestroyed);
+        const allBouldersDestroyed = destroyedBoulders.length === state.boulders.length;
+        
+        // If all boulders are destroyed and key hasn't been spawned yet
+        if (allBouldersDestroyed && updatedKey.collected) {
+          // Find the last destroyed boulder to spawn key at its location
+          const lastDestroyedBoulder = destroyedBoulders[destroyedBoulders.length - 1];
+          if (lastDestroyedBoulder) {
+            updatedKey = {
+              ...updatedKey,
+              x: lastDestroyedBoulder.x + lastDestroyedBoulder.width / 2 - 10, // Center key on boulder position
+              y: lastDestroyedBoulder.y + lastDestroyedBoulder.height / 2 - 10,
+              collected: false
+            };
+          }
+        }
+      }
+
       // --- PROJECTILE SYSTEM ---
       // Update projectiles and spitter snake firing
       const projectileResult = get().updateProjectiles(
@@ -1536,6 +1571,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightBeam: updatedLightBeam,
         mirrors: updatedMirrors,
         crystal: updatedCrystal,
+        boulders: updatedBoulders,
       });
     },
 

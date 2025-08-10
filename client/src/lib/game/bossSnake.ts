@@ -1,4 +1,4 @@
-import { Snake, Wall, Player, Position } from './types';
+import { Snake, Wall, Player, Position, Boulder } from './types';
 import { getDistance, moveTowards, findPathAroundWalls, slideAlongWall, getDirectionVector, checkAABBCollision } from './collision';
 
 // Helper function to check wall collision for snake
@@ -11,6 +11,23 @@ function checkWallCollision(snake: Snake, newPosition: Position, walls: Wall[]):
   };
   
   return walls.some(wall => checkAABBCollision(snakeRect, wall));
+}
+
+// Helper function to check boulder collision for snake
+function checkBoulderCollision(snake: Snake, newPosition: Position, boulders: Boulder[]): Boulder | null {
+  const snakeRect = {
+    x: newPosition.x,
+    y: newPosition.y,
+    width: snake.size.width,
+    height: snake.size.height
+  };
+  
+  for (const boulder of boulders) {
+    if (!boulder.isDestroyed && checkAABBCollision(snakeRect, boulder)) {
+      return boulder;
+    }
+  }
+  return null;
 }
 
 function getWallCollisionInfo(snake: Snake, newPosition: Position, walls: Wall[]): { hit: boolean; wall?: Wall; normal?: { x: number; y: number } } {
@@ -94,7 +111,7 @@ function getPatrolTarget(snake: Snake): Position {
   return snake.patrolPoints[index];
 }
 
-export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number, levelBounds?: { width: number; height: number }): Snake {
+export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number, levelBounds?: { width: number; height: number }, boulders?: Boulder[]): Snake {
   if (!player || !currentTime) {
     // Default patrol behavior when no player is present
     const targetPoint = getPatrolTarget(snake);
@@ -171,17 +188,36 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         // Add to total charge distance
         snake.chargeDistanceTraveled += chargeDistance;
         
-        // Check for wall collision with detailed info
-        const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);
-        if (collisionInfo.hit && collisionInfo.normal) {
-          // Hit a wall - calculate reflection direction
-          const reflectedDirection = reflectVector(snake.direction, collisionInfo.normal);
+        // Check for boulder collision first
+        const hitBoulder = boulders ? checkBoulderCollision(snake, newPosition, boulders) : null;
+        if (hitBoulder) {
+          // Hit a boulder - damage it
+          hitBoulder.hitCount += 1;
+          if (hitBoulder.hitCount >= hitBoulder.maxHits) {
+            hitBoulder.isDestroyed = true;
+          }
           
-          // Start animated recoil using reflection
-          // Use 1/4 of the charge distance traveled for proportional recoil
+          // Calculate reflection direction from boulder
+          const snakeCenter = {
+            x: snake.position.x + snake.size.width / 2,
+            y: snake.position.y + snake.size.height / 2
+          };
+          const boulderCenter = {
+            x: hitBoulder.x + hitBoulder.width / 2,
+            y: hitBoulder.y + hitBoulder.height / 2
+          };
+          
+          // Calculate collision normal (from boulder center to snake center)
+          const dx = snakeCenter.x - boulderCenter.x;
+          const dy = snakeCenter.y - boulderCenter.y;
+          const length = Math.sqrt(dx * dx + dy * dy);
+          const normal = length > 0 ? { x: dx / length, y: dy / length } : { x: 1, y: 0 };
+          
+          // Reflect direction off boulder
+          const reflectedDirection = reflectVector(snake.direction, normal);
+          
+          // Start recoil from boulder collision
           let recoilDistance = (snake.chargeDistanceTraveled || 0) * 0.25;
-          
-          // Ensure minimum recoil distance (half her width) and maximum (2x her width)
           const minRecoil = snake.size.width * 0.5;
           const maxRecoil = snake.size.width * 2;
           recoilDistance = Math.max(minRecoil, Math.min(maxRecoil, recoilDistance));
@@ -191,32 +227,75 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             y: snake.position.y + reflectedDirection.y * recoilDistance
           };
           
-          // Find a safe recoil distance by checking progressively shorter distances
-          while (recoilDistance > minRecoil && checkWallCollision(snake, recoilTargetPosition, walls)) {
-            recoilDistance *= 0.8; // Reduce by 20% each time
+          // Find safe recoil distance
+          while (recoilDistance > minRecoil && (checkWallCollision(snake, recoilTargetPosition, walls) || 
+                 (boulders && checkBoulderCollision(snake, recoilTargetPosition, boulders)))) {
+            recoilDistance *= 0.8;
             recoilTargetPosition = {
               x: snake.position.x + reflectedDirection.x * recoilDistance,
               y: snake.position.y + reflectedDirection.y * recoilDistance
             };
           }
           
-          // Apply boundary clamping to ensure target is within playable area
           if (levelBounds) {
             recoilTargetPosition = clampToBounds(recoilTargetPosition, snake.size, levelBounds);
           }
           
-          // Always use reflection - no fallback
           snake.bossState = 'recoiling';
-          snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
-          snake.recoilTargetPosition = recoilTargetPosition;
           snake.recoilStartTime = currentTime;
-          snake.recoilDirection = reflectedDirection;
-
-        
+          snake.recoilStartPosition = { ...snake.position };
+          snake.recoilTargetPosition = recoilTargetPosition;
+          snake.recoilDuration = 200;
+          snake.bossColor = 'stunned';
+          snake.isChargingAtSnapshot = false;
         } else {
-          // Continue charging in same direction
-          snake.position = newPosition;
-          // Keep the same direction (don't recalculate)
+          // Check for wall collision with detailed info
+          const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);
+          if (collisionInfo.hit && collisionInfo.normal) {
+            // Hit a wall - calculate reflection direction
+            const reflectedDirection = reflectVector(snake.direction, collisionInfo.normal);
+            
+            // Start animated recoil using reflection
+            // Use 1/4 of the charge distance traveled for proportional recoil
+            let recoilDistance = (snake.chargeDistanceTraveled || 0) * 0.25;
+            
+            // Ensure minimum recoil distance (half her width) and maximum (2x her width)
+            const minRecoil = snake.size.width * 0.5;
+            const maxRecoil = snake.size.width * 2;
+            recoilDistance = Math.max(minRecoil, Math.min(maxRecoil, recoilDistance));
+            
+            let recoilTargetPosition = {
+              x: snake.position.x + reflectedDirection.x * recoilDistance,
+              y: snake.position.y + reflectedDirection.y * recoilDistance
+            };
+            
+            // Find a safe recoil distance by checking progressively shorter distances
+            while (recoilDistance > minRecoil && checkWallCollision(snake, recoilTargetPosition, walls)) {
+              recoilDistance *= 0.8; // Reduce by 20% each time
+              recoilTargetPosition = {
+                x: snake.position.x + reflectedDirection.x * recoilDistance,
+                y: snake.position.y + reflectedDirection.y * recoilDistance
+              };
+            }
+            
+            // Apply boundary clamping to ensure target is within playable area
+            if (levelBounds) {
+              recoilTargetPosition = clampToBounds(recoilTargetPosition, snake.size, levelBounds);
+            }
+            
+            // Always use reflection - no fallback
+            snake.bossState = 'recoiling';
+            snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
+            snake.recoilTargetPosition = recoilTargetPosition;
+            snake.recoilStartTime = currentTime;
+            snake.recoilDirection = reflectedDirection;
+            snake.bossColor = 'stunned';
+            snake.isChargingAtSnapshot = false;
+          } else {
+            // Continue charging in same direction
+            snake.position = newPosition;
+            // Keep the same direction (don't recalculate)
+          }
         }
       }
       break;

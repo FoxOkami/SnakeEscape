@@ -260,6 +260,13 @@ export interface Teleporter extends Rectangle {
   lastTeleportTime?: number; // Cooldown timestamp to prevent immediate re-activation
 }
 
+export interface Boulder extends Rectangle {
+  id: string;
+  hitCount: number; // Number of times hit by Valerie
+  maxHits: number; // Number of hits required to break (2 for level 6)
+  isDestroyed: boolean; // Whether the boulder has been destroyed
+}
+
 export interface Level {
   id: number;
   name: string;
@@ -277,6 +284,7 @@ export interface Level {
   lightSource?: LightSource;
   teleporters?: Teleporter[];
   snakePits?: SnakePit[];
+  boulders?: Boulder[];
   size: Size;
   startTilePos?: { row: number; col: number }; // For Level 4 randomization
   endTilePos?: { row: number; col: number }; // For Level 4 randomization
@@ -314,6 +322,7 @@ export interface GameData {
   flowState: FlowState | null;
   projectiles: Projectile[];
   teleporters: Teleporter[];
+  boulders: Boulder[];
 
   puzzleShards: PuzzleShard[];
   puzzlePedestal: PuzzlePedestal | null;

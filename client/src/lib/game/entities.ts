@@ -1,8 +1,8 @@
-import { Snake, Player, Wall, Position } from "./types";
+import { Snake, Player, Wall, Position, Boulder } from "./types";
 import { checkAABBCollision, getDistance, moveTowards, hasLineOfSight, getDirectionVector, findPathAroundWalls, slideAlongWall } from "./collision";
 import { updateBossSnake } from "./bossSnake";
 
-export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[], gameState?: any, levelBounds?: { width: number; height: number }): Snake {
+export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[], gameState?: any, levelBounds?: { width: number; height: number }, boulders?: Boulder[]): Snake {
   const currentTime = Date.now();
   
   // Convert deltaTime from milliseconds to seconds for calculations
@@ -35,7 +35,7 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
     case 'rattlesnake':
       return updateRattlesnakeSnake(snake, walls, dt, player);
     case 'boss':
-      return updateBossSnake(snake, walls, dt, player, currentTime, levelBounds);
+      return updateBossSnake(snake, walls, dt, player, currentTime, levelBounds, boulders);
     default:
       return snake;
   }
@@ -462,7 +462,7 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     snake.pauseStartTime = currentTime;
     
     // Find the tile the snake is on and mark it for rotation
-    const currentTile = gameState.patternTiles.find(tile => {
+    const currentTile = gameState.patternTiles.find((tile: any) => {
       const snakeCenter = {
         x: snake.position.x + snake.size.width / 2,
         y: snake.position.y + snake.size.height / 2

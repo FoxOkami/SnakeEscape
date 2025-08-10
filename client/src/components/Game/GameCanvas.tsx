@@ -44,6 +44,7 @@ const GameCanvas: React.FC = () => {
     getCurrentWalls,
     teleporters,
     snakePits,
+    boulders,
     hintState,
     updateHint,
     patternSequence,
@@ -1179,6 +1180,48 @@ const GameCanvas: React.FC = () => {
         ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
         ctx.stroke();
       });
+
+      // Draw boulders (Level 6 only)
+      if (currentLevel === 5) {
+        // Level 6 (0-indexed as 5)
+        boulders.forEach((boulder) => {
+          if (boulder.isDestroyed) return; // Don't draw destroyed boulders
+
+          // Base boulder color - darker brown/gray
+          const baseColor = "#4a4a4a"; // Gray boulder color
+          ctx.fillStyle = baseColor;
+          ctx.fillRect(boulder.x, boulder.y, boulder.width, boulder.height);
+
+          // Add rock texture with lighter spots
+          ctx.fillStyle = "#666666";
+          ctx.fillRect(boulder.x + 10, boulder.y + 10, 20, 15);
+          ctx.fillRect(boulder.x + 40, boulder.y + 20, 25, 20);
+          ctx.fillRect(boulder.x + 15, boulder.y + 45, 30, 20);
+          ctx.fillRect(boulder.x + 50, boulder.y + 50, 20, 20);
+
+          // Add darker shadows for depth
+          ctx.fillStyle = "#2a2a2a";
+          ctx.fillRect(boulder.x + 60, boulder.y + 60, 15, 15);
+          ctx.fillRect(boulder.x + 5, boulder.y + 65, 20, 10);
+
+          // Add border to make it stand out
+          ctx.strokeStyle = "#333333";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(boulder.x, boulder.y, boulder.width, boulder.height);
+          // Add damage indicator if damaged
+          if (boulder.hitCount > 0 && boulder.hitCount < boulder.maxHits) {
+            // Add crack effect
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(boulder.x + 20, boulder.y + 10);
+            ctx.lineTo(boulder.x + 60, boulder.y + 70);
+            ctx.moveTo(boulder.x + 40, boulder.y + 5);
+            ctx.lineTo(boulder.x + 30, boulder.y + 75);
+            ctx.stroke();
+          }
+        });
+      }
 
       // Draw snakes with different visuals for each type
       // On Level 3, skip snakes here so they render on top of mirrors

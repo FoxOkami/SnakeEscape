@@ -1355,7 +1355,49 @@ export const LEVELS: Level[] = [
       },
     ],
     door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
-    key: { x: 400, y: 500, width: 20, height: 20, collected: false },
+    key: { x: -100, y: -100, width: 20, height: 20, collected: false }, // Key hidden until final boulder breaks
+    boulders: [
+      {
+        id: "boulder_top_left",
+        x: 0,
+        y: 0,
+        width: 80,
+        height: 80,
+        hitCount: 0,
+        maxHits: 2,
+        isDestroyed: false,
+      },
+      {
+        id: "boulder_top_right",
+        x: 720, // 800 - 80 = 720
+        y: 0,
+        width: 80,
+        height: 80,
+        hitCount: 0,
+        maxHits: 2,
+        isDestroyed: false,
+      },
+      {
+        id: "boulder_bottom_left",
+        x: 0,
+        y: 520, // 600 - 80 = 520
+        width: 80,
+        height: 80,
+        hitCount: 0,
+        maxHits: 2,
+        isDestroyed: false,
+      },
+      {
+        id: "boulder_bottom_right",
+        x: 720, // 800 - 80 = 720
+        y: 520, // 600 - 80 = 520
+        width: 80,
+        height: 80,
+        hitCount: 0,
+        maxHits: 2,
+        isDestroyed: false,
+      },
+    ],
     patternTiles: [],
     patternSequence: [],
     switches: [],
