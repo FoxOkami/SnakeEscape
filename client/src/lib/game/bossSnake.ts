@@ -190,6 +190,12 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         
         // Check for boulder collision first
         const hitBoulder = boulders ? checkBoulderCollision(snake, newPosition, boulders) : null;
+        console.log('Boss charging - Boulder collision check:', {
+          bouldersProvided: !!boulders,
+          boulderCount: boulders?.length || 0,
+          hitBoulder: !!hitBoulder,
+          boulderStates: boulders?.map(b => ({ id: b.id, isDestroyed: b.isDestroyed, x: b.x, y: b.y }))
+        });
         if (hitBoulder) {
           // Hit a boulder - damage it
           hitBoulder.hitCount += 1;
