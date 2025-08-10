@@ -929,6 +929,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           updatedPlayer,
           playerSounds,
           { ...state, quadrantLighting },
+          levels[state.currentLevel]?.size,
         );
       });
 

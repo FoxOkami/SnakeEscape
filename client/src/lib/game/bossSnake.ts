@@ -67,6 +67,22 @@ function reflectVector(incident: { x: number; y: number }, normal: { x: number; 
   };
 }
 
+function clampToBounds(position: Position, snakeSize: { width: number; height: number }, bounds?: { width: number; height: number }): Position {
+  // Default to Level 6 boundaries if bounds not provided
+  const levelBounds = bounds || { width: 800, height: 600 };
+  
+  // Level boundaries: walls at 0,0 with thickness 20, so playable area is 20 to bounds.width-20
+  const minX = 20;
+  const maxX = levelBounds.width - 20 - snakeSize.width;
+  const minY = 20;
+  const maxY = levelBounds.height - 20 - snakeSize.height;
+  
+  return {
+    x: Math.max(minX, Math.min(maxX, position.x)),
+    y: Math.max(minY, Math.min(maxY, position.y))
+  };
+}
+
 // Helper function to get patrol target
 function getPatrolTarget(snake: Snake): Position {
   if (snake.patrolPoints.length === 0) {
@@ -78,7 +94,7 @@ function getPatrolTarget(snake: Snake): Position {
   return snake.patrolPoints[index];
 }
 
-export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number): Snake {
+export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number, levelBounds?: { width: number; height: number }): Snake {
   if (!player || !currentTime) {
     // Default patrol behavior when no player is present
     const targetPoint = getPatrolTarget(snake);
@@ -169,6 +185,11 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             };
           }
           
+          // Apply boundary clamping to ensure target is within playable area
+          if (levelBounds) {
+            recoilTargetPosition = clampToBounds(recoilTargetPosition, snake.size, levelBounds);
+          }
+          
           // Always use reflection - no fallback
           snake.bossState = 'recoiling';
           snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
@@ -197,14 +218,14 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           y: snake.position.y + snake.recoilDirection.y * recoilDistance
         };
         
-        // Check if we've reached the target or hit something
+        // Check if we've reached the target
         const distanceToTarget = Math.sqrt(
           Math.pow(snake.recoilTargetPosition.x - snake.position.x, 2) +
           Math.pow(snake.recoilTargetPosition.y - snake.position.y, 2)
         );
         
-        if (distanceToTarget <= recoilDistance || checkWallCollision(snake, newRecoilPosition, walls)) {
-          // Finished recoiling - snap to target and enter recovery
+        if (distanceToTarget <= recoilDistance) {
+          // Reached target normally - snap to target and enter recovery
           snake.position = snake.recoilTargetPosition;
           snake.bossState = 'recovering';
           snake.bossColor = 'normal'; // Change back to normal color
@@ -219,8 +240,23 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           // Add brief recovery time before next attack
           snake.pauseStartTime = currentTime;
           console.log(`Valerie: Recoiling → Recovering. Final position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
+        } else if (checkWallCollision(snake, newRecoilPosition, walls)) {
+          // Hit another wall during recoil - stop at current position and enter recovery
+          snake.bossState = 'recovering';
+          snake.bossColor = 'normal'; // Change back to normal color
+          snake.isChargingAtSnapshot = false;
+          snake.playerSnapshot = undefined;
+          snake.direction = { x: 0, y: 0 };
+          // Clear recoil properties
+          snake.recoilStartPosition = undefined;
+          snake.recoilTargetPosition = undefined;
+          snake.recoilStartTime = undefined;
+          snake.recoilDirection = undefined;
+          // Add brief recovery time before next attack
+          snake.pauseStartTime = currentTime;
+          console.log(`Valerie: Hit wall during recoil! Stopping at current position: (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
         } else {
-          // Continue recoiling
+          // Continue recoiling safely
           snake.position = newRecoilPosition;
         }
       }
