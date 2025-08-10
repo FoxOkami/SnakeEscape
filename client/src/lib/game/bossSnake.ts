@@ -153,48 +153,30 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           const reflectedDirection = reflectVector(snake.direction, collisionInfo.normal);
           
           // Start animated recoil using reflection
-          const recoilDistance = snake.size.width / 2; // Half her width
-          const recoilTargetPosition = {
+          // Use a longer recoil distance to ensure we move away from walls
+          let recoilDistance = snake.size.width * 2; // Start with 2x her width
+          let recoilTargetPosition = {
             x: snake.position.x + reflectedDirection.x * recoilDistance,
             y: snake.position.y + reflectedDirection.y * recoilDistance
           };
           
-          // Check if recoil target is valid
-          if (!checkWallCollision(snake, recoilTargetPosition, walls)) {
-            // Start recoil animation
-            snake.bossState = 'recoiling';
-            snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
-            snake.recoilTargetPosition = recoilTargetPosition;
-            snake.recoilStartTime = currentTime;
-            snake.recoilDirection = reflectedDirection; // Use reflection instead of opposite direction
-            console.log(`Valerie: Hit wall! Charging → Recoiling. Reflected direction: (${reflectedDirection.x.toFixed(3)}, ${reflectedDirection.y.toFixed(3)}) Target: (${recoilTargetPosition.x.toFixed(1)}, ${recoilTargetPosition.y.toFixed(1)})`);
-          } else {
-            // Can't recoil in reflected direction, try opposite direction as fallback
-            const fallbackDirection = { x: -snake.direction.x, y: -snake.direction.y };
-            const fallbackTargetPosition = {
-              x: snake.position.x + fallbackDirection.x * recoilDistance,
-              y: snake.position.y + fallbackDirection.y * recoilDistance
+          // Find a safe recoil distance by checking progressively shorter distances
+          while (recoilDistance > snake.size.width * 0.5 && checkWallCollision(snake, recoilTargetPosition, walls)) {
+            recoilDistance *= 0.8; // Reduce by 20% each time
+            recoilTargetPosition = {
+              x: snake.position.x + reflectedDirection.x * recoilDistance,
+              y: snake.position.y + reflectedDirection.y * recoilDistance
             };
-            
-            if (!checkWallCollision(snake, fallbackTargetPosition, walls)) {
-              // Use fallback recoil
-              snake.bossState = 'recoiling';
-              snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
-              snake.recoilTargetPosition = fallbackTargetPosition;
-              snake.recoilStartTime = currentTime;
-              snake.recoilDirection = fallbackDirection;
-              console.log(`Valerie: Hit wall! Using fallback recoil direction. Target: (${fallbackTargetPosition.x.toFixed(1)}, ${fallbackTargetPosition.y.toFixed(1)})`);
-            } else {
-              // Can't recoil at all, go directly to recovery
-              snake.bossState = 'recovering';
-              snake.bossColor = 'normal';
-              snake.isChargingAtSnapshot = false;
-              snake.playerSnapshot = undefined;
-              snake.direction = { x: 0, y: 0 };
-              snake.pauseStartTime = currentTime;
-              console.log(`Valerie: Hit wall! No space to recoil → Recovering directly`);
-            }
           }
+          
+          // Always use reflection - no fallback
+          snake.bossState = 'recoiling';
+          snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
+          snake.recoilTargetPosition = recoilTargetPosition;
+          snake.recoilStartTime = currentTime;
+          snake.recoilDirection = reflectedDirection;
+          console.log(`Valerie: Hit wall! Charging → Recoiling. Reflected direction: (${reflectedDirection.x.toFixed(3)}, ${reflectedDirection.y.toFixed(3)}) Target: (${recoilTargetPosition.x.toFixed(1)}, ${recoilTargetPosition.y.toFixed(1)})`);
+        
         } else {
           // Continue charging in same direction
           snake.position = newPosition;
