@@ -237,8 +237,8 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
               spawnMiniBoulders: false,
               spawnScreensaverSnake: true,
               boulderHitPosition: {
-                x: hitBoulder.x + hitBoulder.width / 2,
-                y: hitBoulder.y + hitBoulder.height / 2
+                x: snake.position.x + snake.size.width / 2,
+                y: snake.position.y + snake.size.height / 2
               }
             };
           }
