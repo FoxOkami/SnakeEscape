@@ -1225,7 +1225,11 @@ const GameCanvas: React.FC = () => {
       }
 
       // Draw mini boulders (falling environmental effects)
+      if (miniBoulders.length > 0) {
+        console.log(`Drawing ${miniBoulders.length} mini boulders`);
+      }
       miniBoulders.forEach((miniBoulder) => {
+        console.log(`Drawing mini boulder at position: x=${miniBoulder.position.x}, y=${miniBoulder.position.y}`);
         // Base mini boulder color - similar to regular boulders but smaller
         const baseColor = "#4a4a4a";
         ctx.fillStyle = baseColor;

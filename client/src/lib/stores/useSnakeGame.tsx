@@ -2866,6 +2866,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       const dt = deltaTime / 1000; // Convert to seconds
       
+      if (state.miniBoulders.length > 0) {
+        console.log(`Updating ${state.miniBoulders.length} mini boulders`);
+      }
+      
       const updatedMiniBoulders = state.miniBoulders
         .map((boulder) => {
           if (boulder.isLanded) return boulder;
