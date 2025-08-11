@@ -2978,8 +2978,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         currentPatrolIndex: 0,
         patrolDirection: 1,
         chaseSpeed: 250, // Very fast when berserk
-        sightRange: 150, // Good sight range when berserk
-        hearingRange: 200, // Can hear player when in darkness
+        sightRange: 800, // Entire map width for Level 6
+        hearingRange: 600, // Entire map height for Level 6
         isChasing: false,
         isInDarkness: isDark, // Set based on actual lighting conditions
         isBerserk: !isDark, // If not dark, start in berserk mode
