@@ -2841,16 +2841,27 @@ export const useSnakeGame = create<SnakeGameState>()(
     spawnScreensaverSnake: (centerPosition: Position, levelSize: Size): Snake => {
       const currentTime = Date.now();
       
+      // Spawn near the boulder position, with some offset to avoid overlap
+      const offsetX = (Math.random() - 0.5) * 120; // Random offset within 60 pixels each direction
+      const offsetY = (Math.random() - 0.5) * 120;
+      
+      let spawnX = centerPosition.x + offsetX;
+      let spawnY = centerPosition.y + offsetY;
+      
+      // Keep within level bounds
+      spawnX = Math.max(20, Math.min(levelSize.width - 60, spawnX));
+      spawnY = Math.max(20, Math.min(levelSize.height - 60, spawnY));
+      
       return {
         id: `screensaver_snake_${currentTime}`,
         type: 'screensaver',
         position: {
-          x: Math.random() * (levelSize.width - 40),
-          y: -50 // Start above the screen
+          x: spawnX,
+          y: spawnY
         },
         size: { width: 40, height: 40 },
-        speed: 100 + Math.random() * 50, // Random speed between 100-150
-        direction: { x: 0, y: 1 }, // Start moving downward
+        speed: 50, // Slower speed for level obstacle
+        direction: { x: 0, y: 0 }, // Start stationary
         patrolPoints: [],
         currentPatrolIndex: 0,
         patrolDirection: 1,
