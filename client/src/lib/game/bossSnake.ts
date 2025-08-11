@@ -230,32 +230,73 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             };
           }
           
-          // Check if Valerie is at full speed (or close to it)
-          const isAtFullSpeed = currentChargeSpeed >= (snake.chargeMaxSpeed || 400) * 0.95; // 95% of max speed
+          // Always use recoil behavior when hitting boulder
+          // Calculate reflection direction from boulder
+          const snakeCenter = {
+            x: snake.position.x + snake.size.width / 2,
+            y: snake.position.y + snake.size.height / 2
+          };
+          const boulderCenter = {
+            x: hitBoulder.x + hitBoulder.width / 2,
+            y: hitBoulder.y + hitBoulder.height / 2
+          };
           
-          if (isAtFullSpeed) {
-            // At full speed - use recoil behavior
-            // Calculate reflection direction from boulder
-            const snakeCenter = {
-              x: snake.position.x + snake.size.width / 2,
-              y: snake.position.y + snake.size.height / 2
+          // Calculate collision normal (from boulder center to snake center)
+          const dx = snakeCenter.x - boulderCenter.x;
+          const dy = snakeCenter.y - boulderCenter.y;
+          const length = Math.sqrt(dx * dx + dy * dy);
+          const normal = length > 0 ? { x: dx / length, y: dy / length } : { x: 1, y: 0 };
+          
+          // Reflect direction off boulder
+          const reflectedDirection = reflectVector(snake.direction, normal);
+          
+          // Start recoil from boulder collision
+          let recoilDistance = (snake.chargeDistanceTraveled || 0) * 0.25;
+          const minRecoil = snake.size.width * 0.5;
+          const maxRecoil = snake.size.width * 2;
+          recoilDistance = Math.max(minRecoil, Math.min(maxRecoil, recoilDistance));
+          
+          let recoilTargetPosition = {
+            x: snake.position.x + reflectedDirection.x * recoilDistance,
+            y: snake.position.y + reflectedDirection.y * recoilDistance
+          };
+          
+          // Find safe recoil distance
+          while (recoilDistance > minRecoil && (checkWallCollision(snake, recoilTargetPosition, walls) || 
+                 (boulders && checkBoulderCollision(snake, recoilTargetPosition, boulders)))) {
+            recoilDistance *= 0.8;
+            recoilTargetPosition = {
+              x: snake.position.x + reflectedDirection.x * recoilDistance,
+              y: snake.position.y + reflectedDirection.y * recoilDistance
             };
-            const boulderCenter = {
-              x: hitBoulder.x + hitBoulder.width / 2,
-              y: hitBoulder.y + hitBoulder.height / 2
-            };
+          }
+          
+          if (levelBounds) {
+            recoilTargetPosition = clampToBounds(recoilTargetPosition, snake.size, levelBounds);
+          }
+          
+          snake.bossState = 'recoiling';
+          snake.recoilStartTime = currentTime;
+          snake.recoilStartPosition = { ...snake.position };
+          snake.recoilTargetPosition = recoilTargetPosition;
+          snake.recoilDirection = reflectedDirection;
+          snake.recoilDuration = 200;
+          snake.bossColor = 'stunned';
+          snake.isChargingAtSnapshot = false;
+          snake.recoilFromBoulder = true; // Mark this recoil as boulder-caused
+        } else {
+          // Check for wall collision with detailed info
+          const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);
+          if (collisionInfo.hit && collisionInfo.normal) {
+            // Always use recoil behavior when hitting wall
+            // Hit a wall - calculate reflection direction
+            const reflectedDirection = reflectVector(snake.direction, collisionInfo.normal);
             
-            // Calculate collision normal (from boulder center to snake center)
-            const dx = snakeCenter.x - boulderCenter.x;
-            const dy = snakeCenter.y - boulderCenter.y;
-            const length = Math.sqrt(dx * dx + dy * dy);
-            const normal = length > 0 ? { x: dx / length, y: dy / length } : { x: 1, y: 0 };
-            
-            // Reflect direction off boulder
-            const reflectedDirection = reflectVector(snake.direction, normal);
-            
-            // Start recoil from boulder collision
+            // Start animated recoil using reflection
+            // Use 1/4 of the charge distance traveled for proportional recoil
             let recoilDistance = (snake.chargeDistanceTraveled || 0) * 0.25;
+            
+            // Ensure minimum recoil distance (half her width) and maximum (2x her width)
             const minRecoil = snake.size.width * 0.5;
             const maxRecoil = snake.size.width * 2;
             recoilDistance = Math.max(minRecoil, Math.min(maxRecoil, recoilDistance));
@@ -265,103 +306,28 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
               y: snake.position.y + reflectedDirection.y * recoilDistance
             };
             
-            // Find safe recoil distance
-            while (recoilDistance > minRecoil && (checkWallCollision(snake, recoilTargetPosition, walls) || 
-                   (boulders && checkBoulderCollision(snake, recoilTargetPosition, boulders)))) {
-              recoilDistance *= 0.8;
+            // Find a safe recoil distance by checking progressively shorter distances
+            while (recoilDistance > minRecoil && checkWallCollision(snake, recoilTargetPosition, walls)) {
+              recoilDistance *= 0.8; // Reduce by 20% each time
               recoilTargetPosition = {
                 x: snake.position.x + reflectedDirection.x * recoilDistance,
                 y: snake.position.y + reflectedDirection.y * recoilDistance
               };
             }
             
+            // Apply boundary clamping to ensure target is within playable area
             if (levelBounds) {
               recoilTargetPosition = clampToBounds(recoilTargetPosition, snake.size, levelBounds);
             }
             
+            // Always use reflection - no fallback
             snake.bossState = 'recoiling';
-            snake.recoilStartTime = currentTime;
-            snake.recoilStartPosition = { ...snake.position };
+            snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
             snake.recoilTargetPosition = recoilTargetPosition;
+            snake.recoilStartTime = currentTime;
             snake.recoilDirection = reflectedDirection;
-            snake.recoilDuration = 200;
             snake.bossColor = 'stunned';
             snake.isChargingAtSnapshot = false;
-            snake.recoilFromBoulder = true; // Mark this recoil as boulder-caused
-          } else {
-            // Not at full speed - pause for 100ms then charge at player again
-            snake.bossState = 'pausing';
-            snake.pauseStartTime = currentTime;
-            snake.bossColor = 'normal';
-            snake.isChargingAtSnapshot = false;
-            
-            // Take a new snapshot of the player position for the next charge
-            snake.playerSnapshot = {
-              x: player.position.x + player.size.width / 2,
-              y: player.position.y + player.size.height / 2
-            };
-          }
-        } else {
-          // Check for wall collision with detailed info
-          const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);
-          if (collisionInfo.hit && collisionInfo.normal) {
-            // Check if Valerie is at full speed (or close to it)
-            const isAtFullSpeed = currentChargeSpeed >= (snake.chargeMaxSpeed || 400) * 0.95; // 95% of max speed
-            
-            if (isAtFullSpeed) {
-              // At full speed - use recoil behavior
-              // Hit a wall - calculate reflection direction
-              const reflectedDirection = reflectVector(snake.direction, collisionInfo.normal);
-              
-              // Start animated recoil using reflection
-              // Use 1/4 of the charge distance traveled for proportional recoil
-              let recoilDistance = (snake.chargeDistanceTraveled || 0) * 0.25;
-              
-              // Ensure minimum recoil distance (half her width) and maximum (2x her width)
-              const minRecoil = snake.size.width * 0.5;
-              const maxRecoil = snake.size.width * 2;
-              recoilDistance = Math.max(minRecoil, Math.min(maxRecoil, recoilDistance));
-              
-              let recoilTargetPosition = {
-                x: snake.position.x + reflectedDirection.x * recoilDistance,
-                y: snake.position.y + reflectedDirection.y * recoilDistance
-              };
-              
-              // Find a safe recoil distance by checking progressively shorter distances
-              while (recoilDistance > minRecoil && checkWallCollision(snake, recoilTargetPosition, walls)) {
-                recoilDistance *= 0.8; // Reduce by 20% each time
-                recoilTargetPosition = {
-                  x: snake.position.x + reflectedDirection.x * recoilDistance,
-                  y: snake.position.y + reflectedDirection.y * recoilDistance
-                };
-              }
-              
-              // Apply boundary clamping to ensure target is within playable area
-              if (levelBounds) {
-                recoilTargetPosition = clampToBounds(recoilTargetPosition, snake.size, levelBounds);
-              }
-              
-              // Always use reflection - no fallback
-              snake.bossState = 'recoiling';
-              snake.recoilStartPosition = { x: snake.position.x, y: snake.position.y };
-              snake.recoilTargetPosition = recoilTargetPosition;
-              snake.recoilStartTime = currentTime;
-              snake.recoilDirection = reflectedDirection;
-              snake.bossColor = 'stunned';
-              snake.isChargingAtSnapshot = false;
-            } else {
-              // Not at full speed - pause for 100ms then charge at player again
-              snake.bossState = 'pausing';
-              snake.pauseStartTime = currentTime;
-              snake.bossColor = 'normal';
-              snake.isChargingAtSnapshot = false;
-              
-              // Take a new snapshot of the player position for the next charge
-              snake.playerSnapshot = {
-                x: player.position.x + player.size.width / 2,
-                y: player.position.y + player.size.height / 2
-              };
-            }
           } else {
             // Continue charging in same direction
             snake.position = newPosition;
