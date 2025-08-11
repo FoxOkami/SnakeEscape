@@ -45,6 +45,7 @@ const GameCanvas: React.FC = () => {
     teleporters,
     snakePits,
     boulders,
+    miniBoulders,
     hintState,
     updateHint,
     patternSequence,
@@ -1222,6 +1223,28 @@ const GameCanvas: React.FC = () => {
           }
         });
       }
+
+      // Draw mini boulders (falling environmental effects)
+      miniBoulders.forEach((miniBoulder) => {
+        // Base mini boulder color - similar to regular boulders but smaller
+        const baseColor = "#4a4a4a";
+        ctx.fillStyle = baseColor;
+        ctx.fillRect(miniBoulder.position.x, miniBoulder.position.y, miniBoulder.size.width, miniBoulder.size.height);
+
+        // Add simple texture for mini boulders
+        ctx.fillStyle = "#666666";
+        ctx.fillRect(miniBoulder.position.x + 3, miniBoulder.position.y + 3, 6, 6);
+        ctx.fillRect(miniBoulder.position.x + 12, miniBoulder.position.y + 8, 5, 7);
+
+        // Add darker shadow
+        ctx.fillStyle = "#2a2a2a";
+        ctx.fillRect(miniBoulder.position.x + 15, miniBoulder.position.y + 15, 3, 3);
+
+        // Add border
+        ctx.strokeStyle = "#333333";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(miniBoulder.position.x, miniBoulder.position.y, miniBoulder.size.width, miniBoulder.size.height);
+      });
 
       // Draw snakes with different visuals for each type
       // On Level 3, skip snakes here so they render on top of mirrors

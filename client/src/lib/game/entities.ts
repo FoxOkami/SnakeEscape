@@ -382,6 +382,35 @@ function checkWallCollision(snake: Snake, newPosition: Position, walls: Wall[]):
 }
 
 function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake {
+  // Check if this is an environmental screensaver snake (from boss boulder collision)
+  const isEnvironmental = snake.id.includes('screensaver_snake_');
+  
+  if (isEnvironmental) {
+    // Environmental screensaver snakes fall straight down like mini boulders
+    const newPosition = {
+      x: snake.position.x, // No horizontal movement
+      y: snake.position.y + snake.speed * dt // Fall downward
+    };
+    
+    // Check if it reached the ground (assuming level height is 600)
+    if (newPosition.y + snake.size.height >= 600) {
+      // Land on the ground and stop moving (act like an obstacle)
+      snake.position = {
+        x: snake.position.x,
+        y: 600 - snake.size.height
+      };
+      snake.speed = 0; // Stop moving once landed
+      snake.direction = { x: 0, y: 0 };
+    } else {
+      // Continue falling
+      snake.position = newPosition;
+      snake.direction = { x: 0, y: 1 }; // Always falling down
+    }
+    
+    return snake;
+  }
+  
+  // Original screensaver snake behavior for non-environmental snakes
   // Eight cardinal directions: N, NE, E, SE, S, SW, W, NW
   const cardinalDirections = [
     { x: 0, y: -1 },   // North

@@ -19,6 +19,7 @@ import {
   Teleporter,
   SnakePit,
   Boulder,
+  MiniBoulder,
 } from "../game/types";
 import { LEVELS, randomizeLevel2 } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
@@ -279,6 +280,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     teleporters: [],
     snakePits: [],
     boulders: [],
+    miniBoulders: [],
     lastLightCheckTime: 0,
 
     puzzleShards: [],
@@ -554,6 +556,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           ? level.boulders.map((boulder) => ({ ...boulder }))
           : [],
         hintState: null, // Initialize hint state
+        miniBoulders: [],
         randomizedSymbols, // Store randomized symbols for Level 1
         // Clear pre-stored Level 2 data when directly selecting Level 2
         level2RandomizedSwitches:
@@ -630,6 +633,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         boulders: level.boulders
           ? level.boulders.map((boulder) => ({ ...boulder }))
           : [],
+        miniBoulders: [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
@@ -735,6 +739,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           ? level.boulders.map((boulder) => ({ ...boulder }))
           : [],
         currentVelocity: { x: 0, y: 0 },
+        miniBoulders: [],
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
@@ -836,13 +841,39 @@ export const useSnakeGame = create<SnakeGameState>()(
         height: state.player.size.height,
       };
 
+      // Check for environmental screensaver snake collisions (act as walls)
+      const environmentalSnakeCollisionX = state.snakes.some((snake) => {
+        if (snake.type !== 'screensaver' || !snake.id.includes('screensaver_snake_') || snake.speed > 0) {
+          return false; // Only landed environmental screensaver snakes block movement
+        }
+        return checkAABBCollision(testXPosition, {
+          x: snake.position.x,
+          y: snake.position.y,
+          width: snake.size.width,
+          height: snake.size.height
+        });
+      });
+
+      // Check for mini boulder collisions (landed ones act as walls)
+      const miniBoulderCollisionX = state.miniBoulders.some(boulder => {
+        if (!boulder.isLanded) return false;
+        return checkAABBCollision(testXPosition, {
+          x: boulder.position.x,
+          y: boulder.position.y,
+          width: boulder.size.width,
+          height: boulder.size.height
+        });
+      });
+
       const canMoveX =
         newPlayerPosition.x >= 0 &&
         newPlayerPosition.x + state.player.size.width <=
           state.levelSize.width &&
         !get()
           .getCurrentWalls()
-          .some((wall) => checkAABBCollision(testXPosition, wall));
+          .some((wall) => checkAABBCollision(testXPosition, wall)) &&
+        !environmentalSnakeCollisionX &&
+        !miniBoulderCollisionX;
 
       if (canMoveX) {
         finalPosition.x = newPlayerPosition.x;
@@ -859,13 +890,39 @@ export const useSnakeGame = create<SnakeGameState>()(
         height: state.player.size.height,
       };
 
+      // Check for environmental screensaver snake collisions (act as walls) for Y movement
+      const environmentalSnakeCollisionY = state.snakes.some((snake) => {
+        if (snake.type !== 'screensaver' || !snake.id.includes('screensaver_snake_') || snake.speed > 0) {
+          return false; // Only landed environmental screensaver snakes block movement
+        }
+        return checkAABBCollision(testYPosition, {
+          x: snake.position.x,
+          y: snake.position.y,
+          width: snake.size.width,
+          height: snake.size.height
+        });
+      });
+
+      // Check for mini boulder collisions (landed ones act as walls) for Y movement
+      const miniBoulderCollisionY = state.miniBoulders.some(boulder => {
+        if (!boulder.isLanded) return false;
+        return checkAABBCollision(testYPosition, {
+          x: boulder.position.x,
+          y: boulder.position.y,
+          width: boulder.size.width,
+          height: boulder.size.height
+        });
+      });
+
       const canMoveY =
         newPlayerPosition.y >= 0 &&
         newPlayerPosition.y + state.player.size.height <=
           state.levelSize.height &&
         !get()
           .getCurrentWalls()
-          .some((wall) => checkAABBCollision(testYPosition, wall));
+          .some((wall) => checkAABBCollision(testYPosition, wall)) &&
+        !environmentalSnakeCollisionY &&
+        !miniBoulderCollisionY;
 
       if (canMoveY) {
         finalPosition.y = newPlayerPosition.y;
@@ -922,6 +979,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         };
       }
 
+      let newMiniBoulders = [...state.miniBoulders];
+      let newSnakes = [...state.snakes];
+      
       const updatedSnakes = state.snakes.map((snake) => {
         // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
         // Allow patrolling and chasing rattlesnakes to be processed by normal AI
@@ -933,7 +993,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         ) {
           return snake;
         }
-        return updateSnake(
+        
+        const updatedSnake = updateSnake(
           snake,
           currentWalls,
           deltaTime,
@@ -943,6 +1004,24 @@ export const useSnakeGame = create<SnakeGameState>()(
           LEVELS[state.currentLevel]?.size,
           state.boulders,
         );
+        
+        // Check for environmental effects triggered by boss boulder collision
+        if (updatedSnake.environmentalEffects?.spawnMiniBoulders) {
+          const spawnedMiniBoulders = get().spawnMiniBoulders(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
+          newMiniBoulders.push(...spawnedMiniBoulders);
+        }
+        
+        if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
+          const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
+          newSnakes.push(screensaverSnake);
+        }
+        
+        // Clear environmental effects after processing
+        if (updatedSnake.environmentalEffects) {
+          updatedSnake.environmentalEffects = undefined;
+        }
+        
+        return updatedSnake;
       });
 
       // Handle plumber snake tile rotations
@@ -1557,9 +1636,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Update hint animation
       get().updateHint(deltaTime);
 
+      // --- ENVIRONMENTAL EFFECTS ---
+      // Update mini boulders physics and lifetime
+      get().updateMiniBoulders(deltaTime);
+
       // --- UPDATE STATE ---
-      // Get the most up-to-date snakes after all processing (snake pits, projectiles, etc.)
-      const finalSnakes = get().snakes;
+      // Get the most up-to-date snakes after all processing (snake pits, projectiles, environmental effects)
+      const finalSnakes = newSnakes.length > state.snakes.length ? [...newSnakes] : get().snakes;
 
       set({
         currentVelocity: newVelocity, // Use the updated velocity that includes wall collision resets
@@ -2722,6 +2805,106 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
 
       return { hitCount };
+    },
+
+    // Environmental effects for boss boulder collisions
+    spawnMiniBoulders: (centerPosition: Position, levelSize: Size): MiniBoulder[] => {
+      const miniBoulders: MiniBoulder[] = [];
+      const currentTime = Date.now();
+      
+      // Spawn 10 mini boulders randomly around the arena
+      for (let i = 0; i < 10; i++) {
+        const randomX = Math.random() * (levelSize.width - 40) + 20;
+        const randomY = Math.random() * (levelSize.height - 40) + 20;
+        
+        miniBoulders.push({
+          id: `mini_boulder_${currentTime}_${i}`,
+          position: {
+            x: randomX,
+            y: -50 - (Math.random() * 200) // Start above the screen
+          },
+          size: { width: 20, height: 20 },
+          velocity: {
+            x: (Math.random() - 0.5) * 100, // Random horizontal velocity
+            y: 0 // Will gain downward velocity from gravity
+          },
+          gravity: 300, // Pixels per second squared
+          isLanded: false,
+          spawnTime: currentTime
+        });
+      }
+      
+      return miniBoulders;
+    },
+
+    spawnScreensaverSnake: (centerPosition: Position, levelSize: Size): Snake => {
+      const currentTime = Date.now();
+      
+      return {
+        id: `screensaver_snake_${currentTime}`,
+        type: 'screensaver',
+        position: {
+          x: Math.random() * (levelSize.width - 40),
+          y: -50 // Start above the screen
+        },
+        size: { width: 40, height: 40 },
+        speed: 100 + Math.random() * 50, // Random speed between 100-150
+        direction: { x: 0, y: 1 }, // Start moving downward
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0, // Screensaver snakes don't chase
+        sightRange: 0,
+        isChasing: false
+      };
+    },
+
+    updateMiniBoulders: (deltaTime: number) => {
+      const state = get();
+      const dt = deltaTime / 1000; // Convert to seconds
+      
+      const updatedMiniBoulders = state.miniBoulders
+        .map((boulder) => {
+          if (boulder.isLanded) return boulder;
+          
+          // Apply gravity
+          const newVelocity = {
+            x: boulder.velocity.x,
+            y: boulder.velocity.y + boulder.gravity * dt
+          };
+          
+          // Update position
+          const newPosition = {
+            x: boulder.position.x + boulder.velocity.x * dt,
+            y: boulder.position.y + boulder.velocity.y * dt
+          };
+          
+          // Check if landed (hit ground)
+          if (newPosition.y + boulder.size.height >= state.levelSize.height) {
+            return {
+              ...boulder,
+              position: {
+                x: newPosition.x,
+                y: state.levelSize.height - boulder.size.height
+              },
+              velocity: { x: 0, y: 0 },
+              isLanded: true
+            };
+          }
+          
+          return {
+            ...boulder,
+            position: newPosition,
+            velocity: newVelocity
+          };
+        })
+        .filter((boulder) => {
+          // Remove mini boulders that are older than 30 seconds or fell off screen
+          const age = Date.now() - boulder.spawnTime;
+          return age < 30000 && boulder.position.x > -50 && boulder.position.x < state.levelSize.width + 50;
+        });
+      
+      set({ miniBoulders: updatedMiniBoulders });
     },
 
     spawnSpitterSnake: (position: Position) => {

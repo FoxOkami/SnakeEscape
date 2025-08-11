@@ -99,6 +99,13 @@ export interface Snake {
   chargeBaseSpeed?: number; // Starting speed for current charge
   chargeMaxSpeed?: number; // Maximum speed for charge
   isInitialPause?: boolean; // Whether this is the first pause to let player adjust
+  
+  // Environmental effects triggered when boss hits boulder
+  environmentalEffects?: {
+    spawnMiniBoulders: boolean;
+    spawnScreensaverSnake: boolean;
+    boulderHitPosition: Position;
+  };
 }
 
 export interface Wall extends Rectangle {}
@@ -278,6 +285,16 @@ export interface Boulder extends Rectangle {
   destructionTime?: number; // When the boulder was destroyed (timestamp)
 }
 
+export interface MiniBoulder {
+  id: string;
+  position: Position;
+  size: Size;
+  velocity: Position;
+  gravity: number;
+  isLanded: boolean;
+  spawnTime: number;
+}
+
 export interface Level {
   id: number;
   name: string;
@@ -334,6 +351,7 @@ export interface GameData {
   projectiles: Projectile[];
   teleporters: Teleporter[];
   boulders: Boulder[];
+  miniBoulders: MiniBoulder[];
 
   puzzleShards: PuzzleShard[];
   puzzlePedestal: PuzzlePedestal | null;
