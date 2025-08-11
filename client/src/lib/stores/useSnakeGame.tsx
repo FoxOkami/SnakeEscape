@@ -2903,7 +2903,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           y: spawnY
         },
         size: { width: 40, height: 40 },
-        speed: 50, // Slower speed for level obstacle
+        speed: 50 * (1.5 + Math.random()), // Random speed between 1.5x (75) and 2.5x (125) of base speed
         direction: { x: initialDirection.x, y: initialDirection.y },
         patrolPoints: [],
         currentPatrolIndex: 0,
