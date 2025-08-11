@@ -666,29 +666,34 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
     snake.isCharging = false;
     snake.chargeDirection = undefined; // Clear any previous charge direction
 
-    // Level 6 specific behavior: prioritize return to spawn when player is walking
-    if (gameState && gameState.currentLevel === 5 && snake.spawnPoint && 
-        gameState.player && gameState.player.isWalking) {
-      // Immediately stop chasing sounds and return to spawn point when player is walking
-      snake.lastHeardSound = undefined;
-      snake.isChasing = false;
-      snake.soundCooldown = 0;
+    // Level 6 specific behavior: return to spawn when player is walking OR when no sounds to chase
+    if (gameState && gameState.currentLevel === 5 && snake.spawnPoint) {
+      const hasCurrentSounds = sounds && sounds.length > 0;
+      const playerIsWalking = gameState.player && gameState.player.isWalking;
       
-      const distanceToSpawn = getDistance(snake.position, snake.spawnPoint);
-      
-      if (distanceToSpawn > 10) { // If not at spawn point
-        const newPosition = moveTowards(snake.position, snake.spawnPoint, snake.speed * dt);
-        if (!checkWallCollision(snake, newPosition, walls)) {
-          snake.position = newPosition;
-        } else {
-          // Try sliding along wall if blocked
-          const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
-          snake.position = slidePosition;
+      // Return to spawn if player is walking OR if no current sounds to chase
+      if (playerIsWalking || !hasCurrentSounds) {
+        // Stop chasing sounds and return to spawn point
+        snake.lastHeardSound = undefined;
+        snake.isChasing = false;
+        snake.soundCooldown = 0;
+        
+        const distanceToSpawn = getDistance(snake.position, snake.spawnPoint);
+        
+        if (distanceToSpawn > 10) { // If not at spawn point
+          const newPosition = moveTowards(snake.position, snake.spawnPoint, snake.speed * dt);
+          if (!checkWallCollision(snake, newPosition, walls)) {
+            snake.position = newPosition;
+          } else {
+            // Try sliding along wall if blocked
+            const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
+            snake.position = slidePosition;
+          }
+          snake.direction = getDirectionVector(snake.position, snake.spawnPoint);
         }
-        snake.direction = getDirectionVector(snake.position, snake.spawnPoint);
+        
+        return snake; // Exit early, don't process sound hunting
       }
-      
-      return snake; // Exit early, don't process sound hunting
     }
 
     // Update sound cooldown
