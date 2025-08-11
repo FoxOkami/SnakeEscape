@@ -222,13 +222,11 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         // Check for boulder collision first
         const hitBoulder = boulders ? checkBoulderCollision(snake, newPosition, boulders) : null;
         if (hitBoulder) {
-          console.log("Boss snake hit boulder:", hitBoulder.id);
           // Hit a boulder - damage it
           hitBoulder.hitCount += 1;
           if (hitBoulder.hitCount >= hitBoulder.maxHits) {
             hitBoulder.isDestroyed = true;
             hitBoulder.destructionTime = currentTime; // Record when it was destroyed
-            console.log("Boulder destroyed, triggering environmental effects");
           }
           
           // Trigger environmental effects - spawn 10 mini boulders falling to random locations
@@ -240,7 +238,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
               y: hitBoulder.y + hitBoulder.height / 2
             }
           };
-          console.log("Set environmental effects for mini boulders");
           
           // Calculate reflection direction from boulder
           const snakeCenter = {

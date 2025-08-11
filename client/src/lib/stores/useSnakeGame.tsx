@@ -1007,9 +1007,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // Check for environmental effects triggered by boss boulder collision
         if (updatedSnake.environmentalEffects?.spawnMiniBoulders) {
-          console.log("Spawning mini boulders at position:", updatedSnake.environmentalEffects.boulderHitPosition);
           const spawnedMiniBoulders = get().spawnMiniBoulders(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
-          console.log("Spawned", spawnedMiniBoulders.length, "mini boulders");
           newMiniBoulders.push(...spawnedMiniBoulders);
         }
         
@@ -2824,14 +2822,14 @@ export const useSnakeGame = create<SnakeGameState>()(
           id: `mini_boulder_${currentTime}_${i}`,
           position: {
             x: randomX,
-            y: -50 - (Math.random() * 200) // Start above the screen
+            y: -30 - (Math.random() * 50) // Start just above the screen, closer range
           },
           size: { width: 20, height: 20 },
           velocity: {
-            x: (Math.random() - 0.5) * 100, // Random horizontal velocity
-            y: 0 // Will gain downward velocity from gravity
+            x: (Math.random() - 0.5) * 50, // Reduced horizontal velocity
+            y: 50 // Start with some downward velocity
           },
-          gravity: 300, // Pixels per second squared
+          gravity: 200, // Reduced gravity for more visible falling
           isLanded: false,
           spawnTime: currentTime
         });
@@ -2865,10 +2863,6 @@ export const useSnakeGame = create<SnakeGameState>()(
     updateMiniBoulders: (deltaTime: number) => {
       const state = get();
       const dt = deltaTime / 1000; // Convert to seconds
-      
-      if (state.miniBoulders.length > 0) {
-        console.log(`Updating ${state.miniBoulders.length} mini boulders`);
-      }
       
       const updatedMiniBoulders = state.miniBoulders
         .map((boulder) => {
