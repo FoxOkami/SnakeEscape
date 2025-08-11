@@ -229,15 +229,19 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             hitBoulder.destructionTime = currentTime; // Record when it was destroyed
           }
           
-          // Spawn screensaver snake near the first boulder hit
-          snake.environmentalEffects = {
-            spawnMiniBoulders: false,
-            spawnScreensaverSnake: true,
-            boulderHitPosition: {
-              x: hitBoulder.x + hitBoulder.width / 2,
-              y: hitBoulder.y + hitBoulder.height / 2
-            }
-          };
+          // Spawn screensaver snake only on first hit of each boulder
+          const shouldSpawnScreensaverSnake = !hitBoulder.hasSpawnedScreensaver;
+          if (shouldSpawnScreensaverSnake) {
+            hitBoulder.hasSpawnedScreensaver = true;
+            snake.environmentalEffects = {
+              spawnMiniBoulders: false,
+              spawnScreensaverSnake: true,
+              boulderHitPosition: {
+                x: hitBoulder.x + hitBoulder.width / 2,
+                y: hitBoulder.y + hitBoulder.height / 2
+              }
+            };
+          }
           
           // Calculate reflection direction from boulder
           const snakeCenter = {
