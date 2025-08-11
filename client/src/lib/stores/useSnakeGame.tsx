@@ -2840,46 +2840,10 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     spawnScreensaverSnake: (centerPosition: Position, levelSize: Size): Snake => {
       const currentTime = Date.now();
-      const state = get();
       
-      // Try to find a safe spawn position away from boulders
-      let spawnX, spawnY;
-      let attempts = 0;
-      const maxAttempts = 20;
-      
-      do {
-        // Generate random position in level bounds
-        spawnX = Math.random() * (levelSize.width - 60) + 20;
-        spawnY = Math.random() * (levelSize.height - 60) + 20;
-        attempts++;
-        
-        // Check if position overlaps with any boulder
-        const overlapsWithBoulder = state.boulders.some(boulder => {
-          if (boulder.isDestroyed) return false;
-          return (
-            spawnX < boulder.x + boulder.width + 20 && // 20 pixel buffer
-            spawnX + 40 > boulder.x - 20 &&
-            spawnY < boulder.y + boulder.height + 20 &&
-            spawnY + 40 > boulder.y - 20
-          );
-        });
-        
-        if (!overlapsWithBoulder) break;
-        
-      } while (attempts < maxAttempts);
-      
-      // If we couldn't find a safe spot after many attempts, use a corner position
-      if (attempts >= maxAttempts) {
-        const corners = [
-          { x: 50, y: 50 },
-          { x: levelSize.width - 90, y: 50 },
-          { x: 50, y: levelSize.height - 90 },
-          { x: levelSize.width - 90, y: levelSize.height - 90 }
-        ];
-        const randomCorner = corners[Math.floor(Math.random() * corners.length)];
-        spawnX = randomCorner.x;
-        spawnY = randomCorner.y;
-      }
+      // Use the provided center position directly (Valerie's position)
+      const spawnX = centerPosition.x;
+      const spawnY = centerPosition.y;
       
       // Give it a random cardinal direction to start moving
       const cardinalDirections = [
