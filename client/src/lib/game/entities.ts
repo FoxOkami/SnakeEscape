@@ -666,6 +666,31 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
     snake.isCharging = false;
     snake.chargeDirection = undefined; // Clear any previous charge direction
 
+    // Level 6 specific behavior: prioritize return to spawn when player is walking
+    if (gameState && gameState.currentLevel === 5 && snake.spawnPoint && 
+        gameState.player && gameState.player.isWalking) {
+      // Immediately stop chasing sounds and return to spawn point when player is walking
+      snake.lastHeardSound = undefined;
+      snake.isChasing = false;
+      snake.soundCooldown = 0;
+      
+      const distanceToSpawn = getDistance(snake.position, snake.spawnPoint);
+      
+      if (distanceToSpawn > 10) { // If not at spawn point
+        const newPosition = moveTowards(snake.position, snake.spawnPoint, snake.speed * dt);
+        if (!checkWallCollision(snake, newPosition, walls)) {
+          snake.position = newPosition;
+        } else {
+          // Try sliding along wall if blocked
+          const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
+          snake.position = slidePosition;
+        }
+        snake.direction = getDirectionVector(snake.position, snake.spawnPoint);
+      }
+      
+      return snake; // Exit early, don't process sound hunting
+    }
+
     // Update sound cooldown
     if (snake.soundCooldown && snake.soundCooldown > 0) {
       snake.soundCooldown -= dt;
@@ -736,34 +761,15 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
       
     } else {
-      // Level 6 specific behavior: return to spawn point when player is walking and not in berserk mode
-      if (gameState && gameState.currentLevel === 5 && snake.spawnPoint && 
-          gameState.player && gameState.player.isWalking) {
-        // Return to spawn point when player is walking
-        const distanceToSpawn = getDistance(snake.position, snake.spawnPoint);
-        
-        if (distanceToSpawn > 10) { // If not at spawn point
-          const newPosition = moveTowards(snake.position, snake.spawnPoint, snake.speed * dt);
-          if (!checkWallCollision(snake, newPosition, walls)) {
-            snake.position = newPosition;
-          } else {
-            // Try sliding along wall if blocked
-            const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
-            snake.position = slidePosition;
-          }
-          snake.direction = getDirectionVector(snake.position, snake.spawnPoint);
-        }
-      } else {
-        // Default behavior: patrol slowly in darkness
-        snake.isChasing = false;
-        const targetPoint = getPatrolTarget(snake);
-        const newPosition = moveTowards(snake.position, targetPoint, (snake.speed * 0.5) * dt); // Half speed patrol
-        
-        if (!checkWallCollision(snake, newPosition, walls)) {
-          snake.position = newPosition;
-        }
-        snake.direction = getDirectionVector(snake.position, targetPoint);
+      // Default behavior: patrol slowly in darkness
+      snake.isChasing = false;
+      const targetPoint = getPatrolTarget(snake);
+      const newPosition = moveTowards(snake.position, targetPoint, (snake.speed * 0.5) * dt); // Half speed patrol
+      
+      if (!checkWallCollision(snake, newPosition, walls)) {
+        snake.position = newPosition;
       }
+      snake.direction = getDirectionVector(snake.position, targetPoint);
     }
     
     return snake;
