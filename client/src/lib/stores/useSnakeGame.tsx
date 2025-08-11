@@ -1598,19 +1598,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // If all boulders are destroyed and key hasn't been spawned yet (key starts hidden)
         if (allBouldersDestroyed && updatedKey.x === -100 && updatedKey.y === -100) {
-          // Find the boulder that was destroyed most recently
-          const lastDestroyedBoulder = destroyedBoulders
-            .filter(boulder => boulder.destructionTime) // Only boulders with destruction time
-            .sort((a, b) => (b.destructionTime || 0) - (a.destructionTime || 0))[0]; // Sort by most recent first
-          
-          if (lastDestroyedBoulder) {
-            updatedKey = {
-              ...updatedKey,
-              x: lastDestroyedBoulder.x + lastDestroyedBoulder.width / 2 - 10, // Center key on boulder position
-              y: lastDestroyedBoulder.y + lastDestroyedBoulder.height / 2 - 10,
-              collected: false
-            };
-          }
+          // Spawn key at the center of the map (800x600 level)
+          updatedKey = {
+            ...updatedKey,
+            x: 400 - 10, // Center of map (400) minus half key width (10)
+            y: 300 - 10, // Center of map (300) minus half key height (10)
+            collected: false
+          };
         }
       }
 
