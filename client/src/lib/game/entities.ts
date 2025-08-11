@@ -761,15 +761,18 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
       
     } else {
-      // Default behavior: patrol slowly in darkness
+      // Default behavior: stay still if no patrol points (photophobic snakes don't patrol)
       snake.isChasing = false;
-      const targetPoint = getPatrolTarget(snake);
-      const newPosition = moveTowards(snake.position, targetPoint, (snake.speed * 0.5) * dt); // Half speed patrol
-      
-      if (!checkWallCollision(snake, newPosition, walls)) {
-        snake.position = newPosition;
+      if (snake.patrolPoints && snake.patrolPoints.length > 0) {
+        const targetPoint = getPatrolTarget(snake);
+        const newPosition = moveTowards(snake.position, targetPoint, (snake.speed * 0.5) * dt); // Half speed patrol
+        
+        if (!checkWallCollision(snake, newPosition, walls)) {
+          snake.position = newPosition;
+        }
+        snake.direction = getDirectionVector(snake.position, targetPoint);
       }
-      snake.direction = getDirectionVector(snake.position, targetPoint);
+      // If no patrol points, snake stays in place
     }
     
     return snake;

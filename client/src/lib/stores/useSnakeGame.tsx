@@ -2952,18 +2952,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       const randomIndex = Math.floor(Math.random() * directions.length);
       const initialDirection = directions[randomIndex];
 
-      // Create basic patrol points around spawn area
-      const patrolRadius = 100;
-      const patrolPoints = [
-        { x: spawnX - patrolRadius, y: spawnY - patrolRadius },
-        { x: spawnX + patrolRadius, y: spawnY - patrolRadius },
-        { x: spawnX + patrolRadius, y: spawnY + patrolRadius },
-        { x: spawnX - patrolRadius, y: spawnY + patrolRadius },
-      ].map(point => ({
-        x: Math.max(16, Math.min(point.x, levelSize.width - 16)),
-        y: Math.max(16, Math.min(point.y, levelSize.height - 16))
-      }));
-
       return {
         id: `photophobic_snake_${currentTime}`,
         type: 'photophobic',
@@ -2978,7 +2966,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         size: { width: 32, height: 32 },
         speed: 80, // Slower when patrolling normally
         direction: { x: initialDirection.x, y: initialDirection.y },
-        patrolPoints,
+        patrolPoints: [], // No patrol points for photophobic snakes
         currentPatrolIndex: 0,
         patrolDirection: 1,
         chaseSpeed: 250, // Very fast when berserk
