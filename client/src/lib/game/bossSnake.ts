@@ -215,16 +215,23 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             hitBoulder.isDestroyed = true;
             hitBoulder.destructionTime = currentTime; // Record when it was destroyed
             
-            // Spawn photophobic snake at Valerie's center position when boulder is destroyed
-            snake.environmentalEffects = {
-              spawnMiniBoulders: false,
-              spawnScreensaverSnake: false,
-              spawnPhotophobicSnake: true,
-              boulderHitPosition: {
-                x: snake.position.x + snake.size.width / 2,
-                y: snake.position.y + snake.size.height / 2
-              }
-            };
+            // Count how many boulders are now destroyed (including this one)
+            const destroyedCount = boulders.filter(b => b.isDestroyed).length;
+            
+            // Only spawn photophobic snake after 1st and 3rd boulder destruction
+            const shouldSpawnPhotophobic = (destroyedCount === 1 || destroyedCount === 3);
+            
+            if (shouldSpawnPhotophobic) {
+              snake.environmentalEffects = {
+                spawnMiniBoulders: false,
+                spawnScreensaverSnake: false,
+                spawnPhotophobicSnake: true,
+                boulderHitPosition: {
+                  x: snake.position.x + snake.size.width / 2,
+                  y: snake.position.y + snake.size.height / 2
+                }
+              };
+            }
           } else {
             // Spawn screensaver snake only on first hit of each boulder (when not destroyed)
             const shouldSpawnScreensaverSnake = !hitBoulder.hasSpawnedScreensaver;
