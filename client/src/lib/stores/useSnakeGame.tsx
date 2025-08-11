@@ -2891,38 +2891,42 @@ export const useSnakeGame = create<SnakeGameState>()(
       const spawnX = Math.max(16, Math.min(centerPosition.x - 16, levelSize.width - 32));
       const spawnY = Math.max(16, Math.min(centerPosition.y - 16, levelSize.height - 32));
       
-      // Determine initial lighting state based on spawn position
-      // Check which quadrant the spawn position is in (Level 5/6 lighting logic)
-      const isInTopLeft = spawnX < 390 && spawnY < 290;
-      const isInTopRight = spawnX > 410 && spawnY < 290;
-      const isInBottomLeft = spawnX < 390 && spawnY > 310;
-      const isInBottomRight = spawnX > 410 && spawnY > 310;
-      
-      // Get current switch states for lighting calculation
-      const switches = state.switches || [];
-      const A = switches.find((s) => s.id === "light_switch")?.isPressed || false;
-      const B = switches.find((s) => s.id === "switch_1")?.isPressed || false;
-      const C = switches.find((s) => s.id === "switch_2")?.isPressed || false;
-      const D = switches.find((s) => s.id === "switch_3")?.isPressed || false;
-      const E = switches.find((s) => s.id === "switch_4")?.isPressed || false;
-      const F = switches.find((s) => s.id === "switch_5")?.isPressed || false;
-      
-      // Calculate lighting conditions for each quadrant
-      const topLeftLit = (A && !B) || (!A && B); // A XOR B
-      const topRightLit = C && D; // C AND D
-      const bottomLeftLit = !(E && F); // NOT (E AND F)
-      const bottomRightLit = topLeftLit && topRightLit; // (A XOR B) AND (C AND D)
-      
-      // Determine if spawn position is in darkness
+      // Determine initial lighting state based on current level
       let isDark = false;
-      if (isInTopLeft) {
-        isDark = !topLeftLit;
-      } else if (isInTopRight) {
-        isDark = !topRightLit;
-      } else if (isInBottomLeft) {
-        isDark = !bottomLeftLit;
-      } else if (isInBottomRight) {
-        isDark = !bottomRightLit;
+      
+      if (state.currentLevel === 4) {
+        // Level 5 (0-indexed as 4) - Use switch-based quadrant lighting
+        const isInTopLeft = spawnX < 390 && spawnY < 290;
+        const isInTopRight = spawnX > 410 && spawnY < 290;
+        const isInBottomLeft = spawnX < 390 && spawnY > 310;
+        const isInBottomRight = spawnX > 410 && spawnY > 310;
+        
+        const switches = state.switches || [];
+        const A = switches.find((s) => s.id === "light_switch")?.isPressed || false;
+        const B = switches.find((s) => s.id === "switch_1")?.isPressed || false;
+        const C = switches.find((s) => s.id === "switch_2")?.isPressed || false;
+        const D = switches.find((s) => s.id === "switch_3")?.isPressed || false;
+        const E = switches.find((s) => s.id === "switch_4")?.isPressed || false;
+        const F = switches.find((s) => s.id === "switch_5")?.isPressed || false;
+        
+        const topLeftLit = (A && !B) || (!A && B); // A XOR B
+        const topRightLit = C && D; // C AND D
+        const bottomLeftLit = !(E && F); // NOT (E AND F)
+        const bottomRightLit = topLeftLit && topRightLit; // (A XOR B) AND (C AND D)
+        
+        if (isInTopLeft) {
+          isDark = !topLeftLit;
+        } else if (isInTopRight) {
+          isDark = !topRightLit;
+        } else if (isInBottomLeft) {
+          isDark = !bottomLeftLit;
+        } else if (isInBottomRight) {
+          isDark = !bottomRightLit;
+        }
+      } else if (state.currentLevel === 5) {
+        // Level 6 (0-indexed as 5) - Use boulder-based full-map lighting
+        const destroyedBoulders = state.boulders?.filter(boulder => boulder.isDestroyed) || [];
+        isDark = destroyedBoulders.length >= 1; // Dark after first boulder destroyed
       }
       
       // Give it a random initial direction
