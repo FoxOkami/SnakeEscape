@@ -2852,6 +2852,20 @@ export const useSnakeGame = create<SnakeGameState>()(
       spawnX = Math.max(20, Math.min(levelSize.width - 60, spawnX));
       spawnY = Math.max(20, Math.min(levelSize.height - 60, spawnY));
       
+      // Give it a random cardinal direction to start moving
+      const cardinalDirections = [
+        { x: 0, y: -1 },   // North
+        { x: 1, y: -1 },   // Northeast  
+        { x: 1, y: 0 },    // East
+        { x: 1, y: 1 },    // Southeast
+        { x: 0, y: 1 },    // South
+        { x: -1, y: 1 },   // Southwest
+        { x: -1, y: 0 },   // West
+        { x: -1, y: -1 }   // Northwest
+      ];
+      const randomIndex = Math.floor(Math.random() * cardinalDirections.length);
+      const initialDirection = cardinalDirections[randomIndex];
+
       return {
         id: `screensaver_snake_${currentTime}`,
         type: 'screensaver',
@@ -2861,7 +2875,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         },
         size: { width: 40, height: 40 },
         speed: 50, // Slower speed for level obstacle
-        direction: { x: 0, y: 0 }, // Start stationary
+        direction: { x: initialDirection.x, y: initialDirection.y },
         patrolPoints: [],
         currentPatrolIndex: 0,
         patrolDirection: 1,
