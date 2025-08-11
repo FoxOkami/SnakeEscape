@@ -65,6 +65,10 @@ export interface Snake {
   isPaused?: boolean; // Whether currently paused
   chargeDirection?: Position; // Direction of direct charge at player
   isCharging?: boolean; // Whether currently charging at player
+  // Audio pause properties
+  isAudioPaused?: boolean; // Whether paused due to losing audio contact
+  audioPauseStartTime?: number; // When the 500ms audio pause started
+  wasHearingPlayer?: boolean; // Whether snake was actively hearing sounds in previous frame
   // Rattlesnake-specific properties
   pitId?: string; // Which pit this snake belongs to
   isInPit?: boolean; // Whether snake is currently in the pit

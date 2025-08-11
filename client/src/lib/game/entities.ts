@@ -644,7 +644,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
     }
   }
   
-  // Check if currently paused (100ms pause states)
+  // Check if currently paused (100ms pause states for light mode)
   if (snake.isPaused && snake.pauseStartTime) {
     if (currentTime - snake.pauseStartTime >= 100) { // 100ms
       snake.isPaused = false;
@@ -656,6 +656,16 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
     } else {
       return snake; // Stay still during pause
+    }
+  }
+
+  // Check if currently audio paused (500ms pause when losing audio contact)
+  if (snake.isAudioPaused && snake.audioPauseStartTime) {
+    if (currentTime - snake.audioPauseStartTime >= 500) { // 500ms
+      snake.isAudioPaused = false;
+      snake.audioPauseStartTime = undefined;
+    } else {
+      return snake; // Stay still during audio pause
     }
   }
 
@@ -714,6 +724,19 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
         }
       }
     }
+
+    // Check for audio pause trigger - snake stops hearing sounds
+    const currentlyHearingPlayer = !!nearestSound;
+    if (snake.wasHearingPlayer && !currentlyHearingPlayer && !snake.isAudioPaused) {
+      // Snake was hearing player but now isn't - trigger 500ms pause
+      snake.isAudioPaused = true;
+      snake.audioPauseStartTime = currentTime;
+      snake.wasHearingPlayer = false;
+      return snake; // Stay still during audio pause
+    }
+    
+    // Update hearing state for next frame
+    snake.wasHearingPlayer = currentlyHearingPlayer;
 
     if (nearestSound) {
       // Actively chase current sounds
