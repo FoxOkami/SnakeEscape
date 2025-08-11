@@ -1336,8 +1336,8 @@ export const LEVELS: Level[] = [
       {
         id: "valerie",
         type: "boss" as const,
-        position: { x: 100, y: 213 },
-        size: { width: 150, height: 150 },
+        position: { x: 100, y: 235 },
+        size: { width: 130, height: 130 },
         speed: 100,
         direction: { x: 1, y: 0 },
         patrolPoints: [
