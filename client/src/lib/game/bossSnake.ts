@@ -233,8 +233,15 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
               };
             }
           } else {
-            // Spawn screensaver snake only on first hit of each boulder (when not destroyed)
-            const shouldSpawnScreensaverSnake = !hitBoulder.hasSpawnedScreensaver;
+            // Spawn screensaver snake only on first hit of 1st and 2nd boulders
+            const currentlyDestroyedCount = boulders.filter(b => b.isDestroyed).length;
+            const totalBouldersHit = boulders.filter(b => b.hitCount > 0).length;
+            
+            // Only spawn on first hit of boulder if it's the 1st or 2nd boulder to be hit
+            const shouldSpawnScreensaverSnake = !hitBoulder.hasSpawnedScreensaver && 
+                                               hitBoulder.hitCount === 1 && 
+                                               totalBouldersHit <= 2;
+            
             if (shouldSpawnScreensaverSnake) {
               hitBoulder.hasSpawnedScreensaver = true;
               snake.environmentalEffects = {
