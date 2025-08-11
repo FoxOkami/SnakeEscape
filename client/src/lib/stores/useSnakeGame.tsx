@@ -2881,6 +2881,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       const currentTime = Date.now();
       const state = get();
       
+      // Count existing photophobic snakes to determine if this is the first or second
+      const existingPhotophobicSnakes = state.snakes.filter(snake => snake.type === 'photophobic');
+      const isFirstPhotophobicSnake = existingPhotophobicSnakes.length === 0;
+      
       // Spawn at Valerie's center position
       const spawnX = Math.max(16, Math.min(centerPosition.x - 16, levelSize.width - 32));
       const spawnY = Math.max(16, Math.min(centerPosition.y - 16, levelSize.height - 32));
@@ -2946,6 +2950,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       const randomIndex = Math.floor(Math.random() * directions.length);
       const initialDirection = directions[randomIndex];
 
+      // Speed settings: first photophobic snake is 25% slower, second is normal speed
+      const baseSpeed = 80;
+      const baseChaseSpeed = 250;
+      const speedMultiplier = isFirstPhotophobicSnake ? 0.75 : 1.0; // 25% slower for first snake
+
       return {
         id: `photophobic_snake_${currentTime}`,
         type: 'photophobic',
@@ -2958,12 +2967,12 @@ export const useSnakeGame = create<SnakeGameState>()(
           y: spawnY
         },
         size: { width: 32, height: 32 },
-        speed: 80, // Slower when patrolling normally
+        speed: Math.round(baseSpeed * speedMultiplier), // 60 for first, 80 for second
         direction: { x: initialDirection.x, y: initialDirection.y },
         patrolPoints: [], // No patrol points for photophobic snakes
         currentPatrolIndex: 0,
         patrolDirection: 1,
-        chaseSpeed: 250, // Very fast when berserk
+        chaseSpeed: Math.round(baseChaseSpeed * speedMultiplier), // 188 for first, 250 for second
         sightRange: 800, // Entire map width for Level 6
         hearingRange: 600, // Entire map height for Level 6
         isChasing: false,
