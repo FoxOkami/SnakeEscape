@@ -104,6 +104,7 @@ export interface Snake {
   environmentalEffects?: {
     spawnMiniBoulders: boolean;
     spawnScreensaverSnake: boolean;
+    spawnPhotophobicSnake?: boolean;
     boulderHitPosition: Position;
   };
 }

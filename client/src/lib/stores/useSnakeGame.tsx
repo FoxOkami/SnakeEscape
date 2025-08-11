@@ -1016,6 +1016,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           newSnakes.push(screensaverSnake);
         }
         
+        if (updatedSnake.environmentalEffects?.spawnPhotophobicSnake) {
+          const photophobicSnake = get().spawnPhotophobicSnake(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
+          newSnakes.push(photophobicSnake);
+        }
+        
         // Clear environmental effects after processing
         if (updatedSnake.environmentalEffects) {
           updatedSnake.environmentalEffects = undefined;
@@ -2875,6 +2880,59 @@ export const useSnakeGame = create<SnakeGameState>()(
         chaseSpeed: 0, // Screensaver snakes don't chase
         sightRange: 0,
         isChasing: false
+      };
+    },
+
+    spawnPhotophobicSnake: (centerPosition: Position, levelSize: Size): Snake => {
+      const currentTime = Date.now();
+      
+      // Spawn at Valerie's center position
+      const spawnX = Math.max(16, Math.min(centerPosition.x - 16, levelSize.width - 32));
+      const spawnY = Math.max(16, Math.min(centerPosition.y - 16, levelSize.height - 32));
+      
+      // Give it a random initial direction
+      const directions = [
+        { x: 0, y: -1 },   // North
+        { x: 1, y: 0 },    // East
+        { x: 0, y: 1 },    // South
+        { x: -1, y: 0 },   // West
+      ];
+      const randomIndex = Math.floor(Math.random() * directions.length);
+      const initialDirection = directions[randomIndex];
+
+      // Create basic patrol points around spawn area
+      const patrolRadius = 100;
+      const patrolPoints = [
+        { x: spawnX - patrolRadius, y: spawnY - patrolRadius },
+        { x: spawnX + patrolRadius, y: spawnY - patrolRadius },
+        { x: spawnX + patrolRadius, y: spawnY + patrolRadius },
+        { x: spawnX - patrolRadius, y: spawnY + patrolRadius },
+      ].map(point => ({
+        x: Math.max(16, Math.min(point.x, levelSize.width - 16)),
+        y: Math.max(16, Math.min(point.y, levelSize.height - 16))
+      }));
+
+      return {
+        id: `photophobic_snake_${currentTime}`,
+        type: 'photophobic',
+        position: {
+          x: spawnX,
+          y: spawnY
+        },
+        size: { width: 32, height: 32 },
+        speed: 80, // Slower when patrolling normally
+        direction: { x: initialDirection.x, y: initialDirection.y },
+        patrolPoints,
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 250, // Very fast when berserk
+        sightRange: 150, // Good sight range when berserk
+        hearingRange: 200, // Can hear player when in darkness
+        isChasing: false,
+        isInDarkness: true, // Start in darkness state
+        isBerserk: false,
+        isPaused: false,
+        isCharging: false,
       };
     },
 

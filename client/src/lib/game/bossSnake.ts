@@ -214,20 +214,31 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           if (hitBoulder.hitCount >= hitBoulder.maxHits) {
             hitBoulder.isDestroyed = true;
             hitBoulder.destructionTime = currentTime; // Record when it was destroyed
-          }
-          
-          // Spawn screensaver snake only on first hit of each boulder
-          const shouldSpawnScreensaverSnake = !hitBoulder.hasSpawnedScreensaver;
-          if (shouldSpawnScreensaverSnake) {
-            hitBoulder.hasSpawnedScreensaver = true;
+            
+            // Spawn photophobic snake at Valerie's center position when boulder is destroyed
             snake.environmentalEffects = {
               spawnMiniBoulders: false,
-              spawnScreensaverSnake: true,
+              spawnScreensaverSnake: false,
+              spawnPhotophobicSnake: true,
               boulderHitPosition: {
                 x: snake.position.x + snake.size.width / 2,
                 y: snake.position.y + snake.size.height / 2
               }
             };
+          } else {
+            // Spawn screensaver snake only on first hit of each boulder (when not destroyed)
+            const shouldSpawnScreensaverSnake = !hitBoulder.hasSpawnedScreensaver;
+            if (shouldSpawnScreensaverSnake) {
+              hitBoulder.hasSpawnedScreensaver = true;
+              snake.environmentalEffects = {
+                spawnMiniBoulders: false,
+                spawnScreensaverSnake: true,
+                boulderHitPosition: {
+                  x: snake.position.x + snake.size.width / 2,
+                  y: snake.position.y + snake.size.height / 2
+                }
+              };
+            }
           }
           
           // Always use recoil behavior when hitting boulder
