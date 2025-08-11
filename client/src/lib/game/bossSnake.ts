@@ -229,10 +229,10 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             hitBoulder.destructionTime = currentTime; // Record when it was destroyed
           }
           
-          // Trigger environmental effects - spawn mini boulders and screensaver snake
+          // Trigger environmental effects - spawn 10 mini boulders falling to random locations
           snake.environmentalEffects = {
             spawnMiniBoulders: true,
-            spawnScreensaverSnake: true,
+            spawnScreensaverSnake: false,
             boulderHitPosition: {
               x: hitBoulder.x + hitBoulder.width / 2,
               y: hitBoulder.y + hitBoulder.height / 2
