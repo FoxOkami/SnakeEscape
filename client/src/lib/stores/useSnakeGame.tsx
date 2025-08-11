@@ -2903,7 +2903,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           y: spawnY
         },
         size: { width: 40, height: 40 },
-        speed: 50 * (1.5 + Math.random()), // Random speed between 1.5x (75) and 2.5x (125) of base speed
+        speed: 125 + Math.random() * 125, // Random speed between 125 and 250
         direction: { x: initialDirection.x, y: initialDirection.y },
         patrolPoints: [],
         currentPatrolIndex: 0,
