@@ -681,6 +681,19 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       const hasCurrentSounds = sounds && sounds.length > 0;
       const playerIsWalking = gameState.player && gameState.player.isWalking;
       
+      // Check for audio pause trigger before spawn return - snake stops hearing sounds
+      const currentlyHearingPlayer = hasCurrentSounds;
+      if (snake.wasHearingPlayer && !currentlyHearingPlayer && !snake.isAudioPaused) {
+        // Snake was hearing player but now isn't - trigger 500ms pause
+        snake.isAudioPaused = true;
+        snake.audioPauseStartTime = currentTime;
+        snake.wasHearingPlayer = false;
+        return snake; // Stay still during audio pause
+      }
+      
+      // Update hearing state for next frame
+      snake.wasHearingPlayer = currentlyHearingPlayer;
+      
       // Return to spawn if player is walking OR if no current sounds to chase
       if (playerIsWalking || !hasCurrentSounds) {
         // Stop chasing sounds and return to spawn point
@@ -725,18 +738,19 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
     }
 
-    // Check for audio pause trigger - snake stops hearing sounds
-    const currentlyHearingPlayer = !!nearestSound;
-    if (snake.wasHearingPlayer && !currentlyHearingPlayer && !snake.isAudioPaused) {
-      // Snake was hearing player but now isn't - trigger 500ms pause
-      snake.isAudioPaused = true;
-      snake.audioPauseStartTime = currentTime;
-      snake.wasHearingPlayer = false;
-      return snake; // Stay still during audio pause
+    // For non-Level 6 snakes, also check for audio pause when losing sounds
+    if (gameState && gameState.currentLevel !== 5) {
+      const currentlyHearingPlayer = !!nearestSound;
+      if (snake.wasHearingPlayer && !currentlyHearingPlayer && !snake.isAudioPaused) {
+        // Snake was hearing player but now isn't - trigger 500ms pause
+        snake.isAudioPaused = true;
+        snake.audioPauseStartTime = currentTime;
+        snake.wasHearingPlayer = false;
+        return snake; // Stay still during audio pause
+      }
+      // Update hearing state for next frame
+      snake.wasHearingPlayer = currentlyHearingPlayer;
     }
-    
-    // Update hearing state for next frame
-    snake.wasHearingPlayer = currentlyHearingPlayer;
 
     if (nearestSound) {
       // Actively chase current sounds
