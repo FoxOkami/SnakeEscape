@@ -1586,10 +1586,22 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- LEVEL 6 BOULDER MECHANICS ---
       // Check if all boulders are destroyed and spawn key if needed
       let updatedBoulders = state.boulders;
+      let updatedLightSource = state.lightSource;
       if (state.currentLevel === 5 && state.boulders.length > 0) {
         // Level 6 (0-indexed as 5)
         const destroyedBoulders = state.boulders.filter(boulder => boulder.isDestroyed);
         const allBouldersDestroyed = destroyedBoulders.length === state.boulders.length;
+        
+        // Control lighting based on boulder destruction count
+        if (updatedLightSource) {
+          if (destroyedBoulders.length === 1) {
+            // First boulder destroyed - turn lights off
+            updatedLightSource = { ...updatedLightSource, isOn: false };
+          } else if (destroyedBoulders.length === 2) {
+            // Second boulder destroyed - turn lights back on
+            updatedLightSource = { ...updatedLightSource, isOn: true };
+          }
+        }
         
         // If all boulders are destroyed and key hasn't been spawned yet (key starts hidden)
         if (allBouldersDestroyed && updatedKey.x === -100 && updatedKey.y === -100) {
@@ -1658,6 +1670,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         lightBeam: updatedLightBeam,
         mirrors: updatedMirrors,
         crystal: updatedCrystal,
+        lightSource: updatedLightSource,
         boulders: updatedBoulders,
       });
     },

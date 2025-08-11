@@ -175,6 +175,18 @@ const GameCanvas: React.FC = () => {
         }
       }
 
+      // Level 6 full-map lighting effect based on light source
+      if (currentLevel === 5) {
+        // Level 6 (0-indexed as 5)
+        const isLightOn = lightSource?.isOn ?? false;
+        
+        if (!isLightOn) {
+          // Draw darkness overlay over entire map when lights are off
+          ctx.fillStyle = "#000000";
+          ctx.fillRect(0, 0, levelSize.width, levelSize.height);
+        }
+      }
+
       // Add test border to see if canvas is drawing
       ctx.strokeStyle = "#ff0000";
       ctx.lineWidth = 5;
