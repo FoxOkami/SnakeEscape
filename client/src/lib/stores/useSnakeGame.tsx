@@ -2924,9 +2924,18 @@ export const useSnakeGame = create<SnakeGameState>()(
           isDark = !bottomRightLit;
         }
       } else if (state.currentLevel === 5) {
-        // Level 6 (0-indexed as 5) - Use boulder-based full-map lighting
+        // Level 6 (0-indexed as 5) - Simple boulder-based lighting
+        // Light starts on → first boulder destroyed = light off → second boulder destroyed = light back on
         const destroyedBoulders = state.boulders?.filter(boulder => boulder.isDestroyed) || [];
-        isDark = destroyedBoulders.length >= 1; // Dark after first boulder destroyed
+        const destroyedCount = destroyedBoulders.length;
+        
+        if (destroyedCount === 0) {
+          isDark = false; // Light is on at start
+        } else if (destroyedCount === 1) {
+          isDark = true;  // Light is off after first boulder
+        } else {
+          isDark = false; // Light is back on after second boulder
+        }
       }
       
       // Give it a random initial direction
