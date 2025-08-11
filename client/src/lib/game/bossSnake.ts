@@ -175,7 +175,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'pausing':
-      // Pause for 1000ms
+      // Move toward center for 1000ms instead of staying still
       if (currentTime - (snake.pauseStartTime || 0) >= 1000) {
         // Start charging after pause
         snake.bossState = 'charging';
@@ -194,8 +194,26 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.direction = getDirectionVector(valerieCenter, snake.playerSnapshot);
 
         }
+      } else {
+        // Move toward center during pause
+        const centerX = 400; // Screen center X (800/2)
+        const centerY = 300; // Screen center Y (600/2)
+        const snakeCenter = {
+          x: snake.position.x + snake.size.width / 2,
+          y: snake.position.y + snake.size.height / 2
+        };
+        const targetCenter = { x: centerX, y: centerY };
+        
+        // Move toward center at a moderate speed (slower than normal chase speed)
+        const moveSpeed = snake.chaseSpeed * 0.5; // 50% of normal chase speed
+        const newPosition = moveTowards(snake.position, targetCenter, moveSpeed * dt);
+        
+        // Check for wall collisions during movement to center
+        if (!checkWallCollision(snake, newPosition, walls)) {
+          snake.position.x = newPosition.x;
+          snake.position.y = newPosition.y;
+        }
       }
-      // Stay in current position during pause
       break;
 
     case 'charging':
