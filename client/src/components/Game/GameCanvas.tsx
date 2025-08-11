@@ -175,13 +175,14 @@ const GameCanvas: React.FC = () => {
         }
       }
 
-      // Level 6 full-map lighting effect based on light source
+      // Level 6 full-map lighting effect based on boulder destruction count
       if (currentLevel === 5) {
         // Level 6 (0-indexed as 5)
-        const isLightOn = lightSource?.isOn ?? false;
+        const destroyedBoulders = boulders.filter(boulder => boulder.isDestroyed);
+        const shouldBeDark = destroyedBoulders.length === 1; // Dark after first boulder destroyed
         
-        if (!isLightOn) {
-          // Draw darkness overlay over entire map when lights are off
+        if (shouldBeDark) {
+          // Draw darkness overlay over entire map when first boulder is destroyed
           ctx.fillStyle = "#000000";
           ctx.fillRect(0, 0, levelSize.width, levelSize.height);
         }
