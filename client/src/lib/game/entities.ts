@@ -626,16 +626,20 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
     } else if (gameState.currentLevel === 5) {
       // Level 6 (0-indexed as 5) - Use boulder-based full-map lighting
-      // Light starts on → first boulder destroyed = light off → second boulder destroyed = light back on
+      // ON → OFF (1st) → ON (2nd) → OFF (3rd) → ON (4th)
       const destroyedBoulders = gameState.boulders?.filter(boulder => boulder.isDestroyed) || [];
       const destroyedCount = destroyedBoulders.length;
       
       if (destroyedCount === 0) {
         isDark = false; // Light is on at start
       } else if (destroyedCount === 1) {
-        isDark = true;  // Light is off after first boulder
+        isDark = true;  // Light is off after 1st boulder
+      } else if (destroyedCount === 2) {
+        isDark = false; // Light is on after 2nd boulder
+      } else if (destroyedCount === 3) {
+        isDark = true;  // Light is off after 3rd boulder
       } else {
-        isDark = false; // Light is back on after second boulder
+        isDark = false; // Light is on after 4th boulder
       }
     }
   }
