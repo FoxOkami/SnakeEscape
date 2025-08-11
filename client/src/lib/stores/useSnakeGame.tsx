@@ -2813,24 +2813,24 @@ export const useSnakeGame = create<SnakeGameState>()(
       const miniBoulders: MiniBoulder[] = [];
       const currentTime = Date.now();
       
-      // Spawn 10 mini boulders randomly around the arena
+      // Spawn 10 mini boulders at random locations on the map
       for (let i = 0; i < 10; i++) {
-        const randomX = Math.random() * (levelSize.width - 40) + 20;
-        const randomY = Math.random() * (levelSize.height - 40) + 20;
+        const randomX = Math.random() * (levelSize.width - 20); // 20x20 size
+        const randomY = Math.random() * (levelSize.height - 20);
         
         miniBoulders.push({
           id: `mini_boulder_${currentTime}_${i}`,
           position: {
             x: randomX,
-            y: -30 - (Math.random() * 50) // Start just above the screen, closer range
+            y: randomY // Spawn directly on the map
           },
           size: { width: 20, height: 20 },
           velocity: {
-            x: (Math.random() - 0.5) * 50, // Reduced horizontal velocity
-            y: 50 // Start with some downward velocity
+            x: 0, // No movement
+            y: 0
           },
-          gravity: 200, // Reduced gravity for more visible falling
-          isLanded: false,
+          gravity: 0, // No gravity needed
+          isLanded: true, // Already "landed"
           spawnTime: currentTime
         });
       }
@@ -2862,47 +2862,12 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     updateMiniBoulders: (deltaTime: number) => {
       const state = get();
-      const dt = deltaTime / 1000; // Convert to seconds
       
       const updatedMiniBoulders = state.miniBoulders
-        .map((boulder) => {
-          if (boulder.isLanded) return boulder;
-          
-          // Apply gravity
-          const newVelocity = {
-            x: boulder.velocity.x,
-            y: boulder.velocity.y + boulder.gravity * dt
-          };
-          
-          // Update position
-          const newPosition = {
-            x: boulder.position.x + boulder.velocity.x * dt,
-            y: boulder.position.y + boulder.velocity.y * dt
-          };
-          
-          // Check if landed (hit ground)
-          if (newPosition.y + boulder.size.height >= state.levelSize.height) {
-            return {
-              ...boulder,
-              position: {
-                x: newPosition.x,
-                y: state.levelSize.height - boulder.size.height
-              },
-              velocity: { x: 0, y: 0 },
-              isLanded: true
-            };
-          }
-          
-          return {
-            ...boulder,
-            position: newPosition,
-            velocity: newVelocity
-          };
-        })
         .filter((boulder) => {
-          // Remove mini boulders that are older than 30 seconds or fell off screen
+          // Remove mini boulders that are older than 30 seconds
           const age = Date.now() - boulder.spawnTime;
-          return age < 30000 && boulder.position.x > -50 && boulder.position.x < state.levelSize.width + 50;
+          return age < 30000;
         });
       
       set({ miniBoulders: updatedMiniBoulders });
