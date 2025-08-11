@@ -175,8 +175,8 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'pausing':
-      // Pause for 100ms
-      if (currentTime - (snake.pauseStartTime || 0) >= 100) {
+      // Pause for 1000ms
+      if (currentTime - (snake.pauseStartTime || 0) >= 1000) {
         // Start charging after pause
         snake.bossState = 'charging';
         snake.chargeStartTime = currentTime;
