@@ -1007,7 +1007,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // Check for environmental effects triggered by boss boulder collision
         if (updatedSnake.environmentalEffects?.spawnMiniBoulders) {
+          console.log("Spawning mini boulders at position:", updatedSnake.environmentalEffects.boulderHitPosition);
           const spawnedMiniBoulders = get().spawnMiniBoulders(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
+          console.log("Spawned", spawnedMiniBoulders.length, "mini boulders");
           newMiniBoulders.push(...spawnedMiniBoulders);
         }
         
@@ -1647,6 +1649,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       set({
         currentVelocity: newVelocity, // Use the updated velocity that includes wall collision resets
         snakes: finalSnakes, // Use snakes after pit/projectile processing
+        miniBoulders: newMiniBoulders, // Add the mini boulders to the state
         key: updatedKey,
         player: updatedPlayer,
         switches: updatedSwitches,
