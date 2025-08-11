@@ -608,16 +608,35 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
 
   // Get lighting state from game state (passed through gameState parameter)
   let isDark = false;
-  if (gameState && gameState.quadrantLighting) {
-    const lighting = gameState.quadrantLighting;
-    if (isInTopLeft) {
-      isDark = !lighting.topLeft;
-    } else if (isInTopRight) {
-      isDark = !lighting.topRight;
-    } else if (isInBottomLeft) {
-      isDark = !lighting.bottomLeft;
-    } else if (isInBottomRight) {
-      isDark = !lighting.bottomRight;
+  
+  if (gameState) {
+    if (gameState.currentLevel === 4) {
+      // Level 5 (0-indexed as 4) - Use quadrant-based lighting
+      if (gameState.quadrantLighting) {
+        const lighting = gameState.quadrantLighting;
+        if (isInTopLeft) {
+          isDark = !lighting.topLeft;
+        } else if (isInTopRight) {
+          isDark = !lighting.topRight;
+        } else if (isInBottomLeft) {
+          isDark = !lighting.bottomLeft;
+        } else if (isInBottomRight) {
+          isDark = !lighting.bottomRight;
+        }
+      }
+    } else if (gameState.currentLevel === 5) {
+      // Level 6 (0-indexed as 5) - Use boulder-based full-map lighting
+      // Light starts on → first boulder destroyed = light off → second boulder destroyed = light back on
+      const destroyedBoulders = gameState.boulders?.filter(boulder => boulder.isDestroyed) || [];
+      const destroyedCount = destroyedBoulders.length;
+      
+      if (destroyedCount === 0) {
+        isDark = false; // Light is on at start
+      } else if (destroyedCount === 1) {
+        isDark = true;  // Light is off after first boulder
+      } else {
+        isDark = false; // Light is back on after second boulder
+      }
     }
   }
   
