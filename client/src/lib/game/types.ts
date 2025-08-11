@@ -25,6 +25,7 @@ export interface Snake {
   id: string;
   type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic' | 'rattlesnake' | 'boss';
   position: Position;
+  spawnPoint?: Position; // Original spawn position for return behavior
   size: Size;
   speed: number;
   direction: Position;

@@ -736,15 +736,34 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
       
     } else {
-      // No sounds to chase, patrol slowly in darkness
-      snake.isChasing = false;
-      const targetPoint = getPatrolTarget(snake);
-      const newPosition = moveTowards(snake.position, targetPoint, (snake.speed * 0.5) * dt); // Half speed patrol
-      
-      if (!checkWallCollision(snake, newPosition, walls)) {
-        snake.position = newPosition;
+      // Level 6 specific behavior: return to spawn point when player is walking and not in berserk mode
+      if (gameState && gameState.currentLevel === 5 && snake.spawnPoint && 
+          gameState.player && gameState.player.isWalking) {
+        // Return to spawn point when player is walking
+        const distanceToSpawn = getDistance(snake.position, snake.spawnPoint);
+        
+        if (distanceToSpawn > 10) { // If not at spawn point
+          const newPosition = moveTowards(snake.position, snake.spawnPoint, snake.speed * dt);
+          if (!checkWallCollision(snake, newPosition, walls)) {
+            snake.position = newPosition;
+          } else {
+            // Try sliding along wall if blocked
+            const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
+            snake.position = slidePosition;
+          }
+          snake.direction = getDirectionVector(snake.position, snake.spawnPoint);
+        }
+      } else {
+        // Default behavior: patrol slowly in darkness
+        snake.isChasing = false;
+        const targetPoint = getPatrolTarget(snake);
+        const newPosition = moveTowards(snake.position, targetPoint, (snake.speed * 0.5) * dt); // Half speed patrol
+        
+        if (!checkWallCollision(snake, newPosition, walls)) {
+          snake.position = newPosition;
+        }
+        snake.direction = getDirectionVector(snake.position, targetPoint);
       }
-      snake.direction = getDirectionVector(snake.position, targetPoint);
     }
     
     return snake;

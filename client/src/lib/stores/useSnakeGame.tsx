@@ -2971,6 +2971,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           x: spawnX,
           y: spawnY
         },
+        spawnPoint: {
+          x: spawnX,
+          y: spawnY
+        },
         size: { width: 32, height: 32 },
         speed: 80, // Slower when patrolling normally
         direction: { x: initialDirection.x, y: initialDirection.y },
