@@ -1354,7 +1354,7 @@ export const LEVELS: Level[] = [
         isChasing: false,
       },
     ],
-    door: { x: 750, y: 280, width: 30, height: 40, isOpen: false },
+    door: { x: 0, y: 460, width: 30, height: 40, isOpen: false },
     key: { x: -100, y: -100, width: 20, height: 20, collected: false }, // Key hidden until final boulder breaks
     boulders: [
       {
