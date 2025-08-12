@@ -2726,23 +2726,16 @@ const GameCanvas: React.FC = () => {
             }
           });
 
-          // Redraw player on top of darkness overlay (Level 6 only)
-          ctx.fillStyle = isWalking ? "#68d391" : "#4299e1"; // Green when walking, blue when still
-          ctx.fillRect(
-            player.position.x,
-            player.position.y,
-            player.size.width,
-            player.size.height,
-          );
-
-          // Add player details on top
-          ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
-          ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
-
-          // Player eyes on top
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
-          ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+          // Redraw player character image on top of darkness overlay (Level 6 only)
+          if (playerImage) {
+            ctx.drawImage(
+              playerImage,
+              player.position.x,
+              player.position.y,
+              player.size.width,
+              player.size.height,
+            );
+          }
 
           // Walking indicator - small stealth icon on top
           if (isWalking) {
