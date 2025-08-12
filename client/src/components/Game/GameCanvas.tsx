@@ -179,11 +179,14 @@ const GameCanvas: React.FC = () => {
       if (currentLevel === 5) {
         // Level 6 (0-indexed as 5)
         const destroyedBoulders = boulders.filter(boulder => boulder.isDestroyed);
-        const shouldBeDark = destroyedBoulders.length === 1; // Dark after first boulder destroyed
+        const destroyedCount = destroyedBoulders.length;
+        
+        // ON → OFF (1st) → ON (2nd) → OFF (3rd) → ON (4th)
+        const shouldBeDark = destroyedCount === 1 || destroyedCount === 3;
         
         if (shouldBeDark) {
-          // Draw darkness overlay over entire map when first boulder is destroyed
-          ctx.fillStyle = "#000000";
+          // Draw darkness overlay over entire map
+          ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; // Semi-transparent black overlay
           ctx.fillRect(0, 0, levelSize.width, levelSize.height);
         }
       }
