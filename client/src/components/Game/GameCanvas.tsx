@@ -2725,45 +2725,6 @@ const GameCanvas: React.FC = () => {
               ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
             }
           });
-          
-          // Redraw key with faint glow on top of darkness overlay (Level 6 only)
-          if (key && !key.collected) {
-            // Add faint glow effect for key in dark areas
-            ctx.shadowColor = "#ffd700";
-            ctx.shadowBlur = 15;
-
-            // Draw key with glow
-            ctx.fillStyle = "#ffd700";
-            ctx.fillRect(key.x, key.y, key.width, key.height);
-
-            // Add sparkle effect with glow
-            ctx.fillStyle = "#ffeb3b";
-            ctx.fillRect(key.x + 5, key.y + 5, 10, 10);
-
-            // Reset shadow
-            ctx.shadowBlur = 0;
-          }
-          
-          // Redraw door with faint glow on top of darkness overlay (Level 6 only)
-          ctx.shadowColor = door.isOpen ? "#48bb78" : "#e53e3e";
-          ctx.shadowBlur = 10;
-          
-          // Draw door with glow
-          ctx.fillStyle = door.isOpen ? "#48bb78" : "#e53e3e";
-          ctx.fillRect(door.x, door.y, door.width, door.height);
-          
-          // Add door details
-          ctx.strokeStyle = "#2d3748";
-          ctx.lineWidth = 3;
-          ctx.strokeRect(door.x, door.y, door.width, door.height);
-          
-          if (door.isOpen) {
-            ctx.fillStyle = "#2d3748";
-            ctx.fillRect(door.x + 5, door.y + 15, 5, 10);
-          }
-          
-          // Reset shadow
-          ctx.shadowBlur = 0;
         }
       }
     },
