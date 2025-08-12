@@ -2480,71 +2480,6 @@ const GameCanvas: React.FC = () => {
           }
         });
 
-        // Level 6 full-map lighting effect based on boulder destruction count
-        if (currentLevel === 5) {
-          // Level 6 (0-indexed as 5)
-          const destroyedBoulders = boulders.filter(boulder => boulder.isDestroyed);
-          const destroyedCount = destroyedBoulders.length;
-          
-          // ON → OFF (1st) → ON (2nd) → OFF (3rd) → ON (4th)
-          const shouldBeDark = destroyedCount === 1 || destroyedCount === 3;
-          
-          if (shouldBeDark) {
-            // Draw darkness overlay over entire map
-            ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; // Semi-transparent black overlay
-            ctx.fillRect(0, 0, levelSize.width, levelSize.height);
-            
-            // Redraw snake eyes on top of darkness overlay (Level 6 only)
-            snakes.forEach((snake) => {
-              // Draw bright yellow eyes for all snakes in dark areas (except stalkers)
-              if (snake.type !== "stalker") {
-                ctx.fillStyle = "#ffff00";
-                ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
-                ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
-              }
-            });
-            
-            // Redraw key with faint glow on top of darkness overlay (Level 6 only)
-            if (key && !key.collected) {
-              // Add faint glow effect for key in dark areas
-              ctx.shadowColor = "#ffd700";
-              ctx.shadowBlur = 15;
-
-              // Draw key with glow
-              ctx.fillStyle = "#ffd700";
-              ctx.fillRect(key.x, key.y, key.width, key.height);
-
-              // Add sparkle effect with glow
-              ctx.fillStyle = "#ffeb3b";
-              ctx.fillRect(key.x + 5, key.y + 5, 10, 10);
-
-              // Reset shadow
-              ctx.shadowBlur = 0;
-            }
-            
-            // Redraw door with faint glow on top of darkness overlay (Level 6 only)
-            ctx.shadowColor = door.isOpen ? "#48bb78" : "#e53e3e";
-            ctx.shadowBlur = 10;
-            
-            // Draw door with glow
-            ctx.fillStyle = door.isOpen ? "#48bb78" : "#e53e3e";
-            ctx.fillRect(door.x, door.y, door.width, door.height);
-            
-            // Add door details
-            ctx.strokeStyle = "#2d3748";
-            ctx.lineWidth = 3;
-            ctx.strokeRect(door.x, door.y, door.width, door.height);
-            
-            if (door.isOpen) {
-              ctx.fillStyle = "#2d3748";
-              ctx.fillRect(door.x + 5, door.y + 15, 5, 10);
-            }
-            
-            // Reset shadow
-            ctx.shadowBlur = 0;
-          }
-        }
-
         // Redraw snake eyes on top of darkness overlay (Level 5 only)
         snakes.forEach((snake) => {
           const snakeCenterX = snake.position.x + snake.size.width / 2;
@@ -2765,6 +2700,71 @@ const GameCanvas: React.FC = () => {
             }
           }
         });
+      }
+
+      // Level 6 full-map lighting effect based on boulder destruction count
+      if (currentLevel === 5) {
+        // Level 6 (0-indexed as 5)
+        const destroyedBoulders = boulders.filter(boulder => boulder.isDestroyed);
+        const destroyedCount = destroyedBoulders.length;
+        
+        // ON → OFF (1st) → ON (2nd) → OFF (3rd) → ON (4th)
+        const shouldBeDark = destroyedCount === 1 || destroyedCount === 3;
+        
+        if (shouldBeDark) {
+          // Draw darkness overlay over entire map
+          ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; // Semi-transparent black overlay
+          ctx.fillRect(0, 0, levelSize.width, levelSize.height);
+          
+          // Redraw snake eyes on top of darkness overlay (Level 6 only)
+          snakes.forEach((snake) => {
+            // Draw bright yellow eyes for all snakes in dark areas (except stalkers)
+            if (snake.type !== "stalker") {
+              ctx.fillStyle = "#ffff00";
+              ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
+              ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
+            }
+          });
+          
+          // Redraw key with faint glow on top of darkness overlay (Level 6 only)
+          if (key && !key.collected) {
+            // Add faint glow effect for key in dark areas
+            ctx.shadowColor = "#ffd700";
+            ctx.shadowBlur = 15;
+
+            // Draw key with glow
+            ctx.fillStyle = "#ffd700";
+            ctx.fillRect(key.x, key.y, key.width, key.height);
+
+            // Add sparkle effect with glow
+            ctx.fillStyle = "#ffeb3b";
+            ctx.fillRect(key.x + 5, key.y + 5, 10, 10);
+
+            // Reset shadow
+            ctx.shadowBlur = 0;
+          }
+          
+          // Redraw door with faint glow on top of darkness overlay (Level 6 only)
+          ctx.shadowColor = door.isOpen ? "#48bb78" : "#e53e3e";
+          ctx.shadowBlur = 10;
+          
+          // Draw door with glow
+          ctx.fillStyle = door.isOpen ? "#48bb78" : "#e53e3e";
+          ctx.fillRect(door.x, door.y, door.width, door.height);
+          
+          // Add door details
+          ctx.strokeStyle = "#2d3748";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(door.x, door.y, door.width, door.height);
+          
+          if (door.isOpen) {
+            ctx.fillStyle = "#2d3748";
+            ctx.fillRect(door.x + 5, door.y + 15, 5, 10);
+          }
+          
+          // Reset shadow
+          ctx.shadowBlur = 0;
+        }
       }
     },
     [
