@@ -2727,9 +2727,9 @@ const GameCanvas: React.FC = () => {
           });
 
           // Redraw player character image on top of darkness overlay (Level 6 only)
-          if (playerImage) {
+          if (playerImageRef.current && imageLoaded) {
             ctx.drawImage(
-              playerImage,
+              playerImageRef.current,
               player.position.x,
               player.position.y,
               player.size.width,
