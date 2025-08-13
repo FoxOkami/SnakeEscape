@@ -3034,7 +3034,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         isPhantom: true,
         originalSpawnPosition: { x: spawnPosition.x, y: spawnPosition.y },
         phantomDirection: 'north' as const,
-        hasReturnedToSpawn: false
+        hasReturnedToSpawn: false,
+        maxDistanceFromSpawn: 0
       };
       // console.log("Created phantom snake:", phantom);
       return phantom;
