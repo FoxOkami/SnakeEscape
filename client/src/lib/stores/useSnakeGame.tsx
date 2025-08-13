@@ -982,12 +982,18 @@ export const useSnakeGame = create<SnakeGameState>()(
       let newMiniBoulders = [...state.miniBoulders];
       let newSnakes = [...state.snakes];
       
-      // Process phantom completion and update boss snakes
-      const phantomsToRemove = newSnakes.filter(snake => snake.type === 'phantom' && snake.hasReturnedToSpawn);
+      // Process phantom completion and update boss snakes (only process once per phantom)
+      const phantomsToRemove = newSnakes.filter(snake => 
+        snake.type === 'phantom' && 
+        snake.hasReturnedToSpawn && 
+        !snake.isMarkedForRemoval
+      );
       
       // Update boss snakes for each phantom that needs to be removed
       phantomsToRemove.forEach(phantom => {
         console.log("Processing phantom removal for", phantom.id);
+        phantom.isMarkedForRemoval = true; // Mark to prevent reprocessing
+        
         const bossSnake = newSnakes.find(boss => boss.type === 'boss' && boss.phantomId === phantom.id);
         if (bossSnake && bossSnake.bossState === 'waitingForPhantom') {
           bossSnake.bossState = 'tracking';
@@ -996,8 +1002,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
       
-      // Remove the phantoms that have returned to spawn
-      newSnakes = newSnakes.filter(snake => !(snake.type === 'phantom' && snake.hasReturnedToSpawn));
+      // Remove the phantoms that have been marked for removal
+      newSnakes = newSnakes.filter(snake => !(snake.type === 'phantom' && snake.isMarkedForRemoval));
       
       const updatedSnakes = newSnakes.map((snake) => {
         // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits

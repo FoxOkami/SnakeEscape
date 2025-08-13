@@ -133,6 +133,7 @@ export interface Snake {
   hasReturnedToSpawn?: boolean; // Whether phantom has completed its journey
   totalTravelDistance?: number; // Total distance phantom has traveled (to ensure full lap before return)
   debugLogged?: boolean; // Temporary flag for debug logging to prevent spam
+  isMarkedForRemoval?: boolean; // Flag to prevent duplicate removal processing
 }
 
 export interface Wall extends Rectangle {}
