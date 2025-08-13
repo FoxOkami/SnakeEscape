@@ -132,6 +132,7 @@ export interface Snake {
   phantomDirection?: 'north' | 'east' | 'south' | 'west'; // Current direction phantom is moving
   hasReturnedToSpawn?: boolean; // Whether phantom has completed its journey
   totalTravelDistance?: number; // Total distance phantom has traveled (to ensure full lap before return)
+  debugLogged?: boolean; // Temporary flag for debug logging to prevent spam
 }
 
 export interface Wall extends Rectangle {}

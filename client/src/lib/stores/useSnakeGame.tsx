@@ -986,11 +986,18 @@ export const useSnakeGame = create<SnakeGameState>()(
       newSnakes = newSnakes.filter((snake) => {
         // Remove completed phantoms and notify boss snakes
         if (snake.type === 'phantom' && snake.hasReturnedToSpawn) {
+          console.log("Removing phantom", snake.id, "that has returned to spawn");
           // Find the boss snake that spawned this phantom and resume its tracking
           const bossSnake = newSnakes.find(boss => boss.type === 'boss' && boss.phantomId === snake.id);
-          if (bossSnake && bossSnake.bossState === 'waitingForPhantom') {
-            bossSnake.bossState = 'tracking';
-            bossSnake.phantomId = undefined; // Clear phantom reference
+          if (bossSnake) {
+            console.log("Found boss snake", bossSnake.id, "with state", bossSnake.bossState, "waiting for phantom", bossSnake.phantomId);
+            if (bossSnake.bossState === 'waitingForPhantom') {
+              bossSnake.bossState = 'tracking';
+              bossSnake.phantomId = undefined; // Clear phantom reference
+              console.log("Boss snake resumed tracking after phantom removal");
+            }
+          } else {
+            console.log("No boss snake found for phantom", snake.id);
           }
           return false; // Remove the phantom
         }
