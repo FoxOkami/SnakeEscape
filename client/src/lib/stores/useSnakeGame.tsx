@@ -1024,16 +1024,23 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (updatedSnake.environmentalEffects?.spawnMiniBoulders) {
           const spawnedMiniBoulders = get().spawnMiniBoulders(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
           newMiniBoulders.push(...spawnedMiniBoulders);
+          // Clear the flag immediately after spawning
+          updatedSnake.environmentalEffects.spawnMiniBoulders = false;
         }
         
         if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
+          console.log("Spawning screensaver snake from environmental effects");
           const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
           newSnakes.push(screensaverSnake);
+          // Clear the flag immediately after spawning
+          updatedSnake.environmentalEffects.spawnScreensaverSnake = false;
         }
         
         if (updatedSnake.environmentalEffects?.spawnPhotophobicSnake) {
           const photophobicSnake = get().spawnPhotophobicSnake(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
           newSnakes.push(photophobicSnake);
+          // Clear the flag immediately after spawning
+          updatedSnake.environmentalEffects.spawnPhotophobicSnake = false;
         }
         
         if (updatedSnake.environmentalEffects?.spawnPhantom) {

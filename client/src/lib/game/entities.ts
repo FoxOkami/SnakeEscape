@@ -1059,15 +1059,30 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
     }
   }
 
-  // Check if phantom has returned to spawn position (within 20 pixels for more reliable detection)
+  // Only check for return after phantom has moved a significant distance from spawn (to ensure full lap)
   const distanceToSpawn = Math.sqrt(
     Math.pow(snake.position.x - snake.originalSpawnPosition.x, 2) +
     Math.pow(snake.position.y - snake.originalSpawnPosition.y, 2)
   );
 
-  if (distanceToSpawn <= 20 && !snake.hasReturnedToSpawn) {
+  // Initialize travel distance tracking if not set
+  if (snake.totalTravelDistance === undefined) {
+    snake.totalTravelDistance = 0;
+  }
+
+  // Add to total travel distance
+  const distanceTraveled = Math.sqrt(
+    Math.pow(newPosition.x - oldPosition.x, 2) +
+    Math.pow(newPosition.y - oldPosition.y, 2)
+  );
+  snake.totalTravelDistance += distanceTraveled;
+
+  // Only check for return if phantom has traveled at least around the perimeter (roughly 2400 pixels for 800x600 level)
+  const minimumTravelDistance = 2400;
+  
+  if (distanceToSpawn <= 15 && !snake.hasReturnedToSpawn && snake.totalTravelDistance >= minimumTravelDistance) {
     snake.hasReturnedToSpawn = true;
-    console.log("Phantom has returned to spawn! Distance:", distanceToSpawn, "Current pos:", snake.position, "Spawn pos:", snake.originalSpawnPosition);
+    console.log("Phantom has returned to spawn! Distance:", distanceToSpawn, "Total travel:", snake.totalTravelDistance, "Current pos:", snake.position, "Spawn pos:", snake.originalSpawnPosition);
   }
 
   return snake;

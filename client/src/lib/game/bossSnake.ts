@@ -253,14 +253,17 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             
             if (shouldSpawnScreensaverSnake) {
               hitBoulder.hasSpawnedScreensaver = true;
-              snake.environmentalEffects = {
-                spawnMiniBoulders: false,
-                spawnScreensaverSnake: true,
-                boulderHitPosition: {
-                  x: snake.position.x + snake.size.width / 2,
-                  y: snake.position.y + snake.size.height / 2
-                }
-              };
+              // Only set environmental effects if not already set to prevent multiple spawns
+              if (!snake.environmentalEffects?.spawnScreensaverSnake) {
+                snake.environmentalEffects = {
+                  spawnMiniBoulders: false,
+                  spawnScreensaverSnake: true,
+                  boulderHitPosition: {
+                    x: snake.position.x + snake.size.width / 2,
+                    y: snake.position.y + snake.size.height / 2
+                  }
+                };
+              }
             }
           }
           
