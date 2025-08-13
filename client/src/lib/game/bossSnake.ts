@@ -603,9 +603,9 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'projectileBarrage':
-      // Phase 3: Fire 30 projectiles sequentially in circle, then resume tracking
+      // Phase 3: Fire 15 projectiles sequentially in circle, then resume tracking
       if (snake.projectileBarrageStartTime && snake.barrageProjectileCount !== undefined) {
-        const maxProjectiles = 30;
+        const maxProjectiles = 15;
         const projectileInterval = 100; // 100ms between projectiles
         
         // Initialize sequential firing if not started
@@ -654,7 +654,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             };
             
             snake.barrageProjectileCount++;
-            console.log(`Phase 3: Firing projectile ${snake.barrageProjectileCount}/30`);
+            console.log(`Phase 3: Firing projectile ${snake.barrageProjectileCount}/15`);
           }
         }
         

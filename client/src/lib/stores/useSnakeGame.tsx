@@ -3183,8 +3183,8 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       if (isBossProjectiles && sequentialIndex !== undefined && clockwise !== undefined && startingAngle !== undefined) {
         // Phase 3 boss: Sequential projectile firing
-        const totalProjectiles = 30;
-        const angleStep = 360 / totalProjectiles; // 12 degrees per projectile
+        const totalProjectiles = 15;
+        const angleStep = 360 / totalProjectiles; // 24 degrees per projectile
         
         // Calculate the angle for this specific projectile
         let angle;
@@ -3204,7 +3204,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           y: Math.sin(angleRad)
         }];
         
-        console.log(`Firing projectile ${sequentialIndex + 1}/30 at angle ${angle}°, direction: ${clockwise ? 'clockwise' : 'counter-clockwise'}`);
+        console.log(`Firing projectile ${sequentialIndex + 1}/15 at angle ${angle}°, direction: ${clockwise ? 'clockwise' : 'counter-clockwise'}`);
       } else if (isBossProjectiles) {
         // Phase 3 boss: Fallback to all 30 projectiles at once (if sequential parameters not provided)
         directions = [];
