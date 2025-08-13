@@ -531,16 +531,38 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         // Check if we've reached the wall target
         const distanceToTarget = getDistance(snake.position, snake.wallTargetPosition);
         if (distanceToTarget <= doubleSpeed * dt) {
-          // Reached wall target - snap to position and resume tracking
+          // Reached wall target - snap to position and spawn phantom
           snake.position = snake.wallTargetPosition;
-          snake.bossState = 'tracking';
           snake.wallTargetPosition = undefined; // Clear target
+          
+          // Phase 2: Spawn phantom that will patrol the perimeter
+          const phantomId = `phantom_${Date.now()}`;
+          snake.phantomId = phantomId;
+          snake.bossState = 'waitingForPhantom';
+          
+          // Store phantom spawn request in environmental effects for game engine to handle
+          snake.environmentalEffects = {
+            spawnMiniBoulders: false,
+            spawnScreensaverSnake: false,
+            spawnPhantom: true,
+            phantomSpawnPosition: { x: snake.position.x, y: snake.position.y },
+            phantomId: phantomId,
+            boulderHitPosition: { x: 0, y: 0 } // Not used for phantom spawning
+          };
+          
         } else if (!checkWallCollision(snake, newPosition, walls)) {
           // Continue moving toward wall target
           snake.position = newPosition;
           snake.direction = getDirectionVector(snake.position, snake.wallTargetPosition);
         }
       }
+      break;
+
+    case 'waitingForPhantom':
+      // Phase 2: Wait at wall position until phantom returns
+      // Check if phantom has completed its journey by checking if it still exists in game
+      // This will be handled by the main game loop - when phantom is removed, resume tracking
+      // Stay still and wait for phantom to complete its journey
       break;
 
     case 'recovering':

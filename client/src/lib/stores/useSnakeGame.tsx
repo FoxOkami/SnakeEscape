@@ -982,7 +982,22 @@ export const useSnakeGame = create<SnakeGameState>()(
       let newMiniBoulders = [...state.miniBoulders];
       let newSnakes = [...state.snakes];
       
-      const updatedSnakes = state.snakes.map((snake) => {
+      // Process phantom completion and update boss snakes
+      newSnakes = newSnakes.filter((snake) => {
+        // Remove completed phantoms and notify boss snakes
+        if (snake.type === 'phantom' && snake.hasReturnedToSpawn) {
+          // Find the boss snake that spawned this phantom and resume its tracking
+          const bossSnake = newSnakes.find(boss => boss.type === 'boss' && boss.phantomId === snake.id);
+          if (bossSnake && bossSnake.bossState === 'waitingForPhantom') {
+            bossSnake.bossState = 'tracking';
+            bossSnake.phantomId = undefined; // Clear phantom reference
+          }
+          return false; // Remove the phantom
+        }
+        return true; // Keep other snakes
+      });
+      
+      const updatedSnakes = newSnakes.map((snake) => {
         // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
         // Allow patrolling and chasing rattlesnakes to be processed by normal AI
         if (
@@ -1019,6 +1034,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (updatedSnake.environmentalEffects?.spawnPhotophobicSnake) {
           const photophobicSnake = get().spawnPhotophobicSnake(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
           newSnakes.push(photophobicSnake);
+        }
+        
+        if (updatedSnake.environmentalEffects?.spawnPhantom) {
+          const phantom = get().spawnPhantom(
+            updatedSnake.environmentalEffects.phantomSpawnPosition!, 
+            updatedSnake.environmentalEffects.phantomId!
+          );
+          newSnakes.push(phantom);
         }
         
         // Clear environmental effects after processing
@@ -2980,6 +3003,27 @@ export const useSnakeGame = create<SnakeGameState>()(
         isBerserk: !isDark, // If not dark, start in berserk mode
         isPaused: false,
         isCharging: false,
+      };
+    },
+
+    spawnPhantom: (spawnPosition: Position, phantomId: string): Snake => {
+      return {
+        id: phantomId,
+        type: 'phantom',
+        position: { x: spawnPosition.x, y: spawnPosition.y },
+        size: { width: 48, height: 48 }, // Same size as Valerie but slightly transparent
+        speed: 120, // Consistent phantom movement speed
+        direction: { x: 0, y: -1 }, // Start moving north
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+        isPhantom: true,
+        originalSpawnPosition: { x: spawnPosition.x, y: spawnPosition.y },
+        phantomDirection: 'north',
+        hasReturnedToSpawn: false
       };
     },
 

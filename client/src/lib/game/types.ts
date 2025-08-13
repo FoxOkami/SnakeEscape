@@ -23,7 +23,7 @@ export interface Player {
 
 export interface Snake {
   id: string;
-  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic' | 'rattlesnake' | 'boss';
+  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic' | 'rattlesnake' | 'boss' | 'phantom';
   position: Position;
   spawnPoint?: Position; // Original spawn position for return behavior
   size: Size;
@@ -83,7 +83,7 @@ export interface Snake {
   isLightEmergence?: boolean; // Whether this snake emerged due to light detection
   lightEmergenceDirection?: 'north' | 'south' | 'east' | 'west'; // Cardinal direction for light emergence
   // Boss-specific properties (Valerie)
-  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause' | 'movingToWall'; // Current boss behavior state
+  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause' | 'movingToWall' | 'waitingForPhantom'; // Current boss behavior state
   playerSnapshot?: Position; // Snapshot of player position when starting charge
   chargeStartTime?: number; // When the charge started
   pauseStartTime?: number; // When the pause started (100ms pause)
@@ -111,6 +111,9 @@ export interface Snake {
     spawnMiniBoulders: boolean;
     spawnScreensaverSnake: boolean;
     spawnPhotophobicSnake?: boolean;
+    spawnPhantom?: boolean;
+    phantomSpawnPosition?: Position;
+    phantomId?: string;
     boulderHitPosition: Position;
   };
   
@@ -121,6 +124,13 @@ export interface Snake {
   // Additional boss properties for charge tracking
   chargeDistanceTraveled?: number; // Distance traveled during current charge
   recoilDuration?: number; // Duration of recoil animation
+  
+  // Phase 2 phantom properties
+  phantomId?: string; // ID of spawned phantom (for Valerie to track)
+  isPhantom?: boolean; // Whether this snake is a phantom
+  originalSpawnPosition?: Position; // Original position where phantom was spawned (for return)
+  phantomDirection?: 'north' | 'east' | 'south' | 'west'; // Current direction phantom is moving
+  hasReturnedToSpawn?: boolean; // Whether phantom has completed its journey
 }
 
 export interface Wall extends Rectangle {}

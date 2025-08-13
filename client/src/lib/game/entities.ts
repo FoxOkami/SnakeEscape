@@ -36,6 +36,8 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
       return updateRattlesnakeSnake(snake, walls, dt, player);
     case 'boss':
       return updateBossSnake(snake, walls, dt, player, currentTime, levelBounds, boulders);
+    case 'phantom':
+      return updatePhantomSnake(snake, walls, dt, levelBounds);
     default:
       return snake;
   }
@@ -627,7 +629,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
     } else if (gameState.currentLevel === 5) {
       // Level 6 (0-indexed as 5) - Use boulder-based full-map lighting
       // ON → OFF (1st) → ON (2nd) → OFF (3rd) → ON (4th)
-      const destroyedBoulders = gameState.boulders?.filter(boulder => boulder.isDestroyed) || [];
+      const destroyedBoulders = gameState.boulders?.filter((boulder: any) => boulder.isDestroyed) || [];
       const destroyedCount = destroyedBoulders.length;
       
       if (destroyedCount === 0) {
@@ -968,5 +970,90 @@ function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?
   }
 
   snake.direction = getDirectionVector(snake.position, targetPoint);
+  return snake;
+}
+function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds?: { width: number; height: number }): Snake {
+  if (!snake.isPhantom || !snake.originalSpawnPosition || !levelBounds) {
+    return snake;
+  }
+
+  // Initialize phantom direction if not set (start going north)
+  if (!snake.phantomDirection) {
+    snake.phantomDirection = "north";
+  }
+
+  // Calculate movement speed (same as boss chase speed for visibility)
+  const moveSpeed = snake.speed * dt;
+  
+  let newPosition = { ...snake.position };
+  let hitWall = false;
+
+  // Move based on current direction
+  switch (snake.phantomDirection) {
+    case "north":
+      newPosition.y -= moveSpeed;
+      // Check if hit top wall
+      if (newPosition.y <= 20) { // Account for wall thickness
+        hitWall = true;
+        newPosition.y = 20;
+      }
+      break;
+    case "east":
+      newPosition.x += moveSpeed;
+      // Check if hit right wall
+      if (newPosition.x + snake.size.width >= levelBounds.width - 20) {
+        hitWall = true;
+        newPosition.x = levelBounds.width - 20 - snake.size.width;
+      }
+      break;
+    case "south":
+      newPosition.y += moveSpeed;
+      // Check if hit bottom wall
+      if (newPosition.y + snake.size.height >= levelBounds.height - 20) {
+        hitWall = true;
+        newPosition.y = levelBounds.height - 20 - snake.size.height;
+      }
+      break;
+    case "west":
+      newPosition.x -= moveSpeed;
+      // Check if hit left wall
+      if (newPosition.x <= 20) {
+        hitWall = true;
+        newPosition.x = 20;
+      }
+      break;
+  }
+
+  // Update position
+  snake.position = newPosition;
+
+  // Turn 90 degrees clockwise when hitting a wall
+  if (hitWall) {
+    switch (snake.phantomDirection) {
+      case "north":
+        snake.phantomDirection = "east";
+        break;
+      case "east":
+        snake.phantomDirection = "south";
+        break;
+      case "south":
+        snake.phantomDirection = "west";
+        break;
+      case "west":
+        snake.phantomDirection = "north";
+        break;
+    }
+  }
+
+  // Check if phantom has returned to spawn position (within 10 pixels)
+  const distanceToSpawn = Math.sqrt(
+    Math.pow(snake.position.x - snake.originalSpawnPosition.x, 2) +
+    Math.pow(snake.position.y - snake.originalSpawnPosition.y, 2)
+  );
+
+  if (distanceToSpawn <= 10 && !snake.hasReturnedToSpawn) {
+    snake.hasReturnedToSpawn = true;
+  }
+
   return snake;
 }

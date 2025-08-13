@@ -1331,6 +1331,17 @@ const GameCanvas: React.FC = () => {
               eyeColor = "#ffd700"; // Gold eyes (intimidating)
             }
             break;
+          case "phantom":
+            // Phantom - Semi-transparent version of Valerie (Phase 2 phantom)
+            baseColor = "#4b0082"; // Same indigo as Valerie
+            accentColor = "#8a2be2"; // Same blue violet accents  
+            eyeColor = "#ffd700"; // Same golden eyes
+            break;
+        }
+
+        // Set transparency for phantoms
+        if (snake.type === "phantom") {
+          ctx.globalAlpha = 0.5; // 50% transparency for phantoms
         }
 
         // Main body
@@ -1593,6 +1604,11 @@ const GameCanvas: React.FC = () => {
           );
           
           ctx.textAlign = "left"; // Reset text alignment
+        }
+
+        // Reset transparency for phantom snakes
+        if (snake.type === "phantom") {
+          ctx.globalAlpha = 1.0; // Reset transparency
         }
       });
 
