@@ -1059,26 +1059,15 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
     }
   }
 
-  // Check if phantom has returned to spawn position (only after traveling some distance first)
+  // Check if phantom has returned to spawn position (within 20 pixels for more reliable detection)
   const distanceToSpawn = Math.sqrt(
     Math.pow(snake.position.x - snake.originalSpawnPosition.x, 2) +
     Math.pow(snake.position.y - snake.originalSpawnPosition.y, 2)
   );
 
-  // Initialize max distance traveled if not set
-  if (snake.maxDistanceFromSpawn === undefined) {
-    snake.maxDistanceFromSpawn = 0;
-  }
-  
-  // Track the maximum distance the phantom has traveled from spawn
-  if (distanceToSpawn > snake.maxDistanceFromSpawn) {
-    snake.maxDistanceFromSpawn = distanceToSpawn;
-  }
-
-  // Only consider "returned to spawn" if phantom has traveled at least 100 pixels away first
-  if (distanceToSpawn <= 30 && snake.maxDistanceFromSpawn > 100 && !snake.hasReturnedToSpawn) {
+  if (distanceToSpawn <= 20 && !snake.hasReturnedToSpawn) {
     snake.hasReturnedToSpawn = true;
-    console.log("Phantom has returned to spawn! Distance:", distanceToSpawn, "Max distance traveled:", snake.maxDistanceFromSpawn, "Current pos:", snake.position, "Spawn pos:", snake.originalSpawnPosition);
+    console.log("Phantom has returned to spawn! Distance:", distanceToSpawn, "Current pos:", snake.position, "Spawn pos:", snake.originalSpawnPosition);
   }
 
   return snake;
