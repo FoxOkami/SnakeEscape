@@ -625,13 +625,13 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           
           // Determine if Valerie is north or south of player
           const valerieIsNorth = valerieCenter.y < playerCenter.y;
-          snake.projectileClockwise = valerieIsNorth; // North = clockwise, South = counter-clockwise
+          snake.projectileClockwise = !valerieIsNorth; // South = clockwise, North = counter-clockwise
           
           // Calculate starting angle (west/east side of player)
           const playerIsWest = playerCenter.x < valerieCenter.x;
           snake.startingAngle = playerIsWest ? 180 : 0; // 180 degrees = west, 0 degrees = east
           
-          console.log(`Phase 3: Starting sequential projectile barrage. Player is ${playerIsWest ? 'west' : 'east'}, Valerie is ${valerieIsNorth ? 'north' : 'south'}, direction: ${snake.projectileClockwise ? 'clockwise' : 'counter-clockwise'}`);
+          console.log(`Phase 3: Starting sequential projectile barrage. Player is ${playerIsWest ? 'west' : 'east'}, Valerie is ${valerieIsNorth ? 'north' : 'south'}, direction: ${snake.projectileClockwise ? 'clockwise' : 'counter-clockwise'} (${valerieIsNorth ? 'North=CCW' : 'South=CW'})`);
         }
         
         // Check if it's time to fire the next projectile
