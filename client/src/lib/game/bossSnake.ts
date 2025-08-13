@@ -565,6 +565,10 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       // Check if phantom has completed its journey by checking if it still exists in game
       // This will be handled by the main game loop - when phantom is removed, resume tracking
       // Stay still and wait for phantom to complete its journey
+      // Debug log to track this state
+      if (currentTime % 1000 < dt * 1000) { // Log once per second roughly
+        console.log("Valerie waiting for phantom:", snake.phantomId, "at position:", snake.position);
+      }
       break;
 
     case 'recovering':

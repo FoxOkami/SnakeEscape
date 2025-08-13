@@ -1046,10 +1046,16 @@ export const useSnakeGame = create<SnakeGameState>()(
             );
             newSnakes.push(phantom);
           }
+          // Clear phantom spawn flag after spawning but keep other environmental effects
+          updatedSnake.environmentalEffects.spawnPhantom = false;
         }
         
-        // Clear environmental effects after processing
-        if (updatedSnake.environmentalEffects) {
+        // Clear environmental effects after processing (except phantom spawning which is handled separately)
+        if (updatedSnake.environmentalEffects && 
+            !updatedSnake.environmentalEffects.spawnMiniBoulders &&
+            !updatedSnake.environmentalEffects.spawnScreensaverSnake &&
+            !updatedSnake.environmentalEffects.spawnPhotophobicSnake &&
+            !updatedSnake.environmentalEffects.spawnPhantom) {
           updatedSnake.environmentalEffects = undefined;
         }
         

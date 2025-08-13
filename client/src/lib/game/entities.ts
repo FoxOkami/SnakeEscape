@@ -984,8 +984,8 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
     console.log("Phantom initialized to move north from position:", snake.position);
   }
 
-  // Calculate movement speed (use consistent speed for visibility)
-  const moveSpeed = 3.0; // Fixed 3 pixels per frame for consistent movement
+  // Calculate movement speed (use time-based movement like other snakes)
+  const moveSpeed = snake.speed * dt; // Use time-based movement for consistent speed regardless of framerate
   // console.log("Phantom movement:", { direction: snake.phantomDirection, speed: moveSpeed, dt, snakeSpeed: snake.speed });
   
   let newPosition = { ...snake.position };
@@ -1039,7 +1039,10 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
 
   // Turn 90 degrees clockwise when hitting a wall
   if (hitWall) {
-    console.log("Phantom hit wall, turning from", snake.phantomDirection, "to", snake.phantomDirection === "north" ? "east" : snake.phantomDirection === "east" ? "south" : snake.phantomDirection === "south" ? "west" : "north");
+    const nextDirection = snake.phantomDirection === "north" ? "east" : 
+                         snake.phantomDirection === "east" ? "south" : 
+                         snake.phantomDirection === "south" ? "west" : "north";
+    console.log("Phantom hit wall at", newPosition, ", turning from", snake.phantomDirection, "to", nextDirection);
     switch (snake.phantomDirection) {
       case "north":
         snake.phantomDirection = "east";
@@ -1056,14 +1059,15 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
     }
   }
 
-  // Check if phantom has returned to spawn position (within 10 pixels)
+  // Check if phantom has returned to spawn position (within 20 pixels for more reliable detection)
   const distanceToSpawn = Math.sqrt(
     Math.pow(snake.position.x - snake.originalSpawnPosition.x, 2) +
     Math.pow(snake.position.y - snake.originalSpawnPosition.y, 2)
   );
 
-  if (distanceToSpawn <= 10 && !snake.hasReturnedToSpawn) {
+  if (distanceToSpawn <= 20 && !snake.hasReturnedToSpawn) {
     snake.hasReturnedToSpawn = true;
+    console.log("Phantom has returned to spawn! Distance:", distanceToSpawn, "Current pos:", snake.position, "Spawn pos:", snake.originalSpawnPosition);
   }
 
   return snake;
