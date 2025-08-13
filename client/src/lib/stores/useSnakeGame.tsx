@@ -985,41 +985,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       let newMiniBoulders = [...state.miniBoulders];
       let newSnakes = [...state.snakes];
       
-      // Process phantom completion and removal (ensure single execution)
-      if (!get().phantomRemovalInProgress) {
-        const phantomsThatReturned = newSnakes.filter(snake => 
-          snake.type === 'phantom' && 
-          snake.hasReturnedToSpawn && 
-          !snake.processedForRemoval
-        );
-        
-        if (phantomsThatReturned.length > 0) {
-          set(state => ({ ...state, phantomRemovalInProgress: true }));
-          
-          phantomsThatReturned.forEach(phantom => {
-            console.log("Processing phantom", phantom.id, "for removal");
-            phantom.processedForRemoval = true;
-            
-            // Find and update the boss snake
-            const bossSnake = newSnakes.find(boss => boss.type === 'boss' && boss.phantomId === phantom.id);
-            if (bossSnake && bossSnake.bossState === 'waitingForPhantom') {
-              bossSnake.bossState = 'tracking';
-              bossSnake.phantomId = undefined;
-              console.log("Boss snake", bossSnake.id, "resumed tracking after phantom completed journey");
-            }
-          });
-          
-          // Remove phantoms that have been processed
-          newSnakes = newSnakes.filter(snake => !(snake.type === 'phantom' && snake.processedForRemoval));
-          console.log("Removed", phantomsThatReturned.length, "phantom(s) from game:", phantomsThatReturned.map(p => p.id));
-          
-          // Reset the flag after a short delay to prevent immediate re-triggering
-          setTimeout(() => {
-            set(state => ({ ...state, phantomRemovalInProgress: false }));
-          }, 100);
-        }
-      }
-      
       const updatedSnakes = newSnakes.map((snake) => {
         // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
         // Allow patrolling and chasing rattlesnakes to be processed by normal AI
@@ -1703,8 +1668,41 @@ export const useSnakeGame = create<SnakeGameState>()(
       get().updateMiniBoulders(deltaTime);
 
       // --- UPDATE STATE ---
-      // Get the most up-to-date snakes after all processing (snake pits, projectiles, environmental effects)
-      const finalSnakes = newSnakes.length > state.snakes.length ? [...newSnakes] : get().snakes;
+      // Process phantom completion and removal AFTER all snake updates
+      let finalSnakes = newSnakes.length > state.snakes.length ? [...newSnakes] : get().snakes;
+      
+      if (!get().phantomRemovalInProgress) {
+        const phantomsThatReturned = finalSnakes.filter(snake => 
+          snake.type === 'phantom' && 
+          snake.hasReturnedToSpawn && 
+          !snake.processedForRemoval
+        );
+        
+        if (phantomsThatReturned.length > 0) {
+          set(state => ({ ...state, phantomRemovalInProgress: true }));
+          
+          phantomsThatReturned.forEach(phantom => {
+            console.log("Processing phantom", phantom.id, "for removal");
+            
+            // Find and update the boss snake
+            const bossSnake = finalSnakes.find(boss => boss.type === 'boss' && boss.phantomId === phantom.id);
+            if (bossSnake && bossSnake.bossState === 'waitingForPhantom') {
+              bossSnake.bossState = 'tracking';
+              bossSnake.phantomId = undefined;
+              console.log("Boss snake", bossSnake.id, "resumed tracking after phantom completed journey");
+            }
+          });
+          
+          // Remove all phantoms that have returned to spawn
+          finalSnakes = finalSnakes.filter(snake => !(snake.type === 'phantom' && snake.hasReturnedToSpawn));
+          console.log("Removed", phantomsThatReturned.length, "phantom(s) from game:", phantomsThatReturned.map(p => p.id));
+          
+          // Reset the flag after a short delay
+          setTimeout(() => {
+            set(state => ({ ...state, phantomRemovalInProgress: false }));
+          }, 100);
+        }
+      }
 
       set({
         currentVelocity: newVelocity, // Use the updated velocity that includes wall collision resets
@@ -3052,8 +3050,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         id: phantomId,
         type: 'phantom' as const,
         position: { x: spawnPosition.x, y: spawnPosition.y },
-        size: { width: 48, height: 48 }, // Same size as Valerie but slightly transparent
-        speed: 120, // Consistent phantom movement speed
+        size: { width: 64, height: 64 }, // Same size as Valerie (64x64)
+        speed: 180, // Valerie's max speed for fast phantom movement
         direction: { x: 0, y: -1 }, // Start moving north
         patrolPoints: [],
         currentPatrolIndex: 0,
