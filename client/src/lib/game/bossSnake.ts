@@ -505,11 +505,11 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           const screenCenter = levelBounds.width / 2;
           const isPlayerOnLeft = playerCenter.x < screenCenter;
           
-          // Go to vertical center of opposite wall
+          // Go to vertical center of same wall as player
           const wallTargetPosition = {
             x: isPlayerOnLeft 
-              ? levelBounds.width - 20 - snake.size.width // Right wall (account for wall thickness)
-              : 20, // Left wall (account for wall thickness)
+              ? 20 // Left wall (account for wall thickness) - same as player
+              : levelBounds.width - 20 - snake.size.width, // Right wall (account for wall thickness) - same as player
             y: (levelBounds.height / 2) - (snake.size.height / 2) // Vertical center
           };
           
