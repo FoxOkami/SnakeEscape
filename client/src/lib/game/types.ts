@@ -114,6 +114,7 @@ export interface Snake {
     spawnPhantom?: boolean;
     phantomSpawnPosition?: Position;
     phantomId?: string;
+    phantomLevelBounds?: { width: number; height: number };
     boulderHitPosition: Position;
   };
   

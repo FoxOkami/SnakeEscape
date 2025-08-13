@@ -551,6 +551,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
               spawnPhantom: true,
               phantomSpawnPosition: { x: snake.position.x, y: snake.position.y },
               phantomId: phantomId,
+              phantomLevelBounds: levelBounds, // Pass level bounds to determine initial direction
               boulderHitPosition: { x: 0, y: 0 } // Not used for phantom spawning
             };
           }

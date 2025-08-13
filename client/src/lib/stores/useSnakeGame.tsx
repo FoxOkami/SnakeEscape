@@ -1037,7 +1037,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           if (!phantomExists) {
             const phantom = get().spawnPhantom(
               updatedSnake.environmentalEffects.phantomSpawnPosition!, 
-              updatedSnake.environmentalEffects.phantomId!
+              updatedSnake.environmentalEffects.phantomId!,
+              updatedSnake.environmentalEffects.phantomLevelBounds
             );
             newSnakes.push(phantom);
           }
@@ -3044,15 +3045,26 @@ export const useSnakeGame = create<SnakeGameState>()(
       };
     },
 
-    spawnPhantom: (spawnPosition: Position, phantomId: string): Snake => {
+    spawnPhantom: (spawnPosition: Position, phantomId: string, levelBounds?: { width: number; height: number }): Snake => {
       console.log("Spawning phantom at position:", spawnPosition, "with ID:", phantomId);
+      
+      // Determine initial direction based on spawn position
+      // If phantom spawns on the right side of the screen, start going south
+      // If phantom spawns on the left side, start going north
+      const screenCenter = levelBounds ? levelBounds.width / 2 : 400; // Default to 400 for Level 6
+      const isOnRightSide = spawnPosition.x > screenCenter;
+      const initialDirection = isOnRightSide ? 'south' : 'north';
+      const directionVector = isOnRightSide ? { x: 0, y: 1 } : { x: 0, y: -1 };
+      
+      console.log(`Phantom spawning on ${isOnRightSide ? 'right' : 'left'} side, starting direction: ${initialDirection}`);
+      
       const phantom = {
         id: phantomId,
         type: 'phantom' as const,
         position: { x: spawnPosition.x, y: spawnPosition.y },
         size: { width: 130, height: 130 }, // Same size as boss Valerie (130x130)
         speed: 360, // Double Valerie's max speed for very fast phantom movement
-        direction: { x: 0, y: -1 }, // Start moving north
+        direction: directionVector, // Set based on spawn side
         patrolPoints: [],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -3061,7 +3073,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         isChasing: false,
         isPhantom: true,
         originalSpawnPosition: { x: spawnPosition.x, y: spawnPosition.y },
-        phantomDirection: 'north' as const,
+        phantomDirection: initialDirection as 'north' | 'south',
         hasReturnedToSpawn: false
       };
       // console.log("Created phantom snake:", phantom);
