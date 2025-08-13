@@ -158,6 +158,14 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
     if (!snake.chargeMaxSpeed) {
       snake.chargeMaxSpeed = snake.chaseSpeed * 4.0; // Max speed is 4x normal chase speed
     }
+    
+    // Initialize phase system
+    if (!snake.bossPhase) {
+      snake.bossPhase = 1; // Start at phase 1
+    }
+    if (snake.totalBoulderHits === undefined) {
+      snake.totalBoulderHits = 0; // Initialize total hit counter
+    }
   }
 
   // Boss "Valerie" attack pattern state machine
@@ -209,8 +217,9 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         // Check for boulder collision first
         const hitBoulder = boulders ? checkBoulderCollision(snake, newPosition, boulders) : null;
         if (hitBoulder) {
-          // Hit a boulder - damage it
+          // Hit a boulder - damage it and track total hits
           hitBoulder.hitCount += 1;
+          snake.totalBoulderHits = (snake.totalBoulderHits || 0) + 1;
           if (hitBoulder.hitCount >= hitBoulder.maxHits) {
             hitBoulder.isDestroyed = true;
             hitBoulder.destructionTime = currentTime; // Record when it was destroyed
@@ -500,6 +509,19 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
     default:
       snake.bossState = 'tracking';
       break;
+  }
+
+  // Update boss phase based on total boulder hits
+  // Phase 1: 0-1 hits, Phase 2: 2-3 hits, Phase 3: 4-5 hits, Phase 4: 6+ hits
+  const totalHits = snake.totalBoulderHits || 0;
+  if (totalHits >= 6) {
+    snake.bossPhase = 4;
+  } else if (totalHits >= 4) {
+    snake.bossPhase = 3;
+  } else if (totalHits >= 2) {
+    snake.bossPhase = 2;
+  } else {
+    snake.bossPhase = 1;
   }
 
   snake.isChasing = true;

@@ -1569,6 +1569,31 @@ const GameCanvas: React.FC = () => {
           ctx.stroke();
           ctx.setLineDash([]); // Reset line dash
         }
+        
+        // Display phase number above boss snake (Valerie)
+        if (snake.type === "boss" && snake.bossPhase) {
+          ctx.font = "bold 18px Arial";
+          ctx.textAlign = "center";
+          
+          // Draw text outline (black)
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 3;
+          ctx.strokeText(
+            `Phase ${snake.bossPhase}`,
+            snake.position.x + snake.size.width / 2,
+            snake.position.y - 10
+          );
+          
+          // Draw text fill (white)
+          ctx.fillStyle = "#ffffff";
+          ctx.fillText(
+            `Phase ${snake.bossPhase}`,
+            snake.position.x + snake.size.width / 2,
+            snake.position.y - 10
+          );
+          
+          ctx.textAlign = "left"; // Reset text alignment
+        }
       });
 
       // Draw light reflection elements (mirrors, crystal, light beam)

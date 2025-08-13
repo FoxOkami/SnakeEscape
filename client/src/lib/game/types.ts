@@ -112,6 +112,14 @@ export interface Snake {
     spawnPhotophobicSnake?: boolean;
     boulderHitPosition: Position;
   };
+  
+  // Phase system for boss battles
+  bossPhase?: number; // Current phase (1-4)
+  totalBoulderHits?: number; // Total number of boulder hits across all boulders
+  
+  // Additional boss properties for charge tracking
+  chargeDistanceTraveled?: number; // Distance traveled during current charge
+  recoilDuration?: number; // Duration of recoil animation
 }
 
 export interface Wall extends Rectangle {}
