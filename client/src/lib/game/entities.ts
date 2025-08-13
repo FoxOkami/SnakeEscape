@@ -1017,19 +1017,7 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
     return snake;
   }
 
-  // Initialize phantom direction if not set
-  if (!snake.phantomDirection) {
-    // Extract spawn count from phantom ID to determine direction
-    // ID format: phantom_timestamp_spawnCount
-    const idParts = snake.id.split('_');
-    const spawnCount = idParts.length >= 3 ? parseInt(idParts[2]) : 0;
-    
-    // Every other phantom starts in opposite direction (alternating north/south)
-    // Spawn count 0, 2, 4, 6... start north
-    // Spawn count 1, 3, 5, 7... start south
-    snake.phantomDirection = (spawnCount % 2 === 0) ? "north" : "south";
-    console.log(`Projection ${spawnCount + 1}/8 created - ID: ${snake.id}, spawnCount: ${spawnCount}, direction: ${snake.phantomDirection}`);
-  }
+  // Direction is now set during spawn, no need to initialize here
 
   // Calculate movement speed (use time-based movement like other snakes)
   const moveSpeed = snake.speed * dt; // Use time-based movement for consistent speed regardless of framerate

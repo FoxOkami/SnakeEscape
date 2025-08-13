@@ -3099,15 +3099,18 @@ export const useSnakeGame = create<SnakeGameState>()(
     spawnPhantom: (spawnPosition: Position, phantomId: string, levelBounds?: { width: number; height: number }): Snake => {
       console.log("Spawning phantom at position:", spawnPosition, "with ID:", phantomId);
       
-      // Determine initial direction based on spawn position
-      // If phantom spawns on the right side of the screen, start going south
-      // If phantom spawns on the left side, start going north
-      const screenCenter = levelBounds ? levelBounds.width / 2 : 400; // Default to 400 for Level 6
-      const isOnRightSide = spawnPosition.x > screenCenter;
-      const initialDirection = isOnRightSide ? 'south' : 'north';
-      const directionVector = isOnRightSide ? { x: 0, y: 1 } : { x: 0, y: -1 };
+      // Determine initial direction based on alternating pattern (every other phantom goes opposite direction)
+      // Extract spawn count from phantom ID to determine direction
+      const idParts = phantomId.split('_');
+      const spawnCount = idParts.length >= 3 ? parseInt(idParts[2]) : 0;
       
-      console.log(`Phantom spawning on ${isOnRightSide ? 'right' : 'left'} side, starting direction: ${initialDirection}`);
+      // Every other phantom starts in opposite direction (alternating north/south)
+      // Spawn count 0, 2, 4, 6... start north
+      // Spawn count 1, 3, 5, 7... start south
+      const initialDirection = (spawnCount % 2 === 0) ? 'north' : 'south';
+      const directionVector = initialDirection === 'north' ? { x: 0, y: -1 } : { x: 0, y: 1 };
+      
+      console.log(`Projection ${spawnCount + 1}/8 created - moving ${initialDirection}`);
       
       const phantom = {
         id: phantomId,
