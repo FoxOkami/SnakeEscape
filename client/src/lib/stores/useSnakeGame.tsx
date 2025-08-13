@@ -3110,7 +3110,19 @@ export const useSnakeGame = create<SnakeGameState>()(
       const initialDirection = (spawnCount % 2 === 0) ? 'north' : 'south';
       const directionVector = initialDirection === 'north' ? { x: 0, y: -1 } : { x: 0, y: 1 };
       
-      const rotationDirection = initialDirection === 'north' ? 'clockwise' : 'counterclockwise';
+      // Determine rotation direction based on wall position and initial direction
+      // When on west wall: north=clockwise, south=counterclockwise  
+      // When on east wall: north=counterclockwise, south=clockwise
+      const screenCenter = levelBounds ? levelBounds.width / 2 : 400;
+      const isOnWestWall = spawnPosition.x < screenCenter;
+      
+      let rotationDirection: 'clockwise' | 'counterclockwise';
+      if (isOnWestWall) {
+        rotationDirection = initialDirection === 'north' ? 'clockwise' : 'counterclockwise';
+      } else {
+        rotationDirection = initialDirection === 'north' ? 'counterclockwise' : 'clockwise';
+      }
+      
       console.log(`Projection ${spawnCount + 1}/8 created - moving ${initialDirection} (${rotationDirection})`);
       
       const phantom = {
@@ -3129,7 +3141,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         isPhantom: true,
         originalSpawnPosition: { x: spawnPosition.x, y: spawnPosition.y },
         phantomDirection: initialDirection as 'north' | 'south',
-        phantomRotation: initialDirection === 'north' ? 'clockwise' : 'counterclockwise', // Rotation based on initial direction
+        phantomRotation: rotationDirection, // Rotation based on wall position and initial direction
         hasReturnedToSpawn: false
       };
       // console.log("Created phantom snake:", phantom);
