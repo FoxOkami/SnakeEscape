@@ -127,7 +127,10 @@ export interface Snake {
   recoilDuration?: number; // Duration of recoil animation
   
   // Phase 2 phantom properties
-  phantomId?: string; // ID of spawned phantom (for Valerie to track)
+  phantomId?: string; // ID of spawned phantom (for Valerie to track) - legacy single phantom
+  phantomIds?: string[]; // IDs of all spawned phantoms (for multi-phantom tracking)
+  phantomSpawnStartTime?: number; // When the first phantom was spawned
+  phantomSpawnCount?: number; // How many phantoms have been spawned (0-6)
   isPhantom?: boolean; // Whether this snake is a phantom
   originalSpawnPosition?: Position; // Original position where phantom was spawned (for return)
   phantomDirection?: 'north' | 'east' | 'south' | 'west'; // Current direction phantom is moving

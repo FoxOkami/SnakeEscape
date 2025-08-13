@@ -1682,16 +1682,46 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (phantomsThatReturned.length > 0) {
           set(state => ({ ...state, phantomRemovalInProgress: true }));
           
+          // Group phantoms by their boss (look for phantoms that belong to the same boss)
+          const bossSnakes = finalSnakes.filter(snake => snake.type === 'boss' && snake.bossState === 'waitingForPhantom');
+          
+          bossSnakes.forEach(bossSnake => {
+            if (bossSnake.phantomIds && bossSnake.phantomIds.length > 0) {
+              // Check how many of this boss's phantoms have returned
+              const bossPhantomIds = bossSnake.phantomIds;
+              const returnedPhantoms = phantomsThatReturned.filter(phantom => 
+                bossPhantomIds.includes(phantom.id)
+              );
+              const remainingPhantoms = finalSnakes.filter(snake => 
+                snake.type === 'phantom' && 
+                bossPhantomIds.includes(snake.id) && 
+                !snake.hasReturnedToSpawn
+              );
+              
+              console.log(`Boss ${bossSnake.id}: ${returnedPhantoms.length} phantoms returned, ${remainingPhantoms.length} still active`);
+              
+              // Only resume tracking if ALL phantoms from this boss have returned
+              if (remainingPhantoms.length === 0 && returnedPhantoms.length > 0) {
+                bossSnake.bossState = 'tracking';
+                bossSnake.phantomIds = undefined;
+                bossSnake.phantomSpawnStartTime = undefined;
+                bossSnake.phantomSpawnCount = undefined;
+                console.log(`Boss snake ${bossSnake.id} resumed tracking after ALL ${returnedPhantoms.length} phantoms completed journey`);
+              }
+            }
+            // Legacy single phantom support
+            else if (bossSnake.phantomId) {
+              const legacyPhantom = phantomsThatReturned.find(phantom => phantom.id === bossSnake.phantomId);
+              if (legacyPhantom) {
+                bossSnake.bossState = 'tracking';
+                bossSnake.phantomId = undefined;
+                console.log("Boss snake", bossSnake.id, "resumed tracking after legacy phantom completed journey");
+              }
+            }
+          });
+          
           phantomsThatReturned.forEach(phantom => {
             console.log("Processing phantom", phantom.id, "for removal");
-            
-            // Find and update the boss snake
-            const bossSnake = finalSnakes.find(boss => boss.type === 'boss' && boss.phantomId === phantom.id);
-            if (bossSnake && bossSnake.bossState === 'waitingForPhantom') {
-              bossSnake.bossState = 'tracking';
-              bossSnake.phantomId = undefined;
-              console.log("Boss snake", bossSnake.id, "resumed tracking after phantom completed journey");
-            }
           });
           
           // Remove all phantoms that have returned to spawn

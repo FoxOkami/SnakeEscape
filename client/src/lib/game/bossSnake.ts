@@ -534,27 +534,18 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         // Check if we've reached the wall target
         const distanceToTarget = getDistance(snake.position, snake.wallTargetPosition);
         if (distanceToTarget <= doubleSpeed * dt) {
-          // Reached wall target - snap to position and spawn phantom
+          // Reached wall target - snap to position and initialize phantom spawning
           snake.position = snake.wallTargetPosition;
           snake.wallTargetPosition = undefined; // Clear target
           
-          // Phase 2: Spawn phantom that will patrol the perimeter
-          const phantomId = `phantom_${Date.now()}`;
-          snake.phantomId = phantomId;
-          snake.bossState = 'waitingForPhantom';
-          
-          // Store phantom spawn request in environmental effects for game engine to handle (once only)
-          if (!snake.environmentalEffects?.spawnPhantom) {
-            snake.environmentalEffects = {
-              spawnMiniBoulders: false,
-              spawnScreensaverSnake: false,
-              spawnPhantom: true,
-              phantomSpawnPosition: { x: snake.position.x, y: snake.position.y },
-              phantomId: phantomId,
-              phantomLevelBounds: levelBounds, // Pass level bounds to determine initial direction
-              boulderHitPosition: { x: 0, y: 0 } // Not used for phantom spawning
-            };
+          // Phase 2: Initialize multiple phantom spawning system
+          if (!snake.phantomSpawnStartTime) {
+            snake.phantomSpawnStartTime = currentTime;
+            snake.phantomSpawnCount = 0;
+            snake.phantomIds = [];
           }
+          
+          snake.bossState = 'waitingForPhantom';
           
         } else if (!checkWallCollision(snake, newPosition, walls)) {
           // Continue moving toward wall target
@@ -565,13 +556,44 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'waitingForPhantom':
-      // Phase 2: Wait at wall position until phantom returns
-      // Check if phantom has completed its journey by checking if it still exists in game
-      // This will be handled by the main game loop - when phantom is removed, resume tracking
-      // Stay still and wait for phantom to complete its journey
-      // Debug log to track this state
-      if (currentTime % 1000 < dt * 1000) { // Log once per second roughly
-        console.log("Valerie waiting for phantom:", snake.phantomId, "at position:", snake.position);
+      // Phase 2: Handle multiple phantom spawning and wait for all to return
+      const maxPhantoms = 6;
+      const spawnInterval = 1000; // 1 second between spawns
+      
+      // Check if it's time to spawn the next phantom
+      if (snake.phantomSpawnStartTime && snake.phantomSpawnCount !== undefined && snake.phantomSpawnCount < maxPhantoms) {
+        const timeSinceStart = currentTime - snake.phantomSpawnStartTime;
+        const nextSpawnTime = snake.phantomSpawnCount * spawnInterval;
+        
+        if (timeSinceStart >= nextSpawnTime) {
+          // Time to spawn the next phantom
+          const phantomId = `phantom_${Date.now()}_${snake.phantomSpawnCount}`;
+          snake.phantomIds = snake.phantomIds || [];
+          snake.phantomIds.push(phantomId);
+          snake.phantomSpawnCount++;
+          
+          console.log(`Spawning phantom ${snake.phantomSpawnCount}/${maxPhantoms} with ID: ${phantomId}`);
+          
+          // Store phantom spawn request in environmental effects for game engine to handle
+          snake.environmentalEffects = {
+            spawnMiniBoulders: false,
+            spawnScreensaverSnake: false,
+            spawnPhantom: true,
+            phantomSpawnPosition: { x: snake.position.x, y: snake.position.y },
+            phantomId: phantomId,
+            phantomLevelBounds: levelBounds, // Pass level bounds to determine initial direction
+            boulderHitPosition: { x: 0, y: 0 } // Not used for phantom spawning
+          };
+        }
+      }
+      
+      // Debug log to track this state (reduced frequency)
+      if (currentTime % 2000 < dt * 1000) { // Log every 2 seconds roughly
+        console.log("Valerie waiting for phantoms:", {
+          spawned: snake.phantomSpawnCount || 0,
+          totalIds: snake.phantomIds?.length || 0,
+          position: snake.position
+        });
       }
       break;
 
