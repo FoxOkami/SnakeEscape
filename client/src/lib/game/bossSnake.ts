@@ -584,20 +584,65 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         // Check if we've reached the halfway target
         const distanceToTarget = getDistance(snake.position, snake.halfwayTargetPosition);
         if (distanceToTarget <= tripleSpeed * dt) {
-          // Reached halfway point - snap to position and start projectile barrage
+          // Reached halfway point - snap to position and start pause
           snake.position = snake.halfwayTargetPosition;
           snake.halfwayTargetPosition = undefined; // Clear target
           
-          snake.bossState = 'projectileBarrage';
-          snake.projectileBarrageStartTime = currentTime;
-          snake.barrageProjectileCount = 0;
+          snake.bossState = 'pausingAtHalfway';
+          snake.halfwayPauseStartTime = currentTime;
           
-          console.log("Phase 3: Valerie reached halfway point, starting projectile barrage");
+          console.log("Phase 3: Valerie reached halfway point, pausing for 250ms");
           
         } else if (!checkWallCollision(snake, newPosition, walls)) {
           // Continue moving toward halfway target
           snake.position = newPosition;
           snake.direction = getDirectionVector(snake.position, snake.halfwayTargetPosition);
+        }
+      }
+      break;
+
+    case 'pausingAtHalfway':
+      // Phase 3: Pause for 250ms at halfway point
+      if (snake.halfwayPauseStartTime) {
+        const pauseDuration = 250; // 250ms pause
+        if (currentTime - snake.halfwayPauseStartTime >= pauseDuration) {
+          // Pause complete - start returning to center at double speed
+          snake.bossState = 'returningToCenter';
+          snake.halfwayPauseStartTime = undefined;
+          
+          // Set center target position (center of the map)
+          const bounds = levelBounds || { width: 800, height: 600 };
+          snake.centerTargetPosition = { x: bounds.width / 2, y: bounds.height / 2 };
+          
+          console.log("Phase 3: Pause complete, returning to center at double speed");
+        }
+      }
+      // Stay still during pause
+      break;
+
+    case 'returningToCenter':
+      // Phase 3: Move to center at double speed
+      if (snake.centerTargetPosition) {
+        const doubleSpeed = (snake.chaseSpeed || snake.speed) * 2;
+        const newPosition = moveTowards(snake.position, snake.centerTargetPosition, doubleSpeed * dt);
+        
+        // Check if we've reached the center
+        const distanceToCenter = getDistance(snake.position, snake.centerTargetPosition);
+        if (distanceToCenter <= doubleSpeed * dt) {
+          // Reached center - snap to position and start projectile barrage
+          snake.position = snake.centerTargetPosition;
+          snake.centerTargetPosition = undefined; // Clear target
+          
+          snake.bossState = 'projectileBarrage';
+          snake.projectileBarrageStartTime = currentTime;
+          snake.barrageProjectileCount = 0;
+          
+          console.log("Phase 3: Valerie reached center, starting projectile barrage");
+          
+        } else if (!checkWallCollision(snake, newPosition, walls)) {
+          // Continue moving toward center
+          snake.position = newPosition;
+          snake.direction = getDirectionVector(snake.position, snake.centerTargetPosition);
         }
       }
       break;
