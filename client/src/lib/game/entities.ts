@@ -1077,8 +1077,8 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   );
   snake.totalTravelDistance += distanceTraveled;
 
-  // Only check for return if phantom has traveled at least around the perimeter (roughly 2400 pixels for 800x600 level)
-  const minimumTravelDistance = 2400;
+  // Only check for return if phantom has traveled at least around the perimeter once (roughly 1200 pixels for single loop)
+  const minimumTravelDistance = 1200;
   
   // Reduce debug logging frequency - only log when near spawn
   if (distanceToSpawn <= 30 && Math.floor(Date.now() / 2000) % 5 === 0 && !snake.debugLogged) {
