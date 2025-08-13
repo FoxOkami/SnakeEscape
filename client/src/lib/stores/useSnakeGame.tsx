@@ -3093,7 +3093,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         type: 'phantom' as const,
         position: { x: spawnPosition.x, y: spawnPosition.y },
         size: { width: 130, height: 130 }, // Same size as boss Valerie (130x130)
-        speed: 360, // Double Valerie's max speed for very fast phantom movement
+        speed: 540, // Triple Valerie's max speed for extremely fast phantom movement
         direction: directionVector, // Set based on spawn side
         patrolPoints: [],
         currentPatrolIndex: 0,

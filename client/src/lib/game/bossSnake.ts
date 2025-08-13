@@ -557,7 +557,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
 
     case 'waitingForPhantom':
       // Phase 2: Handle multiple phantom spawning and wait for all to return
-      const maxPhantoms = 6;
+      const maxPhantoms = 8;
       const spawnInterval = 1000; // 1 second between spawns
       
       // Check if it's time to spawn the next phantom
@@ -572,7 +572,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.phantomIds.push(phantomId);
           snake.phantomSpawnCount++;
           
-          console.log(`Spawning phantom ${snake.phantomSpawnCount}/${maxPhantoms} with ID: ${phantomId}`);
+          console.log(`Spawning phantom ${snake.phantomSpawnCount}/8 with ID: ${phantomId}`);
           
           // Store phantom spawn request in environmental effects for game engine to handle
           snake.environmentalEffects = {
