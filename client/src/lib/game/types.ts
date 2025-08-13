@@ -83,7 +83,7 @@ export interface Snake {
   isLightEmergence?: boolean; // Whether this snake emerged due to light detection
   lightEmergenceDirection?: 'north' | 'south' | 'east' | 'west'; // Cardinal direction for light emergence
   // Boss-specific properties (Valerie)
-  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause'; // Current boss behavior state
+  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause' | 'movingToWall'; // Current boss behavior state
   playerSnapshot?: Position; // Snapshot of player position when starting charge
   chargeStartTime?: number; // When the charge started
   pauseStartTime?: number; // When the pause started (100ms pause)
@@ -98,6 +98,7 @@ export interface Snake {
   // Enhanced boss behavior properties
   centerTargetPosition?: Position; // Target position when moving to center
   centerPauseStartTime?: number; // When center pause started
+  wallTargetPosition?: Position; // Target position when moving to wall (Phase 2)
   speedBoostApplied?: boolean; // Whether 5% speed boost has been applied
   // Ramping speed properties (per-charge ramping)
   chargeRampStartTime?: number; // When current charge ramp began

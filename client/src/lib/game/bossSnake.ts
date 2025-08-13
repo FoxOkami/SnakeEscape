@@ -225,7 +225,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             hitBoulder.destructionTime = currentTime; // Record when it was destroyed
             
             // Count how many boulders are now destroyed (including this one)
-            const destroyedCount = boulders.filter(b => b.isDestroyed).length;
+            const destroyedCount = boulders?.filter(b => b.isDestroyed).length || 0;
             
             // Only spawn photophobic snake after 1st and 3rd boulder destruction
             const shouldSpawnPhotophobic = (destroyedCount === 1 || destroyedCount === 3);
@@ -243,8 +243,8 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             }
           } else {
             // Spawn screensaver snake only on first hit of 1st and 2nd boulders
-            const currentlyDestroyedCount = boulders.filter(b => b.isDestroyed).length;
-            const totalBouldersHit = boulders.filter(b => b.hitCount > 0).length;
+            const currentlyDestroyedCount = boulders?.filter(b => b.isDestroyed).length || 0;
+            const totalBouldersHit = boulders?.filter(b => b.hitCount > 0).length || 0;
             
             // Only spawn on first hit of boulder if it's the 1st or 2nd boulder to be hit
             const shouldSpawnScreensaverSnake = !hitBoulder.hasSpawnedScreensaver && 
@@ -488,12 +488,59 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'centerPause':
-      // Pause at center for 1 second
-      if (currentTime - (snake.centerPauseStartTime || 0) >= 1000) { // 1000ms pause
-        snake.bossState = 'tracking'; // Resume tracking player
-        snake.centerPauseStartTime = undefined;
+      // Phase-specific pause behavior
+      const pauseDuration = snake.bossPhase === 2 ? 500 : 1000; // Phase 2: 500ms, others: 1000ms
+      if (currentTime - (snake.centerPauseStartTime || 0) >= pauseDuration) {
+        if (snake.bossPhase === 2 && levelBounds) {
+          // Phase 2: Move to opposite wall's vertical center
+          const playerCenter = {
+            x: player.position.x + player.size.width / 2,
+            y: player.position.y + player.size.height / 2
+          };
+          
+          // Determine if player is on left or right side of screen center
+          const screenCenter = levelBounds.width / 2;
+          const isPlayerOnLeft = playerCenter.x < screenCenter;
+          
+          // Go to vertical center of opposite wall
+          const wallTargetPosition = {
+            x: isPlayerOnLeft 
+              ? levelBounds.width - 20 - snake.size.width // Right wall (account for wall thickness)
+              : 20, // Left wall (account for wall thickness)
+            y: (levelBounds.height / 2) - (snake.size.height / 2) // Vertical center
+          };
+          
+          snake.bossState = 'movingToWall';
+          snake.wallTargetPosition = wallTargetPosition;
+          snake.centerPauseStartTime = undefined;
+        } else {
+          // Normal behavior for other phases
+          snake.bossState = 'tracking'; // Resume tracking player
+          snake.centerPauseStartTime = undefined;
+        }
       }
       // Stay still during pause
+      break;
+
+    case 'movingToWall':
+      // Phase 2: Move to wall position at double speed
+      if (snake.wallTargetPosition) {
+        const doubleSpeed = (snake.chaseSpeed || snake.speed) * 2;
+        const newPosition = moveTowards(snake.position, snake.wallTargetPosition, doubleSpeed * dt);
+        
+        // Check if we've reached the wall target
+        const distanceToTarget = getDistance(snake.position, snake.wallTargetPosition);
+        if (distanceToTarget <= doubleSpeed * dt) {
+          // Reached wall target - snap to position and resume tracking
+          snake.position = snake.wallTargetPosition;
+          snake.bossState = 'tracking';
+          snake.wallTargetPosition = undefined; // Clear target
+        } else if (!checkWallCollision(snake, newPosition, walls)) {
+          // Continue moving toward wall target
+          snake.position = newPosition;
+          snake.direction = getDirectionVector(snake.position, snake.wallTargetPosition);
+        }
+      }
       break;
 
     case 'recovering':
