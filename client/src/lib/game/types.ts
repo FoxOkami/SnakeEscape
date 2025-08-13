@@ -142,6 +142,7 @@ export interface Snake {
   isPhantom?: boolean; // Whether this snake is a phantom
   originalSpawnPosition?: Position; // Original position where phantom was spawned (for return)
   phantomDirection?: 'north' | 'east' | 'south' | 'west'; // Current direction phantom is moving
+  phantomRotation?: 'clockwise' | 'counterclockwise'; // Rotation pattern for wall collisions
   hasReturnedToSpawn?: boolean; // Whether phantom has completed its journey
   totalTravelDistance?: number; // Total distance phantom has traveled (to ensure full lap before return)
   debugLogged?: boolean; // Temporary flag for debug logging to prevent spam

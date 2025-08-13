@@ -1068,21 +1068,40 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   
   // Movement tracking removed for cleaner logs
 
-  // Turn 90 degrees clockwise when hitting a wall
+  // Turn 90 degrees based on rotation direction when hitting a wall
   if (hitWall) {
-    switch (snake.phantomDirection) {
-      case "north":
-        snake.phantomDirection = "east";
-        break;
-      case "east":
-        snake.phantomDirection = "south";
-        break;
-      case "south":
-        snake.phantomDirection = "west";
-        break;
-      case "west":
-        snake.phantomDirection = "north";
-        break;
+    if (snake.phantomRotation === 'counterclockwise') {
+      // Counter-clockwise rotation: north -> west -> south -> east -> north
+      switch (snake.phantomDirection) {
+        case "north":
+          snake.phantomDirection = "west";
+          break;
+        case "west":
+          snake.phantomDirection = "south";
+          break;
+        case "south":
+          snake.phantomDirection = "east";
+          break;
+        case "east":
+          snake.phantomDirection = "north";
+          break;
+      }
+    } else {
+      // Clockwise rotation (default): north -> east -> south -> west -> north
+      switch (snake.phantomDirection) {
+        case "north":
+          snake.phantomDirection = "east";
+          break;
+        case "east":
+          snake.phantomDirection = "south";
+          break;
+        case "south":
+          snake.phantomDirection = "west";
+          break;
+        case "west":
+          snake.phantomDirection = "north";
+          break;
+      }
     }
   }
 
