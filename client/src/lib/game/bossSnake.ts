@@ -576,14 +576,14 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'chargingHalfway':
-      // Phase 3: Move to halfway point at full speed
+      // Phase 3: Move to halfway point at 3x speed
       if (snake.halfwayTargetPosition) {
-        const fullSpeed = (snake.chaseSpeed || snake.speed);
-        const newPosition = moveTowards(snake.position, snake.halfwayTargetPosition, fullSpeed * dt);
+        const tripleSpeed = (snake.chaseSpeed || snake.speed) * 3;
+        const newPosition = moveTowards(snake.position, snake.halfwayTargetPosition, tripleSpeed * dt);
         
         // Check if we've reached the halfway target
         const distanceToTarget = getDistance(snake.position, snake.halfwayTargetPosition);
-        if (distanceToTarget <= fullSpeed * dt) {
+        if (distanceToTarget <= tripleSpeed * dt) {
           // Reached halfway point - snap to position and start projectile barrage
           snake.position = snake.halfwayTargetPosition;
           snake.halfwayTargetPosition = undefined; // Clear target
@@ -603,44 +603,29 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'projectileBarrage':
-      // Phase 3: Fire 15 projectiles sequentially in circle, then resume tracking
+      // Phase 3: Fire 4 rounds of 15 projectiles each, with 350ms between rounds and 3-degree shifts
       if (snake.projectileBarrageStartTime && snake.barrageProjectileCount !== undefined) {
-        const maxProjectiles = 15;
-        const projectileInterval = 100; // 100ms between projectiles
+        const maxRounds = 4;
+        const roundInterval = 350; // 350ms between rounds
+        const degreeShift = 3; // 3-degree shift per round
         
-        // Initialize sequential firing if not started
-        if (!snake.sequentialProjectileStarted) {
-          snake.sequentialProjectileStarted = true;
-          snake.barrageProjectileCount = 0;
+        // Initialize burst firing if not started
+        if (!snake.burstProjectileStarted) {
+          snake.burstProjectileStarted = true;
+          snake.barrageProjectileCount = 0; // This will track rounds (0-3)
           
-          // Calculate starting direction based on player position
-          const playerCenter = {
-            x: player.position.x + player.size.width / 2,
-            y: player.position.y + player.size.height / 2
-          };
-          const valerieCenter = {
-            x: snake.position.x + snake.size.width / 2,
-            y: snake.position.y + snake.size.height / 2
-          };
-          
-          // Determine if Valerie is north or south of player
-          const valerieIsNorth = valerieCenter.y < playerCenter.y;
-          snake.projectileClockwise = !valerieIsNorth; // South = clockwise, North = counter-clockwise
-          
-          // Calculate starting angle (west/east side of player)
-          const playerIsWest = playerCenter.x < valerieCenter.x;
-          snake.startingAngle = playerIsWest ? 180 : 0; // 180 degrees = west, 0 degrees = east
-          
-          console.log(`Phase 3: Starting sequential projectile barrage. Player is ${playerIsWest ? 'west' : 'east'}, Valerie is ${valerieIsNorth ? 'north' : 'south'}, direction: ${snake.projectileClockwise ? 'clockwise' : 'counter-clockwise'} (${valerieIsNorth ? 'North=CCW' : 'South=CW'})`);
+          console.log("Phase 3: Starting 4-round projectile burst barrage");
         }
         
-        // Check if it's time to fire the next projectile
-        if (snake.barrageProjectileCount < maxProjectiles) {
+        // Check if it's time to fire the next round
+        if (snake.barrageProjectileCount < maxRounds) {
           const timeSinceStart = currentTime - snake.projectileBarrageStartTime;
-          const nextFireTime = snake.barrageProjectileCount * projectileInterval;
+          const nextRoundTime = snake.barrageProjectileCount * roundInterval;
           
-          if (timeSinceStart >= nextFireTime) {
-            // Fire the next projectile
+          if (timeSinceStart >= nextRoundTime) {
+            // Fire all 15 projectiles for this round simultaneously
+            const roundShift = snake.barrageProjectileCount * degreeShift; // 0°, 3°, 6°, 9°
+            
             snake.environmentalEffects = {
               spawnMiniBoulders: false,
               spawnScreensaverSnake: false,
@@ -648,26 +633,23 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
               boulderHitPosition: { x: 0, y: 0 }, // Not used for projectiles
               fireProjectiles: true, // Flag for projectile firing
               projectileSourceId: snake.id, // Which snake is firing
-              sequentialProjectileIndex: snake.barrageProjectileCount, // Which projectile in sequence
-              projectileClockwise: snake.projectileClockwise, // Direction
-              startingAngle: snake.startingAngle // Starting angle
+              burstRound: snake.barrageProjectileCount, // Which round (0-3)
+              roundAngleShift: roundShift // Angle shift for this round
             };
             
             snake.barrageProjectileCount++;
-            console.log(`Phase 3: Firing projectile ${snake.barrageProjectileCount}/15`);
+            console.log(`Phase 3: Firing round ${snake.barrageProjectileCount}/4 with ${roundShift}° shift`);
           }
         }
         
-        // Wait additional time after firing all projectiles before resuming tracking
-        const totalBarrageDuration = (maxProjectiles * projectileInterval) + 500; // All projectiles + 500ms pause
+        // Wait additional time after firing all rounds before resuming tracking
+        const totalBarrageDuration = (maxRounds * roundInterval) + 500; // All rounds + 500ms pause
         if (currentTime - snake.projectileBarrageStartTime >= totalBarrageDuration) {
           snake.bossState = 'tracking';
           snake.projectileBarrageStartTime = undefined;
           snake.barrageProjectileCount = undefined;
-          snake.sequentialProjectileStarted = false;
-          snake.projectileClockwise = undefined;
-          snake.startingAngle = undefined;
-          console.log("Phase 3: Sequential projectile barrage complete, resuming tracking");
+          snake.burstProjectileStarted = false;
+          console.log("Phase 3: 4-round projectile burst barrage complete, resuming tracking");
         }
       }
       // Stay still during barrage

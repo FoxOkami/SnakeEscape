@@ -118,9 +118,11 @@ export interface Snake {
     boulderHitPosition: Position;
     fireProjectiles?: boolean; // New flag for Phase 3 projectile firing
     projectileSourceId?: string; // Which snake is firing the projectiles
-    sequentialProjectileIndex?: number; // Which projectile in the sequence (0-29)
+    sequentialProjectileIndex?: number; // Which projectile in the sequence (0-14)
     projectileClockwise?: boolean; // Direction of projectile sequence
     startingAngle?: number; // Starting angle in degrees (0=east, 180=west)
+    burstRound?: number; // Which burst round (0-3) for 4-round system
+    roundAngleShift?: number; // Angle shift for current round (0°, 3°, 6°, 9°)
   };
   
   // Phase system for boss battles
@@ -150,6 +152,7 @@ export interface Snake {
   projectileBarrageStartTime?: number; // When projectile barrage began
   barrageProjectileCount?: number; // How many projectiles have been fired (0-30)
   sequentialProjectileStarted?: boolean; // Whether sequential firing has been initialized
+  burstProjectileStarted?: boolean; // Whether burst firing has been initialized
   projectileClockwise?: boolean; // Direction to fire projectiles (clockwise/counter-clockwise)
   startingAngle?: number; // Starting angle for projectile sequence (0=east, 180=west)
 }

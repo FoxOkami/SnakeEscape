@@ -1052,7 +1052,9 @@ export const useSnakeGame = create<SnakeGameState>()(
             updatedSnake.environmentalEffects.projectileSourceId,
             updatedSnake.environmentalEffects.sequentialProjectileIndex,
             updatedSnake.environmentalEffects.projectileClockwise,
-            updatedSnake.environmentalEffects.startingAngle
+            updatedSnake.environmentalEffects.startingAngle,
+            updatedSnake.environmentalEffects.burstRound,
+            updatedSnake.environmentalEffects.roundAngleShift
           );
           // Clear projectile firing flag after firing
           updatedSnake.environmentalEffects.fireProjectiles = false;
@@ -1060,6 +1062,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           updatedSnake.environmentalEffects.sequentialProjectileIndex = undefined;
           updatedSnake.environmentalEffects.projectileClockwise = undefined;
           updatedSnake.environmentalEffects.startingAngle = undefined;
+          updatedSnake.environmentalEffects.burstRound = undefined;
+          updatedSnake.environmentalEffects.roundAngleShift = undefined;
         }
         
         // Clear environmental effects after processing (except phantom spawning which is handled separately)
@@ -3168,7 +3172,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
     },
 
-    fireProjectiles: (snakeId: string, sequentialIndex?: number, clockwise?: boolean, startingAngle?: number) => {
+    fireProjectiles: (snakeId: string, sequentialIndex?: number, clockwise?: boolean, startingAngle?: number, burstRound?: number, roundAngleShift?: number) => {
       const state = get();
       const snake = state.snakes.find((s) => s.id === snakeId);
       if (!snake || (snake.type !== "spitter" && snake.type !== "boss")) return;
@@ -3181,30 +3185,29 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       let directions: { x: number; y: number }[];
 
-      if (isBossProjectiles && sequentialIndex !== undefined && clockwise !== undefined && startingAngle !== undefined) {
-        // Phase 3 boss: Sequential projectile firing
+      if (isBossProjectiles && burstRound !== undefined && roundAngleShift !== undefined) {
+        // Phase 3 boss: 4-round burst firing with angle shifts
         const totalProjectiles = 15;
         const angleStep = 360 / totalProjectiles; // 24 degrees per projectile
         
-        // Calculate the angle for this specific projectile
-        let angle;
-        if (clockwise) {
-          angle = startingAngle + (sequentialIndex * angleStep);
-        } else {
-          angle = startingAngle - (sequentialIndex * angleStep);
+        directions = [];
+        for (let i = 0; i < totalProjectiles; i++) {
+          // Calculate angle for this projectile with round shift applied
+          const baseAngle = i * angleStep; // 0°, 24°, 48°, etc.
+          const shiftedAngle = baseAngle + roundAngleShift; // Add 0°, 3°, 6°, or 9° shift
+          
+          // Normalize angle to 0-360 range
+          const normalizedAngle = ((shiftedAngle % 360) + 360) % 360;
+          
+          // Convert to radians and create direction
+          const angleRad = normalizedAngle * (Math.PI / 180);
+          directions.push({
+            x: Math.cos(angleRad),
+            y: Math.sin(angleRad)
+          });
         }
         
-        // Normalize angle to 0-360 range
-        angle = ((angle % 360) + 360) % 360;
-        
-        // Convert to radians and create direction
-        const angleRad = angle * (Math.PI / 180);
-        directions = [{
-          x: Math.cos(angleRad),
-          y: Math.sin(angleRad)
-        }];
-        
-        console.log(`Firing projectile ${sequentialIndex + 1}/15 at angle ${angle}°, direction: ${clockwise ? 'clockwise' : 'counter-clockwise'}`);
+        console.log(`Firing round ${burstRound + 1}/4 with ${roundAngleShift}° shift (${totalProjectiles} projectiles)`);
       } else if (isBossProjectiles) {
         // Phase 3 boss: Fallback to all 30 projectiles at once (if sequential parameters not provided)
         directions = [];
