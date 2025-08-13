@@ -412,8 +412,23 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.chargeDistanceTraveled = 0; // Reset for next charge
 
         } else if (checkWallCollision(snake, newRecoilPosition, walls)) {
-          // Hit another wall during recoil - stop at current position and enter recovery
-          snake.bossState = 'recovering';
+          // Hit another wall during recoil - stop at current position
+          // Check if this recoil was from a boulder collision
+          if (snake.recoilFromBoulder && levelBounds) {
+            // Even though we hit a wall during recoil, we still need to move to center after boulder collision
+            const centerPosition = {
+              x: (levelBounds.width / 2) - (snake.size.width / 2),
+              y: (levelBounds.height / 2) - (snake.size.height / 2)
+            };
+            snake.bossState = 'movingToCenter';
+            snake.centerTargetPosition = centerPosition;
+            snake.recoilFromBoulder = false; // Clear the flag
+          } else {
+            // Normal wall collision during recoil - enter recovery
+            snake.bossState = 'recovering';
+            snake.pauseStartTime = currentTime;
+          }
+          
           snake.bossColor = 'normal'; // Change back to normal color
           snake.isChargingAtSnapshot = false;
           snake.playerSnapshot = undefined;
@@ -424,8 +439,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilStartTime = undefined;
           snake.recoilDirection = undefined;
           snake.chargeDistanceTraveled = 0; // Reset for next charge
-          // Add brief recovery time before next attack
-          snake.pauseStartTime = currentTime;
 
         } else {
           // Continue recoiling safely
