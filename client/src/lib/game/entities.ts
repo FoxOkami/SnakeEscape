@@ -1080,20 +1080,17 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   // Only check for return if phantom has traveled at least around the perimeter (roughly 2400 pixels for 800x600 level)
   const minimumTravelDistance = 2400;
   
-  // Debug logging for phantom state every few seconds
-  if (Math.floor(Date.now() / 3000) % 10 === 0 && !snake.debugLogged) {
-    console.log("Phantom status:", {
+  // Reduce debug logging frequency - only log when near spawn
+  if (distanceToSpawn <= 30 && Math.floor(Date.now() / 2000) % 5 === 0 && !snake.debugLogged) {
+    console.log("Phantom approaching spawn:", {
       id: snake.id,
-      position: snake.position,
-      spawnPos: snake.originalSpawnPosition,
       distanceToSpawn: Math.round(distanceToSpawn),
       totalTravelDistance: Math.round(snake.totalTravelDistance),
       minimumRequired: minimumTravelDistance,
-      hasReturned: snake.hasReturnedToSpawn,
-      direction: snake.phantomDirection
+      hasReturned: snake.hasReturnedToSpawn
     });
     snake.debugLogged = true;
-  } else if (Math.floor(Date.now() / 3000) % 10 !== 0) {
+  } else if (Math.floor(Date.now() / 2000) % 5 !== 0) {
     snake.debugLogged = false;
   }
   
