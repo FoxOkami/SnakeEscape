@@ -1046,12 +1046,21 @@ export const useSnakeGame = create<SnakeGameState>()(
           updatedSnake.environmentalEffects.spawnPhantom = false;
         }
         
+        if (updatedSnake.environmentalEffects?.fireProjectiles && updatedSnake.environmentalEffects?.projectileSourceId) {
+          // Fire projectiles for Phase 3 boss
+          get().fireProjectiles(updatedSnake.environmentalEffects.projectileSourceId);
+          // Clear projectile firing flag after firing
+          updatedSnake.environmentalEffects.fireProjectiles = false;
+          updatedSnake.environmentalEffects.projectileSourceId = undefined;
+        }
+        
         // Clear environmental effects after processing (except phantom spawning which is handled separately)
         if (updatedSnake.environmentalEffects && 
             !updatedSnake.environmentalEffects.spawnMiniBoulders &&
             !updatedSnake.environmentalEffects.spawnScreensaverSnake &&
             !updatedSnake.environmentalEffects.spawnPhotophobicSnake &&
-            !updatedSnake.environmentalEffects.spawnPhantom) {
+            !updatedSnake.environmentalEffects.spawnPhantom &&
+            !updatedSnake.environmentalEffects.fireProjectiles) {
           updatedSnake.environmentalEffects = undefined;
         }
         
@@ -2900,7 +2909,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     // Environmental effects for boss boulder collisions
-    spawnMiniBoulders: (centerPosition: Position, levelSize: Size): MiniBoulder[] => {
+    spawnMiniBoulders: (centerPosition: Position, levelSize: { width: number; height: number }): MiniBoulder[] => {
       const miniBoulders: MiniBoulder[] = [];
       const currentTime = Date.now();
       
@@ -2929,7 +2938,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       return miniBoulders;
     },
 
-    spawnScreensaverSnake: (centerPosition: Position, levelSize: Size): Snake => {
+    spawnScreensaverSnake: (centerPosition: Position, levelSize: { width: number; height: number }): Snake => {
       const currentTime = Date.now();
       
       // Use the provided center position directly (Valerie's position)
@@ -2969,7 +2978,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       };
     },
 
-    spawnPhotophobicSnake: (centerPosition: Position, levelSize: Size): Snake => {
+    spawnPhotophobicSnake: (centerPosition: Position, levelSize: { width: number; height: number }): Snake => {
       const currentTime = Date.now();
       const state = get();
       
@@ -3154,17 +3163,28 @@ export const useSnakeGame = create<SnakeGameState>()(
     fireProjectiles: (snakeId: string) => {
       const state = get();
       const snake = state.snakes.find((s) => s.id === snakeId);
-      if (!snake || snake.type !== "spitter") return;
+      if (!snake || (snake.type !== "spitter" && snake.type !== "boss")) return;
 
-      const projectileSpeed = 0.3; // pixels per ms - increased from 0.15
-      const projectileSize = { width: 6, height: 6 };
-      const lifespan = 5000; // 5 seconds
+      // Boss projectiles (Phase 3 Valerie) vs regular spitter projectiles
+      const isBossProjectiles = snake.type === "boss" && snake.bossPhase === 3;
+      const projectileSpeed = isBossProjectiles ? 0.4 : 0.3; // Boss projectiles are faster
+      const projectileSize = { width: 8, height: 8 }; // Larger boss projectiles
+      const lifespan = 6000; // 6 seconds for boss projectiles
 
-      // Check if we're on Level 4 for alternating pattern
-      const isLevel4 = state.currentLevel === 3; // Level 4 is 0-indexed as 3
       let directions: { x: number; y: number }[];
 
-      if (isLevel4) {
+      if (isBossProjectiles) {
+        // Phase 3 boss: 30 projectiles in perfect circle (every 12 degrees)
+        directions = [];
+        for (let i = 0; i < 30; i++) {
+          const angle = (i * 12) * (Math.PI / 180); // Convert 12-degree increments to radians
+          directions.push({
+            x: Math.cos(angle),
+            y: Math.sin(angle)
+          });
+        }
+      } else if (state.currentLevel === 3) { // Level 4 spitter behavior
+        // Check if we're on Level 4 for alternating pattern
         // Increment shot count for this manual fire
         const newShotCount = (snake.shotCount || 0) + 1;
         const isOddShot = newShotCount % 2 === 1;
@@ -3207,6 +3227,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         ];
       }
 
+      const projectileColor = isBossProjectiles ? "#ff4444" : "#00ff41"; // Red for boss, green for spitters
+
       const newProjectiles = directions.map((dir, index) => ({
         id: `${snakeId}_projectile_${Date.now()}_${index}`,
         position: {
@@ -3223,7 +3245,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         size: projectileSize,
         createdAt: Date.now(),
         lifespan,
-        color: "#00ff41", // Neon green
+        color: projectileColor,
       }));
 
       set({

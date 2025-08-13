@@ -516,6 +516,26 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.bossState = 'movingToWall';
           snake.wallTargetPosition = wallTargetPosition;
           snake.centerPauseStartTime = undefined;
+        } else if (snake.bossPhase === 3) {
+          // Phase 3: Charge halfway to player then fire projectiles
+          const playerCenter = {
+            x: player.position.x + player.size.width / 2,
+            y: player.position.y + player.size.height / 2
+          };
+          const valerieCenter = {
+            x: snake.position.x + snake.size.width / 2,
+            y: snake.position.y + snake.size.height / 2
+          };
+          
+          // Calculate halfway point between Valerie and player
+          snake.halfwayTargetPosition = {
+            x: (valerieCenter.x + playerCenter.x) / 2 - snake.size.width / 2,
+            y: (valerieCenter.y + playerCenter.y) / 2 - snake.size.height / 2
+          };
+          
+          snake.bossState = 'chargingHalfway';
+          snake.centerPauseStartTime = undefined;
+          console.log("Phase 3: Valerie charging halfway to player position");
         } else {
           // Normal behavior for other phases
           snake.bossState = 'tracking'; // Resume tracking player
@@ -553,6 +573,64 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.direction = getDirectionVector(snake.position, snake.wallTargetPosition);
         }
       }
+      break;
+
+    case 'chargingHalfway':
+      // Phase 3: Move to halfway point at full speed
+      if (snake.halfwayTargetPosition) {
+        const fullSpeed = (snake.chaseSpeed || snake.speed);
+        const newPosition = moveTowards(snake.position, snake.halfwayTargetPosition, fullSpeed * dt);
+        
+        // Check if we've reached the halfway target
+        const distanceToTarget = getDistance(snake.position, snake.halfwayTargetPosition);
+        if (distanceToTarget <= fullSpeed * dt) {
+          // Reached halfway point - snap to position and start projectile barrage
+          snake.position = snake.halfwayTargetPosition;
+          snake.halfwayTargetPosition = undefined; // Clear target
+          
+          snake.bossState = 'projectileBarrage';
+          snake.projectileBarrageStartTime = currentTime;
+          snake.barrageProjectileCount = 0;
+          
+          console.log("Phase 3: Valerie reached halfway point, starting projectile barrage");
+          
+        } else if (!checkWallCollision(snake, newPosition, walls)) {
+          // Continue moving toward halfway target
+          snake.position = newPosition;
+          snake.direction = getDirectionVector(snake.position, snake.halfwayTargetPosition);
+        }
+      }
+      break;
+
+    case 'projectileBarrage':
+      // Phase 3: Fire 30 projectiles in circle, then resume tracking
+      if (snake.projectileBarrageStartTime && snake.barrageProjectileCount !== undefined) {
+        // Fire all 30 projectiles at once (spectacular barrage)
+        if (snake.barrageProjectileCount === 0) {
+          // Request projectile firing through environmental effects
+          snake.environmentalEffects = {
+            spawnMiniBoulders: false,
+            spawnScreensaverSnake: false,
+            spawnPhantom: false,
+            boulderHitPosition: { x: 0, y: 0 }, // Not used for projectiles
+            fireProjectiles: true, // New flag for projectile firing
+            projectileSourceId: snake.id // Which snake is firing
+          };
+          
+          snake.barrageProjectileCount = 30; // Mark as fired
+          console.log("Phase 3: Valerie firing 30 projectiles in perfect circle");
+        }
+        
+        // Wait 1 second after firing before resuming tracking
+        const barrageDuration = 1000; // 1 second
+        if (currentTime - snake.projectileBarrageStartTime >= barrageDuration) {
+          snake.bossState = 'tracking';
+          snake.projectileBarrageStartTime = undefined;
+          snake.barrageProjectileCount = undefined;
+          console.log("Phase 3: Projectile barrage complete, resuming tracking");
+        }
+      }
+      // Stay still during barrage
       break;
 
     case 'waitingForPhantom':

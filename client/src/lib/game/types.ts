@@ -83,7 +83,7 @@ export interface Snake {
   isLightEmergence?: boolean; // Whether this snake emerged due to light detection
   lightEmergenceDirection?: 'north' | 'south' | 'east' | 'west'; // Cardinal direction for light emergence
   // Boss-specific properties (Valerie)
-  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause' | 'movingToWall' | 'waitingForPhantom'; // Current boss behavior state
+  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause' | 'movingToWall' | 'waitingForPhantom' | 'chargingHalfway' | 'projectileBarrage'; // Current boss behavior state
   playerSnapshot?: Position; // Snapshot of player position when starting charge
   chargeStartTime?: number; // When the charge started
   pauseStartTime?: number; // When the pause started (100ms pause)
@@ -116,6 +116,8 @@ export interface Snake {
     phantomId?: string;
     phantomLevelBounds?: { width: number; height: number };
     boulderHitPosition: Position;
+    fireProjectiles?: boolean; // New flag for Phase 3 projectile firing
+    projectileSourceId?: string; // Which snake is firing the projectiles
   };
   
   // Phase system for boss battles
@@ -139,6 +141,11 @@ export interface Snake {
   debugLogged?: boolean; // Temporary flag for debug logging to prevent spam
   isMarkedForRemoval?: boolean; // Flag to prevent duplicate removal processing
   processedForRemoval?: boolean; // Flag to ensure phantom is only processed once for removal
+  
+  // Phase 3 projectile barrage properties
+  halfwayTargetPosition?: Position; // Halfway position between Valerie and player for Phase 3
+  projectileBarrageStartTime?: number; // When projectile barrage began
+  barrageProjectileCount?: number; // How many projectiles have been fired (0-30)
 }
 
 export interface Wall extends Rectangle {}
