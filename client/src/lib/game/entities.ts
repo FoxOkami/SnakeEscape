@@ -1028,7 +1028,7 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
     // Spawn count 0, 2, 4, 6... start north
     // Spawn count 1, 3, 5, 7... start south
     snake.phantomDirection = (spawnCount % 2 === 0) ? "north" : "south";
-    console.log(`Phantom ${spawnCount + 1} initialized to move ${snake.phantomDirection} from position:`, snake.position);
+    console.log(`PHANTOM DIRECTION: ID ${snake.id} -> spawn count ${spawnCount} -> direction ${snake.phantomDirection} (${spawnCount % 2 === 0 ? 'even->north' : 'odd->south'})`);
   }
 
   // Calculate movement speed (use time-based movement like other snakes)
