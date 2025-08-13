@@ -1359,8 +1359,8 @@ export const LEVELS: Level[] = [
     boulders: [
       {
         id: "boulder_top_left",
-        x: 0,
-        y: 0,
+        x: 70,
+        y: 70,
         width: 80,
         height: 80,
         hitCount: 0,
@@ -1369,8 +1369,8 @@ export const LEVELS: Level[] = [
       },
       {
         id: "boulder_top_right",
-        x: 720, // 800 - 80 = 720
-        y: 0,
+        x: 650, // 800 - 80 = 720
+        y: 70,
         width: 80,
         height: 80,
         hitCount: 0,
@@ -1379,8 +1379,8 @@ export const LEVELS: Level[] = [
       },
       {
         id: "boulder_bottom_left",
-        x: 0,
-        y: 520, // 600 - 80 = 520
+        x: 70,
+        y: 450, // 600 - 80 = 520
         width: 80,
         height: 80,
         hitCount: 0,
@@ -1389,8 +1389,8 @@ export const LEVELS: Level[] = [
       },
       {
         id: "boulder_bottom_right",
-        x: 720, // 800 - 80 = 720
-        y: 520, // 600 - 80 = 520
+        x: 650, // (800 - 20 - 50) - 80 = 650
+        y: 450, // (600 - 20 - 50) - 80 = 450
         width: 80,
         height: 80,
         hitCount: 0,

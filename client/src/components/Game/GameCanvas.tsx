@@ -2727,14 +2727,31 @@ const GameCanvas: React.FC = () => {
           });
 
           // Redraw player character image on top of darkness overlay (Level 6 only)
-          if (playerImageRef.current && imageLoaded) {
-            ctx.drawImage(
-              playerImageRef.current,
-              player.position.x,
-              player.position.y,
-              player.size.width,
-              player.size.height,
-            );
+          // Apply the same invincibility flashing logic as main player rendering
+          const shouldFlash = player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
+          if (!shouldFlash) {
+            if (playerImageRef.current && imageLoaded) {
+              ctx.drawImage(
+                playerImageRef.current,
+                player.position.x,
+                player.position.y,
+                player.size.width,
+                player.size.height,
+              );
+
+              // Apply color tint for walking state if needed
+              if (isWalking) {
+                ctx.globalCompositeOperation = "multiply";
+                ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
+                ctx.fillRect(
+                  player.position.x,
+                  player.position.y,
+                  player.size.width,
+                  player.size.height,
+                );
+                ctx.globalCompositeOperation = "source-over";
+              }
+            }
           }
 
           // Walking indicator - small stealth icon on top
