@@ -1048,10 +1048,18 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         if (updatedSnake.environmentalEffects?.fireProjectiles && updatedSnake.environmentalEffects?.projectileSourceId) {
           // Fire projectiles for Phase 3 boss
-          get().fireProjectiles(updatedSnake.environmentalEffects.projectileSourceId);
+          get().fireProjectiles(
+            updatedSnake.environmentalEffects.projectileSourceId,
+            updatedSnake.environmentalEffects.sequentialProjectileIndex,
+            updatedSnake.environmentalEffects.projectileClockwise,
+            updatedSnake.environmentalEffects.startingAngle
+          );
           // Clear projectile firing flag after firing
           updatedSnake.environmentalEffects.fireProjectiles = false;
           updatedSnake.environmentalEffects.projectileSourceId = undefined;
+          updatedSnake.environmentalEffects.sequentialProjectileIndex = undefined;
+          updatedSnake.environmentalEffects.projectileClockwise = undefined;
+          updatedSnake.environmentalEffects.startingAngle = undefined;
         }
         
         // Clear environmental effects after processing (except phantom spawning which is handled separately)
@@ -3160,7 +3168,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
     },
 
-    fireProjectiles: (snakeId: string) => {
+    fireProjectiles: (snakeId: string, sequentialIndex?: number, clockwise?: boolean, startingAngle?: number) => {
       const state = get();
       const snake = state.snakes.find((s) => s.id === snakeId);
       if (!snake || (snake.type !== "spitter" && snake.type !== "boss")) return;
@@ -3173,8 +3181,32 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       let directions: { x: number; y: number }[];
 
-      if (isBossProjectiles) {
-        // Phase 3 boss: 30 projectiles in perfect circle (every 12 degrees)
+      if (isBossProjectiles && sequentialIndex !== undefined && clockwise !== undefined && startingAngle !== undefined) {
+        // Phase 3 boss: Sequential projectile firing
+        const totalProjectiles = 30;
+        const angleStep = 360 / totalProjectiles; // 12 degrees per projectile
+        
+        // Calculate the angle for this specific projectile
+        let angle;
+        if (clockwise) {
+          angle = startingAngle + (sequentialIndex * angleStep);
+        } else {
+          angle = startingAngle - (sequentialIndex * angleStep);
+        }
+        
+        // Normalize angle to 0-360 range
+        angle = ((angle % 360) + 360) % 360;
+        
+        // Convert to radians and create direction
+        const angleRad = angle * (Math.PI / 180);
+        directions = [{
+          x: Math.cos(angleRad),
+          y: Math.sin(angleRad)
+        }];
+        
+        console.log(`Firing projectile ${sequentialIndex + 1}/30 at angle ${angle}°, direction: ${clockwise ? 'clockwise' : 'counter-clockwise'}`);
+      } else if (isBossProjectiles) {
+        // Phase 3 boss: Fallback to all 30 projectiles at once (if sequential parameters not provided)
         directions = [];
         for (let i = 0; i < 30; i++) {
           const angle = (i * 12) * (Math.PI / 180); // Convert 12-degree increments to radians
