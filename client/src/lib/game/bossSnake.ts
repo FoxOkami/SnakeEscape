@@ -603,10 +603,10 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'projectileBarrage':
-      // Phase 3: Fire 4 rounds of 15 projectiles each, with 350ms between rounds and 3-degree shifts
+      // Phase 3: Fire 4 rounds of 15 projectiles each, with 500ms between rounds and 3-degree shifts
       if (snake.projectileBarrageStartTime && snake.barrageProjectileCount !== undefined) {
         const maxRounds = 4;
-        const roundInterval = 350; // 350ms between rounds
+        const roundInterval = 500; // 500ms between rounds
         const degreeShift = 3; // 3-degree shift per round
         
         // Initialize burst firing if not started

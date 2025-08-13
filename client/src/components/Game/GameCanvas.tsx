@@ -2808,6 +2808,30 @@ const GameCanvas: React.FC = () => {
             ctx.fillStyle = "#ffd700";
             ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
           }
+
+          // Redraw projectiles on top of darkness overlay (Level 6 only)
+          projectiles.forEach((projectile) => {
+            ctx.fillStyle = projectile.color;
+            ctx.fillRect(
+              projectile.position.x,
+              projectile.position.y,
+              projectile.size.width,
+              projectile.size.height,
+            );
+
+            // Add a small glow effect for neon green projectiles
+            if (projectile.color === "#00ff41") {
+              ctx.shadowBlur = 5;
+              ctx.shadowColor = projectile.color;
+              ctx.fillRect(
+                projectile.position.x,
+                projectile.position.y,
+                projectile.size.width,
+                projectile.size.height,
+              );
+              ctx.shadowBlur = 0; // Reset shadow
+            }
+          });
         }
       }
     },
