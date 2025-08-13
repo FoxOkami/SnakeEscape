@@ -1017,10 +1017,18 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
     return snake;
   }
 
-  // Initialize phantom direction if not set (start going north)
+  // Initialize phantom direction if not set
   if (!snake.phantomDirection) {
-    snake.phantomDirection = "north";
-    console.log("Phantom initialized to move north from position:", snake.position);
+    // Extract spawn count from phantom ID to determine direction
+    // ID format: phantom_timestamp_spawnCount
+    const idParts = snake.id.split('_');
+    const spawnCount = idParts.length >= 3 ? parseInt(idParts[2]) : 0;
+    
+    // Every other phantom starts in opposite direction (alternating north/south)
+    // Spawn count 0, 2, 4, 6... start north
+    // Spawn count 1, 3, 5, 7... start south
+    snake.phantomDirection = (spawnCount % 2 === 0) ? "north" : "south";
+    console.log(`Phantom ${spawnCount + 1} initialized to move ${snake.phantomDirection} from position:`, snake.position);
   }
 
   // Calculate movement speed (use time-based movement like other snakes)
