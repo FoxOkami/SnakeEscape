@@ -540,15 +540,17 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.phantomId = phantomId;
           snake.bossState = 'waitingForPhantom';
           
-          // Store phantom spawn request in environmental effects for game engine to handle
-          snake.environmentalEffects = {
-            spawnMiniBoulders: false,
-            spawnScreensaverSnake: false,
-            spawnPhantom: true,
-            phantomSpawnPosition: { x: snake.position.x, y: snake.position.y },
-            phantomId: phantomId,
-            boulderHitPosition: { x: 0, y: 0 } // Not used for phantom spawning
-          };
+          // Store phantom spawn request in environmental effects for game engine to handle (once only)
+          if (!snake.environmentalEffects?.spawnPhantom) {
+            snake.environmentalEffects = {
+              spawnMiniBoulders: false,
+              spawnScreensaverSnake: false,
+              spawnPhantom: true,
+              phantomSpawnPosition: { x: snake.position.x, y: snake.position.y },
+              phantomId: phantomId,
+              boulderHitPosition: { x: 0, y: 0 } // Not used for phantom spawning
+            };
+          }
           
         } else if (!checkWallCollision(snake, newPosition, walls)) {
           // Continue moving toward wall target

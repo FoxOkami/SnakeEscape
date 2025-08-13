@@ -1037,11 +1037,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
         
         if (updatedSnake.environmentalEffects?.spawnPhantom) {
-          const phantom = get().spawnPhantom(
-            updatedSnake.environmentalEffects.phantomSpawnPosition!, 
-            updatedSnake.environmentalEffects.phantomId!
-          );
-          newSnakes.push(phantom);
+          // Only spawn phantom if one doesn't already exist with this ID
+          const phantomExists = newSnakes.some(s => s.id === updatedSnake.environmentalEffects?.phantomId);
+          if (!phantomExists) {
+            const phantom = get().spawnPhantom(
+              updatedSnake.environmentalEffects.phantomSpawnPosition!, 
+              updatedSnake.environmentalEffects.phantomId!
+            );
+            newSnakes.push(phantom);
+          }
         }
         
         // Clear environmental effects after processing
@@ -3026,7 +3030,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         phantomDirection: 'north' as const,
         hasReturnedToSpawn: false
       };
-      console.log("Created phantom snake:", phantom);
+      // console.log("Created phantom snake:", phantom);
       return phantom;
     },
 

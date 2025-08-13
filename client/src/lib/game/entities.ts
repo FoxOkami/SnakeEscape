@@ -984,9 +984,9 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
     console.log("Phantom initialized to move north from position:", snake.position);
   }
 
-  // Calculate movement speed (ensure it's substantial enough to see movement)
-  const moveSpeed = Math.max(snake.speed * dt, 2); // Minimum 2 pixels per frame
-  console.log("Phantom movement:", { direction: snake.phantomDirection, speed: moveSpeed, dt, snakeSpeed: snake.speed });
+  // Calculate movement speed (use consistent speed for visibility)
+  const moveSpeed = 3.0; // Fixed 3 pixels per frame for consistent movement
+  // console.log("Phantom movement:", { direction: snake.phantomDirection, speed: moveSpeed, dt, snakeSpeed: snake.speed });
   
   let newPosition = { ...snake.position };
   let hitWall = false;
@@ -1031,12 +1031,10 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   const oldPosition = { ...snake.position };
   snake.position = newPosition;
   
-  // Log movement for debugging
+  // Log significant movement for debugging (reduce noise)
   const moved = oldPosition.x !== newPosition.x || oldPosition.y !== newPosition.y;
-  if (moved) {
+  if (moved && Math.abs(oldPosition.x - newPosition.x) > 0.5 || Math.abs(oldPosition.y - newPosition.y) > 0.5) {
     console.log("Phantom moved from", oldPosition, "to", newPosition);
-  } else {
-    console.log("Phantom did not move, staying at", oldPosition);
   }
 
   // Turn 90 degrees clockwise when hitting a wall
