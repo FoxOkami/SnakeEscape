@@ -717,7 +717,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.phantomIds.push(phantomId);
           snake.phantomSpawnCount++;
           
-          console.log(`Spawning phantom ${snake.phantomSpawnCount}/8 with ID: ${phantomId}`);
+
           
           // Store phantom spawn request in environmental effects for game engine to handle
           snake.environmentalEffects = {
@@ -732,14 +732,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         }
       }
       
-      // Debug log to track this state (reduced frequency)
-      if (currentTime % 2000 < dt * 1000) { // Log every 2 seconds roughly
-        console.log("Valerie waiting for phantoms:", {
-          spawned: snake.phantomSpawnCount || 0,
-          totalIds: snake.phantomIds?.length || 0,
-          position: snake.position
-        });
-      }
+
       break;
 
     case 'recovering':

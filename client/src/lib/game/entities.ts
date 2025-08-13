@@ -1028,7 +1028,7 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
     // Spawn count 0, 2, 4, 6... start north
     // Spawn count 1, 3, 5, 7... start south
     snake.phantomDirection = (spawnCount % 2 === 0) ? "north" : "south";
-    console.log(`PHANTOM DIRECTION: ID ${snake.id} -> spawn count ${spawnCount} -> direction ${snake.phantomDirection} (${spawnCount % 2 === 0 ? 'even->north' : 'odd->south'})`);
+    console.log(`Projection ${spawnCount + 1}/8 created - moving ${snake.phantomDirection}`);
   }
 
   // Calculate movement speed (use time-based movement like other snakes)
@@ -1078,18 +1078,10 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   const oldPosition = { ...snake.position };
   snake.position = newPosition;
   
-  // Log significant movement for debugging (reduce noise)
-  const moved = oldPosition.x !== newPosition.x || oldPosition.y !== newPosition.y;
-  if (moved && Math.abs(oldPosition.x - newPosition.x) > 0.5 || Math.abs(oldPosition.y - newPosition.y) > 0.5) {
-    console.log("Phantom moved from", oldPosition, "to", newPosition);
-  }
+  // Movement tracking removed for cleaner logs
 
   // Turn 90 degrees clockwise when hitting a wall
   if (hitWall) {
-    const nextDirection = snake.phantomDirection === "north" ? "east" : 
-                         snake.phantomDirection === "east" ? "south" : 
-                         snake.phantomDirection === "south" ? "west" : "north";
-    console.log("Phantom hit wall at", newPosition, ", turning from", snake.phantomDirection, "to", nextDirection);
     switch (snake.phantomDirection) {
       case "north":
         snake.phantomDirection = "east";
@@ -1127,23 +1119,8 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   // Only check for return if phantom has traveled at least around the perimeter once (roughly 1200 pixels for single loop)
   const minimumTravelDistance = 1200;
   
-  // Reduce debug logging frequency - only log when near spawn
-  if (distanceToSpawn <= 30 && Math.floor(Date.now() / 2000) % 5 === 0 && !snake.debugLogged) {
-    console.log("Phantom approaching spawn:", {
-      id: snake.id,
-      distanceToSpawn: Math.round(distanceToSpawn),
-      totalTravelDistance: Math.round(snake.totalTravelDistance),
-      minimumRequired: minimumTravelDistance,
-      hasReturned: snake.hasReturnedToSpawn
-    });
-    snake.debugLogged = true;
-  } else if (Math.floor(Date.now() / 2000) % 5 !== 0) {
-    snake.debugLogged = false;
-  }
-  
   if (distanceToSpawn <= 15 && !snake.hasReturnedToSpawn && snake.totalTravelDistance >= minimumTravelDistance) {
     snake.hasReturnedToSpawn = true;
-    console.log("Phantom has returned to spawn! Distance:", distanceToSpawn, "Total travel:", snake.totalTravelDistance, "Current pos:", snake.position, "Spawn pos:", snake.originalSpawnPosition);
   }
   
   // Stop moving if phantom has returned to spawn
