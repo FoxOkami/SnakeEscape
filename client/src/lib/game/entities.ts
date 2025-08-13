@@ -974,16 +974,19 @@ function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?
 }
 function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds?: { width: number; height: number }): Snake {
   if (!snake.isPhantom || !snake.originalSpawnPosition || !levelBounds) {
+    console.log("Phantom snake missing requirements:", { isPhantom: snake.isPhantom, hasSpawnPos: !!snake.originalSpawnPosition, hasLevelBounds: !!levelBounds });
     return snake;
   }
 
   // Initialize phantom direction if not set (start going north)
   if (!snake.phantomDirection) {
     snake.phantomDirection = "north";
+    console.log("Phantom initialized to move north from position:", snake.position);
   }
 
-  // Calculate movement speed (same as boss chase speed for visibility)
-  const moveSpeed = snake.speed * dt;
+  // Calculate movement speed (ensure it's substantial enough to see movement)
+  const moveSpeed = Math.max(snake.speed * dt, 2); // Minimum 2 pixels per frame
+  console.log("Phantom movement:", { direction: snake.phantomDirection, speed: moveSpeed, dt, snakeSpeed: snake.speed });
   
   let newPosition = { ...snake.position };
   let hitWall = false;
@@ -1025,10 +1028,20 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   }
 
   // Update position
+  const oldPosition = { ...snake.position };
   snake.position = newPosition;
+  
+  // Log movement for debugging
+  const moved = oldPosition.x !== newPosition.x || oldPosition.y !== newPosition.y;
+  if (moved) {
+    console.log("Phantom moved from", oldPosition, "to", newPosition);
+  } else {
+    console.log("Phantom did not move, staying at", oldPosition);
+  }
 
   // Turn 90 degrees clockwise when hitting a wall
   if (hitWall) {
+    console.log("Phantom hit wall, turning from", snake.phantomDirection, "to", snake.phantomDirection === "north" ? "east" : snake.phantomDirection === "east" ? "south" : snake.phantomDirection === "south" ? "west" : "north");
     switch (snake.phantomDirection) {
       case "north":
         snake.phantomDirection = "east";

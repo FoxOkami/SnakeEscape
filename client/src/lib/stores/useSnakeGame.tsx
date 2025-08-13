@@ -3007,9 +3007,10 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     spawnPhantom: (spawnPosition: Position, phantomId: string): Snake => {
-      return {
+      console.log("Spawning phantom at position:", spawnPosition, "with ID:", phantomId);
+      const phantom = {
         id: phantomId,
-        type: 'phantom',
+        type: 'phantom' as const,
         position: { x: spawnPosition.x, y: spawnPosition.y },
         size: { width: 48, height: 48 }, // Same size as Valerie but slightly transparent
         speed: 120, // Consistent phantom movement speed
@@ -3022,9 +3023,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         isChasing: false,
         isPhantom: true,
         originalSpawnPosition: { x: spawnPosition.x, y: spawnPosition.y },
-        phantomDirection: 'north',
+        phantomDirection: 'north' as const,
         hasReturnedToSpawn: false
       };
+      console.log("Created phantom snake:", phantom);
+      return phantom;
     },
 
     updateMiniBoulders: (deltaTime: number) => {
