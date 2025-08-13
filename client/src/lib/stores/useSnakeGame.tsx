@@ -982,28 +982,39 @@ export const useSnakeGame = create<SnakeGameState>()(
       let newMiniBoulders = [...state.miniBoulders];
       let newSnakes = [...state.snakes];
       
-      // Process phantom completion and update boss snakes (only process once per phantom)
-      const phantomsToRemove = newSnakes.filter(snake => 
-        snake.type === 'phantom' && 
-        snake.hasReturnedToSpawn && 
-        !snake.isMarkedForRemoval
-      );
+      // Process phantom completion and update boss snakes
+      const allPhantoms = newSnakes.filter(snake => snake.type === 'phantom');
+      const phantomsThatReturned = allPhantoms.filter(snake => snake.hasReturnedToSpawn);
       
-      // Update boss snakes for each phantom that needs to be removed
-      phantomsToRemove.forEach(phantom => {
-        console.log("Processing phantom removal for", phantom.id);
-        phantom.isMarkedForRemoval = true; // Mark to prevent reprocessing
-        
-        const bossSnake = newSnakes.find(boss => boss.type === 'boss' && boss.phantomId === phantom.id);
-        if (bossSnake && bossSnake.bossState === 'waitingForPhantom') {
-          bossSnake.bossState = 'tracking';
-          bossSnake.phantomId = undefined;
-          console.log("Boss snake", bossSnake.id, "resumed tracking after phantom", phantom.id, "completed its journey");
+      console.log("Checking phantoms:", {
+        totalPhantoms: allPhantoms.length,
+        phantomsThatReturned: phantomsThatReturned.length,
+        phantomIds: allPhantoms.map(p => ({ id: p.id, returned: p.hasReturnedToSpawn, marked: p.isMarkedForRemoval }))
+      });
+      
+      // Process phantoms that have returned to spawn
+      phantomsThatReturned.forEach(phantom => {
+        if (!phantom.isMarkedForRemoval) {
+          console.log("Processing phantom removal for", phantom.id);
+          phantom.isMarkedForRemoval = true; // Mark to prevent reprocessing
+          
+          const bossSnake = newSnakes.find(boss => boss.type === 'boss' && boss.phantomId === phantom.id);
+          if (bossSnake && bossSnake.bossState === 'waitingForPhantom') {
+            bossSnake.bossState = 'tracking';
+            bossSnake.phantomId = undefined;
+            console.log("Boss snake", bossSnake.id, "resumed tracking after phantom", phantom.id, "completed its journey");
+          }
         }
       });
       
       // Remove the phantoms that have been marked for removal
+      const initialSnakeCount = newSnakes.length;
       newSnakes = newSnakes.filter(snake => !(snake.type === 'phantom' && snake.isMarkedForRemoval));
+      const finalSnakeCount = newSnakes.length;
+      
+      if (initialSnakeCount !== finalSnakeCount) {
+        console.log("Removed", initialSnakeCount - finalSnakeCount, "phantoms from game");
+      }
       
       const updatedSnakes = newSnakes.map((snake) => {
         // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
