@@ -1096,9 +1096,11 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   
   if (distanceToSpawn <= 15 && !snake.hasReturnedToSpawn && snake.totalTravelDistance >= minimumTravelDistance) {
     snake.hasReturnedToSpawn = true;
-    snake.isMarkedForRemoval = true; // Add explicit removal flag
     console.log("Phantom has returned to spawn! Distance:", distanceToSpawn, "Total travel:", snake.totalTravelDistance, "Current pos:", snake.position, "Spawn pos:", snake.originalSpawnPosition);
-    // Stop the phantom from moving further
+  }
+  
+  // Stop moving if phantom has returned to spawn
+  if (snake.hasReturnedToSpawn) {
     return snake;
   }
 
