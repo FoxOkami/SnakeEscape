@@ -5,6 +5,7 @@ import { useSnakeGame } from '../../lib/stores/useSnakeGame';
 const HubRoom: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
+  const playerImageRef = useRef<HTMLImageElement | null>(null);
   
   const {
     player,
@@ -24,6 +25,22 @@ const HubRoom: React.FC = () => {
   const { startLevel } = useSnakeGame();
   
   const [keys, setKeys] = useState<Set<string>>(new Set());
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
+  // Load player character image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      playerImageRef.current = img;
+      setImageLoaded(true);
+    };
+    img.onerror = (error) => {
+      console.error('Failed to load player image:', error);
+      setImageLoaded(false);
+    };
+    // Add cache busting parameter to ensure fresh load
+    img.src = "/player-character.png?" + Date.now();
+  }, []);
   
   useEffect(() => {
     initializeHub();
@@ -97,14 +114,42 @@ const HubRoom: React.FC = () => {
       ctx.fillStyle = '#1a1a2e';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Draw room boundaries
-      ctx.strokeStyle = '#4a4a4a';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(20, 20, 760, 560);
+      // Draw room boundaries (match main game wall color)
+      ctx.fillStyle = '#4a5568';
+      ctx.fillRect(20, 20, 760, 20); // Top wall
+      ctx.fillRect(20, 20, 20, 560); // Left wall
+      ctx.fillRect(760, 20, 20, 560); // Right wall
+      ctx.fillRect(20, 560, 760, 20); // Bottom wall
       
-      // Draw player
-      ctx.fillStyle = '#4CAF50';
-      ctx.fillRect(player.position.x, player.position.y, player.size.width, player.size.height);
+      // Draw player (use player-character.png like main game)
+      if (imageLoaded && playerImageRef.current) {
+        // Draw custom player image
+        ctx.drawImage(
+          playerImageRef.current,
+          player.position.x,
+          player.position.y,
+          player.size.width,
+          player.size.height,
+        );
+      } else {
+        // Fallback to rectangle (same as main game fallback)
+        ctx.fillStyle = '#4299e1'; // Blue like main game
+        ctx.fillRect(
+          player.position.x,
+          player.position.y,
+          player.size.width,
+          player.size.height,
+        );
+        
+        // Add player details (match main game style)
+        ctx.fillStyle = '#2b6cb0'; // Darker blue for details
+        ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
+        
+        // Player eyes
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
+        ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+      }
       
       // Draw NPCs
       npcs.forEach(npc => {
