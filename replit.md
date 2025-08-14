@@ -35,6 +35,7 @@ Preferred communication style: Simple, everyday language.
   - Phase 2: After pausing at center for 500ms, Valerie moves to the vertical center of the wall on the same side as the player's current position at 3x speed
   - Phase 2 Projections: 8 phantom projections spawn with alternating initial directions and wall-dependent rotation patterns (west wall: north=clockwise/south=counterclockwise, east wall: north=counterclockwise/south=clockwise)
   - Phase 3: Enhanced projectile barrage with 24 projectiles per round (increased from 15) across 4 rounds with 3-degree shifts
+  - Phase 4: Valerie exits north off-screen, then spawns 20 "rain snakes" falling from north to south at random x positions (0-780) with random speeds (100-200), creating a dangerous "snake rain" environmental effect
 
 ### UI/UX Decisions
 - **Components**: Utilizes Radix UI for accessible and performant UI elements.

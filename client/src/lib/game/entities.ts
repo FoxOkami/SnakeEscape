@@ -38,6 +38,8 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
       return updateBossSnake(snake, walls, dt, player, currentTime, levelBounds, boulders);
     case 'phantom':
       return updatePhantomSnake(snake, walls, dt, levelBounds);
+    case 'rainsnake':
+      return updateRainSnake(snake, walls, dt, levelBounds);
     default:
       return snake;
   }
@@ -1134,6 +1136,29 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   if (snake.hasReturnedToSpawn) {
     return snake;
   }
+
+  return snake;
+}
+
+// Rain snake update function - falls from north to south with random speeds
+export function updateRainSnake(snake: Snake, walls: Wall[], dt: number, levelBounds?: { width: number; height: number }): Snake {
+  if (!snake.isRainSnake || !levelBounds) {
+    return snake;
+  }
+
+  // Rain snakes move continuously south (downward) until they exit the bottom
+  const moveSpeed = snake.rainSpeed ? snake.rainSpeed * dt : snake.speed * dt;
+  
+  const newPosition = {
+    x: snake.position.x, // X position stays constant
+    y: snake.position.y + moveSpeed // Move downward (south)
+  };
+
+  // Update position
+  snake.position = newPosition;
+
+  // Rain snakes don't collide with walls, they just fall straight down
+  // They will be removed by the game state when they fall off screen
 
   return snake;
 }

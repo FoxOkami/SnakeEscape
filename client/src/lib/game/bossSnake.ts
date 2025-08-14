@@ -536,6 +536,19 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.bossState = 'chargingHalfway';
           snake.centerPauseStartTime = undefined;
           console.log("Phase 3: Valerie charging halfway to player position");
+        } else if (snake.bossPhase === 4) {
+          // Phase 4: Exit to north and trigger snake rain
+          snake.bossState = 'exitingNorth';
+          snake.centerPauseStartTime = undefined;
+          
+          // Set target position north of playable area
+          const bounds = levelBounds || { width: 800, height: 600 };
+          snake.exitTargetPosition = {
+            x: snake.position.x, // Keep current x position
+            y: -100 // Move well above the screen
+          };
+          
+          console.log("Phase 4: Valerie exiting to the north");
         } else {
           // Normal behavior for other phases
           snake.bossState = 'tracking'; // Resume tracking player
@@ -733,6 +746,94 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
       
 
+      break;
+
+    case 'exitingNorth':
+      // Phase 4: Move north out of playable area
+      if (snake.exitTargetPosition) {
+        const tripleSpeed = (snake.chaseSpeed || snake.speed) * 3;
+        const newPosition = moveTowards(snake.position, snake.exitTargetPosition, tripleSpeed * dt);
+        
+        // Check if we've reached the exit target
+        const distanceToTarget = getDistance(snake.position, snake.exitTargetPosition);
+        if (distanceToTarget <= tripleSpeed * dt) {
+          // Reached exit target - trigger snake rain
+          snake.position = snake.exitTargetPosition;
+          snake.exitTargetPosition = undefined; // Clear target
+          
+          // Initialize snake rain system
+          snake.bossState = 'snakeRain';
+          snake.snakeRainStartTime = currentTime;
+          snake.snakeRainCount = 0;
+          snake.snakeRainIds = [];
+          
+          console.log("Phase 4: Valerie has exited north, starting snake rain");
+          
+        } else {
+          // Continue moving toward exit
+          snake.position = newPosition;
+          snake.direction = getDirectionVector(snake.position, snake.exitTargetPosition);
+        }
+      }
+      break;
+
+    case 'snakeRain':
+      // Phase 4: Rain 20 snakes from north to south
+      const maxRainSnakes = 20;
+      const rainSpawnInterval = 300; // 300ms between spawns
+      
+      // Check if it's time to spawn the next rain snake
+      if (snake.snakeRainStartTime && snake.snakeRainCount !== undefined && snake.snakeRainCount < maxRainSnakes) {
+        const timeSinceRainStart = currentTime - snake.snakeRainStartTime;
+        const nextRainSpawnTime = snake.snakeRainCount * rainSpawnInterval;
+        
+        if (timeSinceRainStart >= nextRainSpawnTime) {
+          // Time to spawn the next rain snake
+          const rainSnakeId = `rainsnake_${Date.now()}_${snake.snakeRainCount}`;
+          snake.snakeRainIds = snake.snakeRainIds || [];
+          snake.snakeRainIds.push(rainSnakeId);
+          snake.snakeRainCount++;
+          
+          // Random x position between 0 and 780
+          const randomX = Math.random() * 780;
+          
+          // Store rain snake spawn request in environmental effects
+          snake.environmentalEffects = {
+            spawnMiniBoulders: false,
+            spawnScreensaverSnake: false,
+            spawnPhantom: false,
+            spawnRainSnake: true,
+            rainSnakeSpawnPosition: { x: randomX, y: -50 }, // Start above screen
+            rainSnakeId: rainSnakeId,
+            boulderHitPosition: { x: 0, y: 0 } // Not used for rain snake spawning
+          };
+          
+          console.log(`Phase 4: Spawning rain snake ${snake.snakeRainCount}/${maxRainSnakes} at x=${Math.round(randomX)}`);
+        }
+      }
+      
+      // Check if all rain snakes have been spawned and wait for completion
+      if (snake.snakeRainCount >= maxRainSnakes) {
+        // All rain snakes spawned - could add logic here to check if they've all fallen off screen
+        // For now, just wait a bit then end the phase
+        const totalRainDuration = (maxRainSnakes * rainSpawnInterval) + 3000; // All spawns + 3s wait
+        if (currentTime - snake.snakeRainStartTime >= totalRainDuration) {
+          // Phase 4 complete - could transition to a different state or end boss fight
+          snake.bossState = 'phase4Complete';
+          snake.snakeRainStartTime = undefined;
+          snake.snakeRainCount = undefined;
+          snake.snakeRainIds = undefined;
+          console.log("Phase 4: Snake rain complete");
+        }
+      }
+      
+      // Stay in current position during snake rain
+      break;
+
+    case 'phase4Complete':
+      // Phase 4 is complete - boss could become inactive or loop back to tracking
+      // For now, just stay still
+      console.log("Phase 4: Boss fight complete");
       break;
 
     case 'recovering':

@@ -1046,6 +1046,20 @@ export const useSnakeGame = create<SnakeGameState>()(
           updatedSnake.environmentalEffects.spawnPhantom = false;
         }
         
+        if (updatedSnake.environmentalEffects?.spawnRainSnake) {
+          // Only spawn rain snake if one doesn't already exist with this ID
+          const rainSnakeExists = newSnakes.some(s => s.id === updatedSnake.environmentalEffects?.rainSnakeId);
+          if (!rainSnakeExists) {
+            const rainSnake = get().spawnRainSnake(
+              updatedSnake.environmentalEffects.rainSnakeSpawnPosition!, 
+              updatedSnake.environmentalEffects.rainSnakeId!
+            );
+            newSnakes.push(rainSnake);
+          }
+          // Clear rain snake spawn flag after spawning
+          updatedSnake.environmentalEffects.spawnRainSnake = false;
+        }
+        
         if (updatedSnake.environmentalEffects?.fireProjectiles && updatedSnake.environmentalEffects?.projectileSourceId) {
           // Fire projectiles for Phase 3 boss
           get().fireProjectiles(
@@ -1754,6 +1768,16 @@ export const useSnakeGame = create<SnakeGameState>()(
             set(state => ({ ...state, phantomRemovalInProgress: false }));
           }, 100);
         }
+      }
+
+      // Remove rain snakes that have fallen off the bottom of the screen
+      const rainSnakesToRemove = finalSnakes.filter(snake => 
+        snake.type === 'rainsnake' && snake.position.y > (state.levelSize?.height || 600) + 50
+      );
+      
+      if (rainSnakesToRemove.length > 0) {
+        finalSnakes = finalSnakes.filter(snake => !(snake.type === 'rainsnake' && snake.position.y > (state.levelSize?.height || 600) + 50));
+        console.log("Removed", rainSnakesToRemove.length, "rain snake(s) that fell off screen:", rainSnakesToRemove.map(s => s.id));
       }
 
       set({
@@ -3146,6 +3170,33 @@ export const useSnakeGame = create<SnakeGameState>()(
       };
       // console.log("Created phantom snake:", phantom);
       return phantom;
+    },
+
+    spawnRainSnake: (spawnPosition: Position, rainSnakeId: string): Snake => {
+      console.log("Spawning rain snake at position:", spawnPosition, "with ID:", rainSnakeId);
+      
+      // Random speed between 100 and 200 as requested
+      const randomSpeed = 100 + Math.random() * 100;
+      
+      const rainSnake = {
+        id: rainSnakeId,
+        type: 'rainsnake' as const,
+        position: { x: spawnPosition.x, y: spawnPosition.y },
+        size: { width: 40, height: 40 }, // Standard snake size
+        speed: randomSpeed,
+        direction: { x: 0, y: 1 }, // Always move south (downward)
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0, // Rain snakes don't chase, they just fall
+        sightRange: 0, // No sight range needed
+        isChasing: false,
+        isRainSnake: true,
+        rainSpeed: randomSpeed
+      };
+      
+      console.log(`Rain snake spawned with speed: ${Math.round(randomSpeed)}`);
+      return rainSnake;
     },
 
     updateMiniBoulders: (deltaTime: number) => {

@@ -1337,6 +1337,11 @@ const GameCanvas: React.FC = () => {
             accentColor = "#8a2be2"; // Same blue violet accents  
             eyeColor = "#ffd700"; // Same golden eyes
             break;
+          case "rainsnake":
+            baseColor = "#4f46e5"; // Deep blue like rain
+            accentColor = "#a5b4fc"; // Light blue like water droplets
+            eyeColor = "#3b82f6"; // Bright blue eyes
+            break;
         }
 
         // Set transparency for phantoms
@@ -1496,6 +1501,17 @@ const GameCanvas: React.FC = () => {
             ctx.stroke();
             ctx.setLineDash([]);
           }
+        } else if (snake.type === "rainsnake") {
+          // Water droplet pattern for rain snakes (falling rain effect)
+          const centerX = snake.position.x + snake.size.width / 2;
+          
+          // Vertical droplet pattern to represent falling rain
+          ctx.fillRect(centerX - 2, snake.position.y + 2, 4, 6);
+          ctx.fillRect(centerX - 1, snake.position.y + 10, 2, 8);
+          ctx.fillRect(centerX - 3, snake.position.y + 20, 6, 4);
+          
+          // Small droplet at top
+          ctx.fillRect(centerX - 1, snake.position.y + 30, 2, 4);
         }
 
         // Add snake eyes (stalkers have no visible eyes)
@@ -1871,6 +1887,11 @@ const GameCanvas: React.FC = () => {
               accentColor = "#daa520"; // Golden rod accent
               eyeColor = "#ff4500"; // Orange red eyes
               break;
+            case "rainsnake":
+              baseColor = "#4f46e5"; // Deep blue like rain
+              accentColor = "#a5b4fc"; // Light blue like water droplets
+              eyeColor = "#3b82f6"; // Bright blue eyes
+              break;
           }
 
           // Base snake body
@@ -2041,6 +2062,17 @@ const GameCanvas: React.FC = () => {
               ctx.stroke();
               ctx.setLineDash([]);
             }
+          } else if (snake.type === "rainsnake") {
+            // Water droplet pattern for rain snakes (falling rain effect)
+            const centerX = snake.position.x + snake.size.width / 2;
+            
+            // Vertical droplet pattern to represent falling rain
+            ctx.fillRect(centerX - 2, snake.position.y + 2, 4, 6);
+            ctx.fillRect(centerX - 1, snake.position.y + 10, 2, 8);
+            ctx.fillRect(centerX - 3, snake.position.y + 20, 6, 4);
+            
+            // Small droplet at top
+            ctx.fillRect(centerX - 1, snake.position.y + 30, 2, 4);
           }
 
           // Add snake eyes (stalkers have no visible eyes)

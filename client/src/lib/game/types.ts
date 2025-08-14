@@ -23,7 +23,7 @@ export interface Player {
 
 export interface Snake {
   id: string;
-  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic' | 'rattlesnake' | 'boss' | 'phantom';
+  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic' | 'rattlesnake' | 'boss' | 'phantom' | 'rainsnake';
   position: Position;
   spawnPoint?: Position; // Original spawn position for return behavior
   size: Size;
@@ -83,7 +83,7 @@ export interface Snake {
   isLightEmergence?: boolean; // Whether this snake emerged due to light detection
   lightEmergenceDirection?: 'north' | 'south' | 'east' | 'west'; // Cardinal direction for light emergence
   // Boss-specific properties (Valerie)
-  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause' | 'movingToWall' | 'waitingForPhantom' | 'chargingHalfway' | 'pausingAtHalfway' | 'returningToCenter' | 'projectileBarrage'; // Current boss behavior state
+  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause' | 'movingToWall' | 'waitingForPhantom' | 'chargingHalfway' | 'pausingAtHalfway' | 'returningToCenter' | 'projectileBarrage' | 'exitingNorth' | 'snakeRain' | 'phase4Complete'; // Current boss behavior state
   playerSnapshot?: Position; // Snapshot of player position when starting charge
   chargeStartTime?: number; // When the charge started
   pauseStartTime?: number; // When the pause started (100ms pause)
@@ -116,6 +116,9 @@ export interface Snake {
     phantomSpawnPosition?: Position;
     phantomId?: string;
     phantomLevelBounds?: { width: number; height: number };
+    spawnRainSnake?: boolean; // New flag for Phase 4 rain snake spawning
+    rainSnakeSpawnPosition?: Position; // Position where rain snake should spawn
+    rainSnakeId?: string; // ID for the rain snake
     boulderHitPosition: Position;
     fireProjectiles?: boolean; // New flag for Phase 3 projectile firing
     projectileSourceId?: string; // Which snake is firing the projectiles
@@ -157,6 +160,14 @@ export interface Snake {
   burstProjectileStarted?: boolean; // Whether burst firing has been initialized
   projectileClockwise?: boolean; // Direction to fire projectiles (clockwise/counter-clockwise)
   startingAngle?: number; // Starting angle for projectile sequence (0=east, 180=west)
+  
+  // Phase 4 properties
+  exitTargetPosition?: Position; // Target position when exiting north
+  snakeRainStartTime?: number; // When snake rain began
+  snakeRainCount?: number; // How many rain snakes have been spawned
+  snakeRainIds?: string[]; // IDs of all spawned rain snakes
+  isRainSnake?: boolean; // Whether this snake is a rain snake falling from north
+  rainSpeed?: number; // Speed for rain snakes (random between 100-200)
 }
 
 export interface Wall extends Rectangle {}
