@@ -460,14 +460,14 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'movingToCenter':
-      // Move to center at double speed after boulder collision
+      // Move to center at triple speed after boulder collision
       if (snake.centerTargetPosition) {
-        const doubleSpeed = (snake.chaseSpeed || snake.speed) * 2;
-        const newPosition = moveTowards(snake.position, snake.centerTargetPosition, doubleSpeed * dt);
+        const tripleSpeed = (snake.chaseSpeed || snake.speed) * 3;
+        const newPosition = moveTowards(snake.position, snake.centerTargetPosition, tripleSpeed * dt);
         
         // Check if we've reached the center
         const distanceToCenter = getDistance(snake.position, snake.centerTargetPosition);
-        if (distanceToCenter <= doubleSpeed * dt) {
+        if (distanceToCenter <= tripleSpeed * dt) {
           // Reached center - snap to position and start pause
           snake.position = snake.centerTargetPosition;
           snake.bossState = 'centerPause';
@@ -546,14 +546,14 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'movingToWall':
-      // Phase 2: Move to wall position at double speed
+      // Phase 2: Move to wall position at triple speed
       if (snake.wallTargetPosition) {
-        const doubleSpeed = (snake.chaseSpeed || snake.speed) * 2;
-        const newPosition = moveTowards(snake.position, snake.wallTargetPosition, doubleSpeed * dt);
+        const tripleSpeed = (snake.chaseSpeed || snake.speed) * 3;
+        const newPosition = moveTowards(snake.position, snake.wallTargetPosition, tripleSpeed * dt);
         
         // Check if we've reached the wall target
         const distanceToTarget = getDistance(snake.position, snake.wallTargetPosition);
-        if (distanceToTarget <= doubleSpeed * dt) {
+        if (distanceToTarget <= tripleSpeed * dt) {
           // Reached wall target - snap to position and initialize phantom spawning
           snake.position = snake.wallTargetPosition;
           snake.wallTargetPosition = undefined; // Clear target
