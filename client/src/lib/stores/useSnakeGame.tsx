@@ -44,7 +44,7 @@ interface SnakeGameState extends GameData {
   startFromLevel: (levelIndex: number) => void;
   startLevel: (levelIndex: number) => void;
   resetGame: () => void;
-  returnToHub: () => void;
+
   movePlayer: (direction: Position) => void;
   updateGame: (deltaTime: number) => void;
   nextLevel: () => void;
@@ -253,7 +253,7 @@ export const useSnakeGame = create<SnakeGameState>()(
   subscribeWithSelector((set, get) => ({
     // Initial state
     currentLevel: 0,
-    gameState: "hub",
+    gameState: "playing",
     levels: LEVELS, // Add levels to store
     player: {
       position: { x: 50, y: 350 },
@@ -752,9 +752,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
     },
 
-    returnToMenu: () => {
-      set({ gameState: "hub" });
-    },
+
 
     movePlayer: (direction: Position) => {
       const state = get();
@@ -4132,9 +4130,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       get().startFromLevel(levelIndex);
     },
 
-    returnToHub: () => {
+    returnToMenu: () => {
+      // Reset to Level 0 (new tutorial level)
       set({
-        gameState: "hub",
+        gameState: "playing",
         currentLevel: 0,
       });
     },

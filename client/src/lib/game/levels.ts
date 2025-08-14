@@ -143,6 +143,36 @@ function getRandomizedLevel2PressurePlatePositions(): Array<{
 }
 
 export const LEVELS: Level[] = [
+  // Level 0: Tutorial - Simple empty room with key and door
+  {
+    id: 0,
+    name: "Tutorial Room",
+    player: { x: 50, y: 300 },
+    size: { width: 800, height: 600 },
+    walls: [
+      // Outer walls only
+      { x: 0, y: 0, width: 800, height: 20 },      // Top wall
+      { x: 0, y: 580, width: 800, height: 20 },    // Bottom wall
+      { x: 0, y: 0, width: 20, height: 600 },      // Left wall
+      { x: 780, y: 0, width: 20, height: 600 },    // Right wall
+    ],
+    snakes: [], // No snakes in tutorial
+    key: { x: 400, y: 300, width: 20, height: 20, collected: false },
+    door: { x: 720, y: 280, width: 30, height: 40, isOpen: false },
+    switches: [],
+    throwableItems: [],
+    patternTiles: [],
+    patternSequence: [],
+    mirrors: [],
+    crystal: undefined,
+    lightSource: undefined,
+    teleporters: [],
+    snakePits: [],
+    boulders: [],
+    puzzleShards: [],
+    puzzlePedestal: null,
+    phaseWalls: [],
+  },
   // Level 1: Pattern-matching puzzle
   {
     id: 1,
