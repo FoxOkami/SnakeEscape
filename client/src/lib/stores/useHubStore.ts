@@ -108,11 +108,11 @@ export const useHubStore = create<HubStore>((set, get) => ({
     const newX = player.position.x + direction.x * speed;
     const newY = player.position.y + direction.y * speed;
     
-    // Check boundaries (keeping player within room bounds)
-    const minX = 25;
-    const maxX = 800 - 25 - player.size.width;
-    const minY = 25;
-    const maxY = 600 - 25 - player.size.height;
+    // Check boundaries (keeping player within room bounds, matching main game wall positions)
+    const minX = 20; // Left wall width
+    const maxX = 780 - player.size.width; // Right wall position minus player width
+    const minY = 20; // Top wall height
+    const maxY = 580 - player.size.height; // Bottom wall position minus player height
     
     const clampedX = Math.max(minX, Math.min(maxX, newX));
     const clampedY = Math.max(minY, Math.min(maxY, newY));

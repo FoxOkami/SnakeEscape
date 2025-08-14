@@ -110,12 +110,12 @@ const HubRoom: React.FC = () => {
       ctx.fillStyle = '#1a1a2e';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Draw room boundaries (match main game wall color)
+      // Draw room boundaries (match main game wall positions exactly)
       ctx.fillStyle = '#4a5568';
-      ctx.fillRect(20, 20, 760, 20); // Top wall
-      ctx.fillRect(20, 20, 20, 560); // Left wall
-      ctx.fillRect(760, 20, 20, 560); // Right wall
-      ctx.fillRect(20, 560, 760, 20); // Bottom wall
+      ctx.fillRect(0, 0, 800, 20); // Top wall
+      ctx.fillRect(0, 580, 800, 20); // Bottom wall  
+      ctx.fillRect(0, 0, 20, 600); // Left wall
+      ctx.fillRect(780, 0, 20, 600); // Right wall
       
       // Draw player (use player-character.png like main game)
       if (imageLoaded && playerImageRef.current) {
