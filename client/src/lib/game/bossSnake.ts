@@ -648,7 +648,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'projectileBarrage':
-      // Phase 3: Fire 4 rounds of 15 projectiles each, with 500ms between rounds and 3-degree shifts
+      // Phase 3: Fire 4 rounds of 24 projectiles each, with 500ms between rounds and 3-degree shifts
       if (snake.projectileBarrageStartTime && snake.barrageProjectileCount !== undefined) {
         const maxRounds = 4;
         const roundInterval = 500; // 500ms between rounds
@@ -668,7 +668,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           const nextRoundTime = snake.barrageProjectileCount * roundInterval;
           
           if (timeSinceStart >= nextRoundTime) {
-            // Fire all 15 projectiles for this round simultaneously
+            // Fire all 24 projectiles for this round simultaneously
             const roundShift = snake.barrageProjectileCount * degreeShift; // 0°, 3°, 6°, 9°
             
             snake.environmentalEffects = {

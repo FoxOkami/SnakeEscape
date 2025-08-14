@@ -3204,8 +3204,8 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       if (isBossProjectiles && burstRound !== undefined && roundAngleShift !== undefined) {
         // Phase 3 boss: 4-round burst firing with angle shifts
-        const totalProjectiles = 15;
-        const angleStep = 360 / totalProjectiles; // 24 degrees per projectile
+        const totalProjectiles = 24;
+        const angleStep = 360 / totalProjectiles; // 15 degrees per projectile
         
         directions = [];
         for (let i = 0; i < totalProjectiles; i++) {
