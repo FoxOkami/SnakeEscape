@@ -3175,8 +3175,8 @@ export const useSnakeGame = create<SnakeGameState>()(
     spawnRainSnake: (spawnPosition: Position, rainSnakeId: string): Snake => {
       console.log("Spawning rain snake at position:", spawnPosition, "with ID:", rainSnakeId);
       
-      // Random speed between 100 and 200 as requested
-      const randomSpeed = 100 + Math.random() * 100;
+      // Random speed between 150 and 600 (50% faster bottom end, 200% faster top end)
+      const randomSpeed = 150 + Math.random() * 450;
       
       const rainSnake = {
         id: rainSnakeId,
