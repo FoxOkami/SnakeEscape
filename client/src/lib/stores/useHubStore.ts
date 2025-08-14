@@ -48,7 +48,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
   player: {
     position: { x: 400, y: 300 },
     size: { width: 30, height: 30 },
-    speed: 200  // Adjusted for hub deltaTime calculation
+    speed: 0.2  // Same as main game PLAYER_SPEED (pixels per millisecond)
   },
   npcs: [],
   
@@ -60,7 +60,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
       player: {
         position: { x: 400, y: 300 },
         size: { width: 30, height: 30 },
-        speed: 200  // Adjusted for hub deltaTime calculation
+        speed: 0.2  // Same as main game PLAYER_SPEED (pixels per millisecond)
       },
       npcs: [
         {
@@ -103,10 +103,10 @@ export const useHubStore = create<HubStore>((set, get) => ({
     const state = get();
     const player = state.player;
     
-    // Calculate new position
-    const speed = player.speed * (deltaTime / 1000);
-    const newX = player.position.x + direction.x * speed;
-    const newY = player.position.y + direction.y * speed;
+    // Calculate new position (match main game calculation)
+    // deltaTime is in milliseconds, speed is pixels per millisecond
+    const newX = player.position.x + direction.x * player.speed * deltaTime;
+    const newY = player.position.y + direction.y * player.speed * deltaTime;
     
     // Check boundaries (keeping player within room bounds)
     const minX = 25;
