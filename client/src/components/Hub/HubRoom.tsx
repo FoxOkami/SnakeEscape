@@ -121,9 +121,8 @@ const HubRoom: React.FC = () => {
       ctx.fillRect(760, 20, 20, 560); // Right wall
       ctx.fillRect(20, 560, 760, 20); // Bottom wall
       
-      // Draw player (use player-character.png like main game)
+      // Draw player (only use player-character.png image)
       if (imageLoaded && playerImageRef.current) {
-        // Draw custom player image
         ctx.drawImage(
           playerImageRef.current,
           player.position.x,
@@ -131,24 +130,6 @@ const HubRoom: React.FC = () => {
           player.size.width,
           player.size.height,
         );
-      } else {
-        // Fallback to rectangle (same as main game fallback)
-        ctx.fillStyle = '#4299e1'; // Blue like main game
-        ctx.fillRect(
-          player.position.x,
-          player.position.y,
-          player.size.width,
-          player.size.height,
-        );
-        
-        // Add player details (match main game style)
-        ctx.fillStyle = '#2b6cb0'; // Darker blue for details
-        ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
-        
-        // Player eyes
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
-        ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
       }
       
       // Draw NPCs
