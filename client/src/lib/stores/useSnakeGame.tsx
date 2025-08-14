@@ -1052,7 +1052,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           if (!rainSnakeExists) {
             const rainSnake = get().spawnRainSnake(
               updatedSnake.environmentalEffects.rainSnakeSpawnPosition!, 
-              updatedSnake.environmentalEffects.rainSnakeId!
+              updatedSnake.environmentalEffects.rainSnakeId!,
+              updatedSnake.environmentalEffects.rainMovementPattern,
+              updatedSnake.environmentalEffects.rainAngle,
+              updatedSnake.environmentalEffects.sineAmplitude,
+              updatedSnake.environmentalEffects.sineFrequency
             );
             newSnakes.push(rainSnake);
           }
@@ -3172,11 +3176,19 @@ export const useSnakeGame = create<SnakeGameState>()(
       return phantom;
     },
 
-    spawnRainSnake: (spawnPosition: Position, rainSnakeId: string): Snake => {
+    spawnRainSnake: (spawnPosition: Position, rainSnakeId: string, movementPattern?: string, angle?: number, amplitude?: number, frequency?: number): Snake => {
       console.log("Spawning rain snake at position:", spawnPosition, "with ID:", rainSnakeId);
       
       // Random speed between 150 and 600 (50% faster bottom end, 200% faster top end)
       const randomSpeed = 150 + Math.random() * 450;
+      
+      // Set direction based on movement pattern
+      let direction = { x: 0, y: 1 }; // Default straight down
+      if (movementPattern === 'angled' && angle) {
+        // Convert 30-degree angle to direction vector
+        const radians = (angle * Math.PI) / 180;
+        direction = { x: Math.sin(radians), y: Math.cos(radians) };
+      }
       
       const rainSnake = {
         id: rainSnakeId,
@@ -3184,7 +3196,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         position: { x: spawnPosition.x, y: spawnPosition.y },
         size: { width: 40, height: 40 }, // Standard snake size
         speed: randomSpeed,
-        direction: { x: 0, y: 1 }, // Always move south (downward)
+        direction: direction,
         patrolPoints: [],
         currentPatrolIndex: 0,
         patrolDirection: 1,
@@ -3192,10 +3204,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         sightRange: 0, // No sight range needed
         isChasing: false,
         isRainSnake: true,
-        rainSpeed: randomSpeed
+        rainSpeed: randomSpeed,
+        rainMovementPattern: movementPattern as 'straight' | 'angled' | 'sine' | undefined,
+        rainAngle: angle,
+        sineAmplitude: amplitude,
+        sineFrequency: frequency,
+        initialX: spawnPosition.x // Store initial X for sine wave calculation
       };
       
-      console.log(`Rain snake spawned with speed: ${Math.round(randomSpeed)}`);
+      console.log(`Rain snake spawned with speed: ${Math.round(randomSpeed)}, pattern: ${movementPattern || 'straight'}`);
       return rainSnake;
     },
 

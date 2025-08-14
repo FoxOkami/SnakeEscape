@@ -538,6 +538,25 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           console.log("Phase 3: Valerie charging halfway to player position");
         } else if (snake.bossPhase === 4) {
           // Phase 4: Exit to north and trigger snake rain
+          // Increment phase 4 count and set movement pattern
+          snake.phase4Count = (snake.phase4Count || 0) + 1;
+          
+          // Set movement pattern based on phase 4 count
+          let patternName = '';
+          if (snake.phase4Count === 1) {
+            snake.rainMovementPattern = 'straight';
+            patternName = 'straight north-to-south';
+          } else if (snake.phase4Count === 2) {
+            snake.rainMovementPattern = 'angled';
+            snake.rainAngle = 30; // 30-degree angle
+            patternName = '30-degree angled';
+          } else if (snake.phase4Count >= 3) {
+            snake.rainMovementPattern = 'sine';
+            snake.sineAmplitude = 80; // Large sine wave amplitude
+            snake.sineFrequency = 0.01; // Frequency for sine wave
+            patternName = 'large sine wave';
+          }
+          
           snake.bossState = 'exitingNorth';
           snake.centerPauseStartTime = undefined;
           
@@ -548,7 +567,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             y: -130 // Move well above the screen (30 pixels further north)
           };
           
-          console.log("Phase 4: Valerie exiting to the north");
+          console.log(`Phase 4.${snake.phase4Count}: Valerie exiting to the north (${patternName} rain pattern)`);
         } else {
           // Normal behavior for other phases
           snake.bossState = 'tracking'; // Resume tracking player
@@ -805,7 +824,11 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             spawnRainSnake: true,
             rainSnakeSpawnPosition: { x: randomX, y: -50 }, // Start above screen
             rainSnakeId: rainSnakeId,
-            boulderHitPosition: { x: 0, y: 0 } // Not used for rain snake spawning
+            boulderHitPosition: { x: 0, y: 0 }, // Not used for rain snake spawning
+            rainMovementPattern: snake.rainMovementPattern,
+            rainAngle: snake.rainAngle,
+            sineAmplitude: snake.sineAmplitude,
+            sineFrequency: snake.sineFrequency
           };
           
           console.log(`Phase 4: Spawning rain snake ${snake.snakeRainCount}/${maxRainSnakes} at x=${Math.round(randomX)}`);

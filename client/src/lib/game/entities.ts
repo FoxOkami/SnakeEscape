@@ -1140,24 +1140,54 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   return snake;
 }
 
-// Rain snake update function - falls from north to south with random speeds
+// Rain snake update function - falls from north to south with different movement patterns
 export function updateRainSnake(snake: Snake, walls: Wall[], dt: number, levelBounds?: { width: number; height: number }): Snake {
   if (!snake.isRainSnake || !levelBounds) {
     return snake;
   }
 
-  // Rain snakes move continuously south (downward) until they exit the bottom
+  // Rain snakes move continuously based on their movement pattern
   const moveSpeed = snake.rainSpeed ? snake.rainSpeed * dt : snake.speed * dt;
   
-  const newPosition = {
-    x: snake.position.x, // X position stays constant
-    y: snake.position.y + moveSpeed // Move downward (south)
-  };
+  let newPosition = { x: snake.position.x, y: snake.position.y };
+
+  if (snake.rainMovementPattern === 'straight') {
+    // Pattern 1: Straight north-to-south (original behavior)
+    newPosition = {
+      x: snake.position.x, // X position stays constant
+      y: snake.position.y + moveSpeed // Move downward (south)
+    };
+    
+  } else if (snake.rainMovementPattern === 'angled' && snake.rainAngle) {
+    // Pattern 2: 30-degree angled movement
+    const radians = (snake.rainAngle * Math.PI) / 180;
+    newPosition = {
+      x: snake.position.x + Math.sin(radians) * moveSpeed,
+      y: snake.position.y + Math.cos(radians) * moveSpeed
+    };
+    
+  } else if (snake.rainMovementPattern === 'sine' && snake.sineAmplitude && snake.sineFrequency && snake.initialX !== undefined) {
+    // Pattern 3: Large sine wave curve north-to-south
+    const distanceTraveled = snake.position.y - (-50); // Distance from initial spawn Y (-50)
+    const sineOffset = Math.sin(distanceTraveled * snake.sineFrequency) * snake.sineAmplitude;
+    
+    newPosition = {
+      x: snake.initialX + sineOffset, // Oscillate around initial X position
+      y: snake.position.y + moveSpeed // Continue moving south
+    };
+    
+  } else {
+    // Fallback to straight movement
+    newPosition = {
+      x: snake.position.x,
+      y: snake.position.y + moveSpeed
+    };
+  }
 
   // Update position
   snake.position = newPosition;
 
-  // Rain snakes don't collide with walls, they just fall straight down
+  // Rain snakes don't collide with walls, they just fall based on their pattern
   // They will be removed by the game state when they fall off screen
 
   return snake;

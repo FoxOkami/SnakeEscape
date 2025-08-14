@@ -127,6 +127,10 @@ export interface Snake {
     startingAngle?: number; // Starting angle in degrees (0=east, 180=west)
     burstRound?: number; // Which burst round (0-3) for 4-round system
     roundAngleShift?: number; // Angle shift for current round (0°, 3°, 6°, 9°)
+    rainMovementPattern?: 'straight' | 'angled' | 'sine'; // Movement pattern for rain snakes
+    rainAngle?: number; // Angle for angled movement (30 degrees)
+    sineAmplitude?: number; // Amplitude for sine wave movement
+    sineFrequency?: number; // Frequency for sine wave movement
   };
   
   // Phase system for boss battles
@@ -167,9 +171,15 @@ export interface Snake {
   snakeRainCount?: number; // How many rain snakes have been spawned
   snakeRainIds?: string[]; // IDs of all spawned rain snakes
   isRainSnake?: boolean; // Whether this snake is a rain snake falling from north
-  rainSpeed?: number; // Speed for rain snakes (random between 100-200)
+  rainSpeed?: number; // Speed for rain snakes (random between 150-600)
   phaseCompletionLogged?: boolean; // Flag to prevent infinite logging in phase4Complete
   returnTargetPosition?: Position; // Target position when returning to playable area
+  phase4Count?: number; // How many times phase 4 has been triggered (1, 2, or 3)
+  rainMovementPattern?: 'straight' | 'angled' | 'sine'; // Movement pattern for rain snakes
+  rainAngle?: number; // Angle for angled movement (30 degrees)
+  sineAmplitude?: number; // Amplitude for sine wave movement
+  sineFrequency?: number; // Frequency for sine wave movement
+  initialX?: number; // Initial X position for sine wave calculation
 }
 
 export interface Wall extends Rectangle {}
