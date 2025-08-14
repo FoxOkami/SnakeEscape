@@ -23,7 +23,7 @@ export interface Player {
 
 export interface Snake {
   id: string;
-  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic' | 'rattlesnake' | 'boss' | 'phantom' | 'rainsnake';
+  type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic' | 'rattlesnake' | 'boss' | 'phantom' | 'rainsnake' | 'friendly';
   position: Position;
   spawnPoint?: Position; // Original spawn position for return behavior
   size: Size;

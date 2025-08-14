@@ -143,6 +143,50 @@ function getRandomizedLevel2PressurePlatePositions(): Array<{
 }
 
 export const LEVELS: Level[] = [
+  // Level 0: Hub Room
+  {
+    id: 0,
+    name: "Snake Room Hub",
+    player: { x: 400, y: 300 },
+    size: { width: 800, height: 600 },
+    walls: [
+      // Outer walls only - clean hub room
+      { x: 0, y: 0, width: 800, height: 20 },
+      { x: 0, y: 580, width: 800, height: 20 },
+      { x: 0, y: 0, width: 20, height: 600 },
+      { x: 780, y: 0, width: 20, height: 600 },
+    ],
+    snakes: [
+      // Game Master NPC represented as a friendly snake
+      {
+        id: "game_master",
+        type: "friendly" as const,
+        position: { x: 200, y: 150 },
+        size: { width: 40, height: 40 },
+        speed: 0, // Stationary
+        direction: { x: 0, y: 0 },
+        patrolPoints: [],
+        currentPatrolIndex: 0,
+        patrolDirection: 1,
+        chaseSpeed: 0,
+        sightRange: 0,
+        isChasing: false,
+      }
+    ],
+    doors: [],
+    keys: [],
+    switches: [],
+    items: [],
+    patternTiles: [],
+    mirrors: [],
+    crystals: [],
+    lightSources: [],
+    teleporters: [],
+    snakePits: [],
+    boulders: [],
+    miniBoulders: [],
+    flowTiles: [],
+  },
   // Level 1: Pattern-matching puzzle
   {
     id: 1,

@@ -1342,6 +1342,11 @@ const GameCanvas: React.FC = () => {
             accentColor = "#a5b4fc"; // Light blue like water droplets
             eyeColor = "#3b82f6"; // Bright blue eyes
             break;
+          case "friendly":
+            baseColor = "#FFB74D"; // Warm orange/gold for Game Master
+            accentColor = "#FFA726"; // Lighter orange
+            eyeColor = "#4CAF50"; // Green eyes to show friendliness
+            break;
         }
 
         // Set transparency for phantoms
@@ -1512,6 +1517,18 @@ const GameCanvas: React.FC = () => {
           
           // Small droplet at top
           ctx.fillRect(centerX - 1, snake.position.y + 30, 2, 4);
+        } else if (snake.type === "friendly") {
+          // Crown pattern for Game Master (friendly NPC)
+          const centerX = snake.position.x + snake.size.width / 2;
+          
+          // Crown points
+          ctx.fillRect(centerX - 8, snake.position.y + 2, 4, 8);
+          ctx.fillRect(centerX - 4, snake.position.y + 2, 4, 12);
+          ctx.fillRect(centerX, snake.position.y + 2, 4, 8);
+          ctx.fillRect(centerX + 4, snake.position.y + 2, 4, 12);
+          
+          // Crown base
+          ctx.fillRect(centerX - 10, snake.position.y + 10, 20, 4);
         }
 
         // Add snake eyes (stalkers have no visible eyes)
@@ -1620,6 +1637,49 @@ const GameCanvas: React.FC = () => {
           );
           
           ctx.textAlign = "left"; // Reset text alignment
+        }
+
+        // Display Game Master interaction prompt (only on Level 0)
+        if (snake.type === "friendly" && currentLevel === 0) {
+          const distance = Math.sqrt(
+            Math.pow(player.position.x - snake.position.x, 2) +
+            Math.pow(player.position.y - snake.position.y, 2)
+          );
+          
+          if (distance < 80) {
+            ctx.font = "16px Arial";
+            ctx.textAlign = "center";
+            
+            // Draw "Game Master" name
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.strokeText(
+              "Game Master",
+              snake.position.x + snake.size.width / 2,
+              snake.position.y - 10
+            );
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(
+              "Game Master",
+              snake.position.x + snake.size.width / 2,
+              snake.position.y - 10
+            );
+            
+            // Draw interaction prompt
+            ctx.strokeText(
+              "Press E to start adventure",
+              snake.position.x + snake.size.width / 2,
+              snake.position.y + snake.size.height + 25
+            );
+            ctx.fillStyle = "#4CAF50";
+            ctx.fillText(
+              "Press E to start adventure",
+              snake.position.x + snake.size.width / 2,
+              snake.position.y + snake.size.height + 25
+            );
+            
+            ctx.textAlign = "left"; // Reset text alignment
+          }
         }
 
         // Reset transparency for phantom snakes

@@ -19,6 +19,7 @@ const SnakeRoom: React.FC = () => {
     checkPathConnection,
     removeKeyWalls,
     toggleLightSwitch,
+    startLevel,
   } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } =
     useAudio();
@@ -73,8 +74,25 @@ const SnakeRoom: React.FC = () => {
         event.preventDefault();
         setKeyPressed(event.code, true);
 
-        // Check if we're on level 3 (mirror/light source rotation level)
+        // Check if we're on level 0 (hub) for Game Master interaction
         const gameState_current = useSnakeGame.getState();
+        if (gameState_current.currentLevel === 0) {
+          // Check if player is near Game Master
+          const gameMaster = gameState_current.snakes.find(snake => snake.id === "game_master");
+          if (gameMaster) {
+            const distance = Math.sqrt(
+              Math.pow(gameState_current.player.position.x - gameMaster.position.x, 2) +
+              Math.pow(gameState_current.player.position.y - gameMaster.position.y, 2)
+            );
+            if (distance < 80) {
+              // Start Level 1 directly
+              startLevel(1);
+              return;
+            }
+          }
+        }
+
+        // Check if we're on level 3 (mirror/light source rotation level)
         if (gameState_current.currentLevel === 2) {
           // Try to rotate mirror first, then light source
           rotateMirror("clockwise");
