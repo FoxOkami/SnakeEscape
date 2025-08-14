@@ -553,7 +553,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           } else if (snake.phase4Count >= 3) {
             snake.rainMovementPattern = 'sine';
             snake.sineAmplitude = 80; // Large sine wave amplitude
-            snake.sineFrequency = 0.01; // Frequency for sine wave
+            snake.sineFrequency = 0.005; // Reduced frequency for less frequent back-and-forth movements
             patternName = 'large sine wave';
           }
           
@@ -813,8 +813,18 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.snakeRainIds.push(rainSnakeId);
           snake.snakeRainCount++;
           
-          // Random x position between -100 and 900
-          const randomX = Math.random() * 1000 - 100;
+          // Different spawn ranges based on trigger count
+          let randomX: number;
+          if (snake.phase4Count === 1) {
+            // Trigger 1: spawn between 0 and 770
+            randomX = Math.random() * 770;
+          } else if (snake.phase4Count === 2) {
+            // Trigger 2: spawn between -150 and 750
+            randomX = Math.random() * 900 - 150;
+          } else {
+            // Trigger 3: spawn between 50 and 700
+            randomX = Math.random() * 650 + 50;
+          }
           
           // Store rain snake spawn request in environmental effects
           snake.environmentalEffects = {
