@@ -2,14 +2,7 @@
 
 ## Overview
 
-Snake Room is a 2D escape game designed to challenge players with navigation through snake-filled levels, key collection, switch activation, and door escapes. Built with a full-stack architecture, it aims to provide an engaging experience combining classic escape game mechanics with dynamic 2D environments. The game features 7 levels total: a tutorial Level 0 followed by 6 increasingly complex puzzle levels.
-
-## Recent Changes (August 14, 2025)
-
-- **Removed Hub System**: Completely removed the separate hub/lobby system that was previously used for level selection
-- **Added Level 0**: Created a new tutorial level (Level 0) that comes before the original 6 levels - simple empty room with just a key and door
-- **Streamlined Game Flow**: Game now starts directly at Level 0 instead of requiring hub navigation
-- **Updated Architecture**: Simplified game state management by removing hub-related code and components
+Snake Room is a 2D escape game designed to challenge players with navigation through snake-filled levels, key collection, switch activation, and door escapes. Built with a full-stack architecture, it aims to provide an engaging experience combining classic escape game mechanics with dynamic 2D environments. The project envisions a captivating game with potential for future expansion into more complex puzzles and level designs.
 
 ## User Preferences
 
