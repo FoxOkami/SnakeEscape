@@ -32,8 +32,9 @@ Preferred communication style: Simple, everyday language.
 - **Health System**: 2-hit player health with 1-second invincibility, health persists between levels
 - **Randomization**: Level 2 features complete randomization: item spawning (9 potential locations), item names (13 different item types), and pressure plate locations (6 potential locations)
 - **Boss Battle System**: 4-phase boss battles for Valerie based on boulder hit progression (Phase 1: 0-1 hits, Phase 2: 2-3 hits, Phase 3: 4-5 hits, Phase 4: 6+ hits) with visual phase indicators and phase-specific behavior patterns
-  - Phase 2: After pausing at center for 500ms, Valerie moves to the vertical center of the wall on the same side as the player's current position
-  - Phase 2 Projections: 8 phantom projections spawn with alternating initial directions (odd projections move north, even projections move south)
+  - Phase 2: After pausing at center for 500ms, Valerie moves to the vertical center of the wall on the same side as the player's current position at 3x speed
+  - Phase 2 Projections: 8 phantom projections spawn with alternating initial directions and wall-dependent rotation patterns (west wall: north=clockwise/south=counterclockwise, east wall: north=counterclockwise/south=clockwise)
+  - Phase 3: Enhanced projectile barrage with 24 projectiles per round (increased from 15) across 4 rounds with 3-degree shifts
 
 ### UI/UX Decisions
 - **Components**: Utilizes Radix UI for accessible and performant UI elements.
