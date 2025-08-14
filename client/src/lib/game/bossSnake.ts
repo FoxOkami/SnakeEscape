@@ -813,11 +813,11 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
       
       // Check if all rain snakes have been spawned and wait for completion
-      if (snake.snakeRainCount >= maxRainSnakes) {
+      if (snake.snakeRainCount !== undefined && snake.snakeRainCount >= maxRainSnakes) {
         // All rain snakes spawned - could add logic here to check if they've all fallen off screen
         // For now, just wait a bit then end the phase
         const totalRainDuration = (maxRainSnakes * rainSpawnInterval) + 3000; // All spawns + 3s wait
-        if (currentTime - snake.snakeRainStartTime >= totalRainDuration) {
+        if (snake.snakeRainStartTime !== undefined && currentTime - snake.snakeRainStartTime >= totalRainDuration) {
           // Phase 4 complete - could transition to a different state or end boss fight
           snake.bossState = 'phase4Complete';
           snake.snakeRainStartTime = undefined;
@@ -831,9 +831,44 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'phase4Complete':
-      // Phase 4 is complete - boss could become inactive or loop back to tracking
-      // For now, just stay still
-      console.log("Phase 4: Boss fight complete");
+      // Phase 4 is complete - transition to return state to move back to playable area
+      if (!snake.phaseCompletionLogged) {
+        console.log("Phase 4: Boss fight complete, Valerie returning to playable area");
+        snake.phaseCompletionLogged = true;
+        
+        // Set return target position (center of playable area)
+        snake.returnTargetPosition = { x: 390, y: 300 }; // Center of 780x600 area
+        snake.bossState = 'returningToArea';
+      }
+      break;
+
+    case 'returningToArea':
+      // Move back to the playable area after phase 4
+      if (snake.returnTargetPosition) {
+        const returnSpeed = (snake.chaseSpeed || snake.speed) * 2; // Moderate speed return
+        const newPosition = moveTowards(snake.position, snake.returnTargetPosition, returnSpeed * dt);
+        
+        // Check if we've reached the return target
+        const distanceToTarget = getDistance(snake.position, snake.returnTargetPosition);
+        if (distanceToTarget <= returnSpeed * dt) {
+          // Reached return target - resume normal behavior
+          snake.position = snake.returnTargetPosition;
+          snake.returnTargetPosition = undefined;
+          snake.phaseCompletionLogged = false; // Reset for potential future phases
+          
+          // Transition to recovery state before resuming tracking
+          snake.bossState = 'recovering';
+          snake.pauseStartTime = currentTime;
+          snake.isInitialPause = false; // Use normal recovery duration
+          
+          console.log("Phase 4: Valerie has returned to playable area, entering recovery");
+          
+        } else {
+          // Continue moving toward return target
+          snake.position = newPosition;
+          snake.direction = getDirectionVector(snake.position, snake.returnTargetPosition);
+        }
+      }
       break;
 
     case 'recovering':

@@ -83,7 +83,7 @@ export interface Snake {
   isLightEmergence?: boolean; // Whether this snake emerged due to light detection
   lightEmergenceDirection?: 'north' | 'south' | 'east' | 'west'; // Cardinal direction for light emergence
   // Boss-specific properties (Valerie)
-  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause' | 'movingToWall' | 'waitingForPhantom' | 'chargingHalfway' | 'pausingAtHalfway' | 'returningToCenter' | 'projectileBarrage' | 'exitingNorth' | 'snakeRain' | 'phase4Complete'; // Current boss behavior state
+  bossState?: 'tracking' | 'pausing' | 'charging' | 'recoiling' | 'recovering' | 'movingToCenter' | 'centerPause' | 'movingToWall' | 'waitingForPhantom' | 'chargingHalfway' | 'pausingAtHalfway' | 'returningToCenter' | 'projectileBarrage' | 'exitingNorth' | 'snakeRain' | 'phase4Complete' | 'returningToArea'; // Current boss behavior state
   playerSnapshot?: Position; // Snapshot of player position when starting charge
   chargeStartTime?: number; // When the charge started
   pauseStartTime?: number; // When the pause started (100ms pause)
@@ -168,6 +168,8 @@ export interface Snake {
   snakeRainIds?: string[]; // IDs of all spawned rain snakes
   isRainSnake?: boolean; // Whether this snake is a rain snake falling from north
   rainSpeed?: number; // Speed for rain snakes (random between 100-200)
+  phaseCompletionLogged?: boolean; // Flag to prevent infinite logging in phase4Complete
+  returnTargetPosition?: Position; // Target position when returning to playable area
 }
 
 export interface Wall extends Rectangle {}
