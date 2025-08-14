@@ -393,7 +393,7 @@ export interface Level {
   endTilePos?: { row: number; col: number }; // For Level 4 randomization
 }
 
-export type GameState = 'menu' | 'playing' | 'gameOver' | 'victory' | 'levelComplete';
+export type GameState = 'menu' | 'hub' | 'playing' | 'gameOver' | 'victory' | 'levelComplete';
 
 export interface HintState {
   isActive: boolean; // Whether hint is currently showing

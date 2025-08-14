@@ -485,7 +485,7 @@ export const LEVELS: Level[] = [
   // Level 3: Light Reflection Puzzle
   {
     id: 3,
-    name: "Desert Slasher",
+    name: "The Canyon",
     player: { x: 25, y: 25 },
     size: { width: 800, height: 600 },
     walls: [

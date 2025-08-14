@@ -42,7 +42,9 @@ interface SnakeGameState extends GameData {
   // Actions
   startGame: () => void;
   startFromLevel: (levelIndex: number) => void;
+  startLevel: (levelIndex: number) => void;
   resetGame: () => void;
+  returnToHub: () => void;
   movePlayer: (direction: Position) => void;
   updateGame: (deltaTime: number) => void;
   nextLevel: () => void;
@@ -251,7 +253,7 @@ export const useSnakeGame = create<SnakeGameState>()(
   subscribeWithSelector((set, get) => ({
     // Initial state
     currentLevel: 0,
-    gameState: "menu",
+    gameState: "hub",
     levels: LEVELS, // Add levels to store
     player: {
       position: { x: 50, y: 350 },
@@ -649,7 +651,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       const nextLevelIndex = state.currentLevel + 1;
 
       if (nextLevelIndex >= LEVELS.length) {
-        set({ gameState: "victory" });
+        // All levels completed, return to hub
+        set({ gameState: "hub" });
         return;
       }
 
@@ -750,7 +753,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     returnToMenu: () => {
-      set({ gameState: "menu" });
+      set({ gameState: "hub" });
     },
 
     movePlayer: (direction: Position) => {
@@ -4123,6 +4126,17 @@ export const useSnakeGame = create<SnakeGameState>()(
     updateHint: (deltaTime: number) => {
       // No longer needed - help text is always displayed on Level 1
       return;
+    },
+
+    startLevel: (levelIndex: number) => {
+      get().startFromLevel(levelIndex);
+    },
+
+    returnToHub: () => {
+      set({
+        gameState: "hub",
+        currentLevel: 0,
+      });
     },
   })),
 );
