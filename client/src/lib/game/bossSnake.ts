@@ -819,8 +819,8 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             // Trigger 1: spawn between 0 and 770
             randomX = Math.random() * 770;
           } else if (snake.phase4Count === 2) {
-            // Trigger 2: spawn between -150 and 750
-            randomX = Math.random() * 900 - 150;
+            // Trigger 2: spawn between -250 and 650 (shifted 100 pixels left)
+            randomX = Math.random() * 900 - 250;
           } else {
             // Trigger 3: spawn between 50 and 700
             randomX = Math.random() * 650 + 50;
