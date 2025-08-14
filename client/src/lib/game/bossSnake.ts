@@ -545,7 +545,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           const bounds = levelBounds || { width: 800, height: 600 };
           snake.exitTargetPosition = {
             x: snake.position.x, // Keep current x position
-            y: -100 // Move well above the screen
+            y: -130 // Move well above the screen (30 pixels further north)
           };
           
           console.log("Phase 4: Valerie exiting to the north");
@@ -778,8 +778,8 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'snakeRain':
-      // Phase 4: Rain 20 snakes from north to south
-      const maxRainSnakes = 20;
+      // Phase 4: Rain 50 snakes from north to south
+      const maxRainSnakes = 50;
       const rainSpawnInterval = 300; // 300ms between spawns
       
       // Check if it's time to spawn the next rain snake
@@ -794,8 +794,8 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.snakeRainIds.push(rainSnakeId);
           snake.snakeRainCount++;
           
-          // Random x position between 0 and 780
-          const randomX = Math.random() * 780;
+          // Random x position between -100 and 900
+          const randomX = Math.random() * 1000 - 100;
           
           // Store rain snake spawn request in environmental effects
           snake.environmentalEffects = {
