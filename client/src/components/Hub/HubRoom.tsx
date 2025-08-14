@@ -80,17 +80,13 @@ const HubRoom: React.FC = () => {
     };
   }, [interactionState, initializeHub, selectOption, confirmSelection, interactWithNPC]);
   
-  // Handle confirmed selection
+  // Handle game start
   useEffect(() => {
-    if (interactionState === 'confirmed') {
-      if (selectedOption === 'yes') {
-        // Start level 1 (index 0)
-        startLevel(0);
-      } else {
-        endInteraction();
-      }
+    if (interactionState === 'startGame') {
+      // Start level 1 (index 0)
+      startLevel(0);
     }
-  }, [interactionState, selectedOption, startLevel, endInteraction]);
+  }, [interactionState, startLevel]);
   
   useEffect(() => {
     const canvas = canvasRef.current;

@@ -26,7 +26,7 @@ interface NPC {
 
 interface HubStore {
   gameState: 'hub' | 'transitioning';
-  interactionState: 'idle' | 'conversation' | 'confirmed';
+  interactionState: 'idle' | 'conversation' | 'confirmed' | 'startGame';
   selectedOption: 'yes' | 'no';
   player: Player;
   npcs: NPC[];
@@ -137,10 +137,10 @@ export const useHubStore = create<HubStore>((set, get) => ({
       return distance < 80;
     });
     
-    if (nearbyNPC) {
+    if (nearbyNPC && nearbyNPC.id === 'game_master') {
+      // Directly start level 1 when interacting with game master
       set({
-        interactionState: 'conversation',
-        selectedOption: 'no' // Default to 'no'
+        interactionState: 'startGame'
       });
     }
   },
