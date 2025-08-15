@@ -2180,8 +2180,8 @@ const GameCanvas: React.FC = () => {
       // Draw crystal
       if (crystal) {
         // On level 3, draw crystal as diamond shape like light source
-        if (currentLevel === 2) {
-          // Level 3 (0-indexed as 2)
+        if (currentLevel === 3) {
+          // Level 3 (0-indexed as 3)
           const centerX = crystal.x + crystal.width / 2;
           const centerY = crystal.y + crystal.height / 2;
           const size = 10; // Half the diamond size
@@ -2304,8 +2304,8 @@ const GameCanvas: React.FC = () => {
       }
 
       // Draw light source rhombus (Level 3 only)
-      if (currentLevel === 2 && lightSource) {
-        // Level 3 (0-indexed as 2)
+      if (currentLevel === 3 && lightSource) {
+        // Level 3 (0-indexed as 3)
         const centerX = lightSource.x;
         const centerY = lightSource.y;
         const size = 8; // Half the rhombus size
