@@ -459,10 +459,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         return; // Invalid level index
       }
 
-      const level = LEVELS[levelIndex];
-      
-      // Debug: Log the original level walls before any processing
-      console.log(`Level ${levelIndex} original walls:`, level.walls.map(w => `(${w.x}, ${w.y}) ${w.width}x${w.height}`));
+      // Create a deep copy of the level to prevent mutations
+      const level = JSON.parse(JSON.stringify(LEVELS[levelIndex]));
 
       // Handle Level 1 randomization
       let patternSequence = level.patternSequence
@@ -522,7 +520,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           invincibilityEndTime: 0,
         },
         snakes: level.snakes.map((snake) => ({ ...snake })),
-        walls: JSON.parse(JSON.stringify(level.walls)),
+        walls: level.walls,
         door: { ...level.door },
         key: { ...level.key },
         switches: levelSwitches,
