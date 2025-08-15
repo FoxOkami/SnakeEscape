@@ -206,6 +206,12 @@ const GameCanvas: React.FC = () => {
 
       // Draw walls (use dynamic walls for Level 5)
       const currentWalls = getCurrentWalls();
+      
+      // Debug: Log walls for Level 1 to help identify extra walls
+      if (currentLevel === 1) {
+        console.log("Level 1 walls:", currentWalls.map(w => `(${w.x}, ${w.y}) ${w.width}x${w.height}`));
+      }
+      
       ctx.fillStyle = "#4a5568";
       currentWalls.forEach((wall) => {
         ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
