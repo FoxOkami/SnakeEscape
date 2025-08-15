@@ -199,6 +199,11 @@ export const LEVELS: Level[] = [
       { x: 0, y: 580, width: 800, height: 20 },
       { x: 0, y: 0, width: 20, height: 600 },
       { x: 780, y: 0, width: 20, height: 600 },
+      // Key room walls (small chamber on the right, closer to key)
+      { x: 610, y: 270, width: 80, height: 20 }, // top wall
+      { x: 610, y: 330, width: 80, height: 20 }, // bottom wall
+      { x: 610, y: 270, width: 20, height: 80 }, // left wall
+      { x: 670, y: 270, width: 20, height: 80 }, // right wall
       // Some obstacle walls scattered around
       { x: 150, y: 100, width: 20, height: 80 },
       { x: 300, y: 150, width: 80, height: 20 },
@@ -258,7 +263,7 @@ export const LEVELS: Level[] = [
       },
     ],
     door: { x: 770, y: 280, width: 30, height: 40, isOpen: false },
-    key: { x: 700, y: 500, width: 20, height: 20, collected: false }, // Key repositioned after chamber removal
+    key: { x: 640, y: 300, width: 20, height: 20, collected: false }, // Key in small chamber
     patternTiles: [
       // These will be randomized by the randomizeLevel1() function
       // Default positions that will be shuffled
