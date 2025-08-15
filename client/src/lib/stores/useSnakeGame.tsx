@@ -478,12 +478,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         ? level.throwableItems.map((item) => ({ ...item }))
         : [];
 
-      if (levelIndex === 0) {
+      if (levelIndex === 1) {
+        // Level 1 (index 1) gets Level 1 randomization
         const randomization = randomizeLevel1();
         patternSequence = randomization.newPatternSequence;
         randomizedSymbols = randomization.randomizedSymbols;
         newPatternTiles = randomization.newPatternTiles;
-      } else if (levelIndex === 1) {
+      } else if (levelIndex === 2) {
+        // Level 2 (index 2) gets Level 2 randomization
         // Use pre-stored randomization if available (from startGame), otherwise generate new
         const currentState = get();
         if (
@@ -571,11 +573,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
 
       // Auto-trigger hint for Level 1 only
-      if (levelIndex === 0) {
+      if (levelIndex === 1) {
         setTimeout(() => {
           const currentState = get();
           if (
-            currentState.currentLevel === 0 &&
+            currentState.currentLevel === 1 &&
             currentState.gameState === "playing"
           ) {
             currentState.showHint();

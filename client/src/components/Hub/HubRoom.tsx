@@ -83,8 +83,8 @@ const HubRoom: React.FC = () => {
   // Handle game start
   useEffect(() => {
     if (interactionState === 'startGame') {
-      // Start level 1 (index 0)
-      startLevel(0);
+      // Start level 1 (index 1 in LEVELS array, since index 0 is hub)
+      startLevel(1);
     }
   }, [interactionState, startLevel]);
   
