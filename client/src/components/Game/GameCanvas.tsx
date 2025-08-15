@@ -2339,8 +2339,8 @@ const GameCanvas: React.FC = () => {
       }
 
       // Draw player on top of light beam and mirrors (Level 3 only)
-      if (currentLevel === 2) {
-        // Level 3 (0-indexed as 2)
+      if (currentLevel === 3) {
+        // Level 3 (0-indexed as 3)
         // Implement flashing effect when invincible
         const shouldFlash =
           player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
