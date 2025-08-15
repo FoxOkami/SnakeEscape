@@ -568,9 +568,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         randomizedSymbols, // Store randomized symbols for Level 1
         // Clear pre-stored Level 2 data when directly selecting Level 2
         level2RandomizedSwitches:
-          levelIndex === 1 ? undefined : get().level2RandomizedSwitches,
+          levelIndex === 2 ? undefined : get().level2RandomizedSwitches,
         level2RandomizedThrowableItems:
-          levelIndex === 1 ? undefined : get().level2RandomizedThrowableItems,
+          levelIndex === 2 ? undefined : get().level2RandomizedThrowableItems,
       });
 
       // Auto-trigger hint for Level 1 only
@@ -669,7 +669,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         ? level.throwableItems.map((item) => ({ ...item }))
         : [];
 
-      if (nextLevelIndex === 1) {
+      if (nextLevelIndex === 2) {
         // Use pre-stored randomization from startGame if available
         if (
           state.level2RandomizedSwitches &&
