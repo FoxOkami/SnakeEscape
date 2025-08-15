@@ -147,18 +147,21 @@ const SnakeRoom: React.FC = () => {
         }
 
         // Check if we're on level 5 (light switch level)
-        if (gameState_current.currentLevel === 4) {
-          // TODO: Implement light switch functionality
-          // For now, skip light switch functionality
+        if (gameState_current.currentLevel === 5) {
+          // Light switch functionality - toggle lever switches
+          toggleLightSwitch();
           return;
         }
 
         // On other levels, E key does item pickup/drop
+        console.log(`[E Key Debug] Level ${gameState_current.currentLevel}, carriedItem:`, gameState_current.carriedItem);
         if (gameState_current.carriedItem) {
           // If carrying something, drop it
+          console.log('[E Key Debug] Dropping item');
           dropItem();
         } else {
           // If not carrying anything, try to pick up the nearest item
+          console.log('[E Key Debug] Trying to pick up nearest item');
           pickupNearestItem();
         }
       }
