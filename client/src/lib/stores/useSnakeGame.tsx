@@ -2024,7 +2024,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     startFlow: () => {
       const state = get();
-      if (state.currentLevel !== 3) return; // Only on level 4 (0-indexed)
+      if (state.currentLevel !== 4) return; // Only on level 4 (0-indexed)
 
       // Get dynamic start tile position
       const currentLevel = state.levels[state.currentLevel];
@@ -2609,7 +2609,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     rotateTile: (direction: "left" | "right") => {
       const state = get();
-      if (state.currentLevel !== 3) return; // Only on level 4 (0-indexed)
+      if (state.currentLevel !== 4) return; // Only on level 4 (0-indexed)
 
       // Find the tile the player is standing on
       const playerRect = {
@@ -2670,7 +2670,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     checkPathConnection: () => {
       const state = get();
-      if (state.currentLevel !== 3) return false; // Only on level 4 (0-indexed)
+      if (state.currentLevel !== 4) return false; // Only on level 4 (0-indexed)
 
       // Get dynamic start and end tile positions
       const currentLevel = state.levels[state.currentLevel];
@@ -2741,7 +2741,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     removeKeyWalls: () => {
       const state = get();
-      if (state.currentLevel !== 3) return; // Only on level 4 (0-indexed)
+      if (state.currentLevel !== 4) return; // Only on level 4 (0-indexed)
 
       // Remove the key chamber walls
       const keyWallIds = [
@@ -2853,7 +2853,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           const lifespan = 5000; // 5 seconds
 
           // Check if we're on Level 4 for alternating pattern
-          const isLevel4 = state.currentLevel === 3; // Level 4 is 0-indexed as 3
+          const isLevel4 = state.currentLevel === 4; // Level 4 is 0-indexed as 4
           let directions: { x: number; y: number }[];
 
           if (isLevel4) {
@@ -3282,7 +3282,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             y: Math.sin(angle)
           });
         }
-      } else if (state.currentLevel === 3) { // Level 4 spitter behavior
+      } else if (state.currentLevel === 4) { // Level 4 spitter behavior
         // Check if we're on Level 4 for alternating pattern
         // Increment shot count for this manual fire
         const newShotCount = (snake.shotCount || 0) + 1;
