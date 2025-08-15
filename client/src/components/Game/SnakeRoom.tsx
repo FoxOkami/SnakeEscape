@@ -93,13 +93,13 @@ const SnakeRoom: React.FC = () => {
         }
 
         // Check if we're on level 3 (mirror/light source rotation level)
-        if (gameState_current.currentLevel === 2) {
+        if (gameState_current.currentLevel === 3) {
           // Try to rotate mirror first, then light source
           rotateMirror("clockwise");
           rotateLightSource("clockwise");
           return;
         }
-        if (gameState_current.currentLevel === 3) {
+        if (gameState_current.currentLevel === 4) {
           // Check if we're on the start tile for connection checking
           const playerRect = {
             x: gameState_current.player.position.x,
