@@ -460,6 +460,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       const level = LEVELS[levelIndex];
+      
+      // Debug: Log the original level walls before any processing
+      console.log(`Level ${levelIndex} original walls:`, level.walls.map(w => `(${w.x}, ${w.y}) ${w.width}x${w.height}`));
 
       // Handle Level 1 randomization
       let patternSequence = level.patternSequence
