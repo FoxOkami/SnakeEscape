@@ -1698,7 +1698,7 @@ const GameCanvas: React.FC = () => {
       // No physical light source object is rendered - the lighting is environmental
 
       // Draw player (different color when walking) - except on level 3 where it's drawn after light beam
-      if (currentLevel !== 2) {
+      if (currentLevel !== 3) {
         // Not level 3
         // Implement flashing effect when invincible
         const shouldFlash =

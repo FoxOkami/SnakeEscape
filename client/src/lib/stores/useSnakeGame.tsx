@@ -1946,7 +1946,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     rotateMirror: (direction: "clockwise" | "counterclockwise") => {
       const state = get();
-      if (state.gameState !== "playing" || state.currentLevel !== 2) return; // Only on level 3 (0-indexed)
+      if (state.gameState !== "playing" || state.currentLevel !== 3) return; // Only on level 3 (0-indexed)
 
       // Find mirror within interaction range
       const nearbyMirror = state.mirrors.find((mirror) => {
@@ -1989,7 +1989,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (
         state.gameState !== "playing" ||
-        state.currentLevel !== 2 ||
+        state.currentLevel !== 3 ||
         !state.lightSource
       )
         return; // Only on level 3 (0-indexed)
