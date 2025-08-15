@@ -1423,10 +1423,10 @@ export const useSnakeGame = create<SnakeGameState>()(
 
         // Define all four key room walls (matching levels.ts)
         const keyRoomWallPositions = [
-          { x: 620, y: 320, width: 80, height: 20 }, // top wall
-          { x: 620, y: 380, width: 80, height: 20 }, // bottom wall
-          { x: 620, y: 320, width: 20, height: 80 }, // left wall
-          { x: 680, y: 320, width: 20, height: 80 }, // right wall
+          { x: 610, y: 270, width: 80, height: 20 }, // top wall
+          { x: 610, y: 330, width: 80, height: 20 }, // bottom wall
+          { x: 610, y: 270, width: 20, height: 80 }, // left wall
+          { x: 670, y: 270, width: 20, height: 80 }, // right wall
         ];
 
         const isKeyRoomWall = (wall: any) => {
