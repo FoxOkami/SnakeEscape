@@ -3,6 +3,7 @@ import { useSnakeGame } from "../../lib/stores/useSnakeGame";
 import GameCanvas from "./GameCanvas";
 import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
+import HubRoom from "../Hub/HubRoom";
 
 const SnakeRoom: React.FC = () => {
   const {
@@ -18,7 +19,6 @@ const SnakeRoom: React.FC = () => {
     rotateTile,
     checkPathConnection,
     removeKeyWalls,
-    toggleLightSwitch,
     startLevel,
   } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } =
@@ -148,8 +148,8 @@ const SnakeRoom: React.FC = () => {
 
         // Check if we're on level 5 (light switch level)
         if (gameState_current.currentLevel === 4) {
-          // Try to toggle light switch first
-          toggleLightSwitch();
+          // TODO: Implement light switch functionality
+          // For now, skip light switch functionality
           return;
         }
 
@@ -250,6 +250,11 @@ const SnakeRoom: React.FC = () => {
       document.removeEventListener("click", handleMouseClick);
     };
   }, [gameState, carriedItem, throwItem]);
+
+  // Render HubRoom for hub state, GameCanvas for playing state
+  if (gameState === "hub") {
+    return <HubRoom />;
+  }
 
   return (
     <div
