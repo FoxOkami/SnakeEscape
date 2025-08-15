@@ -1315,11 +1315,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Check if player is stepping on any pattern tile
       for (const tile of updatedPatternTiles) {
         if (checkAABBCollision(playerRect, tile) && !tile.hasBeenActivated) {
-          console.log(`[Pattern Debug] Player stepped on tile ${tile.id} (sequenceIndex: ${tile.sequenceIndex})`);
-          console.log(`[Pattern Debug] Current pattern step: ${updatedCurrentPatternStep}`);
-          console.log(`[Pattern Debug] Expected next sequence index: ${state.patternSequence[updatedCurrentPatternStep]}`);
-          console.log(`[Pattern Debug] Full sequence:`, state.patternSequence);
-          
           // Mark this tile as activated
           const tileIndex = updatedPatternTiles.findIndex(
             (t) => t.id === tile.id,
@@ -1331,21 +1326,18 @@ export const useSnakeGame = create<SnakeGameState>()(
             state.patternSequence[updatedCurrentPatternStep] ===
             tile.sequenceIndex
           ) {
-            console.log(`[Pattern Debug] Correct tile! Advancing to step ${updatedCurrentPatternStep + 1}`);
             updatedCurrentPatternStep++;
 
             // If we've completed the sequence, open the key room
             if (updatedCurrentPatternStep >= state.patternSequence.length) {
-              console.log(`[Pattern Debug] Pattern sequence COMPLETED! Should open key room.`);
               shouldOpenKeyRoom = true;
-              // Start the pattern demonstration again
+              // Reset all tile glowing states
               updatedPatternTiles = updatedPatternTiles.map((t) => ({
                 ...t,
                 isGlowing: false,
               }));
             }
           } else {
-            console.log(`[Pattern Debug] Wrong tile! Resetting pattern.`);
             // Wrong tile pressed, reset the pattern
             updatedCurrentPatternStep = 0;
             updatedPatternTiles = updatedPatternTiles.map((t) => ({
@@ -1358,44 +1350,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
 
-      // Handle pattern demonstration (make tiles glow in sequence)
-      if (state.patternTiles.length > 0 && !shouldOpenKeyRoom) {
-        const currentTime = Date.now();
-        const demonstrationInterval = 1000; // 1 second between each tile
-        const cycleTime =
-          state.patternSequence.length * demonstrationInterval + 2000; // 2 second pause
-        const timeInCycle = currentTime % cycleTime;
-
-        if (
-          timeInCycle <
-          state.patternSequence.length * demonstrationInterval
-        ) {
-          const currentDemoStep = Math.floor(
-            timeInCycle / demonstrationInterval,
-          );
-          const targetSequenceIndex = state.patternSequence[currentDemoStep];
-
-          updatedPatternTiles = updatedPatternTiles.map((tile) => ({
-            ...tile,
-            isGlowing: tile.sequenceIndex === targetSequenceIndex,
-          }));
-        } else {
-          // Pause period - no tiles glowing
-          updatedPatternTiles = updatedPatternTiles.map((tile) => ({
-            ...tile,
-            isGlowing: false,
-          }));
-        }
-      }
+      // No pattern demonstration needed for Level 1 - players figure out the sequence themselves
 
       // Open key room if pattern completed
       if (shouldOpenKeyRoom) {
-        console.log(`[Level 1 Debug] Pattern sequence completed! Opening key room...`);
-        console.log(`[Level 1 Debug] Current walls before removal:`, state.walls.length);
-        
         // Remove all walls of the key room to allow access
         const keyRoomWalls = state.walls.filter((wall) => {
-          // Filter out all four walls of the key chamber (updated coordinates)
+          // Filter out all four walls of the key chamber
           const isTopWall =
             wall.x === 610 &&
             wall.y === 270 &&
@@ -1420,7 +1381,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           return !(isTopWall || isBottomWall || isLeftWall || isRightWall);
         });
         
-        console.log(`[Level 1 Debug] Walls after removal:`, keyRoomWalls.length);
         set({ walls: keyRoomWalls });
       }
 
