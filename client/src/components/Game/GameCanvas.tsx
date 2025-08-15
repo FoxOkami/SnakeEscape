@@ -212,7 +212,7 @@ const GameCanvas: React.FC = () => {
       });
 
       // Draw static help text for Level 1 - always visible
-      if (currentLevel === 0) {
+      if (currentLevel === 1) {
         const centerX = levelSize.width / 2;
         const topY = 50;
 
@@ -501,7 +501,7 @@ const GameCanvas: React.FC = () => {
 
           // Custom symbols for Level 1, numbers for other levels
           let displaySymbol;
-          if (currentLevel === 0) {
+          if (currentLevel === 1) {
             // Use randomized symbols if available, otherwise fall back to default
             let level1Symbols;
             if (randomizedSymbols) {
