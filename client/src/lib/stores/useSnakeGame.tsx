@@ -1603,7 +1603,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Level 3 (light reflection puzzle) - player must have key, crystal activated, and all mirrors used
       if (
-        state.currentLevel === 2 &&
+        state.currentLevel === 3 &&
         updatedPlayer.hasKey &&
         updatedCrystal &&
         updatedCrystal.isActivated
@@ -1621,7 +1621,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
       // Other levels - player must have key and all switches pressed
       else if (
-        state.currentLevel !== 2 &&
+        state.currentLevel !== 3 &&
         state.currentLevel !== 4 &&
         updatedPlayer.hasKey &&
         allSwitchesPressed
