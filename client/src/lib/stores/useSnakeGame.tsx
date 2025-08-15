@@ -519,7 +519,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           invincibilityEndTime: 0,
         },
         snakes: level.snakes.map((snake) => ({ ...snake })),
-        walls: level.walls.map((wall) => ({ ...wall })),
+        walls: JSON.parse(JSON.stringify(level.walls)),
         door: { ...level.door },
         key: { ...level.key },
         switches: levelSwitches,
