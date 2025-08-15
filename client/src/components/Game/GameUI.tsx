@@ -278,12 +278,12 @@ const GameUI: React.FC = () => {
             🪨 Carrying {carriedItem.type} (E to drop{['rock', 'bottle', 'can'].includes(carriedItem.type) ? ', Click to throw' : ''})
           </Badge>
         )}
-        {currentLevel === 2 && crystal && ( // Level 3 (0-indexed as 2)
+        {currentLevel === 3 && crystal && ( // Level 3 (0-indexed as 3)
           <Badge className={`${crystal.isActivated ? 'bg-green-600' : 'bg-red-600'} text-white`}>
             💎 Crystal {crystal.isActivated ? 'Activated' : 'Inactive'}
           </Badge>
         )}
-        {currentLevel === 2 && mirrors && ( // Level 3 mirror status
+        {currentLevel === 3 && mirrors && ( // Level 3 mirror status
           <Badge className={`${mirrors.every(m => m.isReflecting) ? 'bg-green-600' : 'bg-orange-600'} text-white`}>
             🪞 Mirrors {mirrors.filter(m => m.isReflecting).length}/{mirrors.length} Used
           </Badge>

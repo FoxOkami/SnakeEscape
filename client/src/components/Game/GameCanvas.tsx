@@ -75,7 +75,7 @@ const GameCanvas: React.FC = () => {
 
       // Helper function to check if a position is in a dark quadrant (Level 5 only)
       const isInDarkQuadrant = (x: number, y: number): boolean => {
-        if (currentLevel !== 4) return false; // Only Level 5 (0-indexed as 4)
+        if (currentLevel !== 5) return false; // Only Level 5 (0-indexed as 5)
 
         // Define quadrant boundaries based on the cross-shaped walls
         const centerX = 390; // Vertical wall position
@@ -116,8 +116,8 @@ const GameCanvas: React.FC = () => {
       };
 
       // Level 5 quadrant lighting effect with individual logic conditions
-      if (currentLevel === 4) {
-        // Level 5 (0-indexed as 4)
+      if (currentLevel === 5) {
+        // Level 5 (0-indexed as 5)
         // Define quadrant boundaries based on the cross-shaped walls
         const centerX = 390; // Vertical wall position
         const centerY = 290; // Horizontal wall position
@@ -182,7 +182,7 @@ const GameCanvas: React.FC = () => {
 
       // Helper function to check if player is on a tile
       const getPlayerCurrentTile = () => {
-        if (currentLevel !== 3) return null; // Only on Level 4
+        if (currentLevel !== 4) return null; // Only on Level 4
 
         const playerRect = {
           x: player.position.x,
@@ -1258,11 +1258,9 @@ const GameCanvas: React.FC = () => {
           return;
         }
         // Skip drawing snakes on Level 3 - they'll be drawn after mirrors
-        if (currentLevel === 2) {
+        if (currentLevel === 3) {
           return;
         }
-        
-        console.log(`[Snake Render Debug] Rendering snake ${snake.id} of type ${snake.type} on level ${currentLevel}`);
         // Skip rendering phase-restricted snakes that aren't in their active phase
         // For now, render all snakes (phase system can be enhanced later)
         // if (snake.activePhase && currentLevel === 4 && snake.activePhase !== currentPhase) {
@@ -1889,7 +1887,7 @@ const GameCanvas: React.FC = () => {
       });
 
       // Draw snakes on Level 3 after mirrors (so they appear on top)
-      if (currentLevel === 2) {
+      if (currentLevel === 3) {
         snakes.forEach((snake) => {
           // Skip drawing rattlesnakes that are in the pit
           if (snake.type === "rattlesnake" && snake.isInPit) {
