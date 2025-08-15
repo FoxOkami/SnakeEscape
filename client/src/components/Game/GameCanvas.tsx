@@ -1261,6 +1261,8 @@ const GameCanvas: React.FC = () => {
         if (currentLevel === 2) {
           return;
         }
+        
+        console.log(`[Snake Render Debug] Rendering snake ${snake.id} of type ${snake.type} on level ${currentLevel}`);
         // Skip rendering phase-restricted snakes that aren't in their active phase
         // For now, render all snakes (phase system can be enhanced later)
         // if (snake.activePhase && currentLevel === 4 && snake.activePhase !== currentPhase) {
