@@ -173,8 +173,8 @@ export const LEVELS: Level[] = [
         isChasing: false,
       }
     ],
-    doors: [],
-    keys: [],
+    door: { x: 0, y: 0, width: 30, height: 40, isOpen: false },
+    key: { x: 0, y: 0, width: 20, height: 20, collected: false },
     switches: [],
     items: [],
     patternTiles: [],
@@ -265,6 +265,8 @@ export const LEVELS: Level[] = [
     door: { x: 770, y: 280, width: 30, height: 40, isOpen: false },
     key: { x: 640, y: 300, width: 20, height: 20, collected: false }, // Key in small chamber
     patternTiles: [
+      // These will be randomized by the randomizeLevel1() function
+      // Default positions that will be shuffled
       {
         id: "tile1",
         x: 80,
@@ -276,7 +278,7 @@ export const LEVELS: Level[] = [
         hasBeenActivated: false,
       },
       {
-        id: "tile2",
+        id: "tile2", 
         x: 250,
         y: 80,
         width: 40,
@@ -356,7 +358,7 @@ export const LEVELS: Level[] = [
         hasBeenActivated: false,
       },
     ],
-    patternSequence: [0, 2, 4, 6, 8, 7, 5, 3, 1], // Pattern: corners first, then reverse spiral
+    patternSequence: [0, 1, 2, 3, 4, 5, 6, 7, 8], // Default sequence, will be overridden by randomization
     throwableItems: [],
   },
 
