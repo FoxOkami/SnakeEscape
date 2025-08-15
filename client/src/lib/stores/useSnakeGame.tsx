@@ -446,7 +446,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       setTimeout(() => {
         const currentState = get();
         if (
-          currentState.currentLevel === 0 &&
+          currentState.currentLevel === 1 &&
           currentState.gameState === "playing"
         ) {
           currentState.showHint();
@@ -964,8 +964,8 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Calculate quadrant lighting for photophobic snakes (Level 5)
       let quadrantLighting = {};
-      if (state.currentLevel === 4) {
-        // Level 5 (0-indexed as 4)
+      if (state.currentLevel === 5) {
+        // Level 5 (0-indexed as 5)
         const A =
           state.switches.find((s) => s.id === "light_switch")?.isPressed ||
           false;
@@ -1385,7 +1385,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Handle key room walls for level 2 pressure plates
-      if (state.currentLevel === 2) {
+      if (state.currentLevel === 3) {
         // Level 2 uses pressure plates (MacGruber level)
         const pressurePlates = updatedSwitches.filter((s) =>
           s.id.startsWith("pressure"),
@@ -1429,7 +1429,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Handle Level 5 progressive wall removal switches
-      if (state.currentLevel === 5) {
+      if (state.currentLevel === 6) {
         // Level 5 (0-indexed)
         const middleSwitch = updatedSwitches.find(
           (s) => s.id === "middle_switch",
@@ -1548,7 +1548,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Handle Level 3 crystal activation - dynamic wall state based on light beam and mirror usage
-      if (state.currentLevel === 2 && updatedCrystal) {
+      if (state.currentLevel === 3 && updatedCrystal) {
         // Define all four key room walls for Level 3
         const keyRoomWalls = [
           { x: 660, y: 270, width: 80, height: 20 }, // Top wall
@@ -1616,13 +1616,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
       // Level 5 (logic gate puzzle) - player only needs the key
-      else if (state.currentLevel === 4 && updatedPlayer.hasKey) {
+      else if (state.currentLevel === 5 && updatedPlayer.hasKey) {
         updatedDoor = { ...state.door, isOpen: true };
       }
       // Other levels - player must have key and all switches pressed
       else if (
         state.currentLevel !== 3 &&
-        state.currentLevel !== 4 &&
+        state.currentLevel !== 5 &&
         updatedPlayer.hasKey &&
         allSwitchesPressed
       ) {
@@ -1638,8 +1638,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- LEVEL 6 BOULDER MECHANICS ---
       // Check if all boulders are destroyed and spawn key if needed
       let updatedBoulders = state.boulders;
-      if (state.currentLevel === 5 && state.boulders.length > 0) {
-        // Level 6 (0-indexed as 5)
+      if (state.currentLevel === 6 && state.boulders.length > 0) {
+        // Level 6 (0-indexed as 6)
         const destroyedBoulders = state.boulders.filter(boulder => boulder.isDestroyed);
         const allBouldersDestroyed = destroyedBoulders.length === state.boulders.length;
         

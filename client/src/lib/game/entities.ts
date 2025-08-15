@@ -482,7 +482,7 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   }
   
   // Only move on level 4
-  if (gameState.currentLevel !== 3) {
+  if (gameState.currentLevel !== 4) {
     return snake; // Level 4 is 0-indexed as 3
   }
 
@@ -653,7 +653,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
   let isDark = false;
   
   if (gameState) {
-    if (gameState.currentLevel === 4) {
+    if (gameState.currentLevel === 5) {
       // Level 5 (0-indexed as 4) - Use quadrant-based lighting
       if (gameState.quadrantLighting) {
         const lighting = gameState.quadrantLighting;
@@ -667,7 +667,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
           isDark = !lighting.bottomRight;
         }
       }
-    } else if (gameState.currentLevel === 5) {
+    } else if (gameState.currentLevel === 6) {
       // Level 6 (0-indexed as 5) - Use boulder-based full-map lighting
       // ON → OFF (1st) → ON (2nd) → OFF (3rd) → ON (4th)
       const destroyedBoulders = gameState.boulders?.filter((boulder: any) => boulder.isDestroyed) || [];
@@ -720,7 +720,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
     snake.chargeDirection = undefined; // Clear any previous charge direction
 
     // Level 6 specific behavior: return to spawn when player is walking OR when no sounds to chase
-    if (gameState && gameState.currentLevel === 5 && snake.spawnPoint) {
+    if (gameState && gameState.currentLevel === 6 && snake.spawnPoint) {
       const hasCurrentSounds = sounds && sounds.length > 0;
       const playerIsWalking = gameState.player && gameState.player.isWalking;
       
@@ -782,7 +782,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
     }
 
     // For non-Level 6 snakes, also check for audio pause when losing sounds
-    if (gameState && gameState.currentLevel !== 5) {
+    if (gameState && gameState.currentLevel !== 6) {
       const currentlyHearingPlayer = !!nearestSound;
       if (snake.wasHearingPlayer && !currentlyHearingPlayer && !snake.isAudioPaused) {
         // Snake was hearing player but now isn't - trigger 500ms pause
