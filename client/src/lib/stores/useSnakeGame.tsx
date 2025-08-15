@@ -3526,7 +3526,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Check for light beam intersection with pits (Level 3 only) - improved line-circle intersection
       const lightBeamHitsPit = (pit: any) => {
         if (
-          state.currentLevel !== 2 ||
+          state.currentLevel !== 3 ||
           !state.lightBeam ||
           !state.lightBeam.segments ||
           state.lightBeam.segments.length < 2
