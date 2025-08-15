@@ -1429,7 +1429,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Handle Level 5 progressive wall removal switches
-      if (state.currentLevel === 4) {
+      if (state.currentLevel === 5) {
         // Level 5 (0-indexed)
         const middleSwitch = updatedSwitches.find(
           (s) => s.id === "middle_switch",
@@ -4083,8 +4083,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Evaluate logic puzzle and update key walls for Level 5
-      if (state.currentLevel === 4) {
-        // Level 5 (0-indexed as 4)
+      if (state.currentLevel === 5) {
+        // Level 5 (0-indexed as 5)
         get().evaluateLogicPuzzle(updatedSwitches);
       }
 
