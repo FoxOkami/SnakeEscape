@@ -1315,6 +1315,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Check if player is stepping on any pattern tile
       for (const tile of updatedPatternTiles) {
         if (checkAABBCollision(playerRect, tile) && !tile.hasBeenActivated) {
+          console.log(`[Pattern Debug] Player stepped on tile ${tile.id} (sequenceIndex: ${tile.sequenceIndex})`);
+          console.log(`[Pattern Debug] Current pattern step: ${updatedCurrentPatternStep}`);
+          console.log(`[Pattern Debug] Expected next sequence index: ${state.patternSequence[updatedCurrentPatternStep]}`);
+          console.log(`[Pattern Debug] Full sequence:`, state.patternSequence);
+          
           // Mark this tile as activated
           const tileIndex = updatedPatternTiles.findIndex(
             (t) => t.id === tile.id,
@@ -1326,10 +1331,12 @@ export const useSnakeGame = create<SnakeGameState>()(
             state.patternSequence[updatedCurrentPatternStep] ===
             tile.sequenceIndex
           ) {
+            console.log(`[Pattern Debug] Correct tile! Advancing to step ${updatedCurrentPatternStep + 1}`);
             updatedCurrentPatternStep++;
 
             // If we've completed the sequence, open the key room
             if (updatedCurrentPatternStep >= state.patternSequence.length) {
+              console.log(`[Pattern Debug] Pattern sequence COMPLETED! Should open key room.`);
               shouldOpenKeyRoom = true;
               // Start the pattern demonstration again
               updatedPatternTiles = updatedPatternTiles.map((t) => ({
@@ -1338,6 +1345,7 @@ export const useSnakeGame = create<SnakeGameState>()(
               }));
             }
           } else {
+            console.log(`[Pattern Debug] Wrong tile! Resetting pattern.`);
             // Wrong tile pressed, reset the pattern
             updatedCurrentPatternStep = 0;
             updatedPatternTiles = updatedPatternTiles.map((t) => ({
@@ -1382,6 +1390,9 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Open key room if pattern completed
       if (shouldOpenKeyRoom) {
+        console.log(`[Level 1 Debug] Pattern sequence completed! Opening key room...`);
+        console.log(`[Level 1 Debug] Current walls before removal:`, state.walls.length);
+        
         // Remove all walls of the key room to allow access
         const keyRoomWalls = state.walls.filter((wall) => {
           // Filter out all four walls of the key chamber (updated coordinates)
@@ -1408,32 +1419,27 @@ export const useSnakeGame = create<SnakeGameState>()(
 
           return !(isTopWall || isBottomWall || isLeftWall || isRightWall);
         });
+        
+        console.log(`[Level 1 Debug] Walls after removal:`, keyRoomWalls.length);
         set({ walls: keyRoomWalls });
       }
 
-      // Handle key room walls for level 1 "Shallow Peaks and Low Valleys"
-      if (state.currentLevel === 1) {
-        // Level 1 (0-indexed)
+      // Handle key room walls for level 2 pressure plates
+      if (state.currentLevel === 2) {
+        // Level 2 uses pressure plates (MacGruber level)
         const pressurePlates = updatedSwitches.filter((s) =>
           s.id.startsWith("pressure"),
         );
-        
-        console.log(`[Level 1 Debug] Current level: ${state.currentLevel}`);
-        console.log(`[Level 1 Debug] Pressure plates found:`, pressurePlates.length);
-        console.log(`[Level 1 Debug] Pressure plate states:`, pressurePlates.map(p => ({ id: p.id, isPressed: p.isPressed })));
-        
         const allPressurePlatesActive =
           pressurePlates.length === 3 &&
           pressurePlates.every((p) => p.isPressed);
 
-        console.log(`[Level 1 Debug] All pressure plates active: ${allPressurePlatesActive}`);
-
-        // Define all four key room walls (matching levels.ts)
+        // Define all four key room walls for Level 2 (different coordinates than Level 1)
         const keyRoomWallPositions = [
-          { x: 610, y: 270, width: 80, height: 20 }, // top wall
-          { x: 610, y: 330, width: 80, height: 20 }, // bottom wall
-          { x: 610, y: 270, width: 20, height: 80 }, // left wall
-          { x: 670, y: 270, width: 20, height: 80 }, // right wall
+          { x: 620, y: 320, width: 80, height: 20 }, // top wall
+          { x: 620, y: 380, width: 80, height: 20 }, // bottom wall
+          { x: 620, y: 320, width: 20, height: 80 }, // left wall
+          { x: 680, y: 320, width: 20, height: 80 }, // right wall
         ];
 
         const isKeyRoomWall = (wall: any) => {
@@ -1451,17 +1457,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           isKeyRoomWall(wall),
         );
 
-        console.log(`[Level 1 Debug] Key room walls exist: ${keyRoomWallsExist}`);
-        console.log(`[Level 1 Debug] Current walls count: ${state.walls.length}`);
-
         if (allPressurePlatesActive && keyRoomWallsExist) {
-          console.log(`[Level 1 Debug] Removing key room walls!`);
           // Remove all key room walls
           const newWalls = state.walls.filter((wall) => !isKeyRoomWall(wall));
-          console.log(`[Level 1 Debug] Walls after removal: ${newWalls.length}`);
           set({ walls: newWalls });
         } else if (!allPressurePlatesActive && !keyRoomWallsExist) {
-          console.log(`[Level 1 Debug] Adding key room walls back!`);
           // Add all key room walls back if not all pressure plates are active
           const newWalls = [...state.walls, ...keyRoomWallPositions];
           set({ walls: newWalls });
