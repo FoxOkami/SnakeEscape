@@ -1385,7 +1385,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Handle key room walls for level 2 pressure plates
-      if (state.currentLevel === 3) {
+      if (state.currentLevel === 2) {
         // Level 2 uses pressure plates (MacGruber level)
         const pressurePlates = updatedSwitches.filter((s) =>
           s.id.startsWith("pressure"),
