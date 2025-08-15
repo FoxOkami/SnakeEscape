@@ -1411,15 +1411,22 @@ export const useSnakeGame = create<SnakeGameState>()(
         set({ walls: keyRoomWalls });
       }
 
-      // Handle key room walls for level 2 pressure plates
+      // Handle key room walls for level 1 "Shallow Peaks and Low Valleys"
       if (state.currentLevel === 1) {
-        // Level 2 (0-indexed)
+        // Level 1 (0-indexed)
         const pressurePlates = updatedSwitches.filter((s) =>
           s.id.startsWith("pressure"),
         );
+        
+        console.log(`[Level 1 Debug] Current level: ${state.currentLevel}`);
+        console.log(`[Level 1 Debug] Pressure plates found:`, pressurePlates.length);
+        console.log(`[Level 1 Debug] Pressure plate states:`, pressurePlates.map(p => ({ id: p.id, isPressed: p.isPressed })));
+        
         const allPressurePlatesActive =
           pressurePlates.length === 3 &&
           pressurePlates.every((p) => p.isPressed);
+
+        console.log(`[Level 1 Debug] All pressure plates active: ${allPressurePlatesActive}`);
 
         // Define all four key room walls (matching levels.ts)
         const keyRoomWallPositions = [
@@ -1444,11 +1451,17 @@ export const useSnakeGame = create<SnakeGameState>()(
           isKeyRoomWall(wall),
         );
 
+        console.log(`[Level 1 Debug] Key room walls exist: ${keyRoomWallsExist}`);
+        console.log(`[Level 1 Debug] Current walls count: ${state.walls.length}`);
+
         if (allPressurePlatesActive && keyRoomWallsExist) {
+          console.log(`[Level 1 Debug] Removing key room walls!`);
           // Remove all key room walls
           const newWalls = state.walls.filter((wall) => !isKeyRoomWall(wall));
+          console.log(`[Level 1 Debug] Walls after removal: ${newWalls.length}`);
           set({ walls: newWalls });
         } else if (!allPressurePlatesActive && !keyRoomWallsExist) {
+          console.log(`[Level 1 Debug] Adding key room walls back!`);
           // Add all key room walls back if not all pressure plates are active
           const newWalls = [...state.walls, ...keyRoomWallPositions];
           set({ walls: newWalls });
