@@ -99,7 +99,7 @@ const SnakeRoom: React.FC = () => {
           rotateLightSource("clockwise");
           return;
         }
-        if (gameState_current.currentLevel === 5) {
+        if (gameState_current.currentLevel === 4) {
           // Check if we're on the start tile for connection checking
           const playerRect = {
             x: gameState_current.player.position.x,
