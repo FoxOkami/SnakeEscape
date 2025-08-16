@@ -3408,8 +3408,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         walls = [...walls, ...activePhaseWalls];
       }
 
-      // Level 6 (currentLevel === 5): Add non-destroyed boulders as walls
-      if (state.currentLevel === 5 && state.boulders.length > 0) {
+      // Level 6: Add non-destroyed boulders as walls
+      if (state.currentLevel === 6 && state.boulders.length > 0) {
         const boulderWalls = state.boulders
           .filter((boulder) => !boulder.isDestroyed)
           .map((boulder) => ({
