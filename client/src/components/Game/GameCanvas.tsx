@@ -380,7 +380,7 @@ const GameCanvas: React.FC = () => {
       // Draw pattern tiles
       patternTiles.forEach((tile) => {
         // Base tile color - no highlighting for Level 1
-        if (currentLevel === 0) {
+        if (currentLevel === 1) {
           // Level 1: No yellow highlighting, just gray or green
           if (tile.hasBeenActivated) {
             ctx.fillStyle = "#48bb78"; // Green when activated correctly
