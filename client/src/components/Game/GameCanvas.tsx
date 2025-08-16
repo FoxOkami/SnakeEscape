@@ -2472,8 +2472,8 @@ const GameCanvas: React.FC = () => {
       }
 
       // Level 5 darkness overlay - makes dark quadrants 90% darker (applied on top of everything)
-      if (currentLevel === 4) {
-        // Level 5 (0-indexed as 4)
+      if (currentLevel === 5) {
+        // Level 5 (0-indexed as 5)
         // Define quadrant boundaries based on the cross-shaped walls
         const centerX = 390; // Vertical wall position
         const centerY = 290; // Horizontal wall position
