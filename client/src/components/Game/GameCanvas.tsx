@@ -182,7 +182,7 @@ const GameCanvas: React.FC = () => {
 
       // Helper function to check if player is on a tile
       const getPlayerCurrentTile = () => {
-        if (currentLevel !== 5) return null; // Only on Level 4
+        if (currentLevel !== 4) return null; // Only on Level 4
 
         const playerRect = {
           x: player.position.x,
