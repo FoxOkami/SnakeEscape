@@ -20,6 +20,7 @@ const SnakeRoom: React.FC = () => {
     checkPathConnection,
     removeKeyWalls,
     startLevel,
+    toggleLightSwitch,
   } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } =
     useAudio();
