@@ -75,7 +75,7 @@ const GameCanvas: React.FC = () => {
 
       // Helper function to check if a position is in a dark quadrant (Level 5 only)
       const isInDarkQuadrant = (x: number, y: number): boolean => {
-        if (currentLevel !== 4) return false; // Only Level 5 (0-indexed as 4)
+        if (currentLevel !== 5) return false; // Only Level 5
 
         // Define quadrant boundaries based on the cross-shaped walls
         const centerX = 390; // Vertical wall position
@@ -116,8 +116,8 @@ const GameCanvas: React.FC = () => {
       };
 
       // Level 5 quadrant lighting effect with individual logic conditions
-      if (currentLevel === 4) {
-        // Level 5 (0-indexed as 4)
+      if (currentLevel === 5) {
+        // Level 5
         // Define quadrant boundaries based on the cross-shaped walls
         const centerX = 390; // Vertical wall position
         const centerY = 290; // Horizontal wall position
@@ -1539,8 +1539,8 @@ const GameCanvas: React.FC = () => {
         if (snake.type !== "stalker") {
           // Check if snake is in dark quadrant on level 5 for yellow eyes
           let finalEyeColor = eyeColor;
-          if (currentLevel === 4) {
-            // Level 5 (0-indexed as 4)
+          if (currentLevel === 5) {
+            // Level 5
             const snakeCenterX = snake.position.x + snake.size.width / 2;
             const snakeCenterY = snake.position.y + snake.size.height / 2;
 
@@ -2472,8 +2472,8 @@ const GameCanvas: React.FC = () => {
       }
 
       // Level 5 darkness overlay - makes dark quadrants 90% darker (applied on top of everything)
-      if (currentLevel === 4) {
-        // Level 5 (0-indexed as 4)
+      if (currentLevel === 5) {
+        // Level 5
         // Define quadrant boundaries based on the cross-shaped walls
         const centerX = 390; // Vertical wall position
         const centerY = 290; // Horizontal wall position
