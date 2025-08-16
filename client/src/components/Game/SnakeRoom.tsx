@@ -57,13 +57,13 @@ const SnakeRoom: React.FC = () => {
       if (event.code === "KeyQ") {
         event.preventDefault();
         const gameState_current = useSnakeGame.getState();
-        if (gameState_current.currentLevel === 3) {
+        if (gameState_current.currentLevelKey === "light_reflection") {
           // Try to rotate mirror first, then light source
           rotateMirror("counterclockwise");
           rotateLightSource("counterclockwise");
           return;
         }
-        if (gameState_current.currentLevel === 4) {
+        if (gameState_current.currentLevelKey === "grid_puzzle") {
           // Rotate tile left on level 4
           rotateTile("left");
           return;
@@ -77,7 +77,7 @@ const SnakeRoom: React.FC = () => {
 
         // Check if we're on level 0 (hub) for Game Master interaction
         const gameState_current = useSnakeGame.getState();
-        if (gameState_current.currentLevel === 1) {
+        if (gameState_current.currentLevelKey === "hub") {
           // Check if player is near Game Master
           const gameMaster = gameState_current.snakes.find(snake => snake.id === "game_master");
           if (gameMaster) {
@@ -94,13 +94,13 @@ const SnakeRoom: React.FC = () => {
         }
 
         // Check if we're on level 3 (mirror/light source rotation level)
-        if (gameState_current.currentLevel === 3) {
+        if (gameState_current.currentLevelKey === "light_reflection") {
           // Try to rotate mirror first, then light source
           rotateMirror("clockwise");
           rotateLightSource("clockwise");
           return;
         }
-        if (gameState_current.currentLevel === 4) {
+        if (gameState_current.currentLevelKey === "grid_puzzle") {
           // Check if we're on the start tile for connection checking
           const playerRect = {
             x: gameState_current.player.position.x,
@@ -148,7 +148,7 @@ const SnakeRoom: React.FC = () => {
         }
 
         // Check if we're on level 5 (light switch level)
-        if (gameState_current.currentLevel === 5) {
+        if (gameState_current.currentLevelKey === "light_switch") {
           // Light switch functionality - toggle lever switches
           toggleLightSwitch();
           return;

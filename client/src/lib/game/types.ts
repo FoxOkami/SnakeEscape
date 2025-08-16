@@ -373,6 +373,7 @@ export interface MiniBoulder {
 export interface Level {
   id: number;
   name: string;
+  levelKey: string; // Semantic identifier for code checks
   player: Position;
   walls: Wall[];
   snakes: Snake[];
@@ -405,6 +406,7 @@ export interface HintState {
 
 export interface GameData {
   currentLevel: number;
+  currentLevelKey: string;
   gameState: GameState;
   player: Player;
   snakes: Snake[];

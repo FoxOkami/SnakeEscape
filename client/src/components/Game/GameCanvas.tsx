@@ -33,6 +33,7 @@ const GameCanvas: React.FC = () => {
     lightSource,
     lightBeam,
     currentLevel,
+    currentLevelKey,
     getTileDirections,
     flowState,
     updateFlow,
@@ -75,7 +76,7 @@ const GameCanvas: React.FC = () => {
 
       // Helper function to check if a position is in a dark quadrant (Level 5 only)
       const isInDarkQuadrant = (x: number, y: number): boolean => {
-        if (currentLevel !== 5) return false; // Only Level 5
+        if (currentLevelKey !== "light_switch") return false; // Only Level 5
 
         // Define quadrant boundaries based on the cross-shaped walls
         const centerX = 390; // Vertical wall position
@@ -116,7 +117,7 @@ const GameCanvas: React.FC = () => {
       };
 
       // Level 5 quadrant lighting effect with individual logic conditions
-      if (currentLevel === 5) {
+      if (currentLevelKey === "light_switch") {
         // Level 5
         // Define quadrant boundaries based on the cross-shaped walls
         const centerX = 390; // Vertical wall position
@@ -182,7 +183,7 @@ const GameCanvas: React.FC = () => {
 
       // Helper function to check if player is on a tile
       const getPlayerCurrentTile = () => {
-        if (currentLevel !== 4) return null; // Only on Level 4
+        if (currentLevelKey !== "grid_puzzle") return null; // Only on Level 4
 
         const playerRect = {
           x: player.position.x,
@@ -216,7 +217,7 @@ const GameCanvas: React.FC = () => {
       });
 
       // Draw static help text for Level 1 - always visible
-      if (currentLevel === 1) {
+      if (currentLevelKey === "pattern_memory") {
         const centerX = levelSize.width / 2;
         const topY = 50;
 
@@ -380,7 +381,7 @@ const GameCanvas: React.FC = () => {
       // Draw pattern tiles
       patternTiles.forEach((tile) => {
         // Base tile color - no highlighting for Level 1
-        if (currentLevel === 1) {
+        if (currentLevelKey === "pattern_memory") {
           // Level 1: No yellow highlighting, just gray or green
           if (tile.hasBeenActivated) {
             ctx.fillStyle = "#48bb78"; // Green when activated correctly
@@ -407,7 +408,7 @@ const GameCanvas: React.FC = () => {
         // Add highlight overlay for rotatable tiles with 20% opacity
         // Only show highlight on Level 4 and exclude start/end tiles
         if (
-          currentLevel === 4 &&
+          currentLevelKey === "grid_puzzle" &&
           currentTile &&
           currentTile.id === tile.id &&
           levels[currentLevel]
@@ -505,7 +506,7 @@ const GameCanvas: React.FC = () => {
 
           // Custom symbols for Level 1, numbers for other levels
           let displaySymbol;
-          if (currentLevel === 1) {
+          if (currentLevelKey === "pattern_memory") {
             // Use randomized symbols if available, otherwise fall back to default
             let level1Symbols;
             if (randomizedSymbols) {
@@ -638,7 +639,7 @@ const GameCanvas: React.FC = () => {
       });
 
       // Draw flow visualization for Level 4
-      if (flowState && currentLevel === 4) {
+      if (flowState && currentLevelKey === "grid_puzzle") {
         // Set up neon green flow line
         ctx.strokeStyle = "#00ff00";
         ctx.lineWidth = 6;
@@ -1026,7 +1027,7 @@ const GameCanvas: React.FC = () => {
       }
 
       // Draw teleporters (Level 5 only - before snakes so they appear under snakes)
-      if (currentLevel === 5) {
+      if (currentLevelKey === "light_switch") {
         // Level 5 (0-indexed as 4)
         teleporters.forEach((teleporter) => {
           if (teleporter.type === "sender") {
@@ -1187,7 +1188,7 @@ const GameCanvas: React.FC = () => {
       });
 
       // Draw boulders (Level 6 only)
-      if (currentLevel === 6) {
+      if (currentLevelKey === "boss_valerie") {
         // Level 6 (0-indexed as 5)
         boulders.forEach((boulder) => {
           if (boulder.isDestroyed) return; // Don't draw destroyed boulders
@@ -1258,12 +1259,12 @@ const GameCanvas: React.FC = () => {
           return;
         }
         // Skip drawing snakes on Level 3 - they'll be drawn after mirrors
-        if (currentLevel === 4) {
+        if (currentLevelKey === "grid_puzzle") {
           return;
         }
         // Skip rendering phase-restricted snakes that aren't in their active phase
         // For now, render all snakes (phase system can be enhanced later)
-        // if (snake.activePhase && currentLevel === 5 && snake.activePhase !== currentPhase) {
+        // if (snake.activePhase && currentLevelKey === "light_switch" && snake.activePhase !== currentPhase) {
         //   return; // Don't render this snake
         // }
         let baseColor = "#2d3748";
@@ -1539,7 +1540,7 @@ const GameCanvas: React.FC = () => {
         if (snake.type !== "stalker") {
           // Check if snake is in dark quadrant on level 5 for yellow eyes
           let finalEyeColor = eyeColor;
-          if (currentLevel === 5) {
+          if (currentLevelKey === "light_switch") {
             // Level 5
             const snakeCenterX = snake.position.x + snake.size.width / 2;
             const snakeCenterY = snake.position.y + snake.size.height / 2;
@@ -1698,7 +1699,7 @@ const GameCanvas: React.FC = () => {
       // No physical light source object is rendered - the lighting is environmental
 
       // Draw player (different color when walking) - except on level 3 where it's drawn after light beam
-      if (currentLevel !== 3) {
+      if (currentLevelKey !== "light_reflection") {
         // Not level 3
         // Implement flashing effect when invincible
         const shouldFlash =
@@ -1780,7 +1781,7 @@ const GameCanvas: React.FC = () => {
       };
 
       // Show tooltips for Level 4 tiles
-      if (currentLevel === 4 && currentTile && levels[currentLevel]) {
+      if (currentLevelKey === "grid_puzzle" && currentTile && levels[currentLevel]) {
         const currentLevelData = levels[currentLevel];
         const startTileId = currentLevelData.startTilePos
           ? `grid_tile_${currentLevelData.startTilePos.row}_${currentLevelData.startTilePos.col}`
@@ -1887,7 +1888,7 @@ const GameCanvas: React.FC = () => {
       });
 
       // Draw snakes on Level 3 after mirrors (so they appear on top)
-      if (currentLevel === 4) {
+      if (currentLevelKey === "grid_puzzle") {
         snakes.forEach((snake) => {
           // Skip drawing rattlesnakes that are in the pit
           if (snake.type === "rattlesnake" && snake.isInPit) {
@@ -2180,7 +2181,7 @@ const GameCanvas: React.FC = () => {
       // Draw crystal
       if (crystal) {
         // On level 3, draw crystal as diamond shape like light source
-        if (currentLevel === 3) {
+        if (currentLevelKey === "light_reflection") {
           // Level 3 (0-indexed as 3)
           const centerX = crystal.x + crystal.width / 2;
           const centerY = crystal.y + crystal.height / 2;
@@ -2304,7 +2305,7 @@ const GameCanvas: React.FC = () => {
       }
 
       // Draw light source rhombus (Level 3 only)
-      if (currentLevel === 3 && lightSource) {
+      if (currentLevelKey === "light_reflection" && lightSource) {
         // Level 3 (0-indexed as 3)
         const centerX = lightSource.x;
         const centerY = lightSource.y;
@@ -2339,7 +2340,7 @@ const GameCanvas: React.FC = () => {
       }
 
       // Draw player on top of light beam and mirrors (Level 3 only)
-      if (currentLevel === 3) {
+      if (currentLevelKey === "light_reflection") {
         // Level 3 (0-indexed as 3)
         // Implement flashing effect when invincible
         const shouldFlash =
@@ -2404,7 +2405,7 @@ const GameCanvas: React.FC = () => {
       }
 
       // Draw puzzle shards (Level 5)
-      if (currentLevel === 5) {
+      if (currentLevelKey === "light_switch") {
         // Level 5 (0-indexed as 4)
         puzzleShards.forEach((shard) => {
           if (!shard.collected) {
@@ -2472,7 +2473,7 @@ const GameCanvas: React.FC = () => {
       }
 
       // Level 5 darkness overlay - makes dark quadrants 90% darker (applied on top of everything)
-      if (currentLevel === 5) {
+      if (currentLevelKey === "light_switch") {
         // Level 5
         // Define quadrant boundaries based on the cross-shaped walls
         const centerX = 390; // Vertical wall position
@@ -2840,7 +2841,7 @@ const GameCanvas: React.FC = () => {
       }
 
       // Level 6 full-map lighting effect based on boulder destruction count
-      if (currentLevel === 6) {
+      if (currentLevelKey === "boss_valerie") {
         // Level 6 (0-indexed as 5)
         const destroyedBoulders = boulders.filter(boulder => boulder.isDestroyed);
         const destroyedCount = destroyedBoulders.length;

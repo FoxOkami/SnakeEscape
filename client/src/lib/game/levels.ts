@@ -142,11 +142,25 @@ function getRandomizedLevel2PressurePlatePositions(): Array<{
   return shuffled.slice(0, 3);
 }
 
+// Helper functions for level key management
+export function getLevelByKey(levelKey: string): Level | undefined {
+  return LEVELS.find(level => level.levelKey === levelKey);
+}
+
+export function getLevelIndexByKey(levelKey: string): number {
+  return LEVELS.findIndex(level => level.levelKey === levelKey);
+}
+
+export function getLevelKeyByIndex(levelIndex: number): string {
+  return LEVELS[levelIndex]?.levelKey || 'hub';
+}
+
 export const LEVELS: Level[] = [
   // Level 0: Hub Room
   {
     id: 0,
     name: "Snake Room Hub",
+    levelKey: "hub",
     player: { x: 400, y: 300 },
     size: { width: 800, height: 600 },
     walls: [
@@ -191,6 +205,7 @@ export const LEVELS: Level[] = [
   {
     id: 1,
     name: "Shallow Peaks and Low Valleys",
+    levelKey: "pattern_memory",
     player: { x: 35, y: 135 },
     size: { width: 800, height: 600 },
     walls: [
@@ -366,6 +381,7 @@ export const LEVELS: Level[] = [
   {
     id: 2,
     name: "MacGruber",
+    levelKey: "item_collection",
     player: { x: 30, y: 300 },
     size: { width: 800, height: 600 },
     walls: [
@@ -532,6 +548,7 @@ export const LEVELS: Level[] = [
   {
     id: 3,
     name: "The Canyon",
+    levelKey: "light_reflection",
     player: { x: 25, y: 25 },
     size: { width: 800, height: 600 },
     walls: [
@@ -791,6 +808,7 @@ export const LEVELS: Level[] = [
     return {
       id: 4,
       name: "Alignment Issues",
+      levelKey: "grid_puzzle",
       player: { x: 80, y: 530 },
       size: { width: 800, height: 600 },
       startTilePos: { row: startRow, col: startCol },
@@ -1032,6 +1050,7 @@ export const LEVELS: Level[] = [
   {
     id: 5,
     name: "Amish Corner",
+    levelKey: "light_switch",
     player: { x: 25, y: 315 },
     size: { width: 800, height: 600 },
     walls: [
@@ -1369,6 +1388,7 @@ export const LEVELS: Level[] = [
   {
     id: 6,
     name: "Skate Rink",
+    levelKey: "boss_valerie",
     player: { x: 680, y: 540 },
     size: { width: 800, height: 600 },
     walls: [

@@ -21,7 +21,7 @@ import {
   Boulder,
   MiniBoulder,
 } from "../game/types";
-import { LEVELS, randomizeLevel2 } from "../game/levels";
+import { LEVELS, randomizeLevel2, getLevelKeyByIndex } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
 import { updateSnake } from "../game/entities";
 import { calculateLightBeam } from "../game/lightBeam";
@@ -253,6 +253,7 @@ export const useSnakeGame = create<SnakeGameState>()(
   subscribeWithSelector((set, get) => ({
     // Initial state
     currentLevel: 0,
+    currentLevelKey: "hub",
     gameState: "hub",
     levels: LEVELS, // Add levels to store
     player: {
@@ -380,6 +381,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       set({
         currentLevel: 0,
+        currentLevelKey: "hub",
         gameState: "playing",
         player: {
           position: { ...level.player },
@@ -446,7 +448,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       setTimeout(() => {
         const currentState = get();
         if (
-          currentState.currentLevel === 1 &&
+          currentState.currentLevelKey === "pattern_memory" &&
           currentState.gameState === "playing"
         ) {
           currentState.showHint();
@@ -508,6 +510,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       set({
         currentLevel: levelIndex,
+        currentLevelKey: getLevelKeyByIndex(levelIndex),
         gameState: "playing",
         player: {
           position: { ...level.player },
@@ -578,7 +581,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         setTimeout(() => {
           const currentState = get();
           if (
-            currentState.currentLevel === 1 &&
+            currentState.currentLevelKey === "pattern_memory" &&
             currentState.gameState === "playing"
           ) {
             currentState.showHint();
@@ -689,6 +692,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       set({
         currentLevel: nextLevelIndex,
+        currentLevelKey: getLevelKeyByIndex(nextLevelIndex),
         gameState: "playing",
         player: {
           position: { ...level.player },
@@ -964,7 +968,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Calculate quadrant lighting for photophobic snakes (Level 5)
       let quadrantLighting = {};
-      if (state.currentLevel === 5) {
+      if (state.currentLevelKey === "light_switch") {
         // Level 5 (0-indexed as 5)
         const A =
           state.switches.find((s) => s.id === "light_switch")?.isPressed ||
@@ -1385,7 +1389,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Handle key room walls for level 2 pressure plates
-      if (state.currentLevel === 2) {
+      if (state.currentLevelKey === "item_collection") {
         // Level 2 uses pressure plates (MacGruber level)
         const pressurePlates = updatedSwitches.filter((s) =>
           s.id.startsWith("pressure"),
@@ -1429,7 +1433,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Handle Level 5 progressive wall removal switches
-      if (state.currentLevel === 6) {
+      if (state.currentLevelKey === "boss_valerie") {
         // Level 5 (0-indexed)
         const middleSwitch = updatedSwitches.find(
           (s) => s.id === "middle_switch",
@@ -1548,7 +1552,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Handle Level 3 crystal activation - dynamic wall state based on light beam and mirror usage
-      if (state.currentLevel === 3 && updatedCrystal) {
+      if (state.currentLevelKey === "light_reflection" && updatedCrystal) {
         // Define all four key room walls for Level 3
         const keyRoomWalls = [
           { x: 660, y: 270, width: 80, height: 20 }, // Top wall
@@ -1603,7 +1607,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Level 3 (light reflection puzzle) - player must have key, crystal activated, and all mirrors used
       if (
-        state.currentLevel === 3 &&
+        state.currentLevelKey === "light_reflection" &&
         updatedPlayer.hasKey &&
         updatedCrystal &&
         updatedCrystal.isActivated
@@ -1616,13 +1620,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
       // Level 5 (logic gate puzzle) - player only needs the key
-      else if (state.currentLevel === 5 && updatedPlayer.hasKey) {
+      else if (state.currentLevelKey === "light_switch" && updatedPlayer.hasKey) {
         updatedDoor = { ...state.door, isOpen: true };
       }
       // Other levels - player must have key and all switches pressed
       else if (
-        state.currentLevel !== 3 &&
-        state.currentLevel !== 5 &&
+        state.currentLevelKey !== "light_reflection" &&
+        state.currentLevelKey !== "light_switch" &&
         updatedPlayer.hasKey &&
         allSwitchesPressed
       ) {
@@ -1638,7 +1642,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- LEVEL 6 BOULDER MECHANICS ---
       // Check if all boulders are destroyed and spawn key if needed
       let updatedBoulders = state.boulders;
-      if (state.currentLevel === 6 && state.boulders.length > 0) {
+      if (state.currentLevelKey === "boss_valerie" && state.boulders.length > 0) {
         // Level 6 (0-indexed as 6)
         const destroyedBoulders = state.boulders.filter(boulder => boulder.isDestroyed);
         const allBouldersDestroyed = destroyedBoulders.length === state.boulders.length;
@@ -1946,7 +1950,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     rotateMirror: (direction: "clockwise" | "counterclockwise") => {
       const state = get();
-      if (state.gameState !== "playing" || state.currentLevel !== 3) return; // Only on level 3 (0-indexed)
+      if (state.gameState !== "playing" || state.currentLevelKey !== "light_reflection") return; // Only on level 3 (0-indexed)
 
       // Find mirror within interaction range
       const nearbyMirror = state.mirrors.find((mirror) => {
@@ -1989,7 +1993,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (
         state.gameState !== "playing" ||
-        state.currentLevel !== 3 ||
+        state.currentLevelKey !== "light_reflection" ||
         !state.lightSource
       )
         return; // Only on level 3 (0-indexed)
@@ -2024,7 +2028,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     startFlow: () => {
       const state = get();
-      if (state.currentLevel !== 4) return; // Only on level 4 (0-indexed)
+      if (state.currentLevelKey !== "grid_puzzle") return; // Only on level 4 (0-indexed)
 
       // Get dynamic start tile position
       const currentLevel = state.levels[state.currentLevel];
@@ -2609,7 +2613,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     rotateTile: (direction: "left" | "right") => {
       const state = get();
-      if (state.currentLevel !== 4) return; // Only on level 4 (0-indexed)
+      if (state.currentLevelKey !== "grid_puzzle") return; // Only on level 4 (0-indexed)
 
       // Find the tile the player is standing on
       const playerRect = {
@@ -2670,7 +2674,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     checkPathConnection: () => {
       const state = get();
-      if (state.currentLevel !== 4) return false; // Only on level 4 (0-indexed)
+      if (state.currentLevelKey !== "grid_puzzle") return false; // Only on level 4 (0-indexed)
 
       // Get dynamic start and end tile positions
       const currentLevel = state.levels[state.currentLevel];
@@ -2741,7 +2745,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     removeKeyWalls: () => {
       const state = get();
-      if (state.currentLevel !== 4) return; // Only on level 4 (0-indexed)
+      if (state.currentLevelKey !== "grid_puzzle") return; // Only on level 4 (0-indexed)
 
       // Remove the key chamber walls
       const keyWallIds = [
@@ -2853,7 +2857,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           const lifespan = 5000; // 5 seconds
 
           // Check if we're on Level 4 for alternating pattern
-          const isLevel4 = state.currentLevel === 4; // Level 4 is 0-indexed as 4
+          const isLevel4 = state.currentLevelKey === "grid_puzzle"; // Level 4 is 0-indexed as 4
           let directions: { x: number; y: number }[];
 
           if (isLevel4) {
@@ -3012,7 +3016,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Determine initial lighting state based on current level
       let isDark = false;
       
-      if (state.currentLevel === 4) {
+      if (state.currentLevelKey === "grid_puzzle") {
         // Level 5 (0-indexed as 4) - Use switch-based quadrant lighting
         const isInTopLeft = spawnX < 390 && spawnY < 290;
         const isInTopRight = spawnX > 410 && spawnY < 290;
@@ -3041,7 +3045,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         } else if (isInBottomRight) {
           isDark = !bottomRightLit;
         }
-      } else if (state.currentLevel === 5) {
+      } else if (state.currentLevelKey === "light_switch") {
         // Level 6 (0-indexed as 5) - Boulder-based lighting
         // ON → OFF (1st) → ON (2nd) → OFF (3rd) → ON (4th)
         const destroyedBoulders = state.boulders?.filter(boulder => boulder.isDestroyed) || [];
@@ -3282,7 +3286,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             y: Math.sin(angle)
           });
         }
-      } else if (state.currentLevel === 4) { // Level 4 spitter behavior
+      } else if (state.currentLevelKey === "grid_puzzle") { // Level 4 spitter behavior
         // Check if we're on Level 4 for alternating pattern
         // Increment shot count for this manual fire
         const newShotCount = (snake.shotCount || 0) + 1;
@@ -3395,8 +3399,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       let walls = [...state.walls];
 
-      // Level 5 (currentLevel === 4): Add phase-specific walls
-      if (state.currentLevel === 4) {
+      // Level 5 (currentLevelKey === "grid_puzzle"): Add phase-specific walls
+      if (state.currentLevelKey === "grid_puzzle") {
         const activePhaseWalls = state.phaseWalls
           .filter((wall) => wall.activePhases.includes(state.currentPhase))
           .map((wall) => ({
@@ -3409,7 +3413,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Level 6: Add non-destroyed boulders as walls
-      if (state.currentLevel === 6 && state.boulders.length > 0) {
+      if (state.currentLevelKey === "boss_valerie" && state.boulders.length > 0) {
         const boulderWalls = state.boulders
           .filter((boulder) => !boulder.isDestroyed)
           .map((boulder) => ({
@@ -3526,7 +3530,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Check for light beam intersection with pits (Level 3 only) - improved line-circle intersection
       const lightBeamHitsPit = (pit: any) => {
         if (
-          state.currentLevel !== 3 ||
+          state.currentLevelKey !== "light_reflection" ||
           !state.lightBeam ||
           !state.lightBeam.segments ||
           state.lightBeam.segments.length < 2
@@ -4083,7 +4087,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Evaluate logic puzzle and update key walls for Level 5
-      if (state.currentLevel === 5) {
+      if (state.currentLevelKey === "light_switch") {
         // Level 5 (0-indexed as 5)
         get().evaluateLogicPuzzle(updatedSwitches);
       }
@@ -4112,6 +4116,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       set({
         gameState: "hub",
         currentLevel: 0,
+        currentLevelKey: "hub",
       });
     },
   })),
