@@ -1,19 +1,15 @@
 import { create } from 'zustand';
-
-interface Position {
-  x: number;
-  y: number;
-}
-
-interface Size {
-  width: number;
-  height: number;
-}
+import { 
+  PlayerController, 
+  createHubPlayerController,
+  keysToInputState,
+  type Position,
+  type Size 
+} from '../game/PlayerController';
 
 interface Player {
   position: Position;
   size: Size;
-  speed: number;
 }
 
 interface NPC {
@@ -30,11 +26,11 @@ interface HubStore {
   selectedOption: 'yes' | 'no';
   player: Player;
   npcs: NPC[];
+  playerController: PlayerController | null;
   
   // Actions
   initializeHub: () => void;
   updateHub: (deltaTime: number, keys: Set<string>) => void;
-  movePlayer: (direction: { x: number; y: number }, deltaTime: number, isWalking?: boolean) => void;
   interactWithNPC: () => void;
   selectOption: (option: 'yes' | 'no') => void;
   confirmSelection: () => void;
@@ -47,21 +43,36 @@ export const useHubStore = create<HubStore>((set, get) => ({
   selectedOption: 'no',
   player: {
     position: { x: 400, y: 300 },
-    size: { width: 30, height: 30 },
-    speed: 24
+    size: { width: 30, height: 30 }
   },
   npcs: [],
+  playerController: null,
   
   initializeHub: () => {
+    const playerSize = { width: 30, height: 30 };
+    const playerPosition = { x: 400, y: 300 };
+    const boundaries = {
+      minX: 20,
+      maxX: 780,
+      minY: 20,
+      maxY: 580
+    };
+
+    const playerController = createHubPlayerController(
+      playerPosition,
+      playerSize,
+      boundaries
+    );
+
     set({
       gameState: 'hub',
       interactionState: 'idle',
       selectedOption: 'no',
       player: {
-        position: { x: 400, y: 300 },
-        size: { width: 30, height: 30 },
-        speed: 24
+        position: playerPosition,
+        size: playerSize
       },
+      playerController,
       npcs: [
         {
           id: 'game_master',
@@ -76,55 +87,18 @@ export const useHubStore = create<HubStore>((set, get) => ({
   
   updateHub: (deltaTime: number, keys: Set<string>) => {
     const state = get();
-    if (state.interactionState !== 'idle') return;
+    if (state.interactionState !== 'idle' || !state.playerController) return;
     
-    let dx = 0;
-    let dy = 0;
+    // Convert keys to input state
+    const inputState = keysToInputState(keys);
     
-    // Handle movement input
-    if (keys.has('KeyW') || keys.has('ArrowUp')) dy = -1;
-    if (keys.has('KeyS') || keys.has('ArrowDown')) dy = 1;
-    if (keys.has('KeyA') || keys.has('ArrowLeft')) dx = -1;
-    if (keys.has('KeyD') || keys.has('ArrowRight')) dx = 1;
-    
-    // Check for walking (Ctrl keys)
-    const isWalking = keys.has('ControlLeft') || keys.has('ControlRight');
-    
-    if (dx !== 0 || dy !== 0) {
-      // Normalize diagonal movement
-      const magnitude = Math.sqrt(dx * dx + dy * dy);
-      if (magnitude > 0) {
-        dx /= magnitude;
-        dy /= magnitude;
-      }
-      
-      get().movePlayer({ x: dx, y: dy }, deltaTime, isWalking);
-    }
-  },
-  
-  movePlayer: (direction: { x: number; y: number }, deltaTime: number, isWalking = false) => {
-    const state = get();
-    const player = state.player;
-    
-    // Calculate new position with walking speed modifier
-    const baseSpeed = player.speed * (deltaTime / 1000);
-    const speed = isWalking ? baseSpeed * 0.5 : baseSpeed; // Half speed when walking
-    const newX = player.position.x + direction.x * speed;
-    const newY = player.position.y + direction.y * speed;
-    
-    // Check boundaries (keeping player within room bounds, matching main game wall positions)
-    const minX = 20; // Left wall width
-    const maxX = 780 - player.size.width; // Right wall position minus player width
-    const minY = 20; // Top wall height
-    const maxY = 580 - player.size.height; // Bottom wall position minus player height
-    
-    const clampedX = Math.max(minX, Math.min(maxX, newX));
-    const clampedY = Math.max(minY, Math.min(maxY, newY));
+    // Update player position using PlayerController
+    const newPosition = state.playerController.update(inputState, deltaTime);
     
     set({
       player: {
-        ...player,
-        position: { x: clampedX, y: clampedY }
+        ...state.player,
+        position: newPosition
       }
     });
   },
