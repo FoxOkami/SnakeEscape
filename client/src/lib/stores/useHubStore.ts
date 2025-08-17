@@ -34,7 +34,7 @@ interface HubStore {
   // Actions
   initializeHub: () => void;
   updateHub: (deltaTime: number, keys: Set<string>) => void;
-  movePlayer: (direction: { x: number; y: number }, deltaTime: number) => void;
+  movePlayer: (direction: { x: number; y: number }, deltaTime: number, isWalking?: boolean) => void;
   interactWithNPC: () => void;
   selectOption: (option: 'yes' | 'no') => void;
   confirmSelection: () => void;
@@ -87,6 +87,9 @@ export const useHubStore = create<HubStore>((set, get) => ({
     if (keys.has('KeyA') || keys.has('ArrowLeft')) dx = -1;
     if (keys.has('KeyD') || keys.has('ArrowRight')) dx = 1;
     
+    // Check for walking (Ctrl keys)
+    const isWalking = keys.has('ControlLeft') || keys.has('ControlRight');
+    
     if (dx !== 0 || dy !== 0) {
       // Normalize diagonal movement
       const magnitude = Math.sqrt(dx * dx + dy * dy);
@@ -95,16 +98,17 @@ export const useHubStore = create<HubStore>((set, get) => ({
         dy /= magnitude;
       }
       
-      get().movePlayer({ x: dx, y: dy }, deltaTime);
+      get().movePlayer({ x: dx, y: dy }, deltaTime, isWalking);
     }
   },
   
-  movePlayer: (direction: { x: number; y: number }, deltaTime: number) => {
+  movePlayer: (direction: { x: number; y: number }, deltaTime: number, isWalking = false) => {
     const state = get();
     const player = state.player;
     
-    // Calculate new position
-    const speed = player.speed * (deltaTime / 1000);
+    // Calculate new position with walking speed modifier
+    const baseSpeed = player.speed * (deltaTime / 1000);
+    const speed = isWalking ? baseSpeed * 0.5 : baseSpeed; // Half speed when walking
     const newX = player.position.x + direction.x * speed;
     const newY = player.position.y + direction.y * speed;
     
