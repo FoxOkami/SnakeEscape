@@ -202,12 +202,14 @@ const HubRoom: React.FC = () => {
         ctx.fillRect(key.position.x + 5, key.position.y + 5, 10, 10);
       }
       
-      // Draw key inventory indicator
+      // Draw key indicator on player (small yellow square in top-left corner)
       if (hasKey) {
         ctx.fillStyle = "#ffd700";
-        ctx.font = "16px Arial";
-        ctx.textAlign = "left";
-        ctx.fillText("🗝️ Key obtained", 30, 50);
+        ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
+        
+        // Add sparkle effect to key indicator
+        ctx.fillStyle = "#ffeb3b";
+        ctx.fillRect(player.position.x - 3, player.position.y - 3, 4, 4);
       }
       
       // Draw door interaction prompt
