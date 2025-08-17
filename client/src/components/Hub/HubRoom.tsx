@@ -179,7 +179,7 @@ const HubRoom: React.FC = () => {
       });
       
       // Draw door (using same style as main game)
-      ctx.fillStyle = door.isOpen ? "#48bb78" : "#e53e3e";
+      ctx.fillStyle = hasKey ? "#48bb78" : "#e53e3e";
       ctx.fillRect(door.position.x, door.position.y, door.size.width, door.size.height);
       
       // Add door details
@@ -187,7 +187,7 @@ const HubRoom: React.FC = () => {
       ctx.lineWidth = 3;
       ctx.strokeRect(door.position.x, door.position.y, door.size.width, door.size.height);
       
-      if (door.isOpen) {
+      if (hasKey) {
         ctx.fillStyle = "#2d3748";
         ctx.fillRect(door.position.x + 5, door.position.y + 15, 5, 10);
       }
