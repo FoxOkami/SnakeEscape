@@ -13,6 +13,9 @@ const HubRoom: React.FC = () => {
     gameState,
     interactionState,
     selectedOption,
+    door,
+    key,
+    hasKey,
     initializeHub,
     updateHub,
     movePlayer,
@@ -55,10 +58,6 @@ const HubRoom: React.FC = () => {
           selectOption('no');
         } else if (e.code === 'KeyE' || e.code === 'Enter') {
           confirmSelection();
-        }
-      } else if (interactionState === 'idle') {
-        if (e.code === 'KeyE') {
-          interactWithNPC();
         }
       }
     };
@@ -178,6 +177,63 @@ const HubRoom: React.FC = () => {
           );
         }
       });
+      
+      // Draw door (using same style as main game)
+      ctx.fillStyle = door.isOpen ? "#48bb78" : "#e53e3e";
+      ctx.fillRect(door.position.x, door.position.y, door.size.width, door.size.height);
+      
+      // Add door details
+      ctx.strokeStyle = "#2d3748";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(door.position.x, door.position.y, door.size.width, door.size.height);
+      
+      if (door.isOpen) {
+        ctx.fillStyle = "#2d3748";
+        ctx.fillRect(door.position.x + 5, door.position.y + 15, 5, 10);
+      }
+      
+      // Draw key (if not collected and visible)
+      if (!key.collected && key.position.x > 0) {
+        ctx.fillStyle = "#ffd700";
+        ctx.fillRect(key.position.x, key.position.y, key.size.width, key.size.height);
+        
+        // Add sparkle effect
+        ctx.fillStyle = "#ffeb3b";
+        ctx.fillRect(key.position.x + 5, key.position.y + 5, 10, 10);
+      }
+      
+      // Draw key inventory indicator
+      if (hasKey) {
+        ctx.fillStyle = "#ffd700";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText("🗝️ Key obtained", 30, 50);
+      }
+      
+      // Draw door interaction prompt
+      const doorDistance = Math.sqrt(
+        Math.pow(player.position.x - door.position.x, 2) +
+        Math.pow(player.position.y - door.position.y, 2)
+      );
+      
+      if (doorDistance < 50 && interactionState === 'idle') {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        if (hasKey) {
+          ctx.fillText(
+            'Walk closer to enter Level 1',
+            door.position.x + door.size.width / 2,
+            door.position.y - 10
+          );
+        } else {
+          ctx.fillText(
+            'Locked - Need key',
+            door.position.x + door.size.width / 2,
+            door.position.y - 10
+          );
+        }
+      }
       
       // Draw conversation UI
       if (interactionState === 'conversation') {

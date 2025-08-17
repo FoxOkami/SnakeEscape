@@ -20,6 +20,18 @@ interface NPC {
   dialogue: string;
 }
 
+interface Door {
+  position: Position;
+  size: Size;
+  isOpen: boolean;
+}
+
+interface Key {
+  position: Position;
+  size: Size;
+  collected: boolean;
+}
+
 interface HubStore {
   gameState: 'hub' | 'transitioning';
   interactionState: 'idle' | 'conversation' | 'confirmed' | 'startGame';
@@ -27,11 +39,15 @@ interface HubStore {
   player: Player;
   npcs: NPC[];
   playerController: PlayerController | null;
+  door: Door;
+  key: Key;
+  hasKey: boolean;
   
   // Actions
   initializeHub: () => void;
   updateHub: (deltaTime: number, keys: Set<string>) => void;
   interactWithNPC: () => void;
+  checkDoorInteraction: () => void;
   selectOption: (option: 'yes' | 'no') => void;
   confirmSelection: () => void;
   endInteraction: () => void;
@@ -47,6 +63,17 @@ export const useHubStore = create<HubStore>((set, get) => ({
   },
   npcs: [],
   playerController: null,
+  door: {
+    position: { x: 750, y: 280 },
+    size: { width: 30, height: 40 },
+    isOpen: false
+  },
+  key: {
+    position: { x: -100, y: -100 }, // Hidden initially
+    size: { width: 20, height: 20 },
+    collected: false
+  },
+  hasKey: false,
   
   initializeHub: () => {
     const playerSize = { width: 30, height: 30 };
@@ -73,13 +100,24 @@ export const useHubStore = create<HubStore>((set, get) => ({
         size: playerSize
       },
       playerController,
+      door: {
+        position: { x: 750, y: 280 },
+        size: { width: 30, height: 40 },
+        isOpen: false
+      },
+      key: {
+        position: { x: -100, y: -100 }, // Hidden initially
+        size: { width: 20, height: 20 },
+        collected: false
+      },
+      hasKey: false,
       npcs: [
         {
           id: 'game_master',
           name: 'Game Master',
           position: { x: 200, y: 150 },
           size: { width: 40, height: 40 },
-          dialogue: 'Would you like to play?'
+          dialogue: 'Press E to receive the key to the door.'
         }
       ]
     });
@@ -89,11 +127,34 @@ export const useHubStore = create<HubStore>((set, get) => ({
     const state = get();
     if (state.interactionState !== 'idle' || !state.playerController) return;
     
+    // Handle E key for interactions
+    if (keys.has('KeyE')) {
+      get().interactWithNPC();
+    }
+    
     // Convert keys to input state
     const inputState = keysToInputState(keys);
     
     // Update player position using PlayerController
     const newPosition = state.playerController.update(inputState, deltaTime);
+    
+    // Check for key collection
+    if (!state.key.collected && !state.hasKey) {
+      const keyDistance = Math.sqrt(
+        Math.pow(newPosition.x - state.key.position.x, 2) +
+        Math.pow(newPosition.y - state.key.position.y, 2)
+      );
+      
+      if (keyDistance < 40) {
+        set({
+          key: { ...state.key, collected: true },
+          hasKey: true
+        });
+      }
+    }
+    
+    // Check door interaction for level transition
+    get().checkDoorInteraction();
     
     set({
       player: {
@@ -115,9 +176,31 @@ export const useHubStore = create<HubStore>((set, get) => ({
       return distance < 80;
     });
     
-    if (nearbyNPC && nearbyNPC.id === 'game_master') {
-      // Directly start level 1 when interacting with game master
+    if (nearbyNPC && nearbyNPC.id === 'game_master' && !state.hasKey) {
+      // Give the player the key
       set({
+        key: {
+          ...state.key,
+          position: { x: state.player.position.x + 50, y: state.player.position.y },
+          collected: false
+        }
+      });
+    }
+  },
+
+  checkDoorInteraction: () => {
+    const state = get();
+    
+    // Check if player is near the door
+    const doorDistance = Math.sqrt(
+      Math.pow(state.player.position.x - state.door.position.x, 2) +
+      Math.pow(state.player.position.y - state.door.position.y, 2)
+    );
+    
+    // If player has the key and is near the door, open it and start level 1
+    if (state.hasKey && doorDistance < 50) {
+      set({
+        door: { ...state.door, isOpen: true },
         interactionState: 'startGame'
       });
     }
