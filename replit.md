@@ -8,6 +8,15 @@ Snake Room is a 2D escape game designed to challenge players with navigation thr
 
 Preferred communication style: Simple, everyday language.
 
+## Technical Debt Identified
+
+### Movement System Inconsistency (January 17, 2025)
+- Hub movement system uses different implementation than game levels
+- Hub: Direct deltaTime calculations with Set<string> key detection
+- Game levels: Target/current velocity system with acceleration
+- **Impact**: Code duplication, maintenance overhead, potential behavioral differences
+- **Solution**: Consider unified PlayerController class for consistent movement across all game states
+
 ## System Architecture
 
 ### Frontend Architecture
