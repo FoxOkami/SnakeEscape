@@ -48,7 +48,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
   player: {
     position: { x: 400, y: 300 },
     size: { width: 30, height: 30 },
-    speed: 200
+    speed: 12
   },
   npcs: [],
   
@@ -60,7 +60,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
       player: {
         position: { x: 400, y: 300 },
         size: { width: 30, height: 30 },
-        speed: 200
+        speed: 12
       },
       npcs: [
         {
