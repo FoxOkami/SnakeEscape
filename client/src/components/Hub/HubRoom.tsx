@@ -31,6 +31,8 @@ const HubRoom: React.FC = () => {
   
   const [keys, setKeys] = useState<Set<string>>(new Set());
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [musicVolume, setMusicVolume] = useState(100);
+  const [sfxVolume, setSfxVolume] = useState(100);
   
   // Load player character image
   useEffect(() => {
@@ -341,8 +343,98 @@ const HubRoom: React.FC = () => {
                 ×
               </button>
             </div>
-            <div className="text-gray-600">
-              {/* Settings content will go here */}
+            <div className="space-y-6">
+              {/* Audio Settings */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800">Audio Settings</h3>
+                
+                {/* Music Volume */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700">Music Volume</label>
+                    <span className="text-sm text-gray-500">{musicVolume}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={musicVolume}
+                    onChange={(e) => setMusicVolume(parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                    style={{
+                      background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${musicVolume}%, #d1d5db ${musicVolume}%, #d1d5db 100%)`
+                    }}
+                  />
+                </div>
+                
+                {/* Sound Effects Volume */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700">Sound Effects Volume</label>
+                    <span className="text-sm text-gray-500">{sfxVolume}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={sfxVolume}
+                    onChange={(e) => setSfxVolume(parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                    style={{
+                      background: `linear-gradient(to right, #10b981 0%, #10b981 ${sfxVolume}%, #d1d5db ${sfxVolume}%, #d1d5db 100%)`
+                    }}
+                  />
+                </div>
+              </div>
+              
+              {/* Key Bindings */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800">Key Bindings</h3>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Move Up</span>
+                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
+                      W / ↑
+                    </button>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Move Down</span>
+                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
+                      S / ↓
+                    </button>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Move Left</span>
+                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
+                      A / ←
+                    </button>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Move Right</span>
+                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
+                      D / →
+                    </button>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Interact</span>
+                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
+                      E
+                    </button>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Walk (Hold)</span>
+                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
+                      Ctrl
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
