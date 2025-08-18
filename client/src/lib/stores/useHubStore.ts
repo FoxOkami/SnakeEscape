@@ -42,6 +42,7 @@ interface HubStore {
   door: Door;
   key: Key;
   hasKey: boolean;
+  showSettingsModal: boolean;
   
   // Actions
   initializeHub: () => void;
@@ -51,6 +52,8 @@ interface HubStore {
   selectOption: (option: 'yes' | 'no') => void;
   confirmSelection: () => void;
   endInteraction: () => void;
+  openSettingsModal: () => void;
+  closeSettingsModal: () => void;
 }
 
 export const useHubStore = create<HubStore>((set, get) => ({
@@ -74,6 +77,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
     collected: false
   },
   hasKey: false,
+  showSettingsModal: false,
   
   initializeHub: () => {
     const playerSize = { width: 30, height: 30 };
@@ -111,6 +115,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
         collected: false
       },
       hasKey: false,
+      showSettingsModal: false,
       npcs: [
         {
           id: 'game_master',
@@ -183,15 +188,20 @@ export const useHubStore = create<HubStore>((set, get) => ({
       return distance < 80;
     });
     
-    if (nearbyNPC && nearbyNPC.id === 'game_master' && !state.hasKey) {
-      // Give the player the key
-      set({
-        key: {
-          ...state.key,
-          position: { x: state.player.position.x + 50, y: state.player.position.y },
-          collected: false
-        }
-      });
+    if (nearbyNPC) {
+      if (nearbyNPC.id === 'game_master' && !state.hasKey) {
+        // Give the player the key
+        set({
+          key: {
+            ...state.key,
+            position: { x: state.player.position.x + 50, y: state.player.position.y },
+            collected: false
+          }
+        });
+      } else if (nearbyNPC.id === 'lenny_sterner') {
+        // Open settings modal
+        get().openSettingsModal();
+      }
     }
   },
 
@@ -226,5 +236,13 @@ export const useHubStore = create<HubStore>((set, get) => ({
       interactionState: 'idle',
       selectedOption: 'no'
     });
+  },
+
+  openSettingsModal: () => {
+    set({ showSettingsModal: true });
+  },
+
+  closeSettingsModal: () => {
+    set({ showSettingsModal: false });
   }
 }));

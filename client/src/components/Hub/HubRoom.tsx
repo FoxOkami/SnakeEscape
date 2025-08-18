@@ -16,13 +16,15 @@ const HubRoom: React.FC = () => {
     door,
     key,
     hasKey,
+    showSettingsModal,
     initializeHub,
     updateHub,
     movePlayer,
     interactWithNPC,
     selectOption,
     confirmSelection,
-    endInteraction
+    endInteraction,
+    closeSettingsModal
   } = useHubStore();
 
   const { startLevel } = useSnakeGame();
@@ -325,6 +327,26 @@ const HubRoom: React.FC = () => {
         <p>Use WASD or arrow keys to move</p>
         <p>Press E near NPCs to interact</p>
       </div>
+      
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-96 max-w-90vw">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-800">Settings</h2>
+              <button
+                onClick={closeSettingsModal}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+            <div className="text-gray-600">
+              {/* Settings content will go here */}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
