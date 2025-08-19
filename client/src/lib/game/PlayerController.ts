@@ -212,6 +212,7 @@ export interface CustomKeyBindings {
   left: string;
   right: string;
   interact: string;
+  secondaryInteract: string;
   walking: string;
 }
 

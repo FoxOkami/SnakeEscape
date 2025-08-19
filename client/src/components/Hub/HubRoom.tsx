@@ -496,6 +496,20 @@ const HubRoom: React.FC = () => {
                   </div>
                   
                   <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Secondary Item Interaction</span>
+                    <button 
+                      onClick={() => setEditingKeyBinding('secondaryInteract')}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${
+                        editingKeyBinding === 'secondaryInteract' 
+                          ? 'bg-white border-2 border-red-500 text-transparent' 
+                          : 'bg-gray-100 border hover:bg-gray-200'
+                      }`}
+                    >
+                      {editingKeyBinding === 'secondaryInteract' ? '' : getKeyDisplayText(keyBindings.secondaryInteract)}
+                    </button>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Walk (Hold)</span>
                     <button 
                       onClick={() => setEditingKeyBinding('walking')}
@@ -517,7 +531,8 @@ const HubRoom: React.FC = () => {
                                                  editingKeyBinding === 'down' ? 'Move Down' :
                                                  editingKeyBinding === 'left' ? 'Move Left' :
                                                  editingKeyBinding === 'right' ? 'Move Right' :
-                                                 editingKeyBinding === 'interact' ? 'Interact' : 'Walk (Hold)'}"
+                                                 editingKeyBinding === 'interact' ? 'Interact' : 
+                                                 editingKeyBinding === 'secondaryInteract' ? 'Secondary Item Interaction' : 'Walk (Hold)'}"
                     </p>
                   </div>
                 )}

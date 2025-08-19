@@ -150,6 +150,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
       left: 'ArrowLeft', 
       right: 'ArrowRight',
       interact: 'KeyE',
+      secondaryInteract: 'KeyQ',
       walking: 'ControlLeft'
     };
     

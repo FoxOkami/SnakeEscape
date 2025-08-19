@@ -7,6 +7,7 @@ export interface KeyBindings {
   left: string;
   right: string;
   interact: string;
+  secondaryInteract: string;
   walking: string;
 }
 
@@ -24,6 +25,7 @@ const defaultKeyBindings: KeyBindings = {
   left: 'ArrowLeft',
   right: 'ArrowRight',
   interact: 'KeyE',
+  secondaryInteract: 'KeyQ',
   walking: 'ControlLeft'
 };
 
