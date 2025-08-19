@@ -60,7 +60,7 @@ const HubRoom: React.FC = () => {
           selectOption('yes');
         } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
           selectOption('no');
-        } else if (e.code === 'KeyE' || e.code === 'Enter') {
+        } else if (e.code === 'KeyE' || e.code === 'KeyQ' || e.code === 'Enter') {
           confirmSelection();
         }
       }
@@ -297,7 +297,7 @@ const HubRoom: React.FC = () => {
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(
-          'Use W/S or ↑/↓ to select, E or Enter to confirm',
+          'Use W/S or ↑/↓ to select, E/Q or Enter to confirm',
           canvas.width / 2,
           dialogY + dialogHeight - 20
         );
@@ -327,7 +327,7 @@ const HubRoom: React.FC = () => {
       />
       <div className="mt-4 text-white text-center">
         <p>Use WASD or arrow keys to move</p>
-        <p>Press E near NPCs to interact</p>
+        <p>Press E or Q near NPCs to interact</p>
       </div>
       
       {/* Settings Modal */}
