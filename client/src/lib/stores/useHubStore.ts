@@ -122,7 +122,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
           name: 'Game Master',
           position: { x: 200, y: 150 },
           size: { width: 40, height: 40 },
-          dialogue: 'Press E or Q to receive the key to the door.'
+          dialogue: 'Press E to receive the key to the door.'
         },
         {
           id: 'lenny_sterner',
@@ -139,8 +139,8 @@ export const useHubStore = create<HubStore>((set, get) => ({
     const state = get();
     if (state.interactionState !== 'idle' || !state.playerController) return;
     
-    // Handle E or Q key for interactions
-    if (keys.has('KeyE') || keys.has('KeyQ')) {
+    // Handle E key for interactions
+    if (keys.has('KeyE')) {
       get().interactWithNPC();
     }
     
