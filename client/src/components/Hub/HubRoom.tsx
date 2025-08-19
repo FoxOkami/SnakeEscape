@@ -34,6 +34,7 @@ const HubRoom: React.FC = () => {
   const [musicVolume, setMusicVolume] = useState(100);
   const [sfxVolume, setSfxVolume] = useState(100);
   const [editingKeyBinding, setEditingKeyBinding] = useState<string | null>(null);
+  const [keyBindingError, setKeyBindingError] = useState<string | null>(null);
   
   // Use global key bindings store
   const { keyBindings, setKeyBinding, getKeyDisplayText } = useKeyBindings();
@@ -73,7 +74,19 @@ const HubRoom: React.FC = () => {
         e.preventDefault();
         // Don't allow Escape to be bound as it's reserved for closing modals
         if (e.code !== 'Escape') {
-          setKeyBinding(currentEditingKey as keyof KeyBindings, e.code);
+          // Check if the key is already bound to another action
+          const existingBinding = Object.entries(keyBindings).find(
+            ([action, keyCode]) => keyCode === e.code && action !== currentEditingKey
+          );
+          
+          if (existingBinding) {
+            setKeyBindingError("Unable to bind the same key to multiple actions");
+            // Auto-clear error after 3 seconds
+            setTimeout(() => setKeyBindingError(null), 3000);
+          } else {
+            setKeyBinding(currentEditingKey as keyof KeyBindings, e.code);
+            setKeyBindingError(null);
+          }
         }
         setEditingKeyBinding(null);
         return;
@@ -524,15 +537,16 @@ const HubRoom: React.FC = () => {
                   </div>
                 </div>
                 
-                {editingKeyBinding && (
+                {(editingKeyBinding || keyBindingError) && (
                   <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
                     <p className="text-sm text-red-700">
-                      Press any key to bind to "{editingKeyBinding === 'up' ? 'Move Up' : 
-                                                 editingKeyBinding === 'down' ? 'Move Down' :
-                                                 editingKeyBinding === 'left' ? 'Move Left' :
-                                                 editingKeyBinding === 'right' ? 'Move Right' :
-                                                 editingKeyBinding === 'interact' ? 'Interact' : 
-                                                 editingKeyBinding === 'secondaryInteract' ? 'Secondary Item Interaction' : 'Walk (Hold)'}"
+                      {keyBindingError || 
+                       `Press any key to bind to "${editingKeyBinding === 'up' ? 'Move Up' : 
+                                                    editingKeyBinding === 'down' ? 'Move Down' :
+                                                    editingKeyBinding === 'left' ? 'Move Left' :
+                                                    editingKeyBinding === 'right' ? 'Move Right' :
+                                                    editingKeyBinding === 'interact' ? 'Interact' : 
+                                                    editingKeyBinding === 'secondaryInteract' ? 'Secondary Item Interaction' : 'Walk (Hold)'}"`}
                     </p>
                   </div>
                 )}
