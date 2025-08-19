@@ -49,6 +49,7 @@ const HubRoom: React.FC = () => {
   }, []);
   
   useEffect(() => {
+    console.log('[Debug] HubRoom useEffect initializing hub');
     initializeHub();
     
     const handleKeyDown = (e: KeyboardEvent) => {
