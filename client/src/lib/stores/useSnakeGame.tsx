@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
+import { useKeyBindings } from './useKeyBindings';
 import {
   GameData,
   GameState,
@@ -332,25 +333,28 @@ export const useSnakeGame = create<SnakeGameState>()(
           );
         };
 
-        // Check if walking (Ctrl key held)
+        // Get current key bindings
+        const keyBindings = useKeyBindings.getState().keyBindings;
+        
+        // Check if walking using custom key binding
         const isWalking =
-          isKeyActiveRecently("ControlLeft") ||
-          isKeyActiveRecently("ControlRight");
+          isKeyActiveRecently(keyBindings.walking) ||
+          isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
         const moveSpeed = isWalking ? WALKING_SPEED : PLAYER_SPEED;
 
-        // Calculate target velocity with enhanced key detection
+        // Calculate target velocity with enhanced key detection using custom key bindings
         const targetVelocity = { x: 0, y: 0 };
 
-        if (isKeyActiveRecently("ArrowUp") || isKeyActiveRecently("KeyW")) {
+        if (isKeyActiveRecently(keyBindings.up)) {
           targetVelocity.y -= moveSpeed;
         }
-        if (isKeyActiveRecently("ArrowDown") || isKeyActiveRecently("KeyS")) {
+        if (isKeyActiveRecently(keyBindings.down)) {
           targetVelocity.y += moveSpeed;
         }
-        if (isKeyActiveRecently("ArrowLeft") || isKeyActiveRecently("KeyA")) {
+        if (isKeyActiveRecently(keyBindings.left)) {
           targetVelocity.x -= moveSpeed;
         }
-        if (isKeyActiveRecently("ArrowRight") || isKeyActiveRecently("KeyD")) {
+        if (isKeyActiveRecently(keyBindings.right)) {
           targetVelocity.x += moveSpeed;
         }
 

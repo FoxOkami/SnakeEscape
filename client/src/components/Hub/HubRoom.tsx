@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useHubStore } from '../../lib/stores/useHubStore';
 import { useSnakeGame } from '../../lib/stores/useSnakeGame';
+import { useKeyBindings, type KeyBindings } from '../../lib/stores/useKeyBindings';
 
 const HubRoom: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,7 +20,6 @@ const HubRoom: React.FC = () => {
     showSettingsModal,
     initializeHub,
     updateHub,
-    setCustomKeyBindings: updateStoreKeyBindings,
     interactWithNPC,
     selectOption,
     confirmSelection,
@@ -34,27 +34,17 @@ const HubRoom: React.FC = () => {
   const [musicVolume, setMusicVolume] = useState(100);
   const [sfxVolume, setSfxVolume] = useState(100);
   const [editingKeyBinding, setEditingKeyBinding] = useState<string | null>(null);
-  const [customKeyBindings, setCustomKeyBindings] = useState({
-    up: 'ArrowUp',
-    down: 'ArrowDown', 
-    left: 'ArrowLeft',
-    right: 'ArrowRight',
-    interact: 'KeyE',
-    walking: 'ControlLeft'
-  });
+  
+  // Use global key bindings store
+  const { keyBindings, setKeyBinding, getKeyDisplayText } = useKeyBindings();
   
   // Refs to store current values for event handler
   const editingKeyBindingRef = useRef<string | null>(null);
-  const customKeyBindingsRef = useRef(customKeyBindings);
   
   // Update refs when state changes
   useEffect(() => {
     editingKeyBindingRef.current = editingKeyBinding;
   }, [editingKeyBinding]);
-  
-  useEffect(() => {
-    customKeyBindingsRef.current = customKeyBindings;
-  }, [customKeyBindings]);
   
   // Load player character image
   useEffect(() => {
@@ -71,10 +61,6 @@ const HubRoom: React.FC = () => {
     img.src = "/player-character.png?" + Date.now();
   }, []);
   
-  // Sync custom key bindings with store on mount
-  useEffect(() => {
-    updateStoreKeyBindings(customKeyBindings);
-  }, [customKeyBindings, updateStoreKeyBindings]);
   
   useEffect(() => {
     initializeHub();
@@ -82,18 +68,12 @@ const HubRoom: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Handle key binding editing - use refs to get current values
       const currentEditingKey = editingKeyBindingRef.current;
-      const currentBindings = customKeyBindingsRef.current;
       
       if (currentEditingKey) {
         e.preventDefault();
         // Don't allow Escape to be bound as it's reserved for closing modals
         if (e.code !== 'Escape') {
-          const newBindings = {
-            ...currentBindings,
-            [currentEditingKey]: e.code
-          };
-          setCustomKeyBindings(newBindings);
-          updateStoreKeyBindings(newBindings); // Update both local and store state
+          setKeyBinding(currentEditingKey as keyof KeyBindings, e.code);
         }
         setEditingKeyBinding(null);
         return;
@@ -109,9 +89,9 @@ const HubRoom: React.FC = () => {
       }
       
       if (interactionState === 'conversation') {
-        if (e.code === customKeyBindings.up) {
+        if (e.code === keyBindings.up) {
           selectOption('yes');
-        } else if (e.code === customKeyBindings.down) {
+        } else if (e.code === keyBindings.down) {
           selectOption('no');
         } else if (e.code === 'KeyE' || e.code === 'KeyQ' || e.code === 'Enter') {
           confirmSelection();
@@ -159,7 +139,7 @@ const HubRoom: React.FC = () => {
       
       // Update game state
       if (interactionState === 'idle') {
-        updateHub(deltaTime, keys, customKeyBindings);
+        updateHub(deltaTime, keys, keyBindings);
       }
       
       // Clear canvas
@@ -455,7 +435,7 @@ const HubRoom: React.FC = () => {
                           : 'bg-gray-100 border hover:bg-gray-200'
                       }`}
                     >
-                      {editingKeyBinding === 'up' ? '' : getKeyDisplayText(customKeyBindings.up)}
+                      {editingKeyBinding === 'up' ? '' : getKeyDisplayText(keyBindings.up)}
                     </button>
                   </div>
                   
@@ -469,7 +449,7 @@ const HubRoom: React.FC = () => {
                           : 'bg-gray-100 border hover:bg-gray-200'
                       }`}
                     >
-                      {editingKeyBinding === 'down' ? '' : getKeyDisplayText(customKeyBindings.down)}
+                      {editingKeyBinding === 'down' ? '' : getKeyDisplayText(keyBindings.down)}
                     </button>
                   </div>
                   
@@ -483,7 +463,7 @@ const HubRoom: React.FC = () => {
                           : 'bg-gray-100 border hover:bg-gray-200'
                       }`}
                     >
-                      {editingKeyBinding === 'left' ? '' : getKeyDisplayText(customKeyBindings.left)}
+                      {editingKeyBinding === 'left' ? '' : getKeyDisplayText(keyBindings.left)}
                     </button>
                   </div>
                   
@@ -497,7 +477,7 @@ const HubRoom: React.FC = () => {
                           : 'bg-gray-100 border hover:bg-gray-200'
                       }`}
                     >
-                      {editingKeyBinding === 'right' ? '' : getKeyDisplayText(customKeyBindings.right)}
+                      {editingKeyBinding === 'right' ? '' : getKeyDisplayText(keyBindings.right)}
                     </button>
                   </div>
                   
@@ -512,7 +492,7 @@ const HubRoom: React.FC = () => {
                             : 'bg-gray-100 border hover:bg-gray-200'
                         }`}
                       >
-                        {editingKeyBinding === 'interact' ? '' : getKeyDisplayText(customKeyBindings.interact)}
+                        {editingKeyBinding === 'interact' ? '' : getKeyDisplayText(keyBindings.interact)}
                       </button>
                       <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
                         Q
@@ -530,7 +510,7 @@ const HubRoom: React.FC = () => {
                           : 'bg-gray-100 border hover:bg-gray-200'
                       }`}
                     >
-                      {editingKeyBinding === 'walking' ? '' : getKeyDisplayText(customKeyBindings.walking)}
+                      {editingKeyBinding === 'walking' ? '' : getKeyDisplayText(keyBindings.walking)}
                     </button>
                   </div>
                 </div>
@@ -555,26 +535,5 @@ const HubRoom: React.FC = () => {
   );
 };
 
-// Helper function to get display text for keys
-const getKeyDisplayText = (keyCode: string): string => {
-  const keyMap: { [key: string]: string } = {
-    'ArrowUp': '↑',
-    'ArrowDown': '↓', 
-    'ArrowLeft': '←',
-    'ArrowRight': '→',
-    'KeyE': 'E',
-    'KeyQ': 'Q',
-    'KeyW': 'W',
-    'KeyA': 'A',
-    'KeyS': 'S',
-    'KeyD': 'D',
-    'ControlLeft': 'Ctrl',
-    'ControlRight': 'Ctrl',
-    'Space': 'Space',
-    'ShiftLeft': 'Shift',
-    'ShiftRight': 'Shift'
-  };
-  return keyMap[keyCode] || keyCode.replace('Key', '').replace('Arrow', '');
-};
 
 export default HubRoom;

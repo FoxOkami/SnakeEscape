@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useSnakeGame } from "../../lib/stores/useSnakeGame";
+import { useKeyBindings } from "../../lib/stores/useKeyBindings";
 import GameCanvas from "./GameCanvas";
 import GameUI from "./GameUI";
 import { useAudio } from "../../lib/stores/useAudio";
@@ -70,8 +71,9 @@ const SnakeRoom: React.FC = () => {
         }
       }
 
-      // Handle E key for clockwise rotation (mirrors and light source) or item interaction
-      if (event.code === "KeyE") {
+      // Handle interact key for clockwise rotation (mirrors and light source) or item interaction
+      const keyBindings = useKeyBindings.getState().keyBindings;
+      if (event.code === keyBindings.interact) {
         event.preventDefault();
         setKeyPressed(event.code, true);
 
