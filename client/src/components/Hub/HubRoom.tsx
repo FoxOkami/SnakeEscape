@@ -19,7 +19,6 @@ const HubRoom: React.FC = () => {
     showSettingsModal,
     initializeHub,
     updateHub,
-    movePlayer,
     interactWithNPC,
     selectOption,
     confirmSelection,
@@ -56,9 +55,9 @@ const HubRoom: React.FC = () => {
       setKeys(prev => new Set(prev).add(e.code));
       
       if (interactionState === 'conversation') {
-        if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+        if (e.code === 'ArrowUp') {
           selectOption('yes');
-        } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+        } else if (e.code === 'ArrowDown') {
           selectOption('no');
         } else if (e.code === 'KeyE' || e.code === 'KeyQ' || e.code === 'Enter') {
           confirmSelection();
@@ -297,7 +296,7 @@ const HubRoom: React.FC = () => {
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(
-          'Use W/S or ↑/↓ to select, E or Enter to confirm',
+          'Use ↑/↓ to select, E or Enter to confirm',
           canvas.width / 2,
           dialogY + dialogHeight - 20
         );
@@ -326,7 +325,7 @@ const HubRoom: React.FC = () => {
         style={{ imageRendering: 'pixelated' }}
       />
       <div className="mt-4 text-white text-center">
-        <p>Use WASD or arrow keys to move</p>
+        <p>Use arrow keys to move</p>
         <p>Press E near NPCs to interact</p>
       </div>
       
@@ -395,28 +394,28 @@ const HubRoom: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Move Up</span>
                     <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                      W / ↑
+                      ↑
                     </button>
                   </div>
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Move Down</span>
                     <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                      S / ↓
+                      ↓
                     </button>
                   </div>
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Move Left</span>
                     <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                      A / ←
+                      ←
                     </button>
                   </div>
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Move Right</span>
                     <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                      D / →
+                      →
                     </button>
                   </div>
                   

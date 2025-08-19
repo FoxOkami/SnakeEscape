@@ -208,10 +208,10 @@ export function createGamePlayerController(
 // Helper function to convert key set to input state
 export function keysToInputState(keys: Set<string>): InputState {
   return {
-    up: keys.has('KeyW') || keys.has('ArrowUp'),
-    down: keys.has('KeyS') || keys.has('ArrowDown'),
-    left: keys.has('KeyA') || keys.has('ArrowLeft'),
-    right: keys.has('KeyD') || keys.has('ArrowRight'),
+    up: keys.has('ArrowUp'),
+    down: keys.has('ArrowDown'),
+    left: keys.has('ArrowLeft'),
+    right: keys.has('ArrowRight'),
     walking: keys.has('ControlLeft') || keys.has('ControlRight')
   };
 }
