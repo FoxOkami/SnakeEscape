@@ -43,6 +43,19 @@ const HubRoom: React.FC = () => {
     walking: 'ControlLeft'
   });
   
+  // Refs to store current values for event handler
+  const editingKeyBindingRef = useRef<string | null>(null);
+  const customKeyBindingsRef = useRef(customKeyBindings);
+  
+  // Update refs when state changes
+  useEffect(() => {
+    editingKeyBindingRef.current = editingKeyBinding;
+  }, [editingKeyBinding]);
+  
+  useEffect(() => {
+    customKeyBindingsRef.current = customKeyBindings;
+  }, [customKeyBindings]);
+  
   // Load player character image
   useEffect(() => {
     const img = new Image();
@@ -67,14 +80,17 @@ const HubRoom: React.FC = () => {
     initializeHub();
     
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Handle key binding editing
-      if (editingKeyBinding) {
+      // Handle key binding editing - use refs to get current values
+      const currentEditingKey = editingKeyBindingRef.current;
+      const currentBindings = customKeyBindingsRef.current;
+      
+      if (currentEditingKey) {
         e.preventDefault();
         // Don't allow Escape to be bound as it's reserved for closing modals
         if (e.code !== 'Escape') {
           const newBindings = {
-            ...customKeyBindings,
-            [editingKeyBinding]: e.code
+            ...currentBindings,
+            [currentEditingKey]: e.code
           };
           setCustomKeyBindings(newBindings);
           updateStoreKeyBindings(newBindings); // Update both local and store state
