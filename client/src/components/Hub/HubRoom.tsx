@@ -93,7 +93,7 @@ const HubRoom: React.FC = () => {
           selectOption('yes');
         } else if (e.code === keyBindings.down) {
           selectOption('no');
-        } else if (e.code === 'KeyE' || e.code === 'KeyQ' || e.code === 'Enter') {
+        } else if (e.code === keyBindings.interact || e.code === 'Enter') {
           confirmSelection();
         }
       }
@@ -483,21 +483,16 @@ const HubRoom: React.FC = () => {
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Interact</span>
-                    <div className="flex gap-1">
-                      <button 
-                        onClick={() => setEditingKeyBinding('interact')}
-                        className={`px-3 py-1 text-xs rounded transition-colors ${
-                          editingKeyBinding === 'interact' 
-                            ? 'bg-white border-2 border-red-500 text-transparent' 
-                            : 'bg-gray-100 border hover:bg-gray-200'
-                        }`}
-                      >
-                        {editingKeyBinding === 'interact' ? '' : getKeyDisplayText(keyBindings.interact)}
-                      </button>
-                      <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                        Q
-                      </button>
-                    </div>
+                    <button 
+                      onClick={() => setEditingKeyBinding('interact')}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${
+                        editingKeyBinding === 'interact' 
+                          ? 'bg-white border-2 border-red-500 text-transparent' 
+                          : 'bg-gray-100 border hover:bg-gray-200'
+                      }`}
+                    >
+                      {editingKeyBinding === 'interact' ? '' : getKeyDisplayText(keyBindings.interact)}
+                    </button>
                   </div>
                   
                   <div className="flex justify-between items-center">
