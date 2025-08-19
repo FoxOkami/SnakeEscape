@@ -54,8 +54,9 @@ const HubRoom: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       setKeys(prev => new Set(prev).add(e.code));
       
-      // Close settings modal with Escape key
-      if (e.code === 'Escape' && showSettingsModal) {
+      // Close settings modal with Escape key - get current state from store
+      const currentState = useHubStore.getState();
+      if (e.code === 'Escape' && currentState.showSettingsModal) {
         closeSettingsModal();
         return;
       }
