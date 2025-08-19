@@ -54,6 +54,12 @@ const HubRoom: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       setKeys(prev => new Set(prev).add(e.code));
       
+      // Close settings modal with Escape key
+      if (e.code === 'Escape' && showSettingsModal) {
+        closeSettingsModal();
+        return;
+      }
+      
       if (interactionState === 'conversation') {
         if (e.code === 'ArrowUp') {
           selectOption('yes');
@@ -80,7 +86,7 @@ const HubRoom: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [interactionState, initializeHub, selectOption, confirmSelection, interactWithNPC]);
+  }, [interactionState, showSettingsModal, initializeHub, selectOption, confirmSelection, interactWithNPC, closeSettingsModal]);
   
   // Handle game start
   useEffect(() => {
