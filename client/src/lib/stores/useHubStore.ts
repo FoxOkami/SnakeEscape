@@ -178,10 +178,6 @@ export const useHubStore = create<HubStore>((set, get) => ({
   
   interactWithNPC: () => {
     const state = get();
-    console.log('[Debug] interactWithNPC called, current state:', { 
-      playerPos: state.player.position, 
-      showSettingsModal: state.showSettingsModal 
-    });
     
     // Find nearby NPC
     const nearbyNPC = state.npcs.find(npc => {
@@ -192,11 +188,8 @@ export const useHubStore = create<HubStore>((set, get) => ({
       return distance < 80;
     });
     
-    console.log('[Debug] Nearby NPC found:', nearbyNPC?.id || 'none');
-    
     if (nearbyNPC) {
       if (nearbyNPC.id === 'game_master' && !state.hasKey) {
-        console.log('[Debug] Interacting with game master');
         // Give the player the key
         set({
           key: {
@@ -206,10 +199,8 @@ export const useHubStore = create<HubStore>((set, get) => ({
           }
         });
       } else if (nearbyNPC.id === 'lenny_sterner') {
-        console.log('[Debug] Interacting with Lenny Sterner - opening settings modal');
         // Open settings modal
         get().openSettingsModal();
-        console.log('[Debug] Settings modal should now be open:', get().showSettingsModal);
       }
     }
   },
@@ -248,13 +239,10 @@ export const useHubStore = create<HubStore>((set, get) => ({
   },
 
   openSettingsModal: () => {
-    console.log('[Debug] openSettingsModal called');
     set({ showSettingsModal: true });
-    console.log('[Debug] showSettingsModal set to true');
   },
 
   closeSettingsModal: () => {
-    console.log('[Debug] closeSettingsModal called');
     set({ showSettingsModal: false });
   }
 }));

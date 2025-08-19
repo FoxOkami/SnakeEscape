@@ -49,7 +49,6 @@ const HubRoom: React.FC = () => {
   }, []);
   
   useEffect(() => {
-    console.log('[Debug] HubRoom useEffect initializing hub');
     initializeHub();
     
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -87,7 +86,7 @@ const HubRoom: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [interactionState, showSettingsModal, initializeHub, selectOption, confirmSelection, interactWithNPC, closeSettingsModal]);
+  }, [interactionState, initializeHub, selectOption, confirmSelection, interactWithNPC, closeSettingsModal]);
   
   // Handle game start
   useEffect(() => {
