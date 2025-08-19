@@ -139,8 +139,8 @@ export const useHubStore = create<HubStore>((set, get) => ({
     const state = get();
     if (state.interactionState !== 'idle' || !state.playerController) return;
     
-    // Handle E key for interactions
-    if (keys.has('KeyE')) {
+    // Handle E or Q key for interactions
+    if (keys.has('KeyE') || keys.has('KeyQ')) {
       get().interactWithNPC();
     }
     

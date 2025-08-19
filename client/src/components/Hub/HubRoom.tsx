@@ -423,7 +423,7 @@ const HubRoom: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Interact</span>
                     <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                      E
+                      E / Q
                     </button>
                   </div>
                   
