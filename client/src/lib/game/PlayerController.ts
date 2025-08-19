@@ -205,13 +205,32 @@ export function createGamePlayerController(
   );
 }
 
-// Helper function to convert key set to input state
-export function keysToInputState(keys: Set<string>): InputState {
+// Interface for custom key bindings
+export interface CustomKeyBindings {
+  up: string;
+  down: string;
+  left: string;
+  right: string;
+  interact: string;
+  walking: string;
+}
+
+// Helper function to convert key set to input state with custom key bindings
+export function keysToInputState(keys: Set<string>, customBindings?: CustomKeyBindings): InputState {
+  const bindings = customBindings || {
+    up: 'ArrowUp',
+    down: 'ArrowDown',
+    left: 'ArrowLeft',
+    right: 'ArrowRight',
+    interact: 'KeyE',
+    walking: 'ControlLeft'
+  };
+  
   return {
-    up: keys.has('ArrowUp'),
-    down: keys.has('ArrowDown'),
-    left: keys.has('ArrowLeft'),
-    right: keys.has('ArrowRight'),
-    walking: keys.has('ControlLeft') || keys.has('ControlRight')
+    up: keys.has(bindings.up),
+    down: keys.has(bindings.down),
+    left: keys.has(bindings.left),
+    right: keys.has(bindings.right),
+    walking: keys.has(bindings.walking) || keys.has('ControlRight') // Keep ControlRight as backup
   };
 }

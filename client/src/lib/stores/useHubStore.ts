@@ -4,7 +4,8 @@ import {
   createHubPlayerController,
   keysToInputState,
   type Position,
-  type Size 
+  type Size,
+  type CustomKeyBindings
 } from '../game/PlayerController';
 
 interface Player {
@@ -43,10 +44,12 @@ interface HubStore {
   key: Key;
   hasKey: boolean;
   showSettingsModal: boolean;
+  customKeyBindings: CustomKeyBindings | null;
   
   // Actions
   initializeHub: () => void;
-  updateHub: (deltaTime: number, keys: Set<string>) => void;
+  updateHub: (deltaTime: number, keys: Set<string>, keyBindings?: CustomKeyBindings) => void;
+  setCustomKeyBindings: (bindings: CustomKeyBindings) => void;
   interactWithNPC: () => void;
   checkDoorInteraction: () => void;
   selectOption: (option: 'yes' | 'no') => void;
@@ -60,6 +63,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
   gameState: 'hub',
   interactionState: 'idle',
   selectedOption: 'no',
+  customKeyBindings: null,
   player: {
     position: { x: 400, y: 300 },
     size: { width: 30, height: 30 }
@@ -116,6 +120,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
       },
       hasKey: false,
       showSettingsModal: false,
+      customKeyBindings: null,
       npcs: [
         {
           id: 'game_master',
@@ -135,17 +140,26 @@ export const useHubStore = create<HubStore>((set, get) => ({
     });
   },
   
-  updateHub: (deltaTime: number, keys: Set<string>) => {
+  updateHub: (deltaTime: number, keys: Set<string>, keyBindings?: CustomKeyBindings) => {
     const state = get();
     if (state.interactionState !== 'idle' || !state.playerController) return;
     
-    // Handle E key for interactions
-    if (keys.has('KeyE')) {
+    const currentBindings = keyBindings || state.customKeyBindings || {
+      up: 'ArrowUp',
+      down: 'ArrowDown',
+      left: 'ArrowLeft', 
+      right: 'ArrowRight',
+      interact: 'KeyE',
+      walking: 'ControlLeft'
+    };
+    
+    // Handle interact key for interactions
+    if (keys.has(currentBindings.interact)) {
       get().interactWithNPC();
     }
     
-    // Convert keys to input state
-    const inputState = keysToInputState(keys);
+    // Convert keys to input state with custom bindings
+    const inputState = keysToInputState(keys, currentBindings);
     
     // Update player position using PlayerController
     const newPosition = state.playerController.update(inputState, deltaTime);
@@ -244,5 +258,9 @@ export const useHubStore = create<HubStore>((set, get) => ({
 
   closeSettingsModal: () => {
     set({ showSettingsModal: false });
+  },
+
+  setCustomKeyBindings: (bindings: CustomKeyBindings) => {
+    set({ customKeyBindings: bindings });
   }
 }));

@@ -19,6 +19,7 @@ const HubRoom: React.FC = () => {
     showSettingsModal,
     initializeHub,
     updateHub,
+    setCustomKeyBindings: updateStoreKeyBindings,
     interactWithNPC,
     selectOption,
     confirmSelection,
@@ -32,6 +33,15 @@ const HubRoom: React.FC = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [musicVolume, setMusicVolume] = useState(100);
   const [sfxVolume, setSfxVolume] = useState(100);
+  const [editingKeyBinding, setEditingKeyBinding] = useState<string | null>(null);
+  const [customKeyBindings, setCustomKeyBindings] = useState({
+    up: 'ArrowUp',
+    down: 'ArrowDown', 
+    left: 'ArrowLeft',
+    right: 'ArrowRight',
+    interact: 'KeyE',
+    walking: 'ControlLeft'
+  });
   
   // Load player character image
   useEffect(() => {
@@ -48,10 +58,31 @@ const HubRoom: React.FC = () => {
     img.src = "/player-character.png?" + Date.now();
   }, []);
   
+  // Sync custom key bindings with store on mount
+  useEffect(() => {
+    updateStoreKeyBindings(customKeyBindings);
+  }, [customKeyBindings, updateStoreKeyBindings]);
+  
   useEffect(() => {
     initializeHub();
     
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Handle key binding editing
+      if (editingKeyBinding) {
+        e.preventDefault();
+        // Don't allow Escape to be bound as it's reserved for closing modals
+        if (e.code !== 'Escape') {
+          const newBindings = {
+            ...customKeyBindings,
+            [editingKeyBinding]: e.code
+          };
+          setCustomKeyBindings(newBindings);
+          updateStoreKeyBindings(newBindings); // Update both local and store state
+        }
+        setEditingKeyBinding(null);
+        return;
+      }
+      
       setKeys(prev => new Set(prev).add(e.code));
       
       // Close settings modal with Escape key - get current state from store
@@ -62,9 +93,9 @@ const HubRoom: React.FC = () => {
       }
       
       if (interactionState === 'conversation') {
-        if (e.code === 'ArrowUp') {
+        if (e.code === customKeyBindings.up) {
           selectOption('yes');
-        } else if (e.code === 'ArrowDown') {
+        } else if (e.code === customKeyBindings.down) {
           selectOption('no');
         } else if (e.code === 'KeyE' || e.code === 'KeyQ' || e.code === 'Enter') {
           confirmSelection();
@@ -87,7 +118,7 @@ const HubRoom: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [interactionState, initializeHub, selectOption, confirmSelection, interactWithNPC, closeSettingsModal]);
+  }, [interactionState, editingKeyBinding, customKeyBindings, initializeHub, selectOption, confirmSelection, interactWithNPC, closeSettingsModal]);
   
   // Handle game start
   useEffect(() => {
@@ -112,7 +143,7 @@ const HubRoom: React.FC = () => {
       
       // Update game state
       if (interactionState === 'idle') {
-        updateHub(deltaTime, keys);
+        updateHub(deltaTime, keys, customKeyBindings);
       }
       
       // Clear canvas
@@ -400,37 +431,72 @@ const HubRoom: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Move Up</span>
-                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                      ↑
+                    <button 
+                      onClick={() => setEditingKeyBinding('up')}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${
+                        editingKeyBinding === 'up' 
+                          ? 'bg-white border-2 border-red-500 text-transparent' 
+                          : 'bg-gray-100 border hover:bg-gray-200'
+                      }`}
+                    >
+                      {editingKeyBinding === 'up' ? '' : getKeyDisplayText(customKeyBindings.up)}
                     </button>
                   </div>
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Move Down</span>
-                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                      ↓
+                    <button 
+                      onClick={() => setEditingKeyBinding('down')}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${
+                        editingKeyBinding === 'down' 
+                          ? 'bg-white border-2 border-red-500 text-transparent' 
+                          : 'bg-gray-100 border hover:bg-gray-200'
+                      }`}
+                    >
+                      {editingKeyBinding === 'down' ? '' : getKeyDisplayText(customKeyBindings.down)}
                     </button>
                   </div>
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Move Left</span>
-                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                      ←
+                    <button 
+                      onClick={() => setEditingKeyBinding('left')}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${
+                        editingKeyBinding === 'left' 
+                          ? 'bg-white border-2 border-red-500 text-transparent' 
+                          : 'bg-gray-100 border hover:bg-gray-200'
+                      }`}
+                    >
+                      {editingKeyBinding === 'left' ? '' : getKeyDisplayText(customKeyBindings.left)}
                     </button>
                   </div>
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Move Right</span>
-                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                      →
+                    <button 
+                      onClick={() => setEditingKeyBinding('right')}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${
+                        editingKeyBinding === 'right' 
+                          ? 'bg-white border-2 border-red-500 text-transparent' 
+                          : 'bg-gray-100 border hover:bg-gray-200'
+                      }`}
+                    >
+                      {editingKeyBinding === 'right' ? '' : getKeyDisplayText(customKeyBindings.right)}
                     </button>
                   </div>
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Interact</span>
                     <div className="flex gap-1">
-                      <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                        E
+                      <button 
+                        onClick={() => setEditingKeyBinding('interact')}
+                        className={`px-3 py-1 text-xs rounded transition-colors ${
+                          editingKeyBinding === 'interact' 
+                            ? 'bg-white border-2 border-red-500 text-transparent' 
+                            : 'bg-gray-100 border hover:bg-gray-200'
+                        }`}
+                      >
+                        {editingKeyBinding === 'interact' ? '' : getKeyDisplayText(customKeyBindings.interact)}
                       </button>
                       <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
                         Q
@@ -440,11 +506,30 @@ const HubRoom: React.FC = () => {
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Walk (Hold)</span>
-                    <button className="px-3 py-1 text-xs bg-gray-100 border rounded hover:bg-gray-200 transition-colors">
-                      Ctrl
+                    <button 
+                      onClick={() => setEditingKeyBinding('walking')}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${
+                        editingKeyBinding === 'walking' 
+                          ? 'bg-white border-2 border-red-500 text-transparent' 
+                          : 'bg-gray-100 border hover:bg-gray-200'
+                      }`}
+                    >
+                      {editingKeyBinding === 'walking' ? '' : getKeyDisplayText(customKeyBindings.walking)}
                     </button>
                   </div>
                 </div>
+                
+                {editingKeyBinding && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
+                    <p className="text-sm text-red-700">
+                      Press any key to bind to "{editingKeyBinding === 'up' ? 'Move Up' : 
+                                                 editingKeyBinding === 'down' ? 'Move Down' :
+                                                 editingKeyBinding === 'left' ? 'Move Left' :
+                                                 editingKeyBinding === 'right' ? 'Move Right' :
+                                                 editingKeyBinding === 'interact' ? 'Interact' : 'Walk (Hold)'}"
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -452,6 +537,28 @@ const HubRoom: React.FC = () => {
       )}
     </div>
   );
+};
+
+// Helper function to get display text for keys
+const getKeyDisplayText = (keyCode: string): string => {
+  const keyMap: { [key: string]: string } = {
+    'ArrowUp': '↑',
+    'ArrowDown': '↓', 
+    'ArrowLeft': '←',
+    'ArrowRight': '→',
+    'KeyE': 'E',
+    'KeyQ': 'Q',
+    'KeyW': 'W',
+    'KeyA': 'A',
+    'KeyS': 'S',
+    'KeyD': 'D',
+    'ControlLeft': 'Ctrl',
+    'ControlRight': 'Ctrl',
+    'Space': 'Space',
+    'ShiftLeft': 'Shift',
+    'ShiftRight': 'Shift'
+  };
+  return keyMap[keyCode] || keyCode.replace('Key', '').replace('Arrow', '');
 };
 
 export default HubRoom;
