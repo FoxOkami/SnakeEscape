@@ -52,6 +52,8 @@ export const useKeyBindings = create<KeyBindingsStore>()(
       },
 
       getKeyDisplayText: (keyCode: string): string => {
+        if (!keyCode) return '';
+        
         const keyMap: { [key: string]: string } = {
           'ArrowUp': '↑',
           'ArrowDown': '↓', 
@@ -74,7 +76,20 @@ export const useKeyBindings = create<KeyBindingsStore>()(
     }),
     {
       name: 'snake-game-keybindings',
-      version: 1
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        if (version === 1) {
+          // Add the new secondaryInteract key to existing saved data
+          return {
+            ...persistedState,
+            keyBindings: {
+              ...persistedState.keyBindings,
+              secondaryInteract: 'KeyQ'
+            }
+          };
+        }
+        return persistedState;
+      }
     }
   )
 );
