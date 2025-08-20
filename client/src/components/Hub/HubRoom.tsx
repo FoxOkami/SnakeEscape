@@ -40,6 +40,13 @@ const HubRoom: React.FC = () => {
   // Use global key bindings store
   const { keyBindings, setKeyBinding, getKeyDisplayText } = useKeyBindings();
   
+  // Clear keys when settings modal opens to prevent stuck movement
+  useEffect(() => {
+    if (showSettingsModal) {
+      setKeys(new Set());
+    }
+  }, [showSettingsModal]);
+  
   // Refs to store current values for event handler
   const editingKeyBindingRef = useRef<string | null>(null);
   
@@ -142,7 +149,7 @@ const HubRoom: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [interactionState, initializeHub, selectOption, confirmSelection, interactWithNPC, closeSettingsModal]);
+  }, [interactionState, initializeHub, selectOption, confirmSelection, interactWithNPC, closeSettingsModal, showSettingsModal]);
   
   // Handle game start
   useEffect(() => {

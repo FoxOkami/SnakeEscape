@@ -45,6 +45,7 @@ interface HubStore {
   hasKey: boolean;
   showSettingsModal: boolean;
   customKeyBindings: CustomKeyBindings | null;
+  lastInteractionTime: number;
   
   // Actions
   initializeHub: () => void;
@@ -82,6 +83,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
   },
   hasKey: false,
   showSettingsModal: false,
+  lastInteractionTime: 0,
   
   initializeHub: () => {
     const playerSize = { width: 30, height: 30 };
@@ -193,6 +195,12 @@ export const useHubStore = create<HubStore>((set, get) => ({
   
   interactWithNPC: () => {
     const state = get();
+    const now = Date.now();
+    
+    // Prevent rapid re-interactions (debounce for 500ms)
+    if (now - state.lastInteractionTime < 500) {
+      return;
+    }
     
     // Find nearby NPC
     const nearbyNPC = state.npcs.find(npc => {
@@ -211,10 +219,12 @@ export const useHubStore = create<HubStore>((set, get) => ({
             ...state.key,
             position: { x: state.player.position.x + 50, y: state.player.position.y },
             collected: false
-          }
+          },
+          lastInteractionTime: now
         });
       } else if (nearbyNPC.id === 'lenny_sterner') {
         // Open settings modal
+        set({ lastInteractionTime: now });
         get().openSettingsModal();
       }
     }
