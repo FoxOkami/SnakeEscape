@@ -996,6 +996,17 @@ const GameCanvas: React.FC = () => {
         }
       });
 
+      // Show drop tooltip for MacGruber level when carrying an item
+      if (currentLevelKey === "item_collection" && carriedItem) {
+        drawInteractionTooltip(
+          "to drop",
+          ctx,
+          player.position.x,
+          player.position.y,
+          player.size.width
+        );
+      }
+
       // Draw key (if not collected)
       if (!key.collected) {
         ctx.fillStyle = "#ffd700";
