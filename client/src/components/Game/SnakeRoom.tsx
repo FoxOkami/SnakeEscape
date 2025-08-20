@@ -175,8 +175,9 @@ const SnakeRoom: React.FC = () => {
         currentKeyBindings.down,
         currentKeyBindings.left,
         currentKeyBindings.right,
-        "ControlLeft", // Walking modifier
-        "ControlRight", // Walking modifier
+        currentKeyBindings.walking, // Custom walking key
+        "ControlLeft", // Walking modifier fallback
+        "ControlRight", // Walking modifier fallback
         currentKeyBindings.interact,
         currentKeyBindings.secondaryInteract
       ];
@@ -198,8 +199,9 @@ const SnakeRoom: React.FC = () => {
         currentKeyBindings.down,
         currentKeyBindings.left,
         currentKeyBindings.right,
-        "ControlLeft", // Walking modifier
-        "ControlRight", // Walking modifier
+        currentKeyBindings.walking, // Custom walking key
+        "ControlLeft", // Walking modifier fallback
+        "ControlRight", // Walking modifier fallback
         currentKeyBindings.interact,
         currentKeyBindings.secondaryInteract
       ];
