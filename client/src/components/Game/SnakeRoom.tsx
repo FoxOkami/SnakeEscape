@@ -21,7 +21,6 @@ const SnakeRoom: React.FC = () => {
     checkPathConnection,
     removeKeyWalls,
     startLevel,
-    toggleLightSwitch,
   } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } =
     useAudio();
@@ -170,7 +169,7 @@ const SnakeRoom: React.FC = () => {
       }
 
       // Handle movement keys - get current key bindings dynamically
-      const currentKeyBindings = useKeyBindings.getState();
+      const currentKeyBindings = useKeyBindings.getState().keyBindings;
       const boundMovementKeys = [
         currentKeyBindings.up,
         currentKeyBindings.down,
@@ -179,7 +178,7 @@ const SnakeRoom: React.FC = () => {
         "ControlLeft", // Walking modifier
         "ControlRight", // Walking modifier
         currentKeyBindings.interact,
-        currentKeyBindings.secondaryItemInteraction
+        currentKeyBindings.secondaryInteract
       ];
       
       if (boundMovementKeys.includes(event.code)) {
@@ -193,7 +192,7 @@ const SnakeRoom: React.FC = () => {
       if (gameState !== "playing") return;
       
       // Handle movement keys - get current key bindings dynamically
-      const currentKeyBindings = useKeyBindings.getState();
+      const currentKeyBindings = useKeyBindings.getState().keyBindings;
       const boundMovementKeys = [
         currentKeyBindings.up,
         currentKeyBindings.down,
@@ -202,7 +201,7 @@ const SnakeRoom: React.FC = () => {
         "ControlLeft", // Walking modifier
         "ControlRight", // Walking modifier
         currentKeyBindings.interact,
-        currentKeyBindings.secondaryItemInteraction
+        currentKeyBindings.secondaryInteract
       ];
       
       if (boundMovementKeys.includes(event.code)) {
