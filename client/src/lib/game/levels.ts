@@ -807,7 +807,7 @@ export const LEVELS: Level[] = [
 
     return {
       id: 4,
-      name: "Alignment Issues",
+      name: "Alignment Concerns",
       levelKey: "grid_puzzle",
       player: { x: 80, y: 530 },
       size: { width: 800, height: 600 },
