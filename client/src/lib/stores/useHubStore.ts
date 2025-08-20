@@ -123,6 +123,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
       hasKey: false,
       showSettingsModal: false,
       customKeyBindings: null,
+      lastInteractionTime: 0,
       npcs: [
         {
           id: 'game_master',
@@ -197,8 +198,8 @@ export const useHubStore = create<HubStore>((set, get) => ({
     const state = get();
     const now = Date.now();
     
-    // Prevent rapid re-interactions (debounce for 500ms)
-    if (now - state.lastInteractionTime < 500) {
+    // Prevent rapid re-interactions (debounce for 200ms)
+    if (now - state.lastInteractionTime < 200) {
       return;
     }
     
