@@ -51,10 +51,11 @@ const SnakeRoom: React.FC = () => {
       // Only handle game keys when game is playing
       if (gameState !== "playing") return;
       
-
+      // Get current key bindings
+      const keyBindings = useKeyBindings.getState().keyBindings;
       
-      // Handle Q key for counterclockwise rotation (mirrors, light source, and tiles)
-      if (event.code === "KeyQ") {
+      // Handle secondary interaction key for counterclockwise rotation (mirrors, light source, and tiles)
+      if (event.code === keyBindings.secondaryInteract) {
         event.preventDefault();
         const gameState_current = useSnakeGame.getState();
         if (gameState_current.currentLevelKey === "light_reflection") {
@@ -71,7 +72,6 @@ const SnakeRoom: React.FC = () => {
       }
 
       // Handle interact key for clockwise rotation (mirrors and light source) or item interaction
-      const keyBindings = useKeyBindings.getState().keyBindings;
       if (event.code === keyBindings.interact) {
         event.preventDefault();
         setKeyPressed(event.code, true);
