@@ -93,14 +93,19 @@ const HubRoom: React.FC = () => {
         return;
       }
       
-      setKeys(prev => new Set(prev).add(e.code));
-      
       // Close settings modal with Escape key - get current state from store
       const currentState = useHubStore.getState();
       if (e.code === 'Escape' && currentState.showSettingsModal) {
         closeSettingsModal();
         return;
       }
+      
+      // Don't process any game keys when settings modal is open
+      if (currentState.showSettingsModal) {
+        return;
+      }
+      
+      setKeys(prev => new Set(prev).add(e.code));
       
       if (interactionState === 'conversation') {
         if (e.code === keyBindings.up) {
@@ -114,6 +119,12 @@ const HubRoom: React.FC = () => {
     };
     
     const handleKeyUp = (e: KeyboardEvent) => {
+      // Don't process key releases when settings modal is open
+      const currentState = useHubStore.getState();
+      if (currentState.showSettingsModal) {
+        return;
+      }
+      
       setKeys(prev => {
         const newKeys = new Set(prev);
         newKeys.delete(e.code);
@@ -151,8 +162,8 @@ const HubRoom: React.FC = () => {
       const deltaTime = Math.min(currentTime - lastTime, 100);
       lastTime = currentTime;
       
-      // Update game state
-      if (interactionState === 'idle') {
+      // Update game state - don't update when settings modal is open
+      if (interactionState === 'idle' && !showSettingsModal) {
         updateHub(deltaTime, keys, keyBindings);
       }
       
