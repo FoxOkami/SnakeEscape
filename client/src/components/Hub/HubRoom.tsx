@@ -79,14 +79,22 @@ const HubRoom: React.FC = () => {
           console.log('[Key Binding Debug] Current bindings:', keyBindings);
           console.log('[Key Binding Debug] Editing key:', currentEditingKey);
           
-          const existingBinding = Object.entries(keyBindings).find(
-            ([action, keyCode]) => keyCode === e.code && action !== currentEditingKey
-          );
+          // Get all current key bindings as an array
+          const allBindings = Object.entries(keyBindings);
+          console.log('[Key Binding Debug] All bindings array:', allBindings);
           
-          console.log('[Key Binding Debug] Existing binding found:', existingBinding);
+          // Check if this key is already used by another action
+          const conflictingAction = allBindings.find(([action, keyCode]) => {
+            const isConflict = keyCode === e.code && action !== currentEditingKey;
+            console.log(`[Key Binding Debug] Checking ${action}: ${keyCode} vs ${e.code}, conflict: ${isConflict}`);
+            return isConflict;
+          });
           
-          if (existingBinding) {
-            setKeyBindingError("Unable to bind the same key to multiple actions");
+          console.log('[Key Binding Debug] Conflicting action found:', conflictingAction);
+          
+          if (conflictingAction) {
+            const [conflictAction] = conflictingAction;
+            setKeyBindingError(`Unable to bind the same key to multiple actions (already used by ${conflictAction})`);
             // Auto-clear error after 3 seconds
             setTimeout(() => setKeyBindingError(null), 3000);
           } else {
