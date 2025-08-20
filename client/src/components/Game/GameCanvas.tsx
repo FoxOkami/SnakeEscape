@@ -1881,8 +1881,8 @@ const GameCanvas: React.FC = () => {
         if (distance < 60) {
           drawTooltipText(
             "Q/E to rotate",
-            mirror.x + mirror.width / 2,
-            mirror.y - 10,
+            player.position.x + player.size.width / 2,
+            player.position.y - 10,
           );
         }
       });
@@ -2335,7 +2335,11 @@ const GameCanvas: React.FC = () => {
         );
 
         if (distance < 60) {
-          drawTooltipText("Q/E to rotate light", centerX, centerY - 20);
+          drawTooltipText(
+            "Q/E to rotate light", 
+            player.position.x + player.size.width / 2,
+            player.position.y - 10
+          );
         }
       }
 
@@ -2832,8 +2836,8 @@ const GameCanvas: React.FC = () => {
 
               drawTooltipText(
                 "E to toggle",
-                switchObj.x + switchObj.width / 2,
-                switchObj.y - 10,
+                player.position.x + player.size.width / 2,
+                player.position.y - 10,
               );
             }
           }
