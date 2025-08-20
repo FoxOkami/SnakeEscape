@@ -75,26 +75,12 @@ const HubRoom: React.FC = () => {
         // Don't allow Escape to be bound as it's reserved for closing modals
         if (e.code !== 'Escape') {
           // Check if the key is already bound to another action
-          console.log('[Key Binding Debug] Pressed key:', e.code);
-          console.log('[Key Binding Debug] Current bindings:', keyBindings);
-          console.log('[Key Binding Debug] Editing key:', currentEditingKey);
-          
-          // Get all current key bindings as an array
-          const allBindings = Object.entries(keyBindings);
-          console.log('[Key Binding Debug] All bindings array:', allBindings);
-          
-          // Check if this key is already used by another action
-          const conflictingAction = allBindings.find(([action, keyCode]) => {
-            const isConflict = keyCode === e.code && action !== currentEditingKey;
-            console.log(`[Key Binding Debug] Checking ${action}: ${keyCode} vs ${e.code}, conflict: ${isConflict}`);
-            return isConflict;
-          });
-          
-          console.log('[Key Binding Debug] Conflicting action found:', conflictingAction);
+          const conflictingAction = Object.entries(keyBindings).find(
+            ([action, keyCode]) => keyCode === e.code && action !== currentEditingKey
+          );
           
           if (conflictingAction) {
-            const [conflictAction] = conflictingAction;
-            setKeyBindingError(`Unable to bind the same key to multiple actions (already used by ${conflictAction})`);
+            setKeyBindingError("Unable to bind the same key to multiple actions");
             // Auto-clear error after 3 seconds
             setTimeout(() => setKeyBindingError(null), 3000);
           } else {
