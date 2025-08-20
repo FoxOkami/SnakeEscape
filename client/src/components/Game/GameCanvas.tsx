@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import { useSnakeGame } from "../../lib/stores/useSnakeGame";
 import { checkAABBCollision } from "../../lib/game/collision";
-import { drawPickupTooltip, drawStandardTooltip } from "../../lib/utils/tooltips";
+import { drawPickupTooltip, drawStandardTooltip, drawInteractionTooltip, drawSecondaryInteractionTooltip, drawRotationTooltip } from "../../lib/utils/tooltips";
 
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -985,8 +985,8 @@ const GameCanvas: React.FC = () => {
             playerRect.y + playerRect.height > itemRect.y;
 
           if (canPickup) {
-            drawPickupTooltip(
-              "E to pick up",
+            drawInteractionTooltip(
+              "to pick up",
               ctx,
               player.position.x,
               player.position.y,
@@ -1656,8 +1656,8 @@ const GameCanvas: React.FC = () => {
             );
             
             // Draw interaction prompt slightly below the name
-            drawStandardTooltip(
-              "Press E to start adventure",
+            drawInteractionTooltip(
+              "to start adventure",
               ctx,
               player.position.x,
               player.position.y - 5,
@@ -1763,8 +1763,8 @@ const GameCanvas: React.FC = () => {
           const canStartFlow = !currentFlowState || (!currentFlowState.isActive && !currentFlowState.isEmptying);
           
           if (canStartFlow) {
-            drawStandardTooltip(
-              "E to start",
+            drawInteractionTooltip(
+              "to start",
               ctx,
               player.position.x,
               player.position.y,
@@ -1772,9 +1772,8 @@ const GameCanvas: React.FC = () => {
             );
           }
         } else if (currentTile.id !== endTileId) {
-          // Show "Q/E to rotate" on rotatable tiles (not start or end)
-          drawStandardTooltip(
-            "Q/E to rotate",
+          // Show rotation keys on rotatable tiles (not start or end)
+          drawRotationTooltip(
             ctx,
             player.position.x,
             player.position.y,
@@ -1850,8 +1849,7 @@ const GameCanvas: React.FC = () => {
         );
 
         if (distance < 60) {
-          drawStandardTooltip(
-            "Q/E to rotate",
+          drawRotationTooltip(
             ctx,
             player.position.x,
             player.position.y,
@@ -2308,8 +2306,7 @@ const GameCanvas: React.FC = () => {
         );
 
         if (distance < 60) {
-          drawStandardTooltip(
-            "Q/E to rotate light",
+          drawRotationTooltip(
             ctx,
             player.position.x,
             player.position.y,
@@ -2809,8 +2806,8 @@ const GameCanvas: React.FC = () => {
                 switchCenterY,
               );
 
-              drawStandardTooltip(
-                "E to toggle",
+              drawInteractionTooltip(
+                "to toggle",
                 ctx,
                 player.position.x,
                 player.position.y,

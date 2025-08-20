@@ -33,6 +33,13 @@ Preferred communication style: Simple, everyday language.
 - **Impact**: Custom key bindings now work consistently across hub and all game levels
 - **Files Changed**: `client/src/components/Game/SnakeRoom.tsx`
 
+### Dynamic Tooltip Key Display (January 20, 2025)
+- **Problem**: Tooltips showed hardcoded "E" and "Q" instead of user's actual key bindings
+- **Solution**: Enhanced tooltip utility with dynamic key binding functions
+- **New Functions**: `drawInteractionTooltip()`, `drawSecondaryInteractionTooltip()`, `drawRotationTooltip()`
+- **Impact**: All tooltips now display the user's actual key bindings instead of hardcoded letters
+- **Files Changed**: `client/src/lib/utils/tooltips.ts`, `GameCanvas.tsx`, `HubRoom.tsx`
+
 ## System Architecture
 
 ### Frontend Architecture

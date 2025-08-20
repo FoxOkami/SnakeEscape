@@ -2,6 +2,8 @@
  * Centralized tooltip utility for consistent positioning and styling across the game
  */
 
+import { useKeyBindings } from '../stores/useKeyBindings';
+
 export interface TooltipOptions {
   text: string;
   ctx: CanvasRenderingContext2D;
@@ -13,6 +15,13 @@ export interface TooltipOptions {
   outlineColor?: string;
   outlineWidth?: number;
   offsetY?: number;
+}
+
+/**
+ * Get the display text for a key code (e.g., "KeyE" -> "E")
+ */
+export function getKeyDisplayText(keyCode: string): string {
+  return useKeyBindings.getState().getKeyDisplayText(keyCode);
 }
 
 /**
@@ -103,4 +112,49 @@ export function drawPickupTooltip(
     fontSize: '12px Arial',
     outlineWidth: 3
   });
+}
+
+/**
+ * Draw interaction tooltip with dynamic key binding
+ */
+export function drawInteractionTooltip(
+  action: string,
+  ctx: CanvasRenderingContext2D,
+  playerX: number,
+  playerY: number,
+  playerWidth: number
+): void {
+  const keyBindings = useKeyBindings.getState().keyBindings;
+  const keyDisplay = getKeyDisplayText(keyBindings.interact);
+  drawStandardTooltip(`${keyDisplay} ${action}`, ctx, playerX, playerY, playerWidth);
+}
+
+/**
+ * Draw secondary interaction tooltip with dynamic key binding
+ */
+export function drawSecondaryInteractionTooltip(
+  action: string,
+  ctx: CanvasRenderingContext2D,
+  playerX: number,
+  playerY: number,
+  playerWidth: number
+): void {
+  const keyBindings = useKeyBindings.getState().keyBindings;
+  const keyDisplay = getKeyDisplayText(keyBindings.secondaryInteract);
+  drawStandardTooltip(`${keyDisplay} ${action}`, ctx, playerX, playerY, playerWidth);
+}
+
+/**
+ * Draw rotation tooltip with both keys displayed dynamically
+ */
+export function drawRotationTooltip(
+  ctx: CanvasRenderingContext2D,
+  playerX: number,
+  playerY: number,
+  playerWidth: number
+): void {
+  const keyBindings = useKeyBindings.getState().keyBindings;
+  const secondaryKey = getKeyDisplayText(keyBindings.secondaryInteract);
+  const interactKey = getKeyDisplayText(keyBindings.interact);
+  drawStandardTooltip(`${secondaryKey}/${interactKey} to rotate`, ctx, playerX, playerY, playerWidth);
 }

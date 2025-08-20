@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useHubStore } from '../../lib/stores/useHubStore';
 import { useSnakeGame } from '../../lib/stores/useSnakeGame';
 import { useKeyBindings, type KeyBindings } from '../../lib/stores/useKeyBindings';
-import { drawStandardTooltip } from '../../lib/utils/tooltips';
+import { drawStandardTooltip, drawInteractionTooltip } from '../../lib/utils/tooltips';
 
 const HubRoom: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -219,8 +219,8 @@ const HubRoom: React.FC = () => {
         );
         
         if (distance < 80 && interactionState === 'idle') {
-          drawStandardTooltip(
-            'Press E to interact',
+          drawInteractionTooltip(
+            'to interact',
             ctx,
             player.position.x,
             player.position.y,
