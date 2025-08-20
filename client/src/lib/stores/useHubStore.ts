@@ -72,7 +72,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
   npcs: [],
   playerController: null,
   door: {
-    position: { x: 780, y: 280 },
+    position: { x: 770, y: 280 },
     size: { width: 30, height: 40 },
     isOpen: false
   },
@@ -111,7 +111,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
       },
       playerController,
       door: {
-        position: { x: 780, y: 280 },
+        position: { x: 770, y: 280 },
         size: { width: 30, height: 40 },
         isOpen: false
       },
