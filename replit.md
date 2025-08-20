@@ -26,6 +26,13 @@ Preferred communication style: Simple, everyday language.
 - **Benefits**: Eliminates need to manually verify tooltip positioning across levels, easier maintenance
 - **Refactored Components**: HubRoom.tsx, GameCanvas.tsx (all tooltip implementations unified)
 
+### Fixed Key Binding Inconsistency (January 20, 2025)
+- **Problem**: Movement keys worked in hub but not in game levels when bindings were changed
+- **Root Cause**: SnakeRoom.tsx used hardcoded key arrays instead of dynamic key bindings
+- **Solution**: Updated SnakeRoom.tsx to dynamically fetch current key bindings using `useKeyBindings.getState()`
+- **Impact**: Custom key bindings now work consistently across hub and all game levels
+- **Files Changed**: `client/src/components/Game/SnakeRoom.tsx`
+
 ## System Architecture
 
 ### Frontend Architecture

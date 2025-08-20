@@ -169,22 +169,20 @@ const SnakeRoom: React.FC = () => {
         }
       }
 
-      // Handle movement keys - only prevent default for game keys
-      const gameKeys = [
-        "ArrowUp",
-        "ArrowDown", 
-        "ArrowLeft",
-        "ArrowRight",
-        "KeyW",
-        "KeyA", 
-        "KeyS",
-        "KeyD",
-        "ControlLeft",
-        "ControlRight",
-        "KeyE",
+      // Handle movement keys - get current key bindings dynamically
+      const currentKeyBindings = useKeyBindings.getState();
+      const boundMovementKeys = [
+        currentKeyBindings.up,
+        currentKeyBindings.down,
+        currentKeyBindings.left,
+        currentKeyBindings.right,
+        "ControlLeft", // Walking modifier
+        "ControlRight", // Walking modifier
+        currentKeyBindings.interact,
+        currentKeyBindings.secondaryItemInteraction
       ];
       
-      if (gameKeys.includes(event.code)) {
+      if (boundMovementKeys.includes(event.code)) {
         event.preventDefault();
         setKeyPressed(event.code, true);
       }
@@ -194,21 +192,20 @@ const SnakeRoom: React.FC = () => {
       // Only handle game keys when game is playing
       if (gameState !== "playing") return;
       
-      const gameKeys = [
-        "ArrowUp",
-        "ArrowDown", 
-        "ArrowLeft",
-        "ArrowRight",
-        "KeyW",
-        "KeyA",
-        "KeyS", 
-        "KeyD",
-        "ControlLeft",
-        "ControlRight",
-        "KeyE",
+      // Handle movement keys - get current key bindings dynamically
+      const currentKeyBindings = useKeyBindings.getState();
+      const boundMovementKeys = [
+        currentKeyBindings.up,
+        currentKeyBindings.down,
+        currentKeyBindings.left,
+        currentKeyBindings.right,
+        "ControlLeft", // Walking modifier
+        "ControlRight", // Walking modifier
+        currentKeyBindings.interact,
+        currentKeyBindings.secondaryItemInteraction
       ];
       
-      if (gameKeys.includes(event.code)) {
+      if (boundMovementKeys.includes(event.code)) {
         event.preventDefault();
         setKeyPressed(event.code, false);
       }
