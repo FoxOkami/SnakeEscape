@@ -220,11 +220,13 @@ const HubRoom: React.FC = () => {
         if (distance < 80 && interactionState === 'idle') {
           ctx.fillStyle = '#FFFFFF';
           ctx.font = '14px Arial';
+          ctx.textAlign = 'center';
           ctx.fillText(
             'Press E to interact',
-            npc.position.x + npc.size.width / 2,
-            npc.position.y + npc.size.height + 25
+            player.position.x + player.size.width / 2,
+            player.position.y - 10
           );
+          ctx.textAlign = 'left';
         }
       });
       
@@ -275,14 +277,14 @@ const HubRoom: React.FC = () => {
         if (hasKey) {
           ctx.fillText(
             'Walk closer to enter Level 1',
-            door.position.x + door.size.width / 2,
-            door.position.y - 10
+            player.position.x + player.size.width / 2,
+            player.position.y - 10
           );
         } else {
           ctx.fillText(
             'Locked - Need key',
-            door.position.x + door.size.width / 2,
-            door.position.y - 10
+            player.position.x + player.size.width / 2,
+            player.position.y - 10
           );
         }
       }
