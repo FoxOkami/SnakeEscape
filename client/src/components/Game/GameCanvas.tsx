@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import { useSnakeGame } from "../../lib/stores/useSnakeGame";
 import { checkAABBCollision } from "../../lib/game/collision";
+import { drawPickupTooltip, drawStandardTooltip } from "../../lib/utils/tooltips";
 
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -984,20 +985,13 @@ const GameCanvas: React.FC = () => {
             playerRect.y + playerRect.height > itemRect.y;
 
           if (canPickup) {
-            // Draw white text with black outline
-            ctx.font = "12px Arial";
-            ctx.textAlign = "center";
-
-            // Draw black outline (stroke)
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 3;
-            ctx.strokeText("E to pick up", player.position.x + player.size.width / 2, player.position.y - 10);
-
-            // Draw white fill
-            ctx.fillStyle = "#ffffff";
-            ctx.fillText("E to pick up", player.position.x + player.size.width / 2, player.position.y - 10);
-
-            ctx.textAlign = "left";
+            drawPickupTooltip(
+              "E to pick up",
+              ctx,
+              player.position.x,
+              player.position.y,
+              player.size.width
+            );
           }
         }
       });
@@ -1652,38 +1646,23 @@ const GameCanvas: React.FC = () => {
           );
           
           if (distance < 80) {
-            ctx.font = "16px Arial";
-            ctx.textAlign = "center";
-            
-            // Draw "Game Master" name
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 3;
-            ctx.strokeText(
+            // Draw "Game Master" name above player
+            drawStandardTooltip(
               "Game Master",
-              snake.position.x + snake.size.width / 2,
-              snake.position.y - 10
-            );
-            ctx.fillStyle = "#ffffff";
-            ctx.fillText(
-              "Game Master",
-              snake.position.x + snake.size.width / 2,
-              snake.position.y - 10
+              ctx,
+              player.position.x,
+              player.position.y,
+              player.size.width
             );
             
-            // Draw interaction prompt
-            ctx.strokeText(
+            // Draw interaction prompt slightly below the name
+            drawStandardTooltip(
               "Press E to start adventure",
-              snake.position.x + snake.size.width / 2,
-              snake.position.y + snake.size.height + 25
+              ctx,
+              player.position.x,
+              player.position.y - 5,
+              player.size.width
             );
-            ctx.fillStyle = "#4CAF50";
-            ctx.fillText(
-              "Press E to start adventure",
-              snake.position.x + snake.size.width / 2,
-              snake.position.y + snake.size.height + 25
-            );
-            
-            ctx.textAlign = "left"; // Reset text alignment
           }
         }
 
@@ -1763,21 +1742,9 @@ const GameCanvas: React.FC = () => {
         }
       }
 
-      // Helper function to draw text with white fill and black outline
+      // Helper function to draw text with white fill and black outline (replaced by centralized tooltip system)
       const drawTooltipText = (text: string, x: number, y: number) => {
-        ctx.font = "12px Arial";
-        ctx.textAlign = "center";
-
-        // Draw black outline (stroke)
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 3;
-        ctx.strokeText(text, x, y);
-
-        // Draw white fill
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(text, x, y);
-
-        ctx.textAlign = "left";
+        drawStandardTooltip(text, ctx, player.position.x, player.position.y, player.size.width);
       };
 
       // Show tooltips for Level 4 tiles
@@ -1796,18 +1763,22 @@ const GameCanvas: React.FC = () => {
           const canStartFlow = !currentFlowState || (!currentFlowState.isActive && !currentFlowState.isEmptying);
           
           if (canStartFlow) {
-            drawTooltipText(
+            drawStandardTooltip(
               "E to start",
-              player.position.x + player.size.width / 2,
-              player.position.y - 10,
+              ctx,
+              player.position.x,
+              player.position.y,
+              player.size.width
             );
           }
         } else if (currentTile.id !== endTileId) {
           // Show "Q/E to rotate" on rotatable tiles (not start or end)
-          drawTooltipText(
+          drawStandardTooltip(
             "Q/E to rotate",
-            player.position.x + player.size.width / 2,
-            player.position.y - 10,
+            ctx,
+            player.position.x,
+            player.position.y,
+            player.size.width
           );
         }
       }
@@ -1879,10 +1850,12 @@ const GameCanvas: React.FC = () => {
         );
 
         if (distance < 60) {
-          drawTooltipText(
+          drawStandardTooltip(
             "Q/E to rotate",
-            player.position.x + player.size.width / 2,
-            player.position.y - 10,
+            ctx,
+            player.position.x,
+            player.position.y,
+            player.size.width
           );
         }
       });
@@ -2335,10 +2308,12 @@ const GameCanvas: React.FC = () => {
         );
 
         if (distance < 60) {
-          drawTooltipText(
-            "Q/E to rotate light", 
-            player.position.x + player.size.width / 2,
-            player.position.y - 10
+          drawStandardTooltip(
+            "Q/E to rotate light",
+            ctx,
+            player.position.x,
+            player.position.y,
+            player.size.width
           );
         }
       }
@@ -2834,10 +2809,12 @@ const GameCanvas: React.FC = () => {
                 switchCenterY,
               );
 
-              drawTooltipText(
+              drawStandardTooltip(
                 "E to toggle",
-                player.position.x + player.size.width / 2,
-                player.position.y - 10,
+                ctx,
+                player.position.x,
+                player.position.y,
+                player.size.width
               );
             }
           }

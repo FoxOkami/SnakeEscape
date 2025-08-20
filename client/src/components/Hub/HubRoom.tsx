@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useHubStore } from '../../lib/stores/useHubStore';
 import { useSnakeGame } from '../../lib/stores/useSnakeGame';
 import { useKeyBindings, type KeyBindings } from '../../lib/stores/useKeyBindings';
+import { drawStandardTooltip } from '../../lib/utils/tooltips';
 
 const HubRoom: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -218,15 +219,13 @@ const HubRoom: React.FC = () => {
         );
         
         if (distance < 80 && interactionState === 'idle') {
-          ctx.fillStyle = '#FFFFFF';
-          ctx.font = '14px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText(
+          drawStandardTooltip(
             'Press E to interact',
-            player.position.x + player.size.width / 2,
-            player.position.y - 10
+            ctx,
+            player.position.x,
+            player.position.y,
+            player.size.width
           );
-          ctx.textAlign = 'left';
         }
       });
       
@@ -271,22 +270,14 @@ const HubRoom: React.FC = () => {
       );
       
       if (doorDistance < 50 && interactionState === 'idle') {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = '14px Arial';
-        ctx.textAlign = 'center';
-        if (hasKey) {
-          ctx.fillText(
-            'Walk closer to enter Level 1',
-            player.position.x + player.size.width / 2,
-            player.position.y - 10
-          );
-        } else {
-          ctx.fillText(
-            'Locked - Need key',
-            player.position.x + player.size.width / 2,
-            player.position.y - 10
-          );
-        }
+        const message = hasKey ? 'Walk closer to enter Level 1' : 'Locked - Need key';
+        drawStandardTooltip(
+          message,
+          ctx,
+          player.position.x,
+          player.position.y,
+          player.size.width
+        );
       }
       
       // Draw conversation UI

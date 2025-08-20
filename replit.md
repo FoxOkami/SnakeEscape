@@ -17,6 +17,15 @@ Preferred communication style: Simple, everyday language.
 - **Impact**: Code duplication, maintenance overhead, potential behavioral differences
 - **Solution**: Consider unified PlayerController class for consistent movement across all game states
 
+## Recent Changes
+
+### Centralized Tooltip System (January 20, 2025)
+- **Problem**: Tooltip implementations scattered across multiple files with inconsistent positioning
+- **Solution**: Created centralized tooltip utility (`client/src/lib/utils/tooltips.ts`)
+- **Impact**: All interaction messages now consistently display above player's head
+- **Benefits**: Eliminates need to manually verify tooltip positioning across levels, easier maintenance
+- **Refactored Components**: HubRoom.tsx, GameCanvas.tsx (all tooltip implementations unified)
+
 ## System Architecture
 
 ### Frontend Architecture
