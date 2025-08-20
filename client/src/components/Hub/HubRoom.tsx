@@ -149,7 +149,7 @@ const HubRoom: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [interactionState, initializeHub, selectOption, confirmSelection, interactWithNPC, closeSettingsModal, showSettingsModal]);
+  }, [interactionState, initializeHub, selectOption, confirmSelection, interactWithNPC, closeSettingsModal]);
   
   // Handle game start
   useEffect(() => {
