@@ -159,7 +159,6 @@ export const useHubStore = create<HubStore>((set, get) => ({
     
     // Handle interact key for interactions
     if (keys.has(currentBindings.interact)) {
-      console.log('Interaction key pressed, calling interactWithNPC');
       get().interactWithNPC();
     }
     
@@ -199,11 +198,8 @@ export const useHubStore = create<HubStore>((set, get) => ({
     const state = get();
     const now = Date.now();
     
-    console.log('interactWithNPC called, lastInteractionTime:', state.lastInteractionTime, 'now:', now, 'diff:', now - state.lastInteractionTime);
-    
     // Prevent rapid re-interactions (debounce for 200ms)
     if (now - state.lastInteractionTime < 200) {
-      console.log('Interaction blocked by debounce');
       return;
     }
     
@@ -229,7 +225,6 @@ export const useHubStore = create<HubStore>((set, get) => ({
         });
       } else if (nearbyNPC.id === 'lenny_sterner') {
         // Open settings modal
-        console.log('Opening settings modal for Lenny Sterner');
         set({ lastInteractionTime: now });
         get().openSettingsModal();
       }
