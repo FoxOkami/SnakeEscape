@@ -75,8 +75,11 @@ const HubRoom: React.FC = () => {
         e.preventDefault();
         // Don't allow Escape to be bound as it's reserved for closing modals
         if (e.code !== 'Escape') {
+          // Get current key bindings directly from the store to avoid stale state
+          const currentKeyBindings = useKeyBindings.getState().keyBindings;
+          
           // Check if the key is already bound to another action
-          const conflictingAction = Object.entries(keyBindings).find(
+          const conflictingAction = Object.entries(currentKeyBindings).find(
             ([action, keyCode]) => keyCode === e.code && action !== currentEditingKey
           );
           
