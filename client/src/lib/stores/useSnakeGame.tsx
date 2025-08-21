@@ -123,6 +123,11 @@ interface SnakeGameState extends GameData {
   showHint: () => void;
   updateHint: (deltaTime: number) => void;
 
+  // Inventory system
+  showInventory: boolean;
+  openInventory: () => void;
+  closeInventory: () => void;
+
   // Level 1 randomization
   randomizedSymbols?: string[] | null;
 
@@ -299,6 +304,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     targetVelocity: { x: 0, y: 0 },
     isWalking: false,
     keyStates: new Map(), // Track key state with timestamps
+    showInventory: false,
     randomizedSymbols: null, // Level 1 randomization
 
     setKeyPressed: (key: string, pressed: boolean) => {
@@ -767,6 +773,14 @@ export const useSnakeGame = create<SnakeGameState>()(
       set({ gameState: "hub" });
     },
 
+    openInventory: () => {
+      set({ showInventory: true });
+    },
+
+    closeInventory: () => {
+      set({ showInventory: false });
+    },
+
     movePlayer: (direction: Position) => {
       const state = get();
 
@@ -813,7 +827,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     updateGame: (deltaTime: number) => {
       const state = get();
-      if (state.gameState !== "playing") return;
+      if (state.gameState !== "playing" || state.showInventory) return;
 
       // --- SMOOTH PLAYER MOVEMENT ---
       // Smoothly interpolate current velocity toward target velocity

@@ -5,6 +5,7 @@ import { LEVELS } from "../../lib/game/levels";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
+import { InventoryModal } from "../ui/inventory";
 
 const GameUI: React.FC = () => {
   const {
@@ -19,7 +20,10 @@ const GameUI: React.FC = () => {
     isWalking,
     carriedItem,
     mirrors,
-    crystal
+    crystal,
+    showInventory,
+    openInventory,
+    closeInventory
   } = useSnakeGame();
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
@@ -292,6 +296,14 @@ const GameUI: React.FC = () => {
       
       <div className="flex gap-2">
         <Button
+          onClick={openInventory}
+          variant="outline"
+          size="sm"
+          className="bg-gray-800 text-white border-gray-600 hover:bg-gray-700"
+        >
+          📦 Inventory
+        </Button>
+        <Button
           onClick={toggleMute}
           variant="outline"
           size="sm"
@@ -320,6 +332,13 @@ const GameUI: React.FC = () => {
       {gameState === 'victory' && renderVictory()}
       {gameState === 'playing' && renderGameHUD()}
       {gameState === 'playing' && renderHealthDisplay()}
+      
+      {/* Inventory Modal */}
+      <InventoryModal
+        isOpen={showInventory}
+        onClose={closeInventory}
+        items={[]}
+      />
     </>
   );
 };
