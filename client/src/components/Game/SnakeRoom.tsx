@@ -24,6 +24,7 @@ const SnakeRoom: React.FC = () => {
     showInventory,
     openInventory,
     closeInventory,
+    toggleLightSwitch,
   } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } =
     useAudio();
