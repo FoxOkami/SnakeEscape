@@ -39,6 +39,7 @@ const HubRoom: React.FC = () => {
   const [editingKeyBinding, setEditingKeyBinding] = useState<string | null>(null);
   const [keyBindingError, setKeyBindingError] = useState<string | null>(null);
   const [cheatCodeInput, setCheatCodeInput] = useState<string>('');
+  const [cheatCodeSuccess, setCheatCodeSuccess] = useState<boolean>(false);
   
   // Use global key bindings store
   const { keyBindings, setKeyBinding, getKeyDisplayText } = useKeyBindings();
@@ -61,6 +62,12 @@ const HubRoom: React.FC = () => {
       };
       addInventoryItem(stackRadarItem);
       setCheatCodeInput(''); // Clear input after successful cheat
+      
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
     }
   };
   
@@ -610,7 +617,9 @@ const HubRoom: React.FC = () => {
               
               {/* Enter Cheat Codes Section */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-800">Enter Cheat Codes</h3>
+                <h3 className={`text-lg font-semibold transition-colors duration-200 ${
+                  cheatCodeSuccess ? 'text-green-600' : 'text-gray-800'
+                }`}>Enter Cheat Codes</h3>
                 <input
                   type="text"
                   placeholder="Enter cheat code..."
