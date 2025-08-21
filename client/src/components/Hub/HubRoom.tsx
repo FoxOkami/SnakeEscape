@@ -30,7 +30,7 @@ const HubRoom: React.FC = () => {
     closeSettingsModal
   } = useHubStore();
 
-  const { startLevel, showInventory, openInventory, closeInventory } = useSnakeGame();
+  const { startLevel, showInventory, openInventory, closeInventory, addInventoryItem } = useSnakeGame();
   
   const [keys, setKeys] = useState<Set<string>>(new Set());
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -38,9 +38,31 @@ const HubRoom: React.FC = () => {
   const [sfxVolume, setSfxVolume] = useState(100);
   const [editingKeyBinding, setEditingKeyBinding] = useState<string | null>(null);
   const [keyBindingError, setKeyBindingError] = useState<string | null>(null);
+  const [cheatCodeInput, setCheatCodeInput] = useState<string>('');
   
   // Use global key bindings store
   const { keyBindings, setKeyBinding, getKeyDisplayText } = useKeyBindings();
+  
+  // Handle cheat code processing
+  const handleCheatCode = () => {
+    if (cheatCodeInput.trim() === 'Tangential') {
+      // Add Stack Radar item to inventory
+      const stackRadarItem = {
+        id: `stack_radar_${Date.now()}`, // Unique ID
+        name: 'Stack Radar',
+        description: 'Player speed drastically increased',
+        image: '🟨', // Yellow square emoji
+        duration: 'temporary' as const,
+        modifiers: {
+          playerSpeed: 2.0, // doubles player speed
+          walkSpeed: 2.0 // doubles walk speed
+        },
+        isActive: false
+      };
+      addInventoryItem(stackRadarItem);
+      setCheatCodeInput(''); // Clear input after successful cheat
+    }
+  };
   
   // Clear keys when settings modal opens to prevent stuck movement
   useEffect(() => {
@@ -592,6 +614,13 @@ const HubRoom: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Enter cheat code..."
+                  value={cheatCodeInput}
+                  onChange={(e) => setCheatCodeInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCheatCode();
+                    }
+                  }}
                   className="w-[95%] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
