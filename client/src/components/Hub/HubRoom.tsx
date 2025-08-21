@@ -3,6 +3,8 @@ import { useHubStore } from '../../lib/stores/useHubStore';
 import { useSnakeGame } from '../../lib/stores/useSnakeGame';
 import { useKeyBindings, type KeyBindings } from '../../lib/stores/useKeyBindings';
 import { drawStandardTooltip, drawInteractionTooltip } from '../../lib/utils/tooltips';
+import { InventoryModal } from '../ui/inventory';
+import { Button } from '../ui/button';
 
 const HubRoom: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,7 +30,7 @@ const HubRoom: React.FC = () => {
     closeSettingsModal
   } = useHubStore();
 
-  const { startLevel } = useSnakeGame();
+  const { startLevel, showInventory, openInventory, closeInventory } = useSnakeGame();
   
   const [keys, setKeys] = useState<Set<string>>(new Set());
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -110,8 +112,14 @@ const HubRoom: React.FC = () => {
         return;
       }
       
-      // Don't process any game keys when settings modal is open
-      if (currentState.showSettingsModal) {
+      // Close inventory modal with Escape key
+      if (e.code === 'Escape' && showInventory) {
+        closeInventory();
+        return;
+      }
+      
+      // Don't process any game keys when settings modal or inventory is open
+      if (currentState.showSettingsModal || showInventory) {
         return;
       }
       
@@ -129,9 +137,9 @@ const HubRoom: React.FC = () => {
     };
     
     const handleKeyUp = (e: KeyboardEvent) => {
-      // Don't process key releases when settings modal is open
+      // Don't process key releases when settings modal or inventory is open
       const currentState = useHubStore.getState();
-      if (currentState.showSettingsModal) {
+      if (currentState.showSettingsModal || showInventory) {
         return;
       }
       
@@ -172,8 +180,8 @@ const HubRoom: React.FC = () => {
       const deltaTime = Math.min(currentTime - lastTime, 100);
       lastTime = currentTime;
       
-      // Update game state - don't update when settings modal is open
-      if (interactionState === 'idle' && !showSettingsModal) {
+      // Update game state - don't update when settings modal or inventory is open
+      if (interactionState === 'idle' && !showSettingsModal && !showInventory) {
         updateHub(deltaTime, keys, keyBindings);
       }
       
@@ -390,6 +398,18 @@ const HubRoom: React.FC = () => {
         <p>Press E near NPCs to interact</p>
       </div>
       
+      {/* Inventory Button */}
+      <div className="absolute top-4 right-4">
+        <Button
+          onClick={openInventory}
+          variant="outline"
+          size="sm"
+          className="bg-gray-800 text-white border-gray-600 hover:bg-gray-700"
+        >
+          📦 Inventory
+        </Button>
+      </div>
+      
       {/* Settings Modal */}
       {showSettingsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -569,6 +589,13 @@ const HubRoom: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* Inventory Modal */}
+      <InventoryModal
+        isOpen={showInventory}
+        onClose={closeInventory}
+        items={[]}
+      />
     </div>
   );
 };

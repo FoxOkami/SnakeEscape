@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./dialog";
 import { Badge } from "./badge";
 import { Button } from "./button";
 import { X } from "lucide-react";
@@ -31,6 +31,9 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle className="text-2xl font-bold">Inventory</DialogTitle>
+          <DialogDescription className="sr-only">
+            View your collected items organized by permanent and temporary categories
+          </DialogDescription>
           <Button
             variant="ghost"
             size="sm"
