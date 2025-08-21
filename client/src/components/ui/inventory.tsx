@@ -98,9 +98,8 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
         </div>
 
         <div className="mt-6 pt-4 border-t border-gray-200">
-          <div className="flex justify-between items-center text-sm text-gray-600">
+          <div className="flex justify-center items-center text-sm text-gray-600">
             <span>Total Items: {items.length}</span>
-            <span>Press ESC to close</span>
           </div>
         </div>
       </div>
