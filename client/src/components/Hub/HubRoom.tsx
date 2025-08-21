@@ -46,7 +46,7 @@ const HubRoom: React.FC = () => {
   
   // Handle cheat code processing
   const handleCheatCode = () => {
-    if (cheatCodeInput.trim() === 'Tangential') {
+    if (cheatCodeInput.trim().toLowerCase() === 'tangential') {
       // Add Stack Radar item to inventory
       const stackRadarItem = {
         id: `stack_radar_${Date.now()}`, // Unique ID
