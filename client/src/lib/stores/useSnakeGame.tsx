@@ -867,27 +867,32 @@ export const useSnakeGame = create<SnakeGameState>()(
         const item = state.inventoryItems.find(i => i.id === itemId);
         if (!item) return state;
         
-        // Activate the item and apply its modifiers
-        const currentTime = Date.now();
-        const updatedItem = {
-          ...item,
-          isActive: true,
-          activatedAt: currentTime,
-          expiresAt: item.duration === 'temporary' ? currentTime + 30000 : undefined // 30 seconds for temporary items
-        };
-        
-        return {
-          inventoryItems: state.inventoryItems.map(i => i.id === itemId ? updatedItem : i)
-        };
+        if (item.duration === 'temporary') {
+          // Remove temporary items from inventory after use
+          return {
+            inventoryItems: state.inventoryItems.filter(i => i.id !== itemId)
+          };
+        } else {
+          // For permanent items, mark as active
+          const updatedItem = {
+            ...item,
+            isActive: true,
+            activatedAt: Date.now()
+          };
+          
+          return {
+            inventoryItems: state.inventoryItems.map(i => i.id === itemId ? updatedItem : i)
+          };
+        }
       });
     },
 
-    // Clear active temporary items (called when returning to hub - end of run)
+    // Clear active permanent items (called when returning to hub - end of run)
     clearTemporaryItems: () => {
       set((state) => ({
         inventoryItems: state.inventoryItems.map(item => 
-          item.duration === 'temporary' && item.isActive
-            ? { ...item, isActive: false, activatedAt: undefined, expiresAt: undefined }
+          item.duration === 'permanent' && item.isActive
+            ? { ...item, isActive: false, activatedAt: undefined }
             : item
         )
       }));

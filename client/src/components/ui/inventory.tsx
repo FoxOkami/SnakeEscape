@@ -124,9 +124,9 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                       )}
                     </div>
                     <p className="text-xs text-gray-600 ml-7">{item.description}</p>
-                    {item.isActive && item.expiresAt && (
+                    {item.isActive && (
                       <p className="text-xs text-blue-600 ml-7 mt-1">
-                        Active - Expires in {Math.max(0, Math.ceil((item.expiresAt - Date.now()) / 1000))}s
+                        Active for this run
                       </p>
                     )}
                   </div>
