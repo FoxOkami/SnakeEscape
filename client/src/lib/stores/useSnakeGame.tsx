@@ -151,6 +151,7 @@ interface SnakeGameState extends GameData {
   addInventoryItem: (item: InventoryItem) => void;
   removeInventoryItem: (itemId: string) => void;
   useInventoryItem: (itemId: string) => void;
+  clearTemporaryItems: () => void;
 
   // Level 1 randomization
   randomizedSymbols?: string[] | null;
@@ -734,6 +735,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       if (nextLevelIndex >= LEVELS.length) {
         // All levels completed, return to hub
+        get().clearTemporaryItems(); // Clear temporary items when completing all levels
         set({ gameState: "hub" });
         return;
       }
@@ -836,6 +838,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     returnToMenu: () => {
+      get().clearTemporaryItems(); // Clear temporary items when returning to hub
       set({ gameState: "hub" });
     },
 
@@ -877,6 +880,17 @@ export const useSnakeGame = create<SnakeGameState>()(
           inventoryItems: state.inventoryItems.map(i => i.id === itemId ? updatedItem : i)
         };
       });
+    },
+
+    // Clear active temporary items (called when returning to hub - end of run)
+    clearTemporaryItems: () => {
+      set((state) => ({
+        inventoryItems: state.inventoryItems.map(item => 
+          item.duration === 'temporary' && item.isActive
+            ? { ...item, isActive: false, activatedAt: undefined, expiresAt: undefined }
+            : item
+        )
+      }));
     },
 
     movePlayer: (direction: Position) => {
