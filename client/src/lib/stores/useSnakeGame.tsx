@@ -363,20 +363,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     isWalking: false,
     keyStates: new Map(), // Track key state with timestamps
     showInventory: false,
-    inventoryItems: [
-      {
-        id: 'stack_radar_001',
-        name: 'Stack Radar',
-        description: 'Player speed drastically increased',
-        image: '🟨', // Yellow square emoji
-        duration: 'temporary' as const,
-        modifiers: {
-          playerSpeed: 2.0, // doubles player speed
-          walkSpeed: 2.0 // doubles walk speed
-        },
-        isActive: false
-      }
-    ], // Inventory items array
+    inventoryItems: [], // Inventory starts empty - items can be obtained through cheat codes
     randomizedSymbols: null, // Level 1 randomization
 
     setKeyPressed: (key: string, pressed: boolean) => {
