@@ -1,16 +1,16 @@
 import { create } from 'zustand';
 import { 
   PlayerController, 
-  createHubPlayerController,
+  createGamePlayerController,
   keysToInputState,
   type Position,
   type Size,
   type CustomKeyBindings
 } from '../game/PlayerController';
-import { useSnakeGame, type InventoryItem } from './useSnakeGame';
+import { useSnakeGame, getSpeedMultipliers, type InventoryItem } from './useSnakeGame';
 
-const BASE_HUB_NORMAL_SPEED = 24;  // Hub normal speed
-const BASE_HUB_WALKING_SPEED = 12; // Hub walking speed
+// Hub uses game-style velocity movement with higher base speeds
+const HUB_SPEED_MULTIPLIER = 120; // Scale factor to make hub movement feel faster than game levels
 
 interface Player {
   position: Position;
@@ -99,11 +99,19 @@ export const useHubStore = create<HubStore>((set, get) => ({
       maxY: 580
     };
 
-    const playerController = createHubPlayerController(
+    const playerController = createGamePlayerController(
       playerPosition,
       playerSize,
       boundaries
     );
+    
+    // Configure for hub-specific speeds (faster than game levels)
+    playerController.updateConfig({
+      normalSpeed: 0.2 * HUB_SPEED_MULTIPLIER,
+      walkingSpeed: 0.1 * HUB_SPEED_MULTIPLIER,
+      acceleration: 8, // Faster acceleration for responsive hub movement
+      useAcceleration: true
+    });
 
     set({
       gameState: 'hub',
@@ -161,27 +169,14 @@ export const useHubStore = create<HubStore>((set, get) => ({
       walking: 'ControlLeft'
     };
     
-    // Apply inventory item speed modifiers to hub player speed
+    // Apply centralized inventory item speed modifiers to hub player speed
     const inventoryItems = useSnakeGame.getState().inventoryItems;
-    let playerSpeedMultiplier = 1;
-    let walkSpeedMultiplier = 1;
+    const multipliers = getSpeedMultipliers(inventoryItems);
     
-    // Apply modifiers from active items
-    const currentTime = Date.now();
-    inventoryItems.forEach(item => {
-      if (item.isActive && (!item.expiresAt || currentTime < item.expiresAt)) {
-        if (item.modifiers.playerSpeed) {
-          playerSpeedMultiplier *= item.modifiers.playerSpeed;
-        }
-        if (item.modifiers.walkSpeed) {
-          walkSpeedMultiplier *= item.modifiers.walkSpeed;
-        }
-      }
-    });
-    
+    // Update hub speeds with inventory modifiers (hub uses higher base speeds)
     state.playerController.updateConfig({
-      normalSpeed: BASE_HUB_NORMAL_SPEED * playerSpeedMultiplier,
-      walkingSpeed: BASE_HUB_WALKING_SPEED * walkSpeedMultiplier
+      normalSpeed: (0.2 * HUB_SPEED_MULTIPLIER) * multipliers.playerSpeedMultiplier,
+      walkingSpeed: (0.1 * HUB_SPEED_MULTIPLIER) * multipliers.walkSpeedMultiplier
     });
     
     // Handle interact key for interactions

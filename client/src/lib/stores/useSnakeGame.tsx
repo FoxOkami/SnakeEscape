@@ -164,8 +164,8 @@ const BASE_PLAYER_SPEED = 0.2; // base pixels per second
 const BASE_WALKING_SPEED = 0.1; // base pixels per second when walking (shift held)
 const ACCELERATION = 1; // pixels per second squared
 
-// Helper function to calculate current player speeds with item modifiers
-function getPlayerSpeeds(inventoryItems: InventoryItem[]) {
+// Centralized function to calculate speed multipliers from inventory items
+export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
   let playerSpeedMultiplier = 1;
   let walkSpeedMultiplier = 1;
   
@@ -183,8 +183,17 @@ function getPlayerSpeeds(inventoryItems: InventoryItem[]) {
   });
   
   return {
-    playerSpeed: BASE_PLAYER_SPEED * playerSpeedMultiplier,
-    walkingSpeed: BASE_WALKING_SPEED * walkSpeedMultiplier
+    playerSpeedMultiplier,
+    walkSpeedMultiplier
+  };
+}
+
+// Helper function to calculate current player speeds with item modifiers (for game levels)
+function getPlayerSpeeds(inventoryItems: InventoryItem[]) {
+  const multipliers = getSpeedMultipliers(inventoryItems);
+  return {
+    playerSpeed: BASE_PLAYER_SPEED * multipliers.playerSpeedMultiplier,
+    walkingSpeed: BASE_WALKING_SPEED * multipliers.walkSpeedMultiplier
   };
 }
 
