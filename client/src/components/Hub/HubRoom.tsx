@@ -30,7 +30,7 @@ const HubRoom: React.FC = () => {
     closeSettingsModal
   } = useHubStore();
 
-  const { startLevel, showInventory, openInventory, closeInventory, addInventoryItem } = useSnakeGame();
+  const { startLevel, showInventory, openInventory, closeInventory, addInventoryItem, inventoryItems, useInventoryItem } = useSnakeGame();
   
   const [keys, setKeys] = useState<Set<string>>(new Set());
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -644,7 +644,8 @@ const HubRoom: React.FC = () => {
       <InventoryModal
         isOpen={showInventory}
         onClose={closeInventory}
-        items={[]}
+        items={inventoryItems}
+        onUseItem={useInventoryItem}
       />
     </div>
   );
