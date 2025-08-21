@@ -23,7 +23,9 @@ const GameUI: React.FC = () => {
     crystal,
     showInventory,
     openInventory,
-    closeInventory
+    closeInventory,
+    inventoryItems,
+    useInventoryItem
   } = useSnakeGame();
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
@@ -337,7 +339,8 @@ const GameUI: React.FC = () => {
       <InventoryModal
         isOpen={showInventory}
         onClose={closeInventory}
-        items={[]}
+        items={inventoryItems}
+        onUseItem={useInventoryItem}
       />
     </>
   );

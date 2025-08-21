@@ -22,6 +22,23 @@ import {
   Boulder,
   MiniBoulder,
 } from "../game/types";
+
+// Inventory item interface
+export interface InventoryItem {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  duration: 'permanent' | 'temporary';
+  modifiers: {
+    playerSpeed?: number; // multiplier for player speed
+    walkSpeed?: number; // multiplier for walk speed
+    [key: string]: any; // allow for future modifiers
+  };
+  isActive?: boolean; // for temporary items
+  activatedAt?: number; // timestamp when activated
+  expiresAt?: number; // timestamp when expires (for temporary items)
+}
 import { LEVELS, randomizeLevel2, getLevelKeyByIndex } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
 import { updateSnake } from "../game/entities";
@@ -123,10 +140,17 @@ interface SnakeGameState extends GameData {
   showHint: () => void;
   updateHint: (deltaTime: number) => void;
 
+  // Switch actions
+  toggleLightSwitch: () => void;
+
   // Inventory system
   showInventory: boolean;
+  inventoryItems: InventoryItem[];
   openInventory: () => void;
   closeInventory: () => void;
+  addInventoryItem: (item: InventoryItem) => void;
+  removeInventoryItem: (itemId: string) => void;
+  useInventoryItem: (itemId: string) => void;
 
   // Level 1 randomization
   randomizedSymbols?: string[] | null;
@@ -135,9 +159,33 @@ interface SnakeGameState extends GameData {
   phantomRemovalInProgress?: boolean;
 }
 
-const PLAYER_SPEED = 0.2; // pixels per second
-const WALKING_SPEED = 0.1; // pixels per second when walking (shift held)
+const BASE_PLAYER_SPEED = 0.2; // base pixels per second
+const BASE_WALKING_SPEED = 0.1; // base pixels per second when walking (shift held)
 const ACCELERATION = 1; // pixels per second squared
+
+// Helper function to calculate current player speeds with item modifiers
+function getPlayerSpeeds(inventoryItems: InventoryItem[]) {
+  let playerSpeedMultiplier = 1;
+  let walkSpeedMultiplier = 1;
+  
+  // Apply modifiers from active items
+  const currentTime = Date.now();
+  inventoryItems.forEach(item => {
+    if (item.isActive && (!item.expiresAt || currentTime < item.expiresAt)) {
+      if (item.modifiers.playerSpeed) {
+        playerSpeedMultiplier *= item.modifiers.playerSpeed;
+      }
+      if (item.modifiers.walkSpeed) {
+        walkSpeedMultiplier *= item.modifiers.walkSpeed;
+      }
+    }
+  });
+  
+  return {
+    playerSpeed: BASE_PLAYER_SPEED * playerSpeedMultiplier,
+    walkingSpeed: BASE_WALKING_SPEED * walkSpeedMultiplier
+  };
+}
 
 // Helper function to randomize Level 1
 function randomizeLevel1() {
@@ -265,7 +313,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     player: {
       position: { x: 50, y: 350 },
       size: { width: 32, height: 32 },
-      speed: PLAYER_SPEED,
+      speed: BASE_PLAYER_SPEED,
       hasKey: false,
       health: 9,
       maxHealth: 9,
@@ -305,6 +353,20 @@ export const useSnakeGame = create<SnakeGameState>()(
     isWalking: false,
     keyStates: new Map(), // Track key state with timestamps
     showInventory: false,
+    inventoryItems: [
+      {
+        id: 'stack_radar_001',
+        name: 'Stack Radar',
+        description: 'Player speed drastically increased',
+        image: '🟨', // Yellow square emoji
+        duration: 'temporary' as const,
+        modifiers: {
+          playerSpeed: 2.0, // doubles player speed
+          walkSpeed: 2.0 // doubles walk speed
+        },
+        isActive: false
+      }
+    ], // Inventory items array
     randomizedSymbols: null, // Level 1 randomization
 
     setKeyPressed: (key: string, pressed: boolean) => {
@@ -346,7 +408,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         const isWalking =
           isKeyActiveRecently(keyBindings.walking) ||
           isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
-        const moveSpeed = isWalking ? WALKING_SPEED : PLAYER_SPEED;
+        
+        // Get dynamic speeds based on inventory items
+        const currentState = get();
+        const speeds = getPlayerSpeeds(currentState.inventoryItems);
+        const moveSpeed = isWalking ? speeds.walkingSpeed : speeds.playerSpeed;
 
         // Calculate target velocity with enhanced key detection using custom key bindings
         const targetVelocity = { x: 0, y: 0 };
@@ -396,7 +462,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         player: {
           position: { ...level.player },
           size: { width: 32, height: 32 },
-          speed: PLAYER_SPEED,
+          speed: BASE_PLAYER_SPEED,
           hasKey: false,
           health: 9,
           maxHealth: 9,
@@ -525,7 +591,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         player: {
           position: { ...level.player },
           size: { width: 32, height: 32 },
-          speed: PLAYER_SPEED,
+          speed: BASE_PLAYER_SPEED,
           hasKey: false,
           health: 9,
           maxHealth: 9,
@@ -608,7 +674,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         player: {
           position: { ...level.player },
           size: { width: 32, height: 32 },
-          speed: PLAYER_SPEED,
+          speed: BASE_PLAYER_SPEED,
           hasKey: false,
           health: 9,
           maxHealth: 9,
@@ -707,7 +773,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         player: {
           position: { ...level.player },
           size: { width: 32, height: 32 },
-          speed: PLAYER_SPEED,
+          speed: BASE_PLAYER_SPEED,
           hasKey: false,
           health: state.player.health, // Preserve current health
           maxHealth: 9,
@@ -779,6 +845,38 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     closeInventory: () => {
       set({ showInventory: false });
+    },
+
+    addInventoryItem: (item: InventoryItem) => {
+      set((state) => ({
+        inventoryItems: [...state.inventoryItems, item]
+      }));
+    },
+
+    removeInventoryItem: (itemId: string) => {
+      set((state) => ({
+        inventoryItems: state.inventoryItems.filter(item => item.id !== itemId)
+      }));
+    },
+
+    useInventoryItem: (itemId: string) => {
+      set((state) => {
+        const item = state.inventoryItems.find(i => i.id === itemId);
+        if (!item) return state;
+        
+        // Activate the item and apply its modifiers
+        const currentTime = Date.now();
+        const updatedItem = {
+          ...item,
+          isActive: true,
+          activatedAt: currentTime,
+          expiresAt: item.duration === 'temporary' ? currentTime + 30000 : undefined // 30 seconds for temporary items
+        };
+        
+        return {
+          inventoryItems: state.inventoryItems.map(i => i.id === itemId ? updatedItem : i)
+        };
+      });
     },
 
     movePlayer: (direction: Position) => {

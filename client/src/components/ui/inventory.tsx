@@ -3,21 +3,31 @@ import React from "react";
 interface InventoryItem {
   id: string;
   name: string;
-  type: "permanent" | "temporary";
-  description?: string;
-  icon?: string;
+  description: string;
+  image: string;
+  duration: 'permanent' | 'temporary';
+  modifiers: {
+    playerSpeed?: number;
+    walkSpeed?: number;
+    [key: string]: any;
+  };
+  isActive?: boolean;
+  activatedAt?: number;
+  expiresAt?: number;
 }
 
 interface InventoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   items?: InventoryItem[];
+  onUseItem?: (itemId: string) => void;
 }
 
 export const InventoryModal: React.FC<InventoryModalProps> = ({
   isOpen,
   onClose,
-  items = []
+  items = [],
+  onUseItem
 }) => {
   // Handle ESC key to close modal
   React.useEffect(() => {
@@ -40,8 +50,8 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
 
   if (!isOpen) return null;
 
-  const permanentItems = items.filter(item => item.type === "permanent");
-  const temporaryItems = items.filter(item => item.type === "temporary");
+  const permanentItems = items.filter(item => item.duration === "permanent");
+  const temporaryItems = items.filter(item => item.duration === "temporary");
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -68,13 +78,11 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                     className="p-3 border rounded-lg bg-green-50 border-green-200 hover:bg-green-100 transition-colors"
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg">{item.icon || "📦"}</span>
+                      <span className="text-lg">{item.image || "📦"}</span>
                       <span className="font-medium text-sm text-gray-800">{item.name}</span>
                       <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">Permanent</span>
                     </div>
-                    {item.description && (
-                      <p className="text-xs text-gray-600 ml-7">{item.description}</p>
-                    )}
+                    <p className="text-xs text-gray-600 ml-7">{item.description}</p>
                   </div>
                 ))}
               </div>
@@ -96,13 +104,28 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                     key={item.id}
                     className="p-3 border rounded-lg bg-orange-50 border-orange-200 hover:bg-orange-100 transition-colors"
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg">{item.icon || "⏳"}</span>
-                      <span className="font-medium text-sm text-gray-800">{item.name}</span>
-                      <span className="text-xs bg-orange-600 text-white px-2 py-1 rounded">Temporary</span>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{item.image || "⏳"}</span>
+                        <span className="font-medium text-sm text-gray-800">{item.name}</span>
+                        <span className="text-xs bg-orange-600 text-white px-2 py-1 rounded">
+                          {item.isActive ? 'Active' : 'Temporary'}
+                        </span>
+                      </div>
+                      {!item.isActive && onUseItem && (
+                        <button
+                          onClick={() => onUseItem(item.id)}
+                          className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                          Use
+                        </button>
+                      )}
                     </div>
-                    {item.description && (
-                      <p className="text-xs text-gray-600 ml-7">{item.description}</p>
+                    <p className="text-xs text-gray-600 ml-7">{item.description}</p>
+                    {item.isActive && item.expiresAt && (
+                      <p className="text-xs text-blue-600 ml-7 mt-1">
+                        Active - Expires in {Math.max(0, Math.ceil((item.expiresAt - Date.now()) / 1000))}s
+                      </p>
                     )}
                   </div>
                 ))}
