@@ -7,6 +7,10 @@ import {
   type Size,
   type CustomKeyBindings
 } from '../game/PlayerController';
+import { useSnakeGame, type InventoryItem } from './useSnakeGame';
+
+const BASE_HUB_NORMAL_SPEED = 24;  // Hub normal speed
+const BASE_HUB_WALKING_SPEED = 12; // Hub walking speed
 
 interface Player {
   position: Position;
@@ -156,6 +160,29 @@ export const useHubStore = create<HubStore>((set, get) => ({
       secondaryInteract: 'KeyQ',
       walking: 'ControlLeft'
     };
+    
+    // Apply inventory item speed modifiers to hub player speed
+    const inventoryItems = useSnakeGame.getState().inventoryItems;
+    let playerSpeedMultiplier = 1;
+    let walkSpeedMultiplier = 1;
+    
+    // Apply modifiers from active items
+    const currentTime = Date.now();
+    inventoryItems.forEach(item => {
+      if (item.isActive && (!item.expiresAt || currentTime < item.expiresAt)) {
+        if (item.modifiers.playerSpeed) {
+          playerSpeedMultiplier *= item.modifiers.playerSpeed;
+        }
+        if (item.modifiers.walkSpeed) {
+          walkSpeedMultiplier *= item.modifiers.walkSpeed;
+        }
+      }
+    });
+    
+    state.playerController.updateConfig({
+      normalSpeed: BASE_HUB_NORMAL_SPEED * playerSpeedMultiplier,
+      walkingSpeed: BASE_HUB_WALKING_SPEED * walkSpeedMultiplier
+    });
     
     // Handle interact key for interactions
     if (keys.has(currentBindings.interact)) {
