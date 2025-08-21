@@ -867,34 +867,29 @@ export const useSnakeGame = create<SnakeGameState>()(
         const item = state.inventoryItems.find(i => i.id === itemId);
         if (!item) return state;
         
-        if (item.duration === 'temporary') {
-          // Remove temporary items from inventory after use
-          return {
-            inventoryItems: state.inventoryItems.filter(i => i.id !== itemId)
-          };
-        } else {
-          // For permanent items, mark as active
-          const updatedItem = {
-            ...item,
-            isActive: true,
-            activatedAt: Date.now()
-          };
-          
-          return {
-            inventoryItems: state.inventoryItems.map(i => i.id === itemId ? updatedItem : i)
-          };
-        }
+        // Mark item as active (both temporary and permanent)
+        const updatedItem = {
+          ...item,
+          isActive: true,
+          activatedAt: Date.now()
+        };
+        
+        return {
+          inventoryItems: state.inventoryItems.map(i => i.id === itemId ? updatedItem : i)
+        };
       });
     },
 
-    // Clear active permanent items (called when returning to hub - end of run)
+    // Clear temporary items and deactivate permanent items (called when returning to hub - end of run)
     clearTemporaryItems: () => {
       set((state) => ({
-        inventoryItems: state.inventoryItems.map(item => 
-          item.duration === 'permanent' && item.isActive
-            ? { ...item, isActive: false, activatedAt: undefined }
-            : item
-        )
+        inventoryItems: state.inventoryItems
+          .filter(item => item.duration !== 'temporary' || !item.isActive) // Remove used temporary items
+          .map(item => 
+            item.duration === 'permanent' && item.isActive
+              ? { ...item, isActive: false, activatedAt: undefined } // Deactivate permanent items
+              : item
+          )
       }));
     },
 
