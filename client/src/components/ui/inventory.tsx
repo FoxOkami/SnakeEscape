@@ -19,6 +19,25 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
   onClose,
   items = []
 }) => {
+  // Handle ESC key to close modal
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code === 'Escape' && isOpen) {
+        event.preventDefault();
+        event.stopPropagation();
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown, true); // Use capture phase
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const permanentItems = items.filter(item => item.type === "permanent");
