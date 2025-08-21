@@ -61,7 +61,6 @@ const HubRoom: React.FC = () => {
         isActive: false
       };
       addInventoryItem(stackRadarItem);
-      setCheatCodeInput(''); // Clear input after successful cheat
       
       // Show success feedback
       setCheatCodeSuccess(true);
@@ -69,6 +68,9 @@ const HubRoom: React.FC = () => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
     }
+    
+    // Clear input after any Enter press (valid or invalid cheat code)
+    setCheatCodeInput('');
   };
   
   // Clear keys when settings modal opens to prevent stuck movement
