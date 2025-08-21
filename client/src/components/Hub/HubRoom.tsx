@@ -78,7 +78,7 @@ const HubRoom: React.FC = () => {
         modifiers: {
           biteProtection: 2 // allows 2 additional bites before death
         },
-        isActive: false
+        isActive: true // Permanent items should be active by default
       };
       addInventoryItem(ag1Item);
       

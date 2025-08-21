@@ -249,7 +249,7 @@ const GameUI: React.FC = () => {
         totalBiteProtection += item.modifiers.biteProtection;
       }
     });
-
+    
     return (
       <div className="absolute top-4 left-4 flex flex-col gap-1 z-50 pointer-events-none">
         {Array.from({ length: player.maxHealth }, (_, index) => (

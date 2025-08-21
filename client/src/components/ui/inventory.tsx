@@ -77,10 +77,25 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                     key={item.id}
                     className="p-3 border rounded-lg bg-green-50 border-green-200 hover:bg-green-100 transition-colors"
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg">{item.image || "📦"}</span>
-                      <span className="font-medium text-sm text-gray-800">{item.name}</span>
-                      <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">Permanent</span>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{item.image || "📦"}</span>
+                        <span className="font-medium text-sm text-gray-800">{item.name}</span>
+                        <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">Permanent</span>
+                        {item.isActive && (
+                          <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
+                            Active
+                          </span>
+                        )}
+                      </div>
+                      {!item.isActive && onUseItem && (
+                        <button
+                          onClick={() => onUseItem(item.id)}
+                          className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                          Activate
+                        </button>
+                      )}
                     </div>
                     <p className="text-xs text-gray-600 ml-7">{item.description}</p>
                   </div>
