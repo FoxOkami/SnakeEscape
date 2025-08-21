@@ -241,24 +241,40 @@ const GameUI: React.FC = () => {
     </div>
   );
 
-  const renderHealthDisplay = () => (
-    <div className="absolute top-4 left-4 flex flex-col gap-1 z-50 pointer-events-none">
-      {Array.from({ length: player.maxHealth }, (_, index) => (
-        <div
-          key={index}
-          className={`w-8 h-8 text-2xl font-bold flex items-center justify-center ${
-            index < player.health ? 'text-yellow-400' : 'text-gray-600'
-          } ${player.isInvincible ? 'animate-pulse' : ''}`}
-          style={{
-            filter: player.isInvincible ? 'brightness(1.5)' : 'none',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
-          }}
-        >
-          ▲
-        </div>
-      ))}
-    </div>
-  );
+  const renderHealthDisplay = () => {
+    // Calculate total bite protection from active permanent items
+    let totalBiteProtection = 0;
+    inventoryItems.forEach(item => {
+      if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+        totalBiteProtection += item.modifiers.biteProtection;
+      }
+    });
+
+    return (
+      <div className="absolute top-4 left-4 flex flex-col gap-1 z-50 pointer-events-none">
+        {Array.from({ length: player.maxHealth }, (_, index) => (
+          <div
+            key={index}
+            className={`w-8 h-8 text-2xl font-bold flex items-center justify-center ${
+              index < player.health ? 'text-yellow-400' : 'text-gray-600'
+            } ${player.isInvincible ? 'animate-pulse' : ''}`}
+            style={{
+              filter: player.isInvincible ? 'brightness(1.5)' : 'none',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+            }}
+          >
+            ▲
+          </div>
+        ))}
+        {totalBiteProtection > 0 && (
+          <div className="flex items-center gap-1 mt-1">
+            <div className="text-blue-400 text-lg font-bold">🛡️</div>
+            <div className="text-blue-400 text-sm font-bold">+{totalBiteProtection}</div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderGameHUD = () => (
     <div className="absolute top-4 left-20 right-4 flex justify-between items-start z-5">

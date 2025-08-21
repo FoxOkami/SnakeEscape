@@ -33,6 +33,7 @@ export interface InventoryItem {
   modifiers: {
     playerSpeed?: number; // multiplier for player speed
     walkSpeed?: number; // multiplier for walk speed
+    biteProtection?: number; // additional bites player can take before dying
     [key: string]: any; // allow for future modifiers
   };
   isActive?: boolean; // for temporary items
@@ -1293,9 +1294,19 @@ export const useSnakeGame = create<SnakeGameState>()(
         });
 
       if (hitBySnake) {
+        // Calculate total bite protection from active permanent items
+        let totalBiteProtection = 0;
+        state.inventoryItems.forEach(item => {
+          if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+            totalBiteProtection += item.modifiers.biteProtection;
+          }
+        });
+
         updatedPlayer.health -= 1;
 
-        if (updatedPlayer.health <= 0) {
+        // Check if player dies, accounting for bite protection
+        const effectiveDeathThreshold = 0 - totalBiteProtection;
+        if (updatedPlayer.health <= effectiveDeathThreshold) {
           // Player is dead - game over
           set({ gameState: "gameOver", player: updatedPlayer });
           return;

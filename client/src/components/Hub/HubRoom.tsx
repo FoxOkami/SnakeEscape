@@ -67,6 +67,26 @@ const HubRoom: React.FC = () => {
       setTimeout(() => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.trim().toLowerCase() === 'ag1') {
+      // Add AG1 item to inventory
+      const ag1Item = {
+        id: `ag1_${Date.now()}`, // Unique ID
+        name: 'AG1',
+        description: 'Player can handle 2 more bites',
+        image: '🛡️', // Shield emoji for protection
+        duration: 'permanent' as const,
+        modifiers: {
+          biteProtection: 2 // allows 2 additional bites before death
+        },
+        isActive: false
+      };
+      addInventoryItem(ag1Item);
+      
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
     }
     
     // Clear input after any Enter press (valid or invalid cheat code)
