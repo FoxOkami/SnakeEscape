@@ -585,6 +585,16 @@ const HubRoom: React.FC = () => {
                   </div>
                 )}
               </div>
+              
+              {/* Enter Cheat Codes Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800">Enter Cheat Codes</h3>
+                <input
+                  type="text"
+                  placeholder="Enter cheat code..."
+                  className="w-[95%] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
             </div>
           </div>
         </div>
