@@ -25,7 +25,8 @@ const GameUI: React.FC = () => {
     openInventory,
     closeInventory,
     inventoryItems,
-    useInventoryItem
+    useInventoryItem,
+    togglePermanentItem
   } = useSnakeGame();
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
@@ -349,6 +350,7 @@ const GameUI: React.FC = () => {
         onClose={closeInventory}
         items={inventoryItems}
         onUseItem={useInventoryItem}
+        onTogglePermanentItem={togglePermanentItem}
       />
     </>
   );

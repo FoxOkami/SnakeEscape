@@ -21,13 +21,15 @@ interface InventoryModalProps {
   onClose: () => void;
   items?: InventoryItem[];
   onUseItem?: (itemId: string) => void;
+  onTogglePermanentItem?: (itemId: string) => void;
 }
 
 export const InventoryModal: React.FC<InventoryModalProps> = ({
   isOpen,
   onClose,
   items = [],
-  onUseItem
+  onUseItem,
+  onTogglePermanentItem
 }) => {
   // Handle ESC key to close modal
   React.useEffect(() => {
@@ -82,18 +84,26 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                         <span className="text-lg">{item.image || "📦"}</span>
                         <span className="font-medium text-sm text-gray-800">{item.name}</span>
                         <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">Permanent</span>
-                        {item.isActive && (
+                        {item.isActive ? (
                           <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
                             Active
                           </span>
+                        ) : (
+                          <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded">
+                            Inactive
+                          </span>
                         )}
                       </div>
-                      {!item.isActive && onUseItem && (
+                      {onTogglePermanentItem && (
                         <button
-                          onClick={() => onUseItem(item.id)}
-                          className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                          onClick={() => onTogglePermanentItem(item.id)}
+                          className={`px-2 py-1 text-white text-xs rounded transition-colors ${
+                            item.isActive 
+                              ? 'bg-red-600 hover:bg-red-700' 
+                              : 'bg-blue-600 hover:bg-blue-700'
+                          }`}
                         >
-                          Activate
+                          {item.isActive ? 'Deactivate' : 'Activate'}
                         </button>
                       )}
                     </div>

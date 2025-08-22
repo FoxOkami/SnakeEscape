@@ -153,6 +153,7 @@ interface SnakeGameState extends GameData {
   addInventoryItem: (item: InventoryItem) => void;
   removeInventoryItem: (itemId: string) => void;
   useInventoryItem: (itemId: string) => void;
+  togglePermanentItem: (itemId: string) => void;
   clearTemporaryItems: () => void;
 
   // Hub reset system
@@ -893,6 +894,43 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // Calculate new shield health from all active items
         const updatedInventory = state.inventoryItems.map(i => i.id === itemId ? updatedItem : i);
+        let totalBiteProtection = 0;
+        updatedInventory.forEach(inventoryItem => {
+          if (inventoryItem.duration === 'permanent' && inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
+            totalBiteProtection += inventoryItem.modifiers.biteProtection;
+          }
+        });
+
+        // Update player shield health
+        const updatedPlayer = {
+          ...state.player,
+          maxShieldHealth: totalBiteProtection,
+          shieldHealth: totalBiteProtection
+        };
+        
+        return {
+          inventoryItems: updatedInventory,
+          player: updatedPlayer
+        };
+      });
+    },
+
+    togglePermanentItem: (itemId: string) => {
+      set((state) => {
+        const item = state.inventoryItems.find(i => i.id === itemId);
+        if (!item || item.duration !== 'permanent') return state;
+        
+        // Toggle the active state
+        const updatedItem = {
+          ...item,
+          isActive: !item.isActive,
+          activatedAt: item.isActive ? undefined : Date.now()
+        };
+        
+        // Update inventory
+        const updatedInventory = state.inventoryItems.map(i => i.id === itemId ? updatedItem : i);
+        
+        // Recalculate shield health from all active permanent items
         let totalBiteProtection = 0;
         updatedInventory.forEach(inventoryItem => {
           if (inventoryItem.duration === 'permanent' && inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
