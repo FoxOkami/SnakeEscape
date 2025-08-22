@@ -104,7 +104,7 @@ const HubRoom: React.FC = () => {
       const staplerItem = {
         id: `stapler_${Date.now()}`, // Unique ID
         name: 'Stapler',
-        description: 'All snakes become stationary (except boss)',
+        description: "I'll build one",
         image: '📎', // Paperclip emoji for stapler
         duration: 'permanent' as const,
         modifiers: {
