@@ -91,6 +91,9 @@ const HubRoom: React.FC = () => {
       };
       addInventoryItem(ag1Item);
       
+      // Immediately activate the item to apply shield health
+      useInventoryItem(ag1Item.id);
+      
       // Show success feedback
       setCheatCodeSuccess(true);
       setTimeout(() => {
