@@ -19,6 +19,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### AG1 Item Implementation (January 22, 2025)
+- **Feature**: Added AG1 permanent item with bite protection functionality
+- **Implementation**: New "ag1" cheat code creates permanent item with 2 additional bite protection
+- **Game Mechanics**: Updated damage system to account for bite protection from active permanent items
+- **UI Enhancements**: Added shield icon (🛡️) and protection count display in health UI
+- **Inventory System**: Enhanced permanent items with activation system and status indicators
+- **Files Changed**: `HubRoom.tsx`, `useSnakeGame.tsx`, `GameUI.tsx`, `inventory.tsx`
+
 ### Centralized Tooltip System (January 20, 2025)
 - **Problem**: Tooltip implementations scattered across multiple files with inconsistent positioning
 - **Solution**: Created centralized tooltip utility (`client/src/lib/utils/tooltips.ts`)
