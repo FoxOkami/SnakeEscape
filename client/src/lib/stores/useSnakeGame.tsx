@@ -1185,9 +1185,9 @@ export const useSnakeGame = create<SnakeGameState>()(
           return snake;
         }
         
-        // Apply snake chase multiplier to non-boss snakes
+        // Apply snake chase multiplier to non-boss snakes (but not on Skate Rink level)
         let modifiedSnake = snake;
-        if (snake.type !== 'boss' && snakeChaseMultiplier !== 1) {
+        if (snake.type !== 'boss' && snakeChaseMultiplier !== 1 && state.currentLevelKey !== 'skate_rink') {
           modifiedSnake = {
             ...snake,
             chaseDistance: snake.chaseDistance ? snake.chaseDistance * snakeChaseMultiplier : 0,
