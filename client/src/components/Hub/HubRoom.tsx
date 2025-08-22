@@ -77,11 +77,11 @@ const HubRoom: React.FC = () => {
       setTimeout(() => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
-    } else if (cheatCodeInput.trim().toLowerCase() === 'ag1') {
+    } else if (cheatCodeInput.trim().toLowerCase() === 'katra') {
       // Add AG1 item to inventory
       const ag1Item = {
         id: `ag1_${Date.now()}`, // Unique ID
-        name: 'AG1',
+        name: 'drinkable greens',
         description: 'Player can handle 2 more bites',
         image: '🛡️', // Shield emoji for protection
         duration: 'permanent' as const,
