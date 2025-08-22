@@ -742,7 +742,27 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (nextLevelIndex >= LEVELS.length) {
         // All levels completed, return to hub
         get().clearTemporaryItems(); // Clear temporary items when completing all levels
-        set({ gameState: "hub" });
+        
+        // Calculate shield health from remaining active permanent items
+        let totalBiteProtection = 0;
+        state.inventoryItems.forEach(item => {
+          if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+            totalBiteProtection += item.modifiers.biteProtection;
+          }
+        });
+        
+        // Reset player health to full and apply shield protection
+        set({ 
+          gameState: "hub",
+          player: {
+            ...state.player,
+            health: state.player.maxHealth, // Reset to full health
+            shieldHealth: totalBiteProtection, // Apply shield from permanent items
+            maxShieldHealth: totalBiteProtection,
+            isInvincible: false,
+            invincibilityEndTime: 0
+          }
+        });
         return;
       }
 
