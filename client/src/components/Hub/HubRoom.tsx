@@ -99,6 +99,29 @@ const HubRoom: React.FC = () => {
       setTimeout(() => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.trim().toLowerCase() === 'stapling') {
+      // Add Stapler item to inventory
+      const staplerItem = {
+        id: `stapler_${Date.now()}`, // Unique ID
+        name: 'Stapler',
+        description: 'All snakes become stationary (except boss)',
+        image: '📎', // Paperclip emoji for stapler
+        duration: 'permanent' as const,
+        modifiers: {
+          snakeChaseMultiplier: 0 // sets all snake chase values to 0
+        },
+        isActive: true // Permanent items should be active by default
+      };
+      addInventoryItem(staplerItem);
+      
+      // Immediately activate the item to apply effect
+      useInventoryItem(staplerItem.id);
+      
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
     }
     
     // Clear input after any Enter press (valid or invalid cheat code)

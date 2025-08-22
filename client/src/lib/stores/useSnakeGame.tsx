@@ -34,6 +34,7 @@ export interface InventoryItem {
     playerSpeed?: number; // multiplier for player speed
     walkSpeed?: number; // multiplier for walk speed
     biteProtection?: number; // additional bites player can take before dying
+    snakeChaseMultiplier?: number; // multiplier for snake chase values (affects all non-boss snakes)
     [key: string]: any; // allow for future modifiers
   };
   isActive?: boolean; // for temporary items
@@ -1164,6 +1165,14 @@ export const useSnakeGame = create<SnakeGameState>()(
       let newMiniBoulders = [...state.miniBoulders];
       let newSnakes = [...state.snakes];
       
+      // Calculate snake chase multiplier from active permanent items
+      let snakeChaseMultiplier = 1; // Default multiplier
+      state.inventoryItems.forEach(item => {
+        if (item.duration === 'permanent' && item.isActive && item.modifiers.snakeChaseMultiplier !== undefined) {
+          snakeChaseMultiplier *= item.modifiers.snakeChaseMultiplier;
+        }
+      });
+      
       const updatedSnakes = newSnakes.map((snake) => {
         // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
         // Allow patrolling and chasing rattlesnakes to be processed by normal AI
@@ -1176,8 +1185,18 @@ export const useSnakeGame = create<SnakeGameState>()(
           return snake;
         }
         
+        // Apply snake chase multiplier to non-boss snakes
+        let modifiedSnake = snake;
+        if (snake.type !== 'boss' && snakeChaseMultiplier !== 1) {
+          modifiedSnake = {
+            ...snake,
+            chaseDistance: snake.chaseDistance ? snake.chaseDistance * snakeChaseMultiplier : 0,
+            speed: snake.speed * Math.max(0.1, snakeChaseMultiplier) // Ensure minimum speed for animation
+          };
+        }
+        
         const updatedSnake = updateSnake(
-          snake,
+          modifiedSnake,
           currentWalls,
           deltaTime,
           updatedPlayer,
