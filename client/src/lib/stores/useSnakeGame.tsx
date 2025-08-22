@@ -1289,6 +1289,28 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
 
+      // --- SHIELD HEALTH SYNCHRONIZATION ---
+      // Keep shield health in sync with active items
+      let totalBiteProtection = 0;
+      state.inventoryItems.forEach(item => {
+        if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+          totalBiteProtection += item.modifiers.biteProtection;
+        }
+      });
+
+      // Update shield health if protection has changed
+      if (updatedPlayer.maxShieldHealth !== totalBiteProtection) {
+        updatedPlayer.maxShieldHealth = totalBiteProtection;
+        // If getting new protection, set shield to max
+        if (totalBiteProtection > updatedPlayer.shieldHealth) {
+          updatedPlayer.shieldHealth = totalBiteProtection;
+        }
+        // If protection decreased, cap shield health
+        else if (updatedPlayer.shieldHealth > totalBiteProtection) {
+          updatedPlayer.shieldHealth = totalBiteProtection;
+        }
+      }
+
       // --- COLLISION DETECTION ---
       const playerRect = {
         x: updatedPlayer.position.x,
@@ -1319,27 +1341,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         });
 
       if (hitBySnake) {
-        // Calculate total bite protection from active permanent items and update shield health
-        let totalBiteProtection = 0;
-        state.inventoryItems.forEach(item => {
-          if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
-            totalBiteProtection += item.modifiers.biteProtection;
-          }
-        });
-
-        // Update shield health if it differs from calculated protection
-        if (updatedPlayer.maxShieldHealth !== totalBiteProtection) {
-          updatedPlayer.maxShieldHealth = totalBiteProtection;
-          // If shield health is greater than max, set it to max
-          if (updatedPlayer.shieldHealth > totalBiteProtection) {
-            updatedPlayer.shieldHealth = totalBiteProtection;
-          }
-          // If shield health is less than max (new protection), increase it
-          else if (updatedPlayer.shieldHealth < totalBiteProtection) {
-            updatedPlayer.shieldHealth = totalBiteProtection;
-          }
-        }
-
         // Apply damage: shield first, then health
         if (updatedPlayer.shieldHealth > 0) {
           // Damage shield first
