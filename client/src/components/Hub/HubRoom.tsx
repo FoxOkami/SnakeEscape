@@ -38,6 +38,7 @@ const HubRoom: React.FC = () => {
     addInventoryItem, 
     inventoryItems, 
     useInventoryItem,
+    togglePermanentItem,
     player: gamePlayer // Get player data from main game store for health display
   } = useSnakeGame();
   
@@ -732,6 +733,7 @@ const HubRoom: React.FC = () => {
         onClose={closeInventory}
         items={inventoryItems}
         onUseItem={useInventoryItem}
+        onTogglePermanentItem={togglePermanentItem}
       />
     </div>
   );
