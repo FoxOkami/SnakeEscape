@@ -155,6 +155,9 @@ interface SnakeGameState extends GameData {
   useInventoryItem: (itemId: string) => void;
   clearTemporaryItems: () => void;
 
+  // Hub reset system
+  resetForHub: () => void;
+
   // Level 1 randomization
   randomizedSymbols?: string[] | null;
 
@@ -741,28 +744,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       if (nextLevelIndex >= LEVELS.length) {
         // All levels completed, return to hub
-        get().clearTemporaryItems(); // Clear temporary items when completing all levels
-        
-        // Calculate shield health from remaining active permanent items
-        let totalBiteProtection = 0;
-        state.inventoryItems.forEach(item => {
-          if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
-            totalBiteProtection += item.modifiers.biteProtection;
-          }
-        });
-        
-        // Reset player health to full and apply shield protection
-        set({ 
-          gameState: "hub",
-          player: {
-            ...state.player,
-            health: state.player.maxHealth, // Reset to full health
-            shieldHealth: totalBiteProtection, // Apply shield from permanent items
-            maxShieldHealth: totalBiteProtection,
-            isInvincible: false,
-            invincibilityEndTime: 0
-          }
-        });
+        get().resetForHub();
         return;
       }
 
@@ -864,29 +846,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     returnToMenu: () => {
-      const state = get();
-      state.clearTemporaryItems(); // Clear temporary items when returning to hub
-      
-      // Calculate shield health from remaining active permanent items
-      let totalBiteProtection = 0;
-      state.inventoryItems.forEach(item => {
-        if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
-          totalBiteProtection += item.modifiers.biteProtection;
-        }
-      });
-      
-      // Reset player health to full and apply shield protection
-      set({ 
-        gameState: "hub",
-        player: {
-          ...state.player,
-          health: state.player.maxHealth, // Reset to full health
-          shieldHealth: totalBiteProtection, // Apply shield from permanent items
-          maxShieldHealth: totalBiteProtection,
-          isInvincible: false,
-          invincibilityEndTime: 0
-        }
-      });
+      get().resetForHub();
     },
 
     openInventory: () => {
@@ -4350,12 +4310,37 @@ export const useSnakeGame = create<SnakeGameState>()(
       get().startFromLevel(levelIndex);
     },
 
-    returnToHub: () => {
-      set({
+    // Centralized function to handle all hub reset logic
+    resetForHub: () => {
+      const state = get();
+      state.clearTemporaryItems(); // Clear temporary items when returning to hub
+      
+      // Calculate shield health from remaining active permanent items
+      let totalBiteProtection = 0;
+      state.inventoryItems.forEach(item => {
+        if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+          totalBiteProtection += item.modifiers.biteProtection;
+        }
+      });
+      
+      // Reset player health to full and apply shield protection
+      set({ 
         gameState: "hub",
         currentLevel: 0,
         currentLevelKey: "hub",
+        player: {
+          ...state.player,
+          health: state.player.maxHealth, // Reset to full health
+          shieldHealth: totalBiteProtection, // Apply shield from permanent items
+          maxShieldHealth: totalBiteProtection,
+          isInvincible: false,
+          invincibilityEndTime: 0
+        }
       });
+    },
+
+    returnToHub: () => {
+      get().resetForHub();
     },
   })),
 );
