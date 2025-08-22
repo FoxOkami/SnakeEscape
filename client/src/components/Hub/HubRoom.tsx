@@ -30,7 +30,16 @@ const HubRoom: React.FC = () => {
     closeSettingsModal
   } = useHubStore();
 
-  const { startLevel, showInventory, openInventory, closeInventory, addInventoryItem, inventoryItems, useInventoryItem } = useSnakeGame();
+  const { 
+    startLevel, 
+    showInventory, 
+    openInventory, 
+    closeInventory, 
+    addInventoryItem, 
+    inventoryItems, 
+    useInventoryItem,
+    player: gamePlayer // Get player data from main game store for health display
+  } = useSnakeGame();
   
   const [keys, setKeys] = useState<Set<string>>(new Set());
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -91,6 +100,34 @@ const HubRoom: React.FC = () => {
     
     // Clear input after any Enter press (valid or invalid cheat code)
     setCheatCodeInput('');
+  };
+  
+  // Health display component (same as in GameUI)
+  const renderHealthDisplay = () => {
+    return (
+      <div className="absolute top-4 left-4 flex flex-col gap-1 z-50 pointer-events-none">
+        {Array.from({ length: gamePlayer.maxHealth }, (_, index) => (
+          <div
+            key={index}
+            className={`w-8 h-8 text-2xl font-bold flex items-center justify-center ${
+              index < gamePlayer.health ? 'text-yellow-400' : 'text-gray-600'
+            } ${gamePlayer.isInvincible ? 'animate-pulse' : ''}`}
+            style={{
+              filter: gamePlayer.isInvincible ? 'brightness(1.5)' : 'none',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+            }}
+          >
+            ▲
+          </div>
+        ))}
+        {gamePlayer.shieldHealth > 0 && (
+          <div className="flex items-center gap-1 mt-1">
+            <div className="text-blue-400 text-lg font-bold">🛡️</div>
+            <div className="text-blue-400 text-sm font-bold">{gamePlayer.shieldHealth}</div>
+          </div>
+        )}
+      </div>
+    );
   };
   
   // Clear keys when settings modal opens to prevent stuck movement
@@ -659,6 +696,9 @@ const HubRoom: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* Health Display */}
+      {renderHealthDisplay()}
       
       {/* Inventory Modal */}
       <InventoryModal
