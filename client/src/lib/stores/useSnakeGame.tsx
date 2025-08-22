@@ -843,8 +843,29 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     returnToMenu: () => {
-      get().clearTemporaryItems(); // Clear temporary items when returning to hub
-      set({ gameState: "hub" });
+      const state = get();
+      state.clearTemporaryItems(); // Clear temporary items when returning to hub
+      
+      // Calculate shield health from remaining active permanent items
+      let totalBiteProtection = 0;
+      state.inventoryItems.forEach(item => {
+        if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+          totalBiteProtection += item.modifiers.biteProtection;
+        }
+      });
+      
+      // Reset player health to full and apply shield protection
+      set({ 
+        gameState: "hub",
+        player: {
+          ...state.player,
+          health: state.player.maxHealth, // Reset to full health
+          shieldHealth: totalBiteProtection, // Apply shield from permanent items
+          maxShieldHealth: totalBiteProtection,
+          isInvincible: false,
+          invincibilityEndTime: 0
+        }
+      });
     },
 
     openInventory: () => {
@@ -902,16 +923,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
     },
 
-    // Clear temporary items and deactivate permanent items (called when returning to hub - end of run)
+    // Clear temporary items but keep permanent items active (called when returning to hub - end of run)
     clearTemporaryItems: () => {
       set((state) => ({
         inventoryItems: state.inventoryItems
           .filter(item => item.duration !== 'temporary' || !item.isActive) // Remove used temporary items
-          .map(item => 
-            item.duration === 'permanent' && item.isActive
-              ? { ...item, isActive: false, activatedAt: undefined } // Deactivate permanent items
-              : item
-          )
+          // Keep permanent items as they are - don't deactivate them
       }));
     },
 
