@@ -328,6 +328,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       hasKey: false,
       health: 9,
       maxHealth: 9,
+      shieldHealth: 0,
+      maxShieldHealth: 0,
       isInvincible: false,
       invincibilityEndTime: 0,
     },
@@ -464,6 +466,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           hasKey: false,
           health: 9,
           maxHealth: 9,
+          shieldHealth: 0,
+          maxShieldHealth: 0,
           isInvincible: false,
           invincibilityEndTime: 0,
         },
@@ -593,6 +597,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           hasKey: false,
           health: 9,
           maxHealth: 9,
+          shieldHealth: 0,
+          maxShieldHealth: 0,
           isInvincible: false,
           invincibilityEndTime: 0,
         },
@@ -676,6 +682,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           hasKey: false,
           health: 9,
           maxHealth: 9,
+          shieldHealth: 0,
+          maxShieldHealth: 0,
           isInvincible: false,
           invincibilityEndTime: 0,
         },
@@ -871,8 +879,25 @@ export const useSnakeGame = create<SnakeGameState>()(
           activatedAt: Date.now()
         };
         
+        // Calculate new shield health from all active items
+        const updatedInventory = state.inventoryItems.map(i => i.id === itemId ? updatedItem : i);
+        let totalBiteProtection = 0;
+        updatedInventory.forEach(inventoryItem => {
+          if (inventoryItem.duration === 'permanent' && inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
+            totalBiteProtection += inventoryItem.modifiers.biteProtection;
+          }
+        });
+
+        // Update player shield health
+        const updatedPlayer = {
+          ...state.player,
+          maxShieldHealth: totalBiteProtection,
+          shieldHealth: totalBiteProtection
+        };
+        
         return {
-          inventoryItems: state.inventoryItems.map(i => i.id === itemId ? updatedItem : i)
+          inventoryItems: updatedInventory,
+          player: updatedPlayer
         };
       });
     },
@@ -1294,7 +1319,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         });
 
       if (hitBySnake) {
-        // Calculate total bite protection from active permanent items
+        // Calculate total bite protection from active permanent items and update shield health
         let totalBiteProtection = 0;
         state.inventoryItems.forEach(item => {
           if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
@@ -1302,11 +1327,30 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
         });
 
-        updatedPlayer.health -= 1;
+        // Update shield health if it differs from calculated protection
+        if (updatedPlayer.maxShieldHealth !== totalBiteProtection) {
+          updatedPlayer.maxShieldHealth = totalBiteProtection;
+          // If shield health is greater than max, set it to max
+          if (updatedPlayer.shieldHealth > totalBiteProtection) {
+            updatedPlayer.shieldHealth = totalBiteProtection;
+          }
+          // If shield health is less than max (new protection), increase it
+          else if (updatedPlayer.shieldHealth < totalBiteProtection) {
+            updatedPlayer.shieldHealth = totalBiteProtection;
+          }
+        }
 
-        // Check if player dies, accounting for bite protection
-        const effectiveDeathThreshold = 0 - totalBiteProtection;
-        if (updatedPlayer.health <= effectiveDeathThreshold) {
+        // Apply damage: shield first, then health
+        if (updatedPlayer.shieldHealth > 0) {
+          // Damage shield first
+          updatedPlayer.shieldHealth -= 1;
+        } else {
+          // Shield depleted, damage health
+          updatedPlayer.health -= 1;
+        }
+
+        // Check if player dies (only when both health and shield are depleted)
+        if (updatedPlayer.health <= 0 && updatedPlayer.shieldHealth <= 0) {
           // Player is dead - game over
           set({ gameState: "gameOver", player: updatedPlayer });
           return;

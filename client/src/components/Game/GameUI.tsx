@@ -242,14 +242,6 @@ const GameUI: React.FC = () => {
   );
 
   const renderHealthDisplay = () => {
-    // Calculate total bite protection from active permanent items
-    let totalBiteProtection = 0;
-    inventoryItems.forEach(item => {
-      if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
-        totalBiteProtection += item.modifiers.biteProtection;
-      }
-    });
-    
     return (
       <div className="absolute top-4 left-4 flex flex-col gap-1 z-50 pointer-events-none">
         {Array.from({ length: player.maxHealth }, (_, index) => (
@@ -266,10 +258,10 @@ const GameUI: React.FC = () => {
             ▲
           </div>
         ))}
-        {totalBiteProtection > 0 && (
+        {player.shieldHealth > 0 && (
           <div className="flex items-center gap-1 mt-1">
             <div className="text-blue-400 text-lg font-bold">🛡️</div>
-            <div className="text-blue-400 text-sm font-bold">+{totalBiteProtection}</div>
+            <div className="text-blue-400 text-sm font-bold">{player.shieldHealth}</div>
           </div>
         )}
       </div>
