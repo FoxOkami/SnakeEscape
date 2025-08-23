@@ -83,7 +83,6 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                       <div className="flex items-center gap-2">
                         <span className="text-lg">{item.image || "📦"}</span>
                         <span className="font-medium text-sm text-gray-800">{item.name}</span>
-                        <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">Permanent</span>
                         {item.isActive ? (
                           <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
                             Active
