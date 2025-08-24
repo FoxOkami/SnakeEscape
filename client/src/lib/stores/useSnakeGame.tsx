@@ -1184,10 +1184,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // Apply snake chase multiplier to non-boss snakes (but not on Skate Rink level)
         let modifiedSnake = snake;
-        if (snake.type !== 'boss' && snakeChaseMultiplier !== 1 && state.currentLevelKey !== 'boss_valerie') {
+        if (snake.type !== 'boss' && snakeChaseMultiplier !== 1 && updatedState.currentLevelKey !== 'boss_valerie') {
           modifiedSnake = {
             ...snake,
-            chaseDistance: snake.chaseDistance ? snake.chaseDistance * snakeChaseMultiplier : 0,
             speed: snake.speed * Math.max(0.1, snakeChaseMultiplier) // Ensure minimum speed for animation
           };
         }
@@ -1196,16 +1195,16 @@ export const useSnakeGame = create<SnakeGameState>()(
           modifiedSnake,
           currentWalls,
           deltaTime,
-          updatedPlayer,
+          updatedState.player,
           playerSounds,
-          { ...state, quadrantLighting },
-          LEVELS[state.currentLevel]?.size,
-          state.boulders,
+          { ...updatedState, quadrantLighting },
+          LEVELS[updatedState.currentLevel]?.size,
+          updatedState.boulders,
         );
         
         // Check for environmental effects triggered by boss boulder collision
         if (updatedSnake.environmentalEffects?.spawnMiniBoulders) {
-          const spawnedMiniBoulders = get().spawnMiniBoulders(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
+          const spawnedMiniBoulders = get().spawnMiniBoulders(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
           newMiniBoulders.push(...spawnedMiniBoulders);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnMiniBoulders = false;
@@ -1213,14 +1212,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
           console.log("Spawning screensaver snake from environmental effects");
-          const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
+          const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
           newSnakes.push(screensaverSnake);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnScreensaverSnake = false;
         }
         
         if (updatedSnake.environmentalEffects?.spawnPhotophobicSnake) {
-          const photophobicSnake = get().spawnPhotophobicSnake(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
+          const photophobicSnake = get().spawnPhotophobicSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
           newSnakes.push(photophobicSnake);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnPhotophobicSnake = false;
