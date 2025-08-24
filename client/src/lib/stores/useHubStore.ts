@@ -110,7 +110,10 @@ export const useHubStore = create<HubStore>((set, get) => ({
       normalSpeed: 0.2 * HUB_SPEED_MULTIPLIER,
       walkingSpeed: 0.1 * HUB_SPEED_MULTIPLIER,
       acceleration: 8, // Faster acceleration for responsive hub movement
-      useAcceleration: true
+      useAcceleration: true,
+      dashSpeed: 1.0 * HUB_SPEED_MULTIPLIER, // Hub dash speed
+      dashDistance: 96, // Same distance for hub
+      dashInvulnerabilityDistance: 32 // Same invulnerability distance
     });
 
     set({
@@ -166,7 +169,8 @@ export const useHubStore = create<HubStore>((set, get) => ({
       right: 'ArrowRight',
       interact: 'KeyE',
       secondaryInteract: 'KeyQ',
-      walking: 'ControlLeft'
+      walking: 'ControlLeft',
+      dash: 'KeyR'
     };
     
     // Apply centralized inventory item speed modifiers to hub player speed

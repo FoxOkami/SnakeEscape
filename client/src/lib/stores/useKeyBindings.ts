@@ -9,6 +9,7 @@ export interface KeyBindings {
   interact: string;
   secondaryInteract: string;
   walking: string;
+  dash: string;
 }
 
 interface KeyBindingsStore {
@@ -26,7 +27,8 @@ const defaultKeyBindings: KeyBindings = {
   right: 'ArrowRight',
   interact: 'KeyE',
   secondaryInteract: 'KeyQ',
-  walking: 'ControlLeft'
+  walking: 'ControlLeft',
+  dash: 'KeyR'
 };
 
 export const useKeyBindings = create<KeyBindingsStore>()(
@@ -65,6 +67,7 @@ export const useKeyBindings = create<KeyBindingsStore>()(
           'KeyA': 'A',
           'KeyS': 'S',
           'KeyD': 'D',
+          'KeyR': 'R',
           'ControlLeft': 'Ctrl',
           'ControlRight': 'Ctrl',
           'Space': 'Space',
@@ -76,7 +79,7 @@ export const useKeyBindings = create<KeyBindingsStore>()(
     }),
     {
       name: 'snake-game-keybindings',
-      version: 2,
+      version: 3,
       migrate: (persistedState: any, version: number) => {
         if (version === 1) {
           // Add the new secondaryInteract key to existing saved data
@@ -85,6 +88,16 @@ export const useKeyBindings = create<KeyBindingsStore>()(
             keyBindings: {
               ...persistedState.keyBindings,
               secondaryInteract: 'KeyQ'
+            }
+          };
+        }
+        if (version === 2) {
+          // Add the new dash key to existing saved data
+          return {
+            ...persistedState,
+            keyBindings: {
+              ...persistedState.keyBindings,
+              dash: 'KeyR'
             }
           };
         }

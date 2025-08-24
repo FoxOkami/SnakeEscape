@@ -79,6 +79,15 @@ interface SnakeGameState extends GameData {
   currentVelocity: Position;
   targetVelocity: Position;
   isWalking: boolean;
+  isDashing: boolean;
+  dashState: {
+    isActive: boolean;
+    startTime: number;
+    startPosition: { x: number; y: number };
+    direction: { x: number; y: number };
+    progress: number;
+    isInvulnerable: boolean;
+  };
 
   // Item actions
   pickupItem: (itemId: string) => void;
@@ -369,6 +378,15 @@ export const useSnakeGame = create<SnakeGameState>()(
     currentVelocity: { x: 0, y: 0 },
     targetVelocity: { x: 0, y: 0 },
     isWalking: false,
+    isDashing: false,
+    dashState: {
+      isActive: false,
+      startTime: 0,
+      startPosition: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      progress: 0,
+      isInvulnerable: false,
+    },
     keyStates: new Map(), // Track key state with timestamps
     showInventory: false,
     inventoryItems: [], // Inventory starts empty - items can be obtained through cheat codes
@@ -414,6 +432,9 @@ export const useSnakeGame = create<SnakeGameState>()(
           isKeyActiveRecently(keyBindings.walking) ||
           isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
         
+        // Check if dashing using custom key binding
+        const isDashing = isKeyActiveRecently(keyBindings.dash);
+        
         // Get dynamic speeds based on inventory items
         const currentState = get();
         const speeds = getPlayerSpeeds(currentState.inventoryItems);
@@ -447,6 +468,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           keyStates: newKeyStates,
           targetVelocity: targetVelocity,
           isWalking: isWalking,
+          isDashing: isDashing,
         };
       });
     },
@@ -519,6 +541,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+    isDashing: false,
+    dashState: {
+      isActive: false,
+      startTime: 0,
+      startPosition: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      progress: 0,
+      isInvulnerable: false,
+    },
         hintState: null, // Initialize hint state
         randomizedSymbols: level1Randomization.randomizedSymbols, // Store randomized symbols
         // Store pre-randomized Level 2 data
@@ -648,6 +679,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+    isDashing: false,
+    dashState: {
+      isActive: false,
+      startTime: 0,
+      startPosition: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      progress: 0,
+      isInvulnerable: false,
+    },
         boulders: level.boulders
           ? level.boulders.map((boulder) => ({ ...boulder }))
           : [],
@@ -736,6 +776,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+    isDashing: false,
+    dashState: {
+      isActive: false,
+      startTime: 0,
+      startPosition: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      progress: 0,
+      isInvulnerable: false,
+    },
       });
     },
 
@@ -853,6 +902,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+    isDashing: false,
+    dashState: {
+      isActive: false,
+      startTime: 0,
+      startPosition: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      progress: 0,
+      isInvulnerable: false,
+    },
       });
     },
 
@@ -1009,29 +1067,92 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.gameState !== "playing" || state.showInventory) return;
 
+      // --- DASH MECHANICS ---
+      let updatedDashState = { ...state.dashState };
+      let isPlayerDashing = false;
+
+      // Check for dash initiation
+      if (state.isDashing && !state.dashState.isActive) {
+        // Start dash
+        const dashDirection = { x: 0, y: 0 };
+        
+        // Determine dash direction from target velocity or default to right
+        if (state.targetVelocity.x !== 0 || state.targetVelocity.y !== 0) {
+          const magnitude = Math.sqrt(state.targetVelocity.x ** 2 + state.targetVelocity.y ** 2);
+          if (magnitude > 0) {
+            dashDirection.x = state.targetVelocity.x / magnitude;
+            dashDirection.y = state.targetVelocity.y / magnitude;
+          }
+        } else {
+          dashDirection.x = 1; // Default to right
+        }
+        
+        updatedDashState = {
+          isActive: true,
+          startTime: performance.now(),
+          startPosition: { ...state.player.position },
+          direction: dashDirection,
+          progress: 0,
+          isInvulnerable: true,
+        };
+      }
+
+      // Update dash if active
+      if (updatedDashState.isActive) {
+        const currentTime = performance.now();
+        const dashSpeed = 1.0; // pixels per millisecond
+        const dashDistance = 96;
+        const dashDuration = dashDistance / dashSpeed; // milliseconds to complete dash
+        
+        const elapsedTime = currentTime - updatedDashState.startTime;
+        updatedDashState.progress = Math.min(elapsedTime / dashDuration, 1);
+        
+        // Update invulnerability (first 32 pixels)
+        const distanceTraveled = updatedDashState.progress * dashDistance;
+        updatedDashState.isInvulnerable = distanceTraveled < 32;
+        
+        isPlayerDashing = true;
+        
+        // End dash when complete
+        if (updatedDashState.progress >= 1) {
+          updatedDashState.isActive = false;
+          updatedDashState.isInvulnerable = false;
+          isPlayerDashing = false;
+        }
+      }
+
       // --- SMOOTH PLAYER MOVEMENT ---
       // Smoothly interpolate current velocity toward target velocity
       let newVelocity = { ...state.currentVelocity };
 
-      // Calculate velocity difference
-      const velDiff = {
-        x: state.targetVelocity.x - state.currentVelocity.x,
-        y: state.targetVelocity.y - state.currentVelocity.y,
-      };
-
-      // Apply acceleration to approach target velocity
-      const maxAccel = ACCELERATION * deltaTime;
-
-      if (Math.abs(velDiff.x) > maxAccel) {
-        newVelocity.x += Math.sign(velDiff.x) * maxAccel;
+      // Override velocity if dashing
+      if (isPlayerDashing) {
+        const dashSpeed = 1.0; // pixels per millisecond
+        newVelocity = {
+          x: updatedDashState.direction.x * dashSpeed,
+          y: updatedDashState.direction.y * dashSpeed
+        };
       } else {
-        newVelocity.x = state.targetVelocity.x;
-      }
+        // Calculate velocity difference
+        const velDiff = {
+          x: state.targetVelocity.x - state.currentVelocity.x,
+          y: state.targetVelocity.y - state.currentVelocity.y,
+        };
 
-      if (Math.abs(velDiff.y) > maxAccel) {
-        newVelocity.y += Math.sign(velDiff.y) * maxAccel;
-      } else {
-        newVelocity.y = state.targetVelocity.y;
+        // Apply acceleration to approach target velocity
+        const maxAccel = ACCELERATION * deltaTime;
+
+        if (Math.abs(velDiff.x) > maxAccel) {
+          newVelocity.x += Math.sign(velDiff.x) * maxAccel;
+        } else {
+          newVelocity.x = state.targetVelocity.x;
+        }
+
+        if (Math.abs(velDiff.y) > maxAccel) {
+          newVelocity.y += Math.sign(velDiff.y) * maxAccel;
+        } else {
+          newVelocity.y = state.targetVelocity.y;
+        }
       }
 
       // Calculate new player position based on velocity
@@ -1394,6 +1515,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       const hitBySnake =
         !updatedPlayer.isInvincible &&
+        !updatedDashState.isInvulnerable &&
         updatedSnakes.some((snake) => {
           const snakeRect = {
             x: snake.position.x,
@@ -2020,6 +2142,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         key: updatedKey,
         player: updatedPlayer,
         switches: updatedSwitches,
+        dashState: updatedDashState, // Update dash state
         door: updatedDoor,
         throwableItems: updatedThrowableItems,
         patternTiles: updatedPatternTiles,

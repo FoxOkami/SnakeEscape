@@ -18,6 +18,9 @@ export interface MovementConfig {
   walkingSpeed: number;
   acceleration: number;
   useAcceleration: boolean; // Hub: false, Game levels: true
+  dashSpeed: number;
+  dashDistance: number;
+  dashInvulnerabilityDistance: number;
 }
 
 export interface BoundaryConfig {
@@ -33,6 +36,15 @@ export interface InputState {
   left: boolean;
   right: boolean;
   walking: boolean;
+  dash: boolean;
+}
+
+export interface DashState {
+  isDashing: boolean;
+  dashStartPosition: Position;
+  dashDirection: Velocity;
+  dashProgress: number;
+  isInvulnerable: boolean;
 }
 
 export class PlayerController {
@@ -42,6 +54,8 @@ export class PlayerController {
   private targetVelocity: Velocity;
   private config: MovementConfig;
   private boundaries: BoundaryConfig;
+  private dashState: DashState;
+  private lastDashInput: boolean;
 
   constructor(
     initialPosition: Position,
@@ -55,17 +69,30 @@ export class PlayerController {
     this.targetVelocity = { x: 0, y: 0 };
     this.config = { ...config };
     this.boundaries = { ...boundaries };
+    this.dashState = {
+      isDashing: false,
+      dashStartPosition: { x: 0, y: 0 },
+      dashDirection: { x: 0, y: 0 },
+      dashProgress: 0,
+      isInvulnerable: false
+    };
+    this.lastDashInput = false;
   }
 
   // Update player position based on input
   update(input: InputState, deltaTime: number): Position {
-    this.calculateTargetVelocity(input);
+    this.handleDashInput(input);
+    this.updateDash(deltaTime);
     
-    if (this.config.useAcceleration) {
-      this.updateVelocityWithAcceleration(deltaTime);
-    } else {
-      // Direct velocity for hub (immediate response)
-      this.currentVelocity = { ...this.targetVelocity };
+    if (!this.dashState.isDashing) {
+      this.calculateTargetVelocity(input);
+      
+      if (this.config.useAcceleration) {
+        this.updateVelocityWithAcceleration(deltaTime);
+      } else {
+        // Direct velocity for hub (immediate response)
+        this.currentVelocity = { ...this.targetVelocity };
+      }
     }
 
     this.updatePosition(deltaTime);
@@ -141,6 +168,78 @@ export class PlayerController {
     );
   }
 
+  private handleDashInput(input: InputState): void {
+    // Trigger dash on key press (not hold)
+    if (input.dash && !this.lastDashInput && !this.dashState.isDashing) {
+      this.startDash(input);
+    }
+    this.lastDashInput = input.dash;
+  }
+
+  private startDash(input: InputState): void {
+    // Calculate dash direction based on current input
+    let dashDirection = { x: 0, y: 0 };
+    
+    if (input.up) dashDirection.y -= 1;
+    if (input.down) dashDirection.y += 1;
+    if (input.left) dashDirection.x -= 1;
+    if (input.right) dashDirection.x += 1;
+    
+    // If no direction input, dash in the direction of current movement
+    if (dashDirection.x === 0 && dashDirection.y === 0) {
+      if (this.currentVelocity.x !== 0 || this.currentVelocity.y !== 0) {
+        const magnitude = Math.sqrt(this.currentVelocity.x ** 2 + this.currentVelocity.y ** 2);
+        if (magnitude > 0) {
+          dashDirection.x = this.currentVelocity.x / magnitude;
+          dashDirection.y = this.currentVelocity.y / magnitude;
+        }
+      } else {
+        // Default to facing right if no movement
+        dashDirection.x = 1;
+      }
+    } else {
+      // Normalize diagonal movement
+      const magnitude = Math.sqrt(dashDirection.x ** 2 + dashDirection.y ** 2);
+      if (magnitude > 0) {
+        dashDirection.x /= magnitude;
+        dashDirection.y /= magnitude;
+      }
+    }
+    
+    this.dashState = {
+      isDashing: true,
+      dashStartPosition: { ...this.position },
+      dashDirection,
+      dashProgress: 0,
+      isInvulnerable: true
+    };
+  }
+
+  private updateDash(deltaTime: number): void {
+    if (!this.dashState.isDashing) return;
+    
+    const dt = deltaTime / 1000;
+    const dashProgressIncrement = (this.config.dashSpeed * dt) / this.config.dashDistance;
+    this.dashState.dashProgress += dashProgressIncrement;
+    
+    // Update invulnerability based on distance traveled
+    const distanceTraveled = this.dashState.dashProgress * this.config.dashDistance;
+    this.dashState.isInvulnerable = distanceTraveled < this.config.dashInvulnerabilityDistance;
+    
+    // Set velocity for dash movement
+    this.currentVelocity = {
+      x: this.dashState.dashDirection.x * this.config.dashSpeed,
+      y: this.dashState.dashDirection.y * this.config.dashSpeed
+    };
+    
+    // End dash when distance is complete
+    if (this.dashState.dashProgress >= 1) {
+      this.dashState.isDashing = false;
+      this.dashState.isInvulnerable = false;
+      this.currentVelocity = { x: 0, y: 0 };
+    }
+  }
+
   // Getters
   getPosition(): Position {
     return { ...this.position };
@@ -152,6 +251,10 @@ export class PlayerController {
 
   getTargetVelocity(): Velocity {
     return { ...this.targetVelocity };
+  }
+
+  getDashState(): DashState {
+    return { ...this.dashState };
   }
 
   // Setters
@@ -181,7 +284,10 @@ export function createGamePlayerController(
       normalSpeed: 0.2,   // Game level normal speed
       walkingSpeed: 0.1,  // Game level walking speed
       acceleration: 1,    // Game level acceleration
-      useAcceleration: true
+      useAcceleration: true,
+      dashSpeed: 1.0,     // High speed for dash (96 pixels in short time)
+      dashDistance: 96,   // 96 pixels dash distance
+      dashInvulnerabilityDistance: 32  // First 32 pixels are invulnerable
     },
     boundaries
   );
@@ -196,6 +302,7 @@ export interface CustomKeyBindings {
   interact: string;
   secondaryInteract: string;
   walking: string;
+  dash: string;
 }
 
 // Helper function to convert key set to input state with custom key bindings
@@ -206,7 +313,8 @@ export function keysToInputState(keys: Set<string>, customBindings?: CustomKeyBi
     left: 'ArrowLeft',
     right: 'ArrowRight',
     interact: 'KeyE',
-    walking: 'ControlLeft'
+    walking: 'ControlLeft',
+    dash: 'KeyR'
   };
   
   return {
@@ -214,6 +322,7 @@ export function keysToInputState(keys: Set<string>, customBindings?: CustomKeyBi
     down: keys.has(bindings.down),
     left: keys.has(bindings.left),
     right: keys.has(bindings.right),
-    walking: keys.has(bindings.walking) || keys.has('ControlRight') // Keep ControlRight as backup
+    walking: keys.has(bindings.walking) || keys.has('ControlRight'), // Keep ControlRight as backup
+    dash: keys.has(bindings.dash)
   };
 }

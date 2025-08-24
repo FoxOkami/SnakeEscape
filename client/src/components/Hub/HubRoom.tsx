@@ -684,6 +684,20 @@ const HubRoom: React.FC = () => {
                       {editingKeyBinding === 'walking' ? '' : getKeyDisplayText(keyBindings.walking)}
                     </button>
                   </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Dash</span>
+                    <button 
+                      onClick={() => setEditingKeyBinding('dash')}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${
+                        editingKeyBinding === 'dash' 
+                          ? 'bg-white border-2 border-red-500 text-transparent' 
+                          : 'bg-gray-100 border hover:bg-gray-200'
+                      }`}
+                    >
+                      {editingKeyBinding === 'dash' ? '' : getKeyDisplayText(keyBindings.dash)}
+                    </button>
+                  </div>
                 </div>
                 
                 {(editingKeyBinding || keyBindingError) && (
@@ -695,7 +709,8 @@ const HubRoom: React.FC = () => {
                                                     editingKeyBinding === 'left' ? 'Move Left' :
                                                     editingKeyBinding === 'right' ? 'Move Right' :
                                                     editingKeyBinding === 'interact' ? 'Interact' : 
-                                                    editingKeyBinding === 'secondaryInteract' ? 'Secondary Item Interaction' : 'Walk (Hold)'}"`}
+                                                    editingKeyBinding === 'secondaryInteract' ? 'Secondary Item Interaction' : 
+                                                    editingKeyBinding === 'walking' ? 'Walk (Hold)' : 'Dash'}"`}
                     </p>
                   </div>
                 )}
