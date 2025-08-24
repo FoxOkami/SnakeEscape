@@ -87,6 +87,8 @@ interface SnakeGameState extends GameData {
     direction: { x: number; y: number };
     progress: number;
     isInvulnerable: boolean;
+    lastDashTime: number;
+    cooldownDuration: number;
   };
 
   // Item actions
@@ -386,6 +388,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       direction: { x: 0, y: 0 },
       progress: 0,
       isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
     },
     keyStates: new Map(), // Track key state with timestamps
     showInventory: false,
@@ -549,6 +553,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       direction: { x: 0, y: 0 },
       progress: 0,
       isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
     },
         hintState: null, // Initialize hint state
         randomizedSymbols: level1Randomization.randomizedSymbols, // Store randomized symbols
@@ -687,6 +693,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       direction: { x: 0, y: 0 },
       progress: 0,
       isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
     },
         boulders: level.boulders
           ? level.boulders.map((boulder) => ({ ...boulder }))
@@ -784,6 +792,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       direction: { x: 0, y: 0 },
       progress: 0,
       isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
     },
       });
     },
@@ -910,6 +920,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       direction: { x: 0, y: 0 },
       progress: 0,
       isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
     },
       });
     },
@@ -1072,34 +1084,41 @@ export const useSnakeGame = create<SnakeGameState>()(
       let isPlayerDashing = false;
 
       // Check for dash initiation
-      if (state.isDashing && !state.dashState.isActive) {
-        // Start dash
-        const dashDirection = { x: 0, y: 0 };
-        
-        // Determine dash direction from target velocity or default to right
+      const currentTime = performance.now();
+      const timeSinceLastDash = currentTime - state.dashState.lastDashTime;
+      const canDash = timeSinceLastDash >= state.dashState.cooldownDuration;
+      
+      if (state.isDashing && !state.dashState.isActive && canDash) {
+        // Only dash if there's directional input
         if (state.targetVelocity.x !== 0 || state.targetVelocity.y !== 0) {
           const magnitude = Math.sqrt(state.targetVelocity.x ** 2 + state.targetVelocity.y ** 2);
-          if (magnitude > 0) {
-            dashDirection.x = state.targetVelocity.x / magnitude;
-            dashDirection.y = state.targetVelocity.y / magnitude;
-          }
-        } else {
-          dashDirection.x = 1; // Default to right
+          const dashDirection = {
+            x: state.targetVelocity.x / magnitude,
+            y: state.targetVelocity.y / magnitude
+          };
+          
+          updatedDashState = {
+            ...state.dashState,
+            isActive: true,
+            startTime: currentTime,
+            startPosition: { ...state.player.position },
+            direction: dashDirection,
+            progress: 0,
+            isInvulnerable: true,
+            lastDashTime: currentTime,
+          };
         }
-        
-        updatedDashState = {
-          isActive: true,
-          startTime: performance.now(),
-          startPosition: { ...state.player.position },
-          direction: dashDirection,
-          progress: 0,
-          isInvulnerable: true,
-        };
+        // If no directional input, don't dash but still update lastDashTime to prevent spam
+        else {
+          updatedDashState = {
+            ...state.dashState,
+            lastDashTime: currentTime,
+          };
+        }
       }
 
       // Update dash if active
       if (updatedDashState.isActive) {
-        const currentTime = performance.now();
         const dashSpeed = 1.0; // pixels per millisecond
         const dashDistance = 96;
         const dashDuration = dashDistance / dashSpeed; // milliseconds to complete dash
@@ -1553,7 +1572,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // --- THROWN ITEM PHYSICS ---
-      const currentTime = performance.now() / 1000;
+      const itemTime = performance.now() / 1000;
       let updatedThrowableItems = state.throwableItems.map((item) => {
         if (
           item.isThrown &&
@@ -1562,7 +1581,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           item.throwStartPos &&
           item.throwTargetPos
         ) {
-          const elapsedTime = currentTime - item.throwStartTime;
+          const elapsedTime = itemTime - item.throwStartTime;
           const progress = Math.min(elapsedTime / item.throwDuration, 1);
 
           if (progress >= 1) {

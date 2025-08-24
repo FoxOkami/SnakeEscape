@@ -170,7 +170,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
       interact: 'KeyE',
       secondaryInteract: 'KeyQ',
       walking: 'ControlLeft',
-      dash: 'KeyR'
+      dash: 'Space'
     };
     
     // Apply centralized inventory item speed modifiers to hub player speed

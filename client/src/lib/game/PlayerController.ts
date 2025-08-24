@@ -314,7 +314,7 @@ export function keysToInputState(keys: Set<string>, customBindings?: CustomKeyBi
     right: 'ArrowRight',
     interact: 'KeyE',
     walking: 'ControlLeft',
-    dash: 'KeyR'
+    dash: 'Space'
   };
   
   return {

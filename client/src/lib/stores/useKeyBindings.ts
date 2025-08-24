@@ -28,7 +28,7 @@ const defaultKeyBindings: KeyBindings = {
   interact: 'KeyE',
   secondaryInteract: 'KeyQ',
   walking: 'ControlLeft',
-  dash: 'KeyR'
+  dash: 'Space'
 };
 
 export const useKeyBindings = create<KeyBindingsStore>()(
@@ -97,7 +97,7 @@ export const useKeyBindings = create<KeyBindingsStore>()(
             ...persistedState,
             keyBindings: {
               ...persistedState.keyBindings,
-              dash: 'KeyR'
+              dash: 'Space'
             }
           };
         }
