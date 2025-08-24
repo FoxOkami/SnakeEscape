@@ -40,7 +40,8 @@ const HubRoom: React.FC = () => {
     inventoryItems, 
     useInventoryItem,
     togglePermanentItem,
-    player: gamePlayer // Get player data from main game store for health display
+    player: gamePlayer, // Get player data from main game store for health display
+    dashState
   } = useSnakeGame();
   
   const [keys, setKeys] = useState<Set<string>>(new Set());
@@ -742,11 +743,22 @@ const HubRoom: React.FC = () => {
       {/* Health Display */}
       {renderHealthDisplay()}
       
-      {/* Level name badge (same style as game levels) */}
-      <div className="absolute top-4 left-20 z-5">
+      {/* Level name badge and dash indicator (same style as game levels) */}
+      <div className="absolute top-4 left-20 z-5 flex gap-2">
         <Badge variant="secondary" className="bg-gray-800 text-white border-gray-600">
           Snake Room
         </Badge>
+        {(() => {
+          const currentTime = performance.now();
+          const timeSinceLastDash = currentTime - dashState.lastDashTime;
+          const canDash = timeSinceLastDash >= dashState.cooldownDuration;
+          
+          return (
+            <Badge className={`${canDash ? 'bg-blue-600' : 'bg-gray-600'} text-white`}>
+              ⚡ Dash {canDash ? 'Ready' : 'Cooldown'}
+            </Badge>
+          );
+        })()}
       </div>
       
       {/* Inventory Modal */}
