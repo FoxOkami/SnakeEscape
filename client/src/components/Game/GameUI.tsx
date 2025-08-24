@@ -273,9 +273,6 @@ const GameUI: React.FC = () => {
     <div className="absolute top-4 left-20 right-4 flex justify-between items-start z-5">
       <div className="flex gap-2">
         <Badge variant="secondary" className="bg-gray-800 text-white border-gray-600">
-          Level: {currentLevel + 1} / {LEVELS.length}
-        </Badge>
-        <Badge variant="secondary" className="bg-gray-800 text-white border-gray-600">
           {LEVELS[currentLevel]?.name || 'Unknown Level'}
         </Badge>
         {player.hasKey && (
@@ -313,14 +310,6 @@ const GameUI: React.FC = () => {
           className="bg-gray-800 text-white border-gray-600 hover:bg-gray-700"
         >
           📦 Inventory
-        </Button>
-        <Button
-          onClick={toggleMute}
-          variant="outline"
-          size="sm"
-          className="bg-gray-800 text-white border-gray-600 hover:bg-gray-700"
-        >
-          🔊 {isMuted ? 'Off' : 'On'}
         </Button>
         <Button
           onClick={returnToMenu}
