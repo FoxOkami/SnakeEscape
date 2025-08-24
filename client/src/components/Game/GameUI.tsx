@@ -5,6 +5,7 @@ import { LEVELS } from "../../lib/game/levels";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
+import { InventoryModal } from "../ui/inventory";
 
 const GameUI: React.FC = () => {
   const {
@@ -19,7 +20,13 @@ const GameUI: React.FC = () => {
     isWalking,
     carriedItem,
     mirrors,
-    crystal
+    crystal,
+    showInventory,
+    openInventory,
+    closeInventory,
+    inventoryItems,
+    useInventoryItem,
+    togglePermanentItem
   } = useSnakeGame();
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
@@ -235,31 +242,36 @@ const GameUI: React.FC = () => {
     </div>
   );
 
-  const renderHealthDisplay = () => (
-    <div className="absolute top-4 left-4 flex flex-col gap-1 z-50 pointer-events-none">
-      {Array.from({ length: player.maxHealth }, (_, index) => (
-        <div
-          key={index}
-          className={`w-8 h-8 text-2xl font-bold flex items-center justify-center ${
-            index < player.health ? 'text-yellow-400' : 'text-gray-600'
-          } ${player.isInvincible ? 'animate-pulse' : ''}`}
-          style={{
-            filter: player.isInvincible ? 'brightness(1.5)' : 'none',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
-          }}
-        >
-          ▲
-        </div>
-      ))}
-    </div>
-  );
+  const renderHealthDisplay = () => {
+    return (
+      <div className="absolute top-4 left-4 flex flex-col gap-1 z-50 pointer-events-none">
+        {Array.from({ length: player.maxHealth }, (_, index) => (
+          <div
+            key={index}
+            className={`w-8 h-8 text-2xl font-bold flex items-center justify-center ${
+              index < player.health ? 'text-yellow-400' : 'text-gray-600'
+            } ${player.isInvincible ? 'animate-pulse' : ''}`}
+            style={{
+              filter: player.isInvincible ? 'brightness(1.5)' : 'none',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+            }}
+          >
+            ▲
+          </div>
+        ))}
+        {player.shieldHealth > 0 && (
+          <div className="flex items-center gap-1 mt-1">
+            <div className="text-blue-400 text-lg font-bold">🛡️</div>
+            <div className="text-blue-400 text-sm font-bold">{player.shieldHealth}</div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderGameHUD = () => (
     <div className="absolute top-4 left-20 right-4 flex justify-between items-start z-5">
       <div className="flex gap-2">
-        <Badge variant="secondary" className="bg-gray-800 text-white border-gray-600">
-          Level: {currentLevel + 1} / {LEVELS.length}
-        </Badge>
         <Badge variant="secondary" className="bg-gray-800 text-white border-gray-600">
           {LEVELS[currentLevel]?.name || 'Unknown Level'}
         </Badge>
@@ -292,12 +304,12 @@ const GameUI: React.FC = () => {
       
       <div className="flex gap-2">
         <Button
-          onClick={toggleMute}
+          onClick={openInventory}
           variant="outline"
           size="sm"
           className="bg-gray-800 text-white border-gray-600 hover:bg-gray-700"
         >
-          🔊 {isMuted ? 'Off' : 'On'}
+          📦 Inventory
         </Button>
         <Button
           onClick={returnToMenu}
@@ -320,6 +332,15 @@ const GameUI: React.FC = () => {
       {gameState === 'victory' && renderVictory()}
       {gameState === 'playing' && renderGameHUD()}
       {gameState === 'playing' && renderHealthDisplay()}
+      
+      {/* Inventory Modal */}
+      <InventoryModal
+        isOpen={showInventory}
+        onClose={closeInventory}
+        items={inventoryItems}
+        onUseItem={useInventoryItem}
+        onTogglePermanentItem={togglePermanentItem}
+      />
     </>
   );
 };

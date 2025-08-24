@@ -22,6 +22,25 @@ import {
   Boulder,
   MiniBoulder,
 } from "../game/types";
+
+// Inventory item interface
+export interface InventoryItem {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  duration: 'permanent' | 'temporary';
+  modifiers: {
+    playerSpeed?: number; // multiplier for player speed
+    walkSpeed?: number; // multiplier for walk speed
+    biteProtection?: number; // additional bites player can take before dying
+    snakeChaseMultiplier?: number; // multiplier for snake chase values (affects all non-boss snakes)
+    [key: string]: any; // allow for future modifiers
+  };
+  isActive?: boolean; // for temporary items
+  activatedAt?: number; // timestamp when activated
+  expiresAt?: number; // timestamp when expires (for temporary items)
+}
 import { LEVELS, randomizeLevel2, getLevelKeyByIndex } from "../game/levels";
 import { checkAABBCollision } from "../game/collision";
 import { updateSnake } from "../game/entities";
@@ -123,6 +142,23 @@ interface SnakeGameState extends GameData {
   showHint: () => void;
   updateHint: (deltaTime: number) => void;
 
+  // Switch actions
+  toggleLightSwitch: () => void;
+
+  // Inventory system
+  showInventory: boolean;
+  inventoryItems: InventoryItem[];
+  openInventory: () => void;
+  closeInventory: () => void;
+  addInventoryItem: (item: InventoryItem) => void;
+  removeInventoryItem: (itemId: string) => void;
+  useInventoryItem: (itemId: string) => void;
+  togglePermanentItem: (itemId: string) => void;
+  clearTemporaryItems: () => void;
+
+  // Hub reset system
+  resetForHub: () => void;
+
   // Level 1 randomization
   randomizedSymbols?: string[] | null;
 
@@ -130,9 +166,42 @@ interface SnakeGameState extends GameData {
   phantomRemovalInProgress?: boolean;
 }
 
-const PLAYER_SPEED = 0.2; // pixels per second
-const WALKING_SPEED = 0.1; // pixels per second when walking (shift held)
+const BASE_PLAYER_SPEED = 0.2; // base pixels per second
+const BASE_WALKING_SPEED = 0.1; // base pixels per second when walking (shift held)
 const ACCELERATION = 1; // pixels per second squared
+
+// Centralized function to calculate speed multipliers from inventory items
+export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
+  let playerSpeedMultiplier = 1;
+  let walkSpeedMultiplier = 1;
+  
+  // Apply modifiers from active items
+  const currentTime = Date.now();
+  inventoryItems.forEach(item => {
+    if (item.isActive && (!item.expiresAt || currentTime < item.expiresAt)) {
+      if (item.modifiers.playerSpeed) {
+        playerSpeedMultiplier *= item.modifiers.playerSpeed;
+      }
+      if (item.modifiers.walkSpeed) {
+        walkSpeedMultiplier *= item.modifiers.walkSpeed;
+      }
+    }
+  });
+  
+  return {
+    playerSpeedMultiplier,
+    walkSpeedMultiplier
+  };
+}
+
+// Helper function to calculate current player speeds with item modifiers (for game levels)
+function getPlayerSpeeds(inventoryItems: InventoryItem[]) {
+  const multipliers = getSpeedMultipliers(inventoryItems);
+  return {
+    playerSpeed: BASE_PLAYER_SPEED * multipliers.playerSpeedMultiplier,
+    walkingSpeed: BASE_WALKING_SPEED * multipliers.walkSpeedMultiplier
+  };
+}
 
 // Helper function to randomize Level 1
 function randomizeLevel1() {
@@ -260,10 +329,12 @@ export const useSnakeGame = create<SnakeGameState>()(
     player: {
       position: { x: 50, y: 350 },
       size: { width: 32, height: 32 },
-      speed: PLAYER_SPEED,
+      speed: BASE_PLAYER_SPEED,
       hasKey: false,
       health: 9,
       maxHealth: 9,
+      shieldHealth: 0,
+      maxShieldHealth: 0,
       isInvincible: false,
       invincibilityEndTime: 0,
     },
@@ -299,6 +370,8 @@ export const useSnakeGame = create<SnakeGameState>()(
     targetVelocity: { x: 0, y: 0 },
     isWalking: false,
     keyStates: new Map(), // Track key state with timestamps
+    showInventory: false,
+    inventoryItems: [], // Inventory starts empty - items can be obtained through cheat codes
     randomizedSymbols: null, // Level 1 randomization
 
     setKeyPressed: (key: string, pressed: boolean) => {
@@ -340,7 +413,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         const isWalking =
           isKeyActiveRecently(keyBindings.walking) ||
           isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
-        const moveSpeed = isWalking ? WALKING_SPEED : PLAYER_SPEED;
+        
+        // Get dynamic speeds based on inventory items
+        const currentState = get();
+        const speeds = getPlayerSpeeds(currentState.inventoryItems);
+        const moveSpeed = isWalking ? speeds.walkingSpeed : speeds.playerSpeed;
 
         // Calculate target velocity with enhanced key detection using custom key bindings
         const targetVelocity = { x: 0, y: 0 };
@@ -390,10 +467,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         player: {
           position: { ...level.player },
           size: { width: 32, height: 32 },
-          speed: PLAYER_SPEED,
+          speed: BASE_PLAYER_SPEED,
           hasKey: false,
           health: 9,
           maxHealth: 9,
+          shieldHealth: 0,
+          maxShieldHealth: 0,
           isInvincible: false,
           invincibilityEndTime: 0,
         },
@@ -519,10 +598,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         player: {
           position: { ...level.player },
           size: { width: 32, height: 32 },
-          speed: PLAYER_SPEED,
+          speed: BASE_PLAYER_SPEED,
           hasKey: false,
           health: 9,
           maxHealth: 9,
+          shieldHealth: 0,
+          maxShieldHealth: 0,
           isInvincible: false,
           invincibilityEndTime: 0,
         },
@@ -602,10 +683,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         player: {
           position: { ...level.player },
           size: { width: 32, height: 32 },
-          speed: PLAYER_SPEED,
+          speed: BASE_PLAYER_SPEED,
           hasKey: false,
           health: 9,
           maxHealth: 9,
+          shieldHealth: 0,
+          maxShieldHealth: 0,
           isInvincible: false,
           invincibilityEndTime: 0,
         },
@@ -662,7 +745,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       if (nextLevelIndex >= LEVELS.length) {
         // All levels completed, return to hub
-        set({ gameState: "hub" });
+        get().resetForHub();
         return;
       }
 
@@ -694,6 +777,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
 
+      // Calculate shield health from remaining active permanent items
+      let totalBiteProtection = 0;
+      state.inventoryItems.forEach(item => {
+        if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+          totalBiteProtection += item.modifiers.biteProtection;
+        }
+      });
+
       set({
         currentLevel: nextLevelIndex,
         currentLevelKey: getLevelKeyByIndex(nextLevelIndex),
@@ -701,10 +792,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         player: {
           position: { ...level.player },
           size: { width: 32, height: 32 },
-          speed: PLAYER_SPEED,
+          speed: BASE_PLAYER_SPEED,
           hasKey: false,
           health: state.player.health, // Preserve current health
           maxHealth: 9,
+          shieldHealth: totalBiteProtection, // Preserve shield from permanent items
+          maxShieldHealth: totalBiteProtection,
           isInvincible: false,
           invincibilityEndTime: 0,
         },
@@ -764,7 +857,108 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     returnToMenu: () => {
-      set({ gameState: "hub" });
+      get().resetForHub();
+    },
+
+    openInventory: () => {
+      set({ showInventory: true });
+    },
+
+    closeInventory: () => {
+      set({ showInventory: false });
+    },
+
+    addInventoryItem: (item: InventoryItem) => {
+      set((state) => ({
+        inventoryItems: [...state.inventoryItems, item]
+      }));
+    },
+
+    removeInventoryItem: (itemId: string) => {
+      set((state) => ({
+        inventoryItems: state.inventoryItems.filter(item => item.id !== itemId)
+      }));
+    },
+
+    useInventoryItem: (itemId: string) => {
+      set((state) => {
+        const item = state.inventoryItems.find(i => i.id === itemId);
+        if (!item) return state;
+        
+        // Mark item as active (both temporary and permanent)
+        const updatedItem = {
+          ...item,
+          isActive: true,
+          activatedAt: Date.now()
+        };
+        
+        // Calculate new shield health from all active items
+        const updatedInventory = state.inventoryItems.map(i => i.id === itemId ? updatedItem : i);
+        let totalBiteProtection = 0;
+        updatedInventory.forEach(inventoryItem => {
+          if (inventoryItem.duration === 'permanent' && inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
+            totalBiteProtection += inventoryItem.modifiers.biteProtection;
+          }
+        });
+
+        // Update player shield health
+        const updatedPlayer = {
+          ...state.player,
+          maxShieldHealth: totalBiteProtection,
+          shieldHealth: totalBiteProtection
+        };
+        
+        return {
+          inventoryItems: updatedInventory,
+          player: updatedPlayer
+        };
+      });
+    },
+
+    togglePermanentItem: (itemId: string) => {
+      set((state) => {
+        const item = state.inventoryItems.find(i => i.id === itemId);
+        if (!item || item.duration !== 'permanent') return state;
+        
+        // Toggle the active state
+        const updatedItem = {
+          ...item,
+          isActive: !item.isActive,
+          activatedAt: item.isActive ? undefined : Date.now()
+        };
+        
+        // Update inventory
+        const updatedInventory = state.inventoryItems.map(i => i.id === itemId ? updatedItem : i);
+        
+        // Recalculate shield health from all active permanent items
+        let totalBiteProtection = 0;
+        updatedInventory.forEach(inventoryItem => {
+          if (inventoryItem.duration === 'permanent' && inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
+            totalBiteProtection += inventoryItem.modifiers.biteProtection;
+          }
+        });
+
+        // Update player shield health
+        const updatedPlayer = {
+          ...state.player,
+          maxShieldHealth: totalBiteProtection,
+          shieldHealth: totalBiteProtection
+        };
+        
+        return {
+          inventoryItems: updatedInventory,
+          player: updatedPlayer
+        };
+      });
+    },
+
+    // Clear temporary items but keep permanent items active (called when returning to hub - end of run)
+    clearTemporaryItems: () => {
+      set((state) => ({
+        inventoryItems: state.inventoryItems
+          .filter(item => item.duration !== 'temporary' || !item.isActive) // Remove used temporary items
+          // Keep permanent items as they are - don't deactivate them
+      }));
     },
 
     movePlayer: (direction: Position) => {
@@ -813,7 +1007,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     updateGame: (deltaTime: number) => {
       const state = get();
-      if (state.gameState !== "playing") return;
+      if (state.gameState !== "playing" || state.showInventory) return;
 
       // --- SMOOTH PLAYER MOVEMENT ---
       // Smoothly interpolate current velocity toward target velocity
@@ -999,6 +1193,14 @@ export const useSnakeGame = create<SnakeGameState>()(
       let newMiniBoulders = [...state.miniBoulders];
       let newSnakes = [...state.snakes];
       
+      // Calculate snake chase multiplier from active permanent items
+      let snakeChaseMultiplier = 1; // Default multiplier
+      state.inventoryItems.forEach(item => {
+        if (item.duration === 'permanent' && item.isActive && item.modifiers.snakeChaseMultiplier !== undefined) {
+          snakeChaseMultiplier *= item.modifiers.snakeChaseMultiplier;
+        }
+      });
+      
       const updatedSnakes = newSnakes.map((snake) => {
         // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
         // Allow patrolling and chasing rattlesnakes to be processed by normal AI
@@ -1011,8 +1213,18 @@ export const useSnakeGame = create<SnakeGameState>()(
           return snake;
         }
         
+        // Apply snake chase multiplier to non-boss snakes (but not on Skate Rink level)
+        let modifiedSnake = snake;
+        if (snake.type !== 'boss' && snakeChaseMultiplier !== 1 && state.currentLevelKey !== 'boss_valerie') {
+          modifiedSnake = {
+            ...snake,
+            chaseDistance: snake.chaseDistance ? snake.chaseDistance * snakeChaseMultiplier : 0,
+            speed: snake.speed * Math.max(0.1, snakeChaseMultiplier) // Ensure minimum speed for animation
+          };
+        }
+        
         const updatedSnake = updateSnake(
-          snake,
+          modifiedSnake,
           currentWalls,
           deltaTime,
           updatedPlayer,
@@ -1141,6 +1353,28 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
 
+      // --- SHIELD HEALTH SYNCHRONIZATION ---
+      // Keep shield health in sync with active items
+      let totalBiteProtection = 0;
+      state.inventoryItems.forEach(item => {
+        if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+          totalBiteProtection += item.modifiers.biteProtection;
+        }
+      });
+
+      // Update shield health if protection has changed
+      if (updatedPlayer.maxShieldHealth !== totalBiteProtection) {
+        updatedPlayer.maxShieldHealth = totalBiteProtection;
+        // If getting new protection, set shield to max
+        if (totalBiteProtection > updatedPlayer.shieldHealth) {
+          updatedPlayer.shieldHealth = totalBiteProtection;
+        }
+        // If protection decreased, cap shield health
+        else if (updatedPlayer.shieldHealth > totalBiteProtection) {
+          updatedPlayer.shieldHealth = totalBiteProtection;
+        }
+      }
+
       // --- COLLISION DETECTION ---
       const playerRect = {
         x: updatedPlayer.position.x,
@@ -1171,9 +1405,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         });
 
       if (hitBySnake) {
-        updatedPlayer.health -= 1;
+        // Apply damage: shield first, then health
+        if (updatedPlayer.shieldHealth > 0) {
+          // Damage shield first
+          updatedPlayer.shieldHealth -= 1;
+        } else {
+          // Shield depleted, damage health
+          updatedPlayer.health -= 1;
+        }
 
-        if (updatedPlayer.health <= 0) {
+        // Check if player dies (only when both health and shield are depleted)
+        if (updatedPlayer.health <= 0 && updatedPlayer.shieldHealth <= 0) {
           // Player is dead - game over
           set({ gameState: "gameOver", player: updatedPlayer });
           return;
@@ -4116,12 +4358,37 @@ export const useSnakeGame = create<SnakeGameState>()(
       get().startFromLevel(levelIndex);
     },
 
-    returnToHub: () => {
-      set({
+    // Centralized function to handle all hub reset logic
+    resetForHub: () => {
+      const state = get();
+      state.clearTemporaryItems(); // Clear temporary items when returning to hub
+      
+      // Calculate shield health from remaining active permanent items
+      let totalBiteProtection = 0;
+      state.inventoryItems.forEach(item => {
+        if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+          totalBiteProtection += item.modifiers.biteProtection;
+        }
+      });
+      
+      // Reset player health to full and apply shield protection
+      set({ 
         gameState: "hub",
         currentLevel: 0,
         currentLevelKey: "hub",
+        player: {
+          ...state.player,
+          health: state.player.maxHealth, // Reset to full health
+          shieldHealth: totalBiteProtection, // Apply shield from permanent items
+          maxShieldHealth: totalBiteProtection,
+          isInvincible: false,
+          invincibilityEndTime: 0
+        }
       });
+    },
+
+    returnToHub: () => {
+      get().resetForHub();
     },
   })),
 );

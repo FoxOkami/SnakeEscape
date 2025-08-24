@@ -168,25 +168,7 @@ export class PlayerController {
   }
 }
 
-// Factory functions for different contexts
-export function createHubPlayerController(
-  initialPosition: Position,
-  size: Size,
-  boundaries: BoundaryConfig
-): PlayerController {
-  return new PlayerController(
-    initialPosition,
-    size,
-    {
-      normalSpeed: 24,    // Hub normal speed
-      walkingSpeed: 12,   // Hub walking speed (50% of normal)
-      acceleration: 1,    // Not used in hub
-      useAcceleration: false
-    },
-    boundaries
-  );
-}
-
+// Factory function for unified movement system (used by both hub and game levels)
 export function createGamePlayerController(
   initialPosition: Position,
   size: Size,

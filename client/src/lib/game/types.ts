@@ -17,6 +17,8 @@ export interface Player {
   hasKey: boolean;
   health: number;
   maxHealth: number;
+  shieldHealth: number;
+  maxShieldHealth: number;
   isInvincible: boolean;
   invincibilityEndTime: number;
 }

@@ -21,6 +21,10 @@ const SnakeRoom: React.FC = () => {
     checkPathConnection,
     removeKeyWalls,
     startLevel,
+    showInventory,
+    openInventory,
+    closeInventory,
+    toggleLightSwitch,
   } = useSnakeGame();
   const { setBackgroundMusic, setHitSound, setSuccessSound, setRockSound } =
     useAudio();
@@ -48,8 +52,14 @@ const SnakeRoom: React.FC = () => {
   // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Only handle game keys when game is playing
-      if (gameState !== "playing") return;
+      // Handle Escape key to close inventory
+      if (event.code === 'Escape' && showInventory) {
+        closeInventory();
+        return;
+      }
+      
+      // Only handle game keys when game is playing and inventory is not open
+      if (gameState !== "playing" || showInventory) return;
       
       // Get current key bindings
       const keyBindings = useKeyBindings.getState().keyBindings;

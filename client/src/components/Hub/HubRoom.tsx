@@ -3,6 +3,9 @@ import { useHubStore } from '../../lib/stores/useHubStore';
 import { useSnakeGame } from '../../lib/stores/useSnakeGame';
 import { useKeyBindings, type KeyBindings } from '../../lib/stores/useKeyBindings';
 import { drawStandardTooltip, drawInteractionTooltip } from '../../lib/utils/tooltips';
+import { InventoryModal } from '../ui/inventory';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
 
 const HubRoom: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,7 +31,17 @@ const HubRoom: React.FC = () => {
     closeSettingsModal
   } = useHubStore();
 
-  const { startLevel } = useSnakeGame();
+  const { 
+    startLevel, 
+    showInventory, 
+    openInventory, 
+    closeInventory, 
+    addInventoryItem, 
+    inventoryItems, 
+    useInventoryItem,
+    togglePermanentItem,
+    player: gamePlayer // Get player data from main game store for health display
+  } = useSnakeGame();
   
   const [keys, setKeys] = useState<Set<string>>(new Set());
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -36,9 +49,114 @@ const HubRoom: React.FC = () => {
   const [sfxVolume, setSfxVolume] = useState(100);
   const [editingKeyBinding, setEditingKeyBinding] = useState<string | null>(null);
   const [keyBindingError, setKeyBindingError] = useState<string | null>(null);
+  const [cheatCodeInput, setCheatCodeInput] = useState<string>('');
+  const [cheatCodeSuccess, setCheatCodeSuccess] = useState<boolean>(false);
   
   // Use global key bindings store
   const { keyBindings, setKeyBinding, getKeyDisplayText } = useKeyBindings();
+  
+  // Handle cheat code processing
+  const handleCheatCode = () => {
+    if (cheatCodeInput.trim().toLowerCase() === 'tangential') {
+      // Add Stack Radar item to inventory
+      const stackRadarItem = {
+        id: `stack_radar_${Date.now()}`, // Unique ID
+        name: 'Stack Radar',
+        description: 'Player speed drastically increased',
+        image: '🟨', // Yellow square emoji
+        duration: 'temporary' as const,
+        modifiers: {
+          playerSpeed: 2.0, // doubles player speed
+          walkSpeed: 2.0 // doubles walk speed
+        },
+        isActive: false
+      };
+      addInventoryItem(stackRadarItem);
+      
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.trim().toLowerCase() === 'katra') {
+      // Add AG1 item to inventory
+      const ag1Item = {
+        id: `ag1_${Date.now()}`, // Unique ID
+        name: 'drinkable greens',
+        description: 'Player can handle 2 more bites',
+        image: '🛡️', // Shield emoji for protection
+        duration: 'permanent' as const,
+        modifiers: {
+          biteProtection: 2 // allows 2 additional bites before death
+        },
+        isActive: true // Permanent items should be active by default
+      };
+      addInventoryItem(ag1Item);
+      
+      // Immediately activate the item to apply shield health
+      useInventoryItem(ag1Item.id);
+      
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.trim().toLowerCase() === 'stapling') {
+      // Add Stapler item to inventory
+      const staplerItem = {
+        id: `stapler_${Date.now()}`, // Unique ID
+        name: 'Stapler',
+        description: "I'll build one",
+        image: '📎', // Paperclip emoji for stapler
+        duration: 'permanent' as const,
+        modifiers: {
+          snakeChaseMultiplier: 0 // sets all snake chase values to 0
+        },
+        isActive: true // Permanent items should be active by default
+      };
+      addInventoryItem(staplerItem);
+      
+      // Immediately activate the item to apply effect
+      useInventoryItem(staplerItem.id);
+      
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    }
+    
+    // Clear input after any Enter press (valid or invalid cheat code)
+    setCheatCodeInput('');
+  };
+  
+  // Health display component (same as in GameUI)
+  const renderHealthDisplay = () => {
+    return (
+      <div className="absolute top-4 left-4 flex flex-col gap-1 z-50 pointer-events-none">
+        {Array.from({ length: gamePlayer.maxHealth }, (_, index) => (
+          <div
+            key={index}
+            className={`w-8 h-8 text-2xl font-bold flex items-center justify-center ${
+              index < gamePlayer.health ? 'text-yellow-400' : 'text-gray-600'
+            } ${gamePlayer.isInvincible ? 'animate-pulse' : ''}`}
+            style={{
+              filter: gamePlayer.isInvincible ? 'brightness(1.5)' : 'none',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+            }}
+          >
+            ▲
+          </div>
+        ))}
+        {gamePlayer.shieldHealth > 0 && (
+          <div className="flex items-center gap-1 mt-1">
+            <div className="text-blue-400 text-lg font-bold">🛡️</div>
+            <div className="text-blue-400 text-sm font-bold">{gamePlayer.shieldHealth}</div>
+          </div>
+        )}
+      </div>
+    );
+  };
   
   // Clear keys when settings modal opens to prevent stuck movement
   useEffect(() => {
@@ -110,8 +228,14 @@ const HubRoom: React.FC = () => {
         return;
       }
       
-      // Don't process any game keys when settings modal is open
-      if (currentState.showSettingsModal) {
+      // Close inventory modal with Escape key
+      if (e.code === 'Escape' && showInventory) {
+        closeInventory();
+        return;
+      }
+      
+      // Don't process any game keys when settings modal or inventory is open
+      if (currentState.showSettingsModal || showInventory) {
         return;
       }
       
@@ -129,9 +253,9 @@ const HubRoom: React.FC = () => {
     };
     
     const handleKeyUp = (e: KeyboardEvent) => {
-      // Don't process key releases when settings modal is open
+      // Don't process key releases when settings modal or inventory is open
       const currentState = useHubStore.getState();
-      if (currentState.showSettingsModal) {
+      if (currentState.showSettingsModal || showInventory) {
         return;
       }
       
@@ -172,8 +296,8 @@ const HubRoom: React.FC = () => {
       const deltaTime = Math.min(currentTime - lastTime, 100);
       lastTime = currentTime;
       
-      // Update game state - don't update when settings modal is open
-      if (interactionState === 'idle' && !showSettingsModal) {
+      // Update game state - don't update when settings modal or inventory is open
+      if (interactionState === 'idle' && !showSettingsModal && !showInventory) {
         updateHub(deltaTime, keys, keyBindings);
       }
       
@@ -377,7 +501,6 @@ const HubRoom: React.FC = () => {
   
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
-      <h1 className="text-3xl font-bold text-white mb-4">Snake Room</h1>
       <canvas
         ref={canvasRef}
         width={800}
@@ -388,6 +511,18 @@ const HubRoom: React.FC = () => {
       <div className="mt-4 text-white text-center">
         <p>Use arrow keys to move</p>
         <p>Press E near NPCs to interact</p>
+      </div>
+      
+      {/* Inventory Button */}
+      <div className="absolute top-4 right-4">
+        <Button
+          onClick={openInventory}
+          variant="outline"
+          size="sm"
+          className="bg-gray-800 text-white border-gray-600 hover:bg-gray-700"
+        >
+          📦 Inventory
+        </Button>
       </div>
       
       {/* Settings Modal */}
@@ -565,10 +700,48 @@ const HubRoom: React.FC = () => {
                   </div>
                 )}
               </div>
+              
+              {/* Enter Cheat Codes Section */}
+              <div className="space-y-4">
+                <h3 className={`text-lg font-semibold transition-colors duration-200 ${
+                  cheatCodeSuccess ? 'text-green-600' : 'text-gray-800'
+                }`}>Enter Cheat Codes</h3>
+                <input
+                  type="text"
+                  placeholder="Enter cheat code..."
+                  value={cheatCodeInput}
+                  onChange={(e) => setCheatCodeInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCheatCode();
+                    }
+                  }}
+                  className="w-[95%] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
+      
+      {/* Health Display */}
+      {renderHealthDisplay()}
+      
+      {/* Level name badge (same style as game levels) */}
+      <div className="absolute top-4 left-20 z-5">
+        <Badge variant="secondary" className="bg-gray-800 text-white border-gray-600">
+          Snake Room
+        </Badge>
+      </div>
+      
+      {/* Inventory Modal */}
+      <InventoryModal
+        isOpen={showInventory}
+        onClose={closeInventory}
+        items={inventoryItems}
+        onUseItem={useInventoryItem}
+        onTogglePermanentItem={togglePermanentItem}
+      />
     </div>
   );
 };

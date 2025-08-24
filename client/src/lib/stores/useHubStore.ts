@@ -1,12 +1,16 @@
 import { create } from 'zustand';
 import { 
   PlayerController, 
-  createHubPlayerController,
+  createGamePlayerController,
   keysToInputState,
   type Position,
   type Size,
   type CustomKeyBindings
 } from '../game/PlayerController';
+import { useSnakeGame, getSpeedMultipliers, type InventoryItem } from './useSnakeGame';
+
+// Hub uses game-style velocity movement with higher base speeds
+const HUB_SPEED_MULTIPLIER = 120; // Scale factor to make hub movement feel faster than game levels
 
 interface Player {
   position: Position;
@@ -95,11 +99,19 @@ export const useHubStore = create<HubStore>((set, get) => ({
       maxY: 580
     };
 
-    const playerController = createHubPlayerController(
+    const playerController = createGamePlayerController(
       playerPosition,
       playerSize,
       boundaries
     );
+    
+    // Configure for hub-specific speeds (faster than game levels)
+    playerController.updateConfig({
+      normalSpeed: 0.2 * HUB_SPEED_MULTIPLIER,
+      walkingSpeed: 0.1 * HUB_SPEED_MULTIPLIER,
+      acceleration: 8, // Faster acceleration for responsive hub movement
+      useAcceleration: true
+    });
 
     set({
       gameState: 'hub',
@@ -156,6 +168,16 @@ export const useHubStore = create<HubStore>((set, get) => ({
       secondaryInteract: 'KeyQ',
       walking: 'ControlLeft'
     };
+    
+    // Apply centralized inventory item speed modifiers to hub player speed
+    const inventoryItems = useSnakeGame.getState().inventoryItems;
+    const multipliers = getSpeedMultipliers(inventoryItems);
+    
+    // Update hub speeds with inventory modifiers (hub uses higher base speeds)
+    state.playerController.updateConfig({
+      normalSpeed: (0.2 * HUB_SPEED_MULTIPLIER) * multipliers.playerSpeedMultiplier,
+      walkingSpeed: (0.1 * HUB_SPEED_MULTIPLIER) * multipliers.walkSpeedMultiplier
+    });
     
     // Handle interact key for interactions
     if (keys.has(currentBindings.interact)) {
