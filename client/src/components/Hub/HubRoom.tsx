@@ -5,6 +5,7 @@ import { useKeyBindings, type KeyBindings } from '../../lib/stores/useKeyBinding
 import { drawStandardTooltip, drawInteractionTooltip } from '../../lib/utils/tooltips';
 import { InventoryModal } from '../ui/inventory';
 import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
 
 const HubRoom: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -500,7 +501,6 @@ const HubRoom: React.FC = () => {
   
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
-      <h1 className="text-3xl font-bold text-white mb-4">Snake Room</h1>
       <canvas
         ref={canvasRef}
         width={800}
@@ -726,6 +726,13 @@ const HubRoom: React.FC = () => {
       
       {/* Health Display */}
       {renderHealthDisplay()}
+      
+      {/* Level name badge (same style as game levels) */}
+      <div className="absolute top-4 left-20 z-5">
+        <Badge variant="secondary" className="bg-gray-800 text-white border-gray-600">
+          Snake Room
+        </Badge>
+      </div>
       
       {/* Inventory Modal */}
       <InventoryModal
