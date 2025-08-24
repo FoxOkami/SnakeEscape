@@ -749,12 +749,13 @@ const HubRoom: React.FC = () => {
           Snake Room
         </Badge>
         {(() => {
-          if (!playerController) return null;
+          const gameState = useSnakeGame.getState();
+          if (!gameState.playerController) return null;
           
-          const hubDashState = playerController.getDashState();
+          const dashState = gameState.dashState;
           const currentTime = performance.now();
-          const timeSinceLastDash = currentTime - hubDashState.lastDashTime;
-          const canDash = timeSinceLastDash >= hubDashState.cooldownDuration;
+          const timeSinceLastDash = currentTime - dashState.lastDashTime;
+          const canDash = timeSinceLastDash >= dashState.cooldownDuration;
           
           return (
             <Badge className={`${canDash ? 'bg-blue-600' : 'bg-gray-600'} text-white`}>

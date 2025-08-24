@@ -46,6 +46,13 @@ import { checkAABBCollision } from "../game/collision";
 import { updateSnake } from "../game/entities";
 import { calculateLightBeam } from "../game/lightBeam";
 import { useAudio } from "./useAudio";
+import { 
+  PlayerController, 
+  createGamePlayerController, 
+  keysToInputState,
+  type InputState,
+  type CustomKeyBindings 
+} from "../game/PlayerController";
 
 interface SnakeGameState extends GameData {
   // Levels data
@@ -90,6 +97,11 @@ interface SnakeGameState extends GameData {
     lastDashTime: number;
     cooldownDuration: number;
   };
+  
+  // Unified Player Controller
+  playerController: PlayerController | null;
+  updatePlayerController: (deltaTime: number, inputState: InputState) => void;
+  configurePlayerController: (isHub: boolean) => void;
 
   // Item actions
   pickupItem: (itemId: string) => void;
@@ -395,6 +407,9 @@ export const useSnakeGame = create<SnakeGameState>()(
     showInventory: false,
     inventoryItems: [], // Inventory starts empty - items can be obtained through cheat codes
     randomizedSymbols: null, // Level 1 randomization
+    
+    // Unified Player Controller
+    playerController: null,
 
     setKeyPressed: (key: string, pressed: boolean) => {
       set((state) => {
@@ -1079,235 +1094,41 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.gameState !== "playing" || state.showInventory) return;
 
-      // --- DASH MECHANICS ---
-      let updatedDashState = { ...state.dashState };
-      let isPlayerDashing = false;
+      // Initialize unified PlayerController if needed
+      if (!state.playerController) {
+        get().configurePlayerController(false); // false for game levels
+      }
 
-      // Check for dash initiation
-      const currentTime = performance.now();
-      const timeSinceLastDash = currentTime - state.dashState.lastDashTime;
-      const canDash = timeSinceLastDash >= state.dashState.cooldownDuration;
+      // Convert current input state for PlayerController
+      const keyBindings = useKeyBindings.getState().keyBindings;
+      const inputState: InputState = {
+        up: state.keysPressed.has(keyBindings.up),
+        down: state.keysPressed.has(keyBindings.down),
+        left: state.keysPressed.has(keyBindings.left),
+        right: state.keysPressed.has(keyBindings.right),
+        walking: state.isWalking,
+        dash: state.isDashing
+      };
+
+      // Update player using unified controller
+      get().updatePlayerController(deltaTime, inputState);
+
+      // Get updated state after PlayerController update
+      const updatedState = get();
       
-      if (state.isDashing && !state.dashState.isActive && canDash) {
-        // Only dash if there's directional input
-        if (state.targetVelocity.x !== 0 || state.targetVelocity.y !== 0) {
-          const magnitude = Math.sqrt(state.targetVelocity.x ** 2 + state.targetVelocity.y ** 2);
-          const dashDirection = {
-            x: state.targetVelocity.x / magnitude,
-            y: state.targetVelocity.y / magnitude
-          };
-          
-          console.log("🚀 DASH STARTED: invulnerable=true, distance=0");
-          
-          updatedDashState = {
-            ...state.dashState,
-            isActive: true,
-            startTime: currentTime,
-            startPosition: { ...state.player.position },
-            direction: dashDirection,
-            progress: 0,
-            isInvulnerable: true,
-            lastDashTime: currentTime,
-          };
-        } else {
-          console.log("❌ DASH BLOCKED: No directional input");
-          // If no directional input, don't dash but still update lastDashTime to prevent spam
-          updatedDashState = {
-            ...state.dashState,
-            lastDashTime: currentTime,
-          };
-        }
-      }
-
-      // Update dash if active
-      if (updatedDashState.isActive) {
-        const dashSpeed = 1.0; // pixels per millisecond
-        const dashDistance = 96;
-        const dashDuration = dashDistance / dashSpeed; // milliseconds to complete dash
-        
-        const elapsedTime = currentTime - updatedDashState.startTime;
-        updatedDashState.progress = Math.min(elapsedTime / dashDuration, 1);
-        
-        // Update invulnerability (full 96 pixels)
-        const distanceTraveled = updatedDashState.progress * dashDistance;
-        updatedDashState.isInvulnerable = distanceTraveled < 96;
-        
-        if (distanceTraveled < 96) {
-          console.log(`🛡️ DASH INVULNERABLE: distance=${distanceTraveled.toFixed(1)}/96px`);
-        } else {
-          console.log(`⚔️ DASH VULNERABLE: distance=${distanceTraveled.toFixed(1)}/96px`);
-        }
-        
-        isPlayerDashing = true;
-        
-        // End dash when complete
-        if (updatedDashState.progress >= 1) {
-          updatedDashState.isActive = false;
-          updatedDashState.isInvulnerable = false;
-          isPlayerDashing = false;
-        }
-      }
-
-      // --- SMOOTH PLAYER MOVEMENT ---
-      // Smoothly interpolate current velocity toward target velocity
-      let newVelocity = { ...state.currentVelocity };
-
-      // Override velocity if dashing
-      if (isPlayerDashing) {
-        const dashSpeed = 1.0; // pixels per millisecond
-        newVelocity = {
-          x: updatedDashState.direction.x * dashSpeed,
-          y: updatedDashState.direction.y * dashSpeed
-        };
-      } else {
-        // Calculate velocity difference
-        const velDiff = {
-          x: state.targetVelocity.x - state.currentVelocity.x,
-          y: state.targetVelocity.y - state.currentVelocity.y,
-        };
-
-        // Apply acceleration to approach target velocity
-        const maxAccel = ACCELERATION * deltaTime;
-
-        if (Math.abs(velDiff.x) > maxAccel) {
-          newVelocity.x += Math.sign(velDiff.x) * maxAccel;
-        } else {
-          newVelocity.x = state.targetVelocity.x;
-        }
-
-        if (Math.abs(velDiff.y) > maxAccel) {
-          newVelocity.y += Math.sign(velDiff.y) * maxAccel;
-        } else {
-          newVelocity.y = state.targetVelocity.y;
-        }
-      }
-
-      // Calculate new player position based on velocity
-      const newPlayerPosition = {
-        x: state.player.position.x + newVelocity.x * deltaTime,
-        y: state.player.position.y + newVelocity.y * deltaTime,
-      };
-
-      // Check bounds and wall collisions for new position
-      let finalPosition = { ...state.player.position };
-      let finalVelocity = { ...newVelocity };
-
-      // Check X movement
-      const testXPosition = {
-        x: newPlayerPosition.x,
-        y: state.player.position.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
-      };
-
-      // Check for environmental screensaver snake collisions (act as walls)
-      const environmentalSnakeCollisionX = state.snakes.some((snake) => {
-        if (snake.type !== 'screensaver' || !snake.id.includes('screensaver_snake_') || snake.speed > 0) {
-          return false; // Only landed environmental screensaver snakes block movement
-        }
-        return checkAABBCollision(testXPosition, {
-          x: snake.position.x,
-          y: snake.position.y,
-          width: snake.size.width,
-          height: snake.size.height
-        });
-      });
-
-      // Check for mini boulder collisions (landed ones act as walls)
-      const miniBoulderCollisionX = state.miniBoulders.some(boulder => {
-        if (!boulder.isLanded) return false;
-        return checkAABBCollision(testXPosition, {
-          x: boulder.position.x,
-          y: boulder.position.y,
-          width: boulder.size.width,
-          height: boulder.size.height
-        });
-      });
-
-      const canMoveX =
-        newPlayerPosition.x >= 0 &&
-        newPlayerPosition.x + state.player.size.width <=
-          state.levelSize.width &&
-        !get()
-          .getCurrentWalls()
-          .some((wall) => checkAABBCollision(testXPosition, wall)) &&
-        !environmentalSnakeCollisionX &&
-        !miniBoulderCollisionX;
-
-      if (canMoveX) {
-        finalPosition.x = newPlayerPosition.x;
-      } else {
-        finalVelocity.x = 0; // Stop horizontal movement when hitting wall
-        newVelocity.x = 0; // Also reset current velocity
-      }
-
-      // Check Y movement
-      const testYPosition = {
-        x: finalPosition.x,
-        y: newPlayerPosition.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
-      };
-
-      // Check for environmental screensaver snake collisions (act as walls) for Y movement
-      const environmentalSnakeCollisionY = state.snakes.some((snake) => {
-        if (snake.type !== 'screensaver' || !snake.id.includes('screensaver_snake_') || snake.speed > 0) {
-          return false; // Only landed environmental screensaver snakes block movement
-        }
-        return checkAABBCollision(testYPosition, {
-          x: snake.position.x,
-          y: snake.position.y,
-          width: snake.size.width,
-          height: snake.size.height
-        });
-      });
-
-      // Check for mini boulder collisions (landed ones act as walls) for Y movement
-      const miniBoulderCollisionY = state.miniBoulders.some(boulder => {
-        if (!boulder.isLanded) return false;
-        return checkAABBCollision(testYPosition, {
-          x: boulder.position.x,
-          y: boulder.position.y,
-          width: boulder.size.width,
-          height: boulder.size.height
-        });
-      });
-
-      const canMoveY =
-        newPlayerPosition.y >= 0 &&
-        newPlayerPosition.y + state.player.size.height <=
-          state.levelSize.height &&
-        !get()
-          .getCurrentWalls()
-          .some((wall) => checkAABBCollision(testYPosition, wall)) &&
-        !environmentalSnakeCollisionY &&
-        !miniBoulderCollisionY;
-
-      if (canMoveY) {
-        finalPosition.y = newPlayerPosition.y;
-      } else {
-        finalVelocity.y = 0; // Stop vertical movement when hitting wall
-        newVelocity.y = 0; // Also reset current velocity
-      }
-
-      let updatedPlayer = {
-        ...state.player,
-        position: finalPosition,
-      };
-
       // --- SNAKE AI ---
       // Generate player sounds for stalker snakes when not walking stealthily
       const playerSounds: Position[] = [];
-      const isMoving = newVelocity.x !== 0 || newVelocity.y !== 0;
+      const isMoving = updatedState.currentVelocity.x !== 0 || updatedState.currentVelocity.y !== 0;
       if (
         isMoving &&
-        !state.isWalking &&
-        updatedPlayer.position &&
-        typeof updatedPlayer.position.x === "number" &&
-        typeof updatedPlayer.position.y === "number"
+        !updatedState.isWalking &&
+        updatedState.player.position &&
+        typeof updatedState.player.position.x === "number" &&
+        typeof updatedState.player.position.y === "number"
       ) {
         // Player makes sound when moving normally (not walking stealthily)
-        playerSounds.push(updatedPlayer.position);
+        playerSounds.push(updatedState.player.position);
       }
 
       const currentWalls = get().getCurrentWalls();
@@ -4540,6 +4361,104 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     returnToHub: () => {
       get().resetForHub();
+    },
+
+    // Unified Player Controller methods
+    updatePlayerController: (deltaTime: number, inputState: InputState) => {
+      const state = get();
+      if (!state.playerController) return;
+      
+      // Update player position using unified controller
+      const newPosition = state.playerController.update(inputState, deltaTime);
+      
+      // Update dash state from controller
+      const controllerDashState = state.playerController.getDashState();
+      
+      // Update store state
+      set({
+        player: {
+          ...state.player,
+          position: newPosition,
+        },
+        dashState: {
+          isActive: controllerDashState.isDashing,
+          startTime: 0, // Not used in PlayerController
+          startPosition: controllerDashState.dashStartPosition,
+          direction: controllerDashState.dashDirection,
+          progress: controllerDashState.dashProgress,
+          isInvulnerable: controllerDashState.isInvulnerable,
+          lastDashTime: controllerDashState.lastDashTime,
+          cooldownDuration: controllerDashState.cooldownDuration,
+        },
+        currentVelocity: state.playerController.getCurrentVelocity(),
+        targetVelocity: state.playerController.getTargetVelocity(),
+      });
+    },
+
+    configurePlayerController: (isHub: boolean) => {
+      const state = get();
+      
+      // Initialize controller if it doesn't exist
+      if (!state.playerController) {
+        const boundaries = isHub 
+          ? { minX: 20, maxX: 780, minY: 20, maxY: 580 }
+          : { minX: 0, maxX: state.levelSize.width - 32, minY: 0, maxY: state.levelSize.height - 32 };
+          
+        const controller = createGamePlayerController(
+          state.player.position,
+          state.player.size,
+          boundaries
+        );
+        
+        set({ playerController: controller });
+        return;
+      }
+      
+      // Configure based on context
+      const inventoryItems = state.inventoryItems;
+      const multipliers = getSpeedMultipliers(inventoryItems);
+      const HUB_SPEED_MULTIPLIER = 2.5;
+      
+      if (isHub) {
+        // Hub configuration - more responsive
+        state.playerController.updateConfig({
+          normalSpeed: (0.2 * HUB_SPEED_MULTIPLIER) * multipliers.playerSpeedMultiplier,
+          walkingSpeed: (0.1 * HUB_SPEED_MULTIPLIER) * multipliers.walkSpeedMultiplier,
+          acceleration: 8,
+          useAcceleration: false, // Direct movement for hub
+          dashSpeed: 1.0 * HUB_SPEED_MULTIPLIER,
+          dashDistance: 96,
+          dashInvulnerabilityDistance: 32
+        });
+        
+        // Update boundaries for hub
+        state.playerController.setBoundaries({
+          minX: 20, maxX: 780, minY: 20, maxY: 580
+        });
+      } else {
+        // Game level configuration - more controlled
+        const speeds = getPlayerSpeeds(inventoryItems);
+        state.playerController.updateConfig({
+          normalSpeed: speeds.playerSpeed,
+          walkingSpeed: speeds.walkingSpeed,
+          acceleration: 1,
+          useAcceleration: true,
+          dashSpeed: 1.0,
+          dashDistance: 96,
+          dashInvulnerabilityDistance: 32
+        });
+        
+        // Update boundaries for current level
+        state.playerController.setBoundaries({
+          minX: 0,
+          maxX: state.levelSize.width - 32,
+          minY: 0,
+          maxY: state.levelSize.height - 32
+        });
+      }
+      
+      // Update position and size
+      state.playerController.setPosition(state.player.position);
     },
   })),
 );

@@ -1,16 +1,12 @@
 import { create } from 'zustand';
 import { 
-  PlayerController, 
-  createGamePlayerController,
   keysToInputState,
   type Position,
   type Size,
   type CustomKeyBindings
 } from '../game/PlayerController';
-import { useSnakeGame, getSpeedMultipliers, type InventoryItem } from './useSnakeGame';
+import { useSnakeGame } from './useSnakeGame';
 
-// Hub uses game-style velocity movement with higher base speeds
-const HUB_SPEED_MULTIPLIER = 120; // Scale factor to make hub movement feel faster than game levels
 
 interface Player {
   position: Position;
@@ -43,7 +39,6 @@ interface HubStore {
   selectedOption: 'yes' | 'no';
   player: Player;
   npcs: NPC[];
-  playerController: PlayerController | null;
   door: Door;
   key: Key;
   hasKey: boolean;
@@ -74,7 +69,6 @@ export const useHubStore = create<HubStore>((set, get) => ({
     size: { width: 30, height: 30 }
   },
   npcs: [],
-  playerController: null,
   door: {
     position: { x: 770, y: 280 },
     size: { width: 30, height: 40 },
@@ -92,29 +86,18 @@ export const useHubStore = create<HubStore>((set, get) => ({
   initializeHub: () => {
     const playerSize = { width: 30, height: 30 };
     const playerPosition = { x: 400, y: 300 };
-    const boundaries = {
-      minX: 20,
-      maxX: 780,
-      minY: 20,
-      maxY: 580
-    };
 
-    const playerController = createGamePlayerController(
-      playerPosition,
-      playerSize,
-      boundaries
-    );
+    // Configure unified PlayerController for hub usage
+    useSnakeGame.getState().configurePlayerController(true); // true for hub
     
-    // Configure for hub-specific speeds (faster than game levels)
-    playerController.updateConfig({
-      normalSpeed: 0.2 * HUB_SPEED_MULTIPLIER,
-      walkingSpeed: 0.1 * HUB_SPEED_MULTIPLIER,
-      acceleration: 8, // Faster acceleration for responsive hub movement
-      useAcceleration: true,
-      dashSpeed: 1.0 * HUB_SPEED_MULTIPLIER, // Hub dash speed
-      dashDistance: 96, // Same distance for hub
-      dashInvulnerabilityDistance: 32 // Same invulnerability distance
-    });
+    // Set player position in main store
+    useSnakeGame.setState(state => ({
+      player: {
+        ...state.player,
+        position: playerPosition,
+        size: playerSize
+      }
+    }));
 
     set({
       gameState: 'hub',
@@ -124,7 +107,6 @@ export const useHubStore = create<HubStore>((set, get) => ({
         position: playerPosition,
         size: playerSize
       },
-      playerController,
       door: {
         position: { x: 770, y: 280 },
         size: { width: 30, height: 40 },
@@ -160,7 +142,8 @@ export const useHubStore = create<HubStore>((set, get) => ({
   
   updateHub: (deltaTime: number, keys: Set<string>, keyBindings?: CustomKeyBindings) => {
     const state = get();
-    if (state.interactionState !== 'idle' || !state.playerController) return;
+    const gameState = useSnakeGame.getState();
+    if (state.interactionState !== 'idle' || !gameState.playerController) return;
     
     const currentBindings = keyBindings || state.customKeyBindings || {
       up: 'ArrowUp',
@@ -173,16 +156,6 @@ export const useHubStore = create<HubStore>((set, get) => ({
       dash: 'Space'
     };
     
-    // Apply centralized inventory item speed modifiers to hub player speed
-    const inventoryItems = useSnakeGame.getState().inventoryItems;
-    const multipliers = getSpeedMultipliers(inventoryItems);
-    
-    // Update hub speeds with inventory modifiers (hub uses higher base speeds)
-    state.playerController.updateConfig({
-      normalSpeed: (0.2 * HUB_SPEED_MULTIPLIER) * multipliers.playerSpeedMultiplier,
-      walkingSpeed: (0.1 * HUB_SPEED_MULTIPLIER) * multipliers.walkSpeedMultiplier
-    });
-    
     // Handle interact key for interactions
     if (keys.has(currentBindings.interact)) {
       get().interactWithNPC();
@@ -191,8 +164,12 @@ export const useHubStore = create<HubStore>((set, get) => ({
     // Convert keys to input state with custom bindings
     const inputState = keysToInputState(keys, currentBindings);
     
-    // Update player position using PlayerController
-    const newPosition = state.playerController.update(inputState, deltaTime);
+    // Update player using unified controller
+    useSnakeGame.getState().updatePlayerController(deltaTime, inputState);
+    
+    // Get updated position from unified controller
+    const updatedGameState = useSnakeGame.getState();
+    const newPosition = updatedGameState.player.position;
     
     // Check for key collection
     if (!state.key.collected && !state.hasKey) {
@@ -212,6 +189,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
     // Check door interaction for level transition
     get().checkDoorInteraction();
     
+    // Update local hub player position to match unified controller
     set({
       player: {
         ...state.player,
