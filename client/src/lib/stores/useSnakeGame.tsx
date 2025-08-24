@@ -1128,14 +1128,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         const elapsedTime = currentTime - updatedDashState.startTime;
         updatedDashState.progress = Math.min(elapsedTime / dashDuration, 1);
         
-        // Update invulnerability (first 32 pixels)
+        // Update invulnerability (full 96 pixels)
         const distanceTraveled = updatedDashState.progress * dashDistance;
-        updatedDashState.isInvulnerable = distanceTraveled < 32;
+        updatedDashState.isInvulnerable = distanceTraveled < 96;
         
-        if (distanceTraveled < 32) {
-          console.log(`🛡️ DASH INVULNERABLE: distance=${distanceTraveled.toFixed(1)}/32px`);
+        if (distanceTraveled < 96) {
+          console.log(`🛡️ DASH INVULNERABLE: distance=${distanceTraveled.toFixed(1)}/96px`);
         } else {
-          console.log(`⚔️ DASH VULNERABLE: distance=${distanceTraveled.toFixed(1)}/32px`);
+          console.log(`⚔️ DASH VULNERABLE: distance=${distanceTraveled.toFixed(1)}/96px`);
         }
         
         isPlayerDashing = true;

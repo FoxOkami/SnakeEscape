@@ -238,9 +238,9 @@ export class PlayerController {
     const dashProgressIncrement = (this.config.dashSpeed * dt) / this.config.dashDistance;
     this.dashState.dashProgress += dashProgressIncrement;
     
-    // Update invulnerability based on distance traveled
+    // Update invulnerability based on distance traveled (full dash distance)
     const distanceTraveled = this.dashState.dashProgress * this.config.dashDistance;
-    this.dashState.isInvulnerable = distanceTraveled < this.config.dashInvulnerabilityDistance;
+    this.dashState.isInvulnerable = distanceTraveled < this.config.dashDistance;
     
     // Set velocity for dash movement
     this.currentVelocity = {
