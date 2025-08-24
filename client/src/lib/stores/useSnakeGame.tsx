@@ -1097,6 +1097,8 @@ export const useSnakeGame = create<SnakeGameState>()(
             y: state.targetVelocity.y / magnitude
           };
           
+          console.log("🚀 DASH STARTED: invulnerable=true, distance=0");
+          
           updatedDashState = {
             ...state.dashState,
             isActive: true,
@@ -1107,9 +1109,9 @@ export const useSnakeGame = create<SnakeGameState>()(
             isInvulnerable: true,
             lastDashTime: currentTime,
           };
-        }
-        // If no directional input, don't dash but still update lastDashTime to prevent spam
-        else {
+        } else {
+          console.log("❌ DASH BLOCKED: No directional input");
+          // If no directional input, don't dash but still update lastDashTime to prevent spam
           updatedDashState = {
             ...state.dashState,
             lastDashTime: currentTime,
@@ -1129,6 +1131,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Update invulnerability (first 32 pixels)
         const distanceTraveled = updatedDashState.progress * dashDistance;
         updatedDashState.isInvulnerable = distanceTraveled < 32;
+        
+        if (distanceTraveled < 32) {
+          console.log(`🛡️ DASH INVULNERABLE: distance=${distanceTraveled.toFixed(1)}/32px`);
+        } else {
+          console.log(`⚔️ DASH VULNERABLE: distance=${distanceTraveled.toFixed(1)}/32px`);
+        }
         
         isPlayerDashing = true;
         
@@ -1546,6 +1554,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         });
 
       if (hitBySnake) {
+        console.log("💥 PLAYER HIT: invincible=" + updatedPlayer.isInvincible + ", dashInvulnerable=" + updatedDashState.isInvulnerable);
         // Apply damage: shield first, then health
         if (updatedPlayer.shieldHealth > 0) {
           // Damage shield first
