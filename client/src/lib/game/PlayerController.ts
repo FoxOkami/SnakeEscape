@@ -45,6 +45,8 @@ export interface DashState {
   dashDirection: Velocity;
   dashProgress: number;
   isInvulnerable: boolean;
+  lastDashTime: number;
+  cooldownDuration: number;
 }
 
 export class PlayerController {
@@ -74,7 +76,9 @@ export class PlayerController {
       dashStartPosition: { x: 0, y: 0 },
       dashDirection: { x: 0, y: 0 },
       dashProgress: 0,
-      isInvulnerable: false
+      isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
     };
     this.lastDashInput = false;
   }
@@ -92,6 +96,23 @@ export class PlayerController {
       } else {
         // Direct velocity for hub (immediate response)
         this.currentVelocity = { ...this.targetVelocity };
+      }
+    } else {
+      // Allow direction changes during dash by updating dash direction based on input
+      let newDashDirection = { x: 0, y: 0 };
+      
+      if (input.up) newDashDirection.y -= 1;
+      if (input.down) newDashDirection.y += 1;
+      if (input.left) newDashDirection.x -= 1;
+      if (input.right) newDashDirection.x += 1;
+      
+      // If there's new directional input, update dash direction
+      if (newDashDirection.x !== 0 || newDashDirection.y !== 0) {
+        const magnitude = Math.sqrt(newDashDirection.x ** 2 + newDashDirection.y ** 2);
+        if (magnitude > 0) {
+          this.dashState.dashDirection.x = newDashDirection.x / magnitude;
+          this.dashState.dashDirection.y = newDashDirection.y / magnitude;
+        }
       }
     }
 
@@ -170,13 +191,20 @@ export class PlayerController {
 
   private handleDashInput(input: InputState): void {
     // Trigger dash on key press (not hold)
-    if (input.dash && !this.lastDashInput && !this.dashState.isDashing) {
-      this.startDash(input);
+    const currentTime = performance.now();
+    const timeSinceLastDash = currentTime - this.dashState.lastDashTime;
+    const canDash = timeSinceLastDash >= this.dashState.cooldownDuration;
+    
+    if (input.dash && !this.lastDashInput && !this.dashState.isDashing && canDash) {
+      // Only dash if there's directional input
+      if (input.up || input.down || input.left || input.right) {
+        this.startDash(input, currentTime);
+      }
     }
     this.lastDashInput = input.dash;
   }
 
-  private startDash(input: InputState): void {
+  private startDash(input: InputState, currentTime: number): void {
     // Calculate dash direction based on current input
     let dashDirection = { x: 0, y: 0 };
     
@@ -185,33 +213,21 @@ export class PlayerController {
     if (input.left) dashDirection.x -= 1;
     if (input.right) dashDirection.x += 1;
     
-    // If no direction input, dash in the direction of current movement
-    if (dashDirection.x === 0 && dashDirection.y === 0) {
-      if (this.currentVelocity.x !== 0 || this.currentVelocity.y !== 0) {
-        const magnitude = Math.sqrt(this.currentVelocity.x ** 2 + this.currentVelocity.y ** 2);
-        if (magnitude > 0) {
-          dashDirection.x = this.currentVelocity.x / magnitude;
-          dashDirection.y = this.currentVelocity.y / magnitude;
-        }
-      } else {
-        // Default to facing right if no movement
-        dashDirection.x = 1;
-      }
-    } else {
-      // Normalize diagonal movement
-      const magnitude = Math.sqrt(dashDirection.x ** 2 + dashDirection.y ** 2);
-      if (magnitude > 0) {
-        dashDirection.x /= magnitude;
-        dashDirection.y /= magnitude;
-      }
+    // Normalize diagonal movement
+    const magnitude = Math.sqrt(dashDirection.x ** 2 + dashDirection.y ** 2);
+    if (magnitude > 0) {
+      dashDirection.x /= magnitude;
+      dashDirection.y /= magnitude;
     }
     
     this.dashState = {
+      ...this.dashState,
       isDashing: true,
       dashStartPosition: { ...this.position },
       dashDirection,
       dashProgress: 0,
-      isInvulnerable: true
+      isInvulnerable: true,
+      lastDashTime: currentTime,
     };
   }
 

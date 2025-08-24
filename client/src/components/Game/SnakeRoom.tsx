@@ -189,7 +189,8 @@ const SnakeRoom: React.FC = () => {
         "ControlLeft", // Walking modifier fallback
         "ControlRight", // Walking modifier fallback
         currentKeyBindings.interact,
-        currentKeyBindings.secondaryInteract
+        currentKeyBindings.secondaryInteract,
+        currentKeyBindings.dash // Add dash key
       ];
       
       if (boundMovementKeys.includes(event.code)) {
@@ -213,7 +214,8 @@ const SnakeRoom: React.FC = () => {
         "ControlLeft", // Walking modifier fallback
         "ControlRight", // Walking modifier fallback
         currentKeyBindings.interact,
-        currentKeyBindings.secondaryInteract
+        currentKeyBindings.secondaryInteract,
+        currentKeyBindings.dash // Add dash key
       ];
       
       if (boundMovementKeys.includes(event.code)) {
