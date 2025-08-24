@@ -26,7 +26,8 @@ const GameUI: React.FC = () => {
     closeInventory,
     inventoryItems,
     useInventoryItem,
-    togglePermanentItem
+    togglePermanentItem,
+    dashState
   } = useSnakeGame();
   
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
@@ -290,6 +291,17 @@ const GameUI: React.FC = () => {
             🪨 Carrying {carriedItem.type} (E to drop{['rock', 'bottle', 'can'].includes(carriedItem.type) ? ', Click to throw' : ''})
           </Badge>
         )}
+        {(() => {
+          const currentTime = performance.now();
+          const timeSinceLastDash = currentTime - dashState.lastDashTime;
+          const canDash = timeSinceLastDash >= dashState.cooldownDuration;
+          
+          return (
+            <Badge className={`${canDash ? 'bg-blue-600' : 'bg-gray-600'} text-white`}>
+              ⚡ Dash {canDash ? 'Ready' : 'Cooldown'}
+            </Badge>
+          );
+        })()}
         {currentLevel === 3 && crystal && ( // Level 3 (0-indexed as 3)
           <Badge className={`${crystal.isActivated ? 'bg-green-600' : 'bg-red-600'} text-white`}>
             💎 Crystal {crystal.isActivated ? 'Activated' : 'Inactive'}
