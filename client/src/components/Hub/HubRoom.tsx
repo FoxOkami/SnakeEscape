@@ -22,6 +22,7 @@ const HubRoom: React.FC = () => {
     key,
     hasKey,
     showSettingsModal,
+    playerController,
     initializeHub,
     updateHub,
     interactWithNPC,
@@ -40,8 +41,7 @@ const HubRoom: React.FC = () => {
     inventoryItems, 
     useInventoryItem,
     togglePermanentItem,
-    player: gamePlayer, // Get player data from main game store for health display
-    dashState
+    player: gamePlayer // Get player data from main game store for health display
   } = useSnakeGame();
   
   const [keys, setKeys] = useState<Set<string>>(new Set());
@@ -749,9 +749,12 @@ const HubRoom: React.FC = () => {
           Snake Room
         </Badge>
         {(() => {
+          if (!playerController) return null;
+          
+          const hubDashState = playerController.getDashState();
           const currentTime = performance.now();
-          const timeSinceLastDash = currentTime - dashState.lastDashTime;
-          const canDash = timeSinceLastDash >= dashState.cooldownDuration;
+          const timeSinceLastDash = currentTime - hubDashState.lastDashTime;
+          const canDash = timeSinceLastDash >= hubDashState.cooldownDuration;
           
           return (
             <Badge className={`${canDash ? 'bg-blue-600' : 'bg-gray-600'} text-white`}>
