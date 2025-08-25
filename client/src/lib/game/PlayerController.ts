@@ -124,16 +124,20 @@ export class PlayerController {
 
   private calculateTargetVelocity(input: InputState): void {
     const moveSpeed = input.walking ? this.config.walkingSpeed : this.config.normalSpeed;
-    console.log('🎮 Movement Debug:', {
-      walkingSpeed: this.config.walkingSpeed,
-      normalSpeed: this.config.normalSpeed,
-      currentMoveSpeed: moveSpeed,
-      isWalking: input.walking,
-      inputKeys: { up: input.up, down: input.down, left: input.left, right: input.right }
-    });
     
     // Calculate target velocity based on input
     this.targetVelocity = { x: 0, y: 0 };
+    
+    // Only log when there's actual input
+    const hasInput = input.up || input.down || input.left || input.right;
+    if (hasInput) {
+      console.log('🎮 INPUT DETECTED:', {
+        normalSpeed: this.config.normalSpeed,
+        walkingSpeed: this.config.walkingSpeed,
+        moveSpeed,
+        input: { up: input.up, down: input.down, left: input.left, right: input.right }
+      });
+    }
 
     if (input.up) this.targetVelocity.y -= moveSpeed;
     if (input.down) this.targetVelocity.y += moveSpeed;
@@ -145,6 +149,11 @@ export class PlayerController {
       const factor = Math.sqrt(2) / 2; // 1/sqrt(2)
       this.targetVelocity.x *= factor;
       this.targetVelocity.y *= factor;
+    }
+    
+    // Log the final target velocity when there's input
+    if (hasInput) {
+      console.log('🎯 TARGET VELOCITY:', this.targetVelocity);
     }
   }
 
@@ -186,19 +195,17 @@ export class PlayerController {
       this.position.y += this.currentVelocity.y * dt;
     }
     
-    console.log('🚀 Position Update:', {
-      deltaTime,
-      dt,
-      currentVelocity: this.currentVelocity,
-      targetVelocity: this.targetVelocity,
-      oldPosition,
-      newPosition: { ...this.position },
-      positionChange: {
-        x: this.position.x - oldPosition.x,
-        y: this.position.y - oldPosition.y
-      },
-      useAcceleration: this.config.useAcceleration
-    });
+    // Only log significant movement
+    const moved = Math.abs(this.position.x - oldPosition.x) > 0.1 || Math.abs(this.position.y - oldPosition.y) > 0.1;
+    if (moved) {
+      console.log('🚀 MOVED:', {
+        positionChange: {
+          x: this.position.x - oldPosition.x,
+          y: this.position.y - oldPosition.y
+        },
+        currentVelocity: this.currentVelocity
+      });
+    }
   }
 
   private applyBoundaries(): void {
