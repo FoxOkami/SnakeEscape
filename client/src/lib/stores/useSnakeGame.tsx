@@ -1321,6 +1321,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
 
+      // Initialize local player and dash state for modifications
+      let updatedPlayer = { ...updatedState.player };
+      let updatedDashState = { ...updatedState.dashState };
+
       // --- SHIELD HEALTH SYNCHRONIZATION ---
       // Keep shield health in sync with active items
       let totalBiteProtection = 0;
@@ -4438,10 +4442,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Game level configuration - more controlled
         const speeds = getPlayerSpeeds(inventoryItems);
         state.playerController.updateConfig({
-          normalSpeed: speeds.playerSpeed,
-          walkingSpeed: speeds.walkingSpeed,
-          acceleration: 1,
-          useAcceleration: true,
+          normalSpeed: speeds.playerSpeed * 2.5, // Increase speed to match hub responsiveness
+          walkingSpeed: speeds.walkingSpeed * 2.5, // Increase walking speed too
+          acceleration: 8, // Higher acceleration for more responsive movement
+          useAcceleration: false, // Disable acceleration for more direct movement
           dashSpeed: 1.0,
           dashDistance: 96,
           dashInvulnerabilityDistance: 32
