@@ -4424,9 +4424,20 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       if (isHub) {
         // Hub configuration - more responsive
+        const hubNormalSpeed = (BASE_PLAYER_SPEED * HUB_SPEED_MULTIPLIER) * multipliers.playerSpeedMultiplier;
+        const hubWalkingSpeed = (BASE_WALKING_SPEED * HUB_SPEED_MULTIPLIER) * multipliers.walkSpeedMultiplier;
+        console.log('🏠 Hub Config:', {
+          BASE_PLAYER_SPEED,
+          BASE_WALKING_SPEED,
+          HUB_SPEED_MULTIPLIER,
+          multipliers,
+          hubNormalSpeed,
+          hubWalkingSpeed
+        });
+        
         state.playerController.updateConfig({
-          normalSpeed: (0.2 * HUB_SPEED_MULTIPLIER) * multipliers.playerSpeedMultiplier,
-          walkingSpeed: (0.1 * HUB_SPEED_MULTIPLIER) * multipliers.walkSpeedMultiplier,
+          normalSpeed: hubNormalSpeed,
+          walkingSpeed: hubWalkingSpeed,
           acceleration: 8,
           useAcceleration: false, // Direct movement for hub
           dashSpeed: 1.0 * HUB_SPEED_MULTIPLIER,
@@ -4441,6 +4452,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       } else {
         // Game level configuration - more controlled
         const speeds = getPlayerSpeeds(inventoryItems);
+        console.log('🎯 Game Level Config:', {
+          BASE_PLAYER_SPEED,
+          BASE_WALKING_SPEED,
+          calculatedSpeeds: speeds,
+          multipliers
+        });
+        
         state.playerController.updateConfig({
           normalSpeed: speeds.playerSpeed, // Use normal speeds with proper base values
           walkingSpeed: speeds.walkingSpeed, // Use normal walking speeds

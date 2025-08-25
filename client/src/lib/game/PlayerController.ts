@@ -124,6 +124,13 @@ export class PlayerController {
 
   private calculateTargetVelocity(input: InputState): void {
     const moveSpeed = input.walking ? this.config.walkingSpeed : this.config.normalSpeed;
+    console.log('🎮 Movement Debug:', {
+      walkingSpeed: this.config.walkingSpeed,
+      normalSpeed: this.config.normalSpeed,
+      currentMoveSpeed: moveSpeed,
+      isWalking: input.walking,
+      inputKeys: { up: input.up, down: input.down, left: input.left, right: input.right }
+    });
     
     // Calculate target velocity based on input
     this.targetVelocity = { x: 0, y: 0 };
@@ -167,6 +174,8 @@ export class PlayerController {
   private updatePosition(deltaTime: number): void {
     const dt = this.config.useAcceleration ? deltaTime / 1000 : deltaTime / 1000;
     
+    const oldPosition = { ...this.position };
+    
     if (this.config.useAcceleration) {
       // Game levels: velocity is already in units per second
       this.position.x += this.currentVelocity.x * dt;
@@ -176,6 +185,20 @@ export class PlayerController {
       this.position.x += this.currentVelocity.x * dt;
       this.position.y += this.currentVelocity.y * dt;
     }
+    
+    console.log('🚀 Position Update:', {
+      deltaTime,
+      dt,
+      currentVelocity: this.currentVelocity,
+      targetVelocity: this.targetVelocity,
+      oldPosition,
+      newPosition: { ...this.position },
+      positionChange: {
+        x: this.position.x - oldPosition.x,
+        y: this.position.y - oldPosition.y
+      },
+      useAcceleration: this.config.useAcceleration
+    });
   }
 
   private applyBoundaries(): void {
