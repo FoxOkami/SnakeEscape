@@ -4411,8 +4411,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         );
       }
       
-      // Update player controller's internal position to match final position
-      state.playerController.setPosition(finalPosition);
+      // Note: Don't call setPosition during gameplay as it interferes with dash state
+      // The PlayerController will sync naturally on the next frame
       
       // Update dash state from controller
       const controllerDashState = state.playerController.getDashState();
