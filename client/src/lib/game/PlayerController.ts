@@ -266,7 +266,7 @@ export class PlayerController {
     } else {
       // Continue dash movement
       this.dashState.dashProgress = timeSinceDashStart / dashDuration;
-      this.dashState.isInvulnerable = timeSinceDashStart < (dashDuration * 0.5); // Invulnerable for first half
+      this.dashState.isInvulnerable = true; // Invulnerable for entire dash duration
       
       // Set velocity for dash movement at high speed
       this.currentVelocity = {
