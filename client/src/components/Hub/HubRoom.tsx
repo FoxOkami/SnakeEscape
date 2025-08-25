@@ -291,7 +291,7 @@ const HubRoom: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    let lastTime = 0;
+    let lastTime = performance.now(); // Initialize with current time like game levels
     
     const gameLoop = (currentTime: number) => {
       const targetFrameTime = 1000 / 60; // 16.67ms for 60fps
