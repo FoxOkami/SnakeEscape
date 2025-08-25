@@ -4420,7 +4420,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Configure based on context
       const inventoryItems = state.inventoryItems;
       const multipliers = getSpeedMultipliers(inventoryItems);
-      const HUB_SPEED_MULTIPLIER = 2.5;
+      const HUB_SPEED_MULTIPLIER = 10;
       
       if (isHub) {
         // Hub configuration - more responsive
