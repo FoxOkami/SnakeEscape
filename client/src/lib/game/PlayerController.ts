@@ -250,25 +250,29 @@ export class PlayerController {
   private updateDash(deltaTime: number): void {
     if (!this.dashState.isDashing) return;
     
-    const dt = deltaTime / 1000;
-    const dashProgressIncrement = (this.config.dashSpeed * dt) / this.config.dashDistance;
-    this.dashState.dashProgress += dashProgressIncrement;
+    // Simple time-based dash: 200ms duration at high speed
+    const currentTime = performance.now();
+    const dashDuration = 200; // 200ms dash
+    const dashSpeed = 600; // Fast movement speed
     
-    // Update invulnerability based on distance traveled (full dash distance)
-    const distanceTraveled = this.dashState.dashProgress * this.config.dashDistance;
-    this.dashState.isInvulnerable = distanceTraveled < this.config.dashDistance;
+    const timeSinceDashStart = currentTime - (this.dashState.lastDashTime || currentTime);
     
-    // Set velocity for dash movement
-    this.currentVelocity = {
-      x: this.dashState.dashDirection.x * this.config.dashSpeed,
-      y: this.dashState.dashDirection.y * this.config.dashSpeed
-    };
-    
-    // End dash when distance is complete
-    if (this.dashState.dashProgress >= 1) {
+    if (timeSinceDashStart >= dashDuration) {
+      // End dash
       this.dashState.isDashing = false;
       this.dashState.isInvulnerable = false;
-      this.currentVelocity = { x: 0, y: 0 };
+      this.dashState.dashProgress = 1;
+      // Don't reset velocity to zero - let normal movement take over
+    } else {
+      // Continue dash movement
+      this.dashState.dashProgress = timeSinceDashStart / dashDuration;
+      this.dashState.isInvulnerable = timeSinceDashStart < (dashDuration * 0.5); // Invulnerable for first half
+      
+      // Set velocity for dash movement at high speed
+      this.currentVelocity = {
+        x: this.dashState.dashDirection.x * dashSpeed,
+        y: this.dashState.dashDirection.y * dashSpeed
+      };
     }
   }
 
@@ -317,9 +321,9 @@ export function createGamePlayerController(
       walkingSpeed: 75,   // Comfortable walking speed
       acceleration: 8,    // Acceleration value (not used when useAcceleration is false)
       useAcceleration: false,  // Direct movement for consistent behavior across all areas
-      dashSpeed: 1.0,     // High speed for dash (96 pixels in short time)
-      dashDistance: 96,   // 96 pixels dash distance
-      dashInvulnerabilityDistance: 32  // First 32 pixels are invulnerable
+      dashSpeed: 600,     // High speed for time-based dash (200ms duration)
+      dashDistance: 120,  // Distance covered during 200ms dash (600 * 0.2 = 120 pixels)
+      dashInvulnerabilityDistance: 60  // Invulnerable during first half of dash
     },
     boundaries
   );
