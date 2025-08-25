@@ -42,7 +42,7 @@ export interface InventoryItem {
   expiresAt?: number; // timestamp when expires (for temporary items)
 }
 import { LEVELS, randomizeLevel2, getLevelKeyByIndex } from "../game/levels";
-import { checkAABBCollision } from "../game/collision";
+import { checkAABBCollision, slideAlongWall } from "../game/collision";
 import { updateSnake } from "../game/entities";
 import { calculateLightBeam } from "../game/lightBeam";
 import { useAudio } from "./useAudio";
