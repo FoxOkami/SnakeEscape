@@ -4442,8 +4442,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Game level configuration - more controlled
         const speeds = getPlayerSpeeds(inventoryItems);
         state.playerController.updateConfig({
-          normalSpeed: speeds.playerSpeed * 2.5, // Increase speed to match hub responsiveness
-          walkingSpeed: speeds.walkingSpeed * 2.5, // Increase walking speed too
+          normalSpeed: speeds.playerSpeed * 10, // Increase speed to match hub responsiveness
+          walkingSpeed: speeds.walkingSpeed * 10, // Increase walking speed too
           acceleration: 8, // Higher acceleration for more responsive movement
           useAcceleration: false, // Disable acceleration for more direct movement
           dashSpeed: 1.0,
