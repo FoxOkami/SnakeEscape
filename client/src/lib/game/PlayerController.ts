@@ -315,8 +315,8 @@ export function createGamePlayerController(
     {
       normalSpeed: 150,   // Comfortable movement speed
       walkingSpeed: 75,   // Comfortable walking speed
-      acceleration: 1,    // Game level acceleration
-      useAcceleration: true,
+      acceleration: 8,    // Acceleration value (not used when useAcceleration is false)
+      useAcceleration: false,  // Direct movement for consistent behavior across all areas
       dashSpeed: 1.0,     // High speed for dash (96 pixels in short time)
       dashDistance: 96,   // 96 pixels dash distance
       dashInvulnerabilityDistance: 32  // First 32 pixels are invulnerable
