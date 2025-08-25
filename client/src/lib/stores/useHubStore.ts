@@ -165,13 +165,6 @@ export const useHubStore = create<HubStore>((set, get) => ({
     const inputState = keysToInputState(keys, currentBindings);
     
     // Update player using unified controller
-    console.log('🏠 HUB UPDATE:', {
-      deltaTime,
-      inputState,
-      playerControllerExists: !!gameState.playerController,
-      currentPosition: gameState.player.position
-    });
-    
     useSnakeGame.getState().updatePlayerController(deltaTime, inputState);
     
     // Get updated position from unified controller

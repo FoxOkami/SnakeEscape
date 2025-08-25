@@ -294,7 +294,8 @@ const HubRoom: React.FC = () => {
     let lastTime = 0;
     
     const gameLoop = (currentTime: number) => {
-      const deltaTime = Math.min(currentTime - lastTime, 100);
+      const targetFrameTime = 1000 / 60; // 16.67ms for 60fps
+      const deltaTime = Math.min(currentTime - lastTime, targetFrameTime * 2); // Cap at 2 frames max, same as game levels
       lastTime = currentTime;
       
       // Update game state - don't update when settings modal or inventory is open
