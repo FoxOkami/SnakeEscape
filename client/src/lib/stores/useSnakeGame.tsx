@@ -1110,7 +1110,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         dash: state.isDashing
       };
 
-      // Update player using unified controller
+      // Update player using unified controller  
+      console.log('🎯 GAME UPDATE:', {
+        deltaTime,
+        inputState,
+        playerControllerExists: !!state.playerController,
+        currentPosition: state.player.position,
+        levelSize: state.levelSize
+      });
+      
       get().updatePlayerController(deltaTime, inputState);
 
       // Get updated state after PlayerController update
@@ -4400,6 +4408,12 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     configurePlayerController: () => {
       const state = get();
+      console.log('🔧 CONFIGURING PLAYER CONTROLLER:', {
+        hasController: !!state.playerController,
+        levelSize: state.levelSize,
+        currentLevel: state.currentLevel,
+        playerPosition: state.player.position
+      });
       
       // Initialize controller if it doesn't exist
       if (!state.playerController) {
@@ -4423,6 +4437,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Use same configuration for all levels (including hub)
       const inventoryItems = state.inventoryItems;
       const speeds = getPlayerSpeeds(inventoryItems);
+      
+      console.log('⚙️ SETTING SPEEDS:', speeds);
       
       state.playerController.updateConfig({
         normalSpeed: speeds.playerSpeed,
