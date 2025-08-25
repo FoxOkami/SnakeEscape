@@ -189,8 +189,8 @@ interface SnakeGameState extends GameData {
   phantomRemovalInProgress?: boolean;
 }
 
-const BASE_PLAYER_SPEED = 0.2; // base pixels per second
-const BASE_WALKING_SPEED = 0.1; // base pixels per second when walking (shift held)
+const BASE_PLAYER_SPEED = 250; // base pixels per second
+const BASE_WALKING_SPEED = 125; // base pixels per second when walking (shift held)
 const ACCELERATION = 1; // pixels per second squared
 
 // Centralized function to calculate speed multipliers from inventory items
@@ -4420,7 +4420,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Configure based on context
       const inventoryItems = state.inventoryItems;
       const multipliers = getSpeedMultipliers(inventoryItems);
-      const HUB_SPEED_MULTIPLIER = 100;
+      const HUB_SPEED_MULTIPLIER = 1; // No multiplier needed with proper base speeds
       
       if (isHub) {
         // Hub configuration - more responsive
@@ -4442,8 +4442,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Game level configuration - more controlled
         const speeds = getPlayerSpeeds(inventoryItems);
         state.playerController.updateConfig({
-          normalSpeed: speeds.playerSpeed * 100, // Increase speed to match hub responsiveness
-          walkingSpeed: speeds.walkingSpeed * 100, // Increase walking speed too
+          normalSpeed: speeds.playerSpeed, // Use normal speeds with proper base values
+          walkingSpeed: speeds.walkingSpeed, // Use normal walking speeds
           acceleration: 8, // Higher acceleration for more responsive movement
           useAcceleration: false, // Disable acceleration for more direct movement
           dashSpeed: 1.0,
