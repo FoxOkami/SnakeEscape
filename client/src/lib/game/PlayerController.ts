@@ -128,16 +128,6 @@ export class PlayerController {
     // Calculate target velocity based on input
     this.targetVelocity = { x: 0, y: 0 };
     
-    // Only log when there's actual input
-    const hasInput = input.up || input.down || input.left || input.right;
-    if (hasInput) {
-      console.log('🎮 INPUT DETECTED:', {
-        normalSpeed: this.config.normalSpeed,
-        walkingSpeed: this.config.walkingSpeed,
-        moveSpeed,
-        input: { up: input.up, down: input.down, left: input.left, right: input.right }
-      });
-    }
 
     if (input.up) this.targetVelocity.y -= moveSpeed;
     if (input.down) this.targetVelocity.y += moveSpeed;
@@ -151,10 +141,6 @@ export class PlayerController {
       this.targetVelocity.y *= factor;
     }
     
-    // Log the final target velocity when there's input
-    if (hasInput) {
-      console.log('🎯 TARGET VELOCITY:', this.targetVelocity);
-    }
   }
 
   private updateVelocityWithAcceleration(deltaTime: number): void {
@@ -195,17 +181,6 @@ export class PlayerController {
       this.position.y += this.currentVelocity.y * dt;
     }
     
-    // Only log significant movement
-    const moved = Math.abs(this.position.x - oldPosition.x) > 0.1 || Math.abs(this.position.y - oldPosition.y) > 0.1;
-    if (moved) {
-      console.log('🚀 MOVED:', {
-        positionChange: {
-          x: this.position.x - oldPosition.x,
-          y: this.position.y - oldPosition.y
-        },
-        currentVelocity: this.currentVelocity
-      });
-    }
   }
 
   private applyBoundaries(): void {
@@ -327,8 +302,8 @@ export function createGamePlayerController(
     initialPosition,
     size,
     {
-      normalSpeed: 0.2,   // Game level normal speed
-      walkingSpeed: 0.1,  // Game level walking speed
+      normalSpeed: 250,   // Fast movement - will be configured later by useSnakeGame
+      walkingSpeed: 125,  // Fast walking - will be configured later by useSnakeGame
       acceleration: 1,    // Game level acceleration
       useAcceleration: true,
       dashSpeed: 1.0,     // High speed for dash (96 pixels in short time)
