@@ -4371,8 +4371,36 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (!state.playerController) return;
       
-      // Update player position using unified controller
-      const newPosition = state.playerController.update(inputState, deltaTime);
+      // Get the intended position from unified controller
+      const intendedPosition = state.playerController.update(inputState, deltaTime);
+      
+      // Check wall collisions using existing collision system
+      const playerRect = {
+        x: intendedPosition.x,
+        y: intendedPosition.y,
+        width: state.player.size.width,
+        height: state.player.size.height,
+      };
+
+      const currentWalls = get().getCurrentWalls();
+      const hasWallCollision = currentWalls.some((wall) =>
+        checkAABBCollision(playerRect, wall),
+      );
+
+      let finalPosition = intendedPosition;
+      
+      // If there's a wall collision, use slideAlongWall to maintain smooth movement
+      if (hasWallCollision) {
+        finalPosition = slideAlongWall(
+          state.player.position,
+          intendedPosition,
+          currentWalls,
+          state.player.size
+        );
+      }
+      
+      // Update player controller's internal position to match final position
+      state.playerController.setPosition(finalPosition);
       
       // Update dash state from controller
       const controllerDashState = state.playerController.getDashState();
@@ -4381,7 +4409,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       set({
         player: {
           ...state.player,
-          position: newPosition,
+          position: finalPosition,
         },
         dashState: {
           isActive: controllerDashState.isDashing,
