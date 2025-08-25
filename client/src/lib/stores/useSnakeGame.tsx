@@ -189,8 +189,8 @@ interface SnakeGameState extends GameData {
   phantomRemovalInProgress?: boolean;
 }
 
-const BASE_PLAYER_SPEED = 250; // base pixels per second
-const BASE_WALKING_SPEED = 125; // base pixels per second when walking (shift held)
+const BASE_PLAYER_SPEED = 150; // base pixels per second
+const BASE_WALKING_SPEED = 75; // base pixels per second when walking (shift held)
 const ACCELERATION = 1; // pixels per second squared
 
 // Centralized function to calculate speed multipliers from inventory items
@@ -1988,7 +1988,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       set({
-        currentVelocity: newVelocity, // Use the updated velocity that includes wall collision resets
+        currentVelocity: state.playerController?.getCurrentVelocity() || { x: 0, y: 0 }, // Get velocity from PlayerController
         snakes: finalSnakes, // Use snakes after pit/projectile processing
         miniBoulders: newMiniBoulders, // Add the mini boulders to the state
         key: updatedKey,

@@ -302,8 +302,8 @@ export function createGamePlayerController(
     initialPosition,
     size,
     {
-      normalSpeed: 250,   // Fast movement - will be configured later by useSnakeGame
-      walkingSpeed: 125,  // Fast walking - will be configured later by useSnakeGame
+      normalSpeed: 150,   // Comfortable movement speed
+      walkingSpeed: 75,   // Comfortable walking speed
       acceleration: 1,    // Game level acceleration
       useAcceleration: true,
       dashSpeed: 1.0,     // High speed for dash (96 pixels in short time)
