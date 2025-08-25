@@ -101,7 +101,7 @@ interface SnakeGameState extends GameData {
   // Unified Player Controller
   playerController: PlayerController | null;
   updatePlayerController: (deltaTime: number, inputState: InputState) => void;
-  configurePlayerController: (isHub: boolean) => void;
+  configurePlayerController: () => void;
 
   // Item actions
   pickupItem: (itemId: string) => void;
@@ -1096,7 +1096,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Initialize unified PlayerController if needed
       if (!state.playerController) {
-        get().configurePlayerController(false); // false for game levels
+        get().configurePlayerController();
       }
 
       // Convert current input state for PlayerController
@@ -4398,14 +4398,17 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
     },
 
-    configurePlayerController: (isHub: boolean) => {
+    configurePlayerController: () => {
       const state = get();
       
       // Initialize controller if it doesn't exist
       if (!state.playerController) {
-        const boundaries = isHub 
-          ? { minX: 20, maxX: 780, minY: 20, maxY: 580 }
-          : { minX: 0, maxX: state.levelSize.width - 32, minY: 0, maxY: state.levelSize.height - 32 };
+        const boundaries = {
+          minX: 0,
+          maxX: state.levelSize.width - 32,
+          minY: 0,
+          maxY: state.levelSize.height - 32
+        };
           
         const controller = createGamePlayerController(
           state.player.position,
@@ -4417,52 +4420,27 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
       
-      // Configure based on context
+      // Use same configuration for all levels (including hub)
       const inventoryItems = state.inventoryItems;
-      const multipliers = getSpeedMultipliers(inventoryItems);
-      const HUB_SPEED_MULTIPLIER = 1; // No multiplier needed with proper base speeds
+      const speeds = getPlayerSpeeds(inventoryItems);
       
-      if (isHub) {
-        // Hub configuration - more responsive
-        const hubNormalSpeed = (BASE_PLAYER_SPEED * HUB_SPEED_MULTIPLIER) * multipliers.playerSpeedMultiplier;
-        const hubWalkingSpeed = (BASE_WALKING_SPEED * HUB_SPEED_MULTIPLIER) * multipliers.walkSpeedMultiplier;
-        
-        state.playerController.updateConfig({
-          normalSpeed: hubNormalSpeed,
-          walkingSpeed: hubWalkingSpeed,
-          acceleration: 8,
-          useAcceleration: false, // Direct movement for hub
-          dashSpeed: 1.0 * HUB_SPEED_MULTIPLIER,
-          dashDistance: 96,
-          dashInvulnerabilityDistance: 32
-        });
-        
-        // Update boundaries for hub
-        state.playerController.setBoundaries({
-          minX: 20, maxX: 780, minY: 20, maxY: 580
-        });
-      } else {
-        // Game level configuration - more controlled
-        const speeds = getPlayerSpeeds(inventoryItems);
-        
-        state.playerController.updateConfig({
-          normalSpeed: speeds.playerSpeed, // Use normal speeds with proper base values
-          walkingSpeed: speeds.walkingSpeed, // Use normal walking speeds
-          acceleration: 8, // Higher acceleration for more responsive movement
-          useAcceleration: false, // Disable acceleration for more direct movement
-          dashSpeed: 1.0,
-          dashDistance: 96,
-          dashInvulnerabilityDistance: 32
-        });
-        
-        // Update boundaries for current level
-        state.playerController.setBoundaries({
-          minX: 0,
-          maxX: state.levelSize.width - 32,
-          minY: 0,
-          maxY: state.levelSize.height - 32
-        });
-      }
+      state.playerController.updateConfig({
+        normalSpeed: speeds.playerSpeed,
+        walkingSpeed: speeds.walkingSpeed,
+        acceleration: 8,
+        useAcceleration: false, // Direct movement for all levels
+        dashSpeed: 1.0,
+        dashDistance: 96,
+        dashInvulnerabilityDistance: 32
+      });
+      
+      // Update boundaries for current level
+      state.playerController.setBoundaries({
+        minX: 0,
+        maxX: state.levelSize.width - 32,
+        minY: 0,
+        maxY: state.levelSize.height - 32
+      });
       
       // Update position and size
       state.playerController.setPosition(state.player.position);

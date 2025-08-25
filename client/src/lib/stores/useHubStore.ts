@@ -88,7 +88,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
     const playerPosition = { x: 400, y: 300 };
 
     // Configure unified PlayerController for hub usage
-    useSnakeGame.getState().configurePlayerController(true); // true for hub
+    useSnakeGame.getState().configurePlayerController();
     
     // Set player position in main store
     useSnakeGame.setState(state => ({
