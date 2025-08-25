@@ -4420,7 +4420,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Configure based on context
       const inventoryItems = state.inventoryItems;
       const multipliers = getSpeedMultipliers(inventoryItems);
-      const HUB_SPEED_MULTIPLIER = 10;
+      const HUB_SPEED_MULTIPLIER = 100;
       
       if (isHub) {
         // Hub configuration - more responsive
@@ -4442,8 +4442,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Game level configuration - more controlled
         const speeds = getPlayerSpeeds(inventoryItems);
         state.playerController.updateConfig({
-          normalSpeed: speeds.playerSpeed * 10, // Increase speed to match hub responsiveness
-          walkingSpeed: speeds.walkingSpeed * 10, // Increase walking speed too
+          normalSpeed: speeds.playerSpeed * 100, // Increase speed to match hub responsiveness
+          walkingSpeed: speeds.walkingSpeed * 100, // Increase walking speed too
           acceleration: 8, // Higher acceleration for more responsive movement
           useAcceleration: false, // Disable acceleration for more direct movement
           dashSpeed: 1.0,
