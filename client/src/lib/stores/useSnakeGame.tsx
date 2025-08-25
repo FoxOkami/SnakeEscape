@@ -722,7 +722,13 @@ export const useSnakeGame = create<SnakeGameState>()(
           levelIndex === 2 ? undefined : get().level2RandomizedSwitches,
         level2RandomizedThrowableItems:
           levelIndex === 2 ? undefined : get().level2RandomizedThrowableItems,
+        
+        // Reset PlayerController to ensure it doesn't have old position
+        playerController: null,
       });
+      
+      // Force reconfigure PlayerController with new spawn position
+      get().configurePlayerController();
 
       // Auto-trigger hint for Level 1 only
       if (levelIndex === 1) {
@@ -938,7 +944,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       lastDashTime: 0,
       cooldownDuration: 1500, // 1.5 seconds in milliseconds
     },
+        
+        // Reset PlayerController to ensure it doesn't have old position
+        playerController: null,
       });
+      
+      // Force reconfigure PlayerController with new spawn position
+      get().configurePlayerController();
     },
 
     returnToMenu: () => {
