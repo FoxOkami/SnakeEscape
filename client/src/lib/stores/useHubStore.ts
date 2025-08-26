@@ -87,22 +87,8 @@ export const useHubStore = create<HubStore>((set, get) => ({
     const playerSize = { width: 30, height: 30 };
     const playerPosition = { x: 400, y: 300 };
 
-    // Import and load hub level walls
-    import('../game/levels').then(({ LEVELS }) => {
-      const hubLevel = LEVELS[0]; // Hub is level 0
-      
-      // Set hub walls in main game state
-      useSnakeGame.setState(state => ({
-        ...state,
-        walls: hubLevel.walls.map(wall => ({ ...wall })),
-        currentLevel: 0,
-        currentLevelKey: "hub",
-        levelSize: hubLevel.size
-      }));
-      
-      // Configure unified PlayerController after walls are set
-      useSnakeGame.getState().configurePlayerController();
-    });
+    // Configure unified PlayerController for hub usage
+    useSnakeGame.getState().configurePlayerController();
     
     // Set player position in main store
     useSnakeGame.setState(state => ({

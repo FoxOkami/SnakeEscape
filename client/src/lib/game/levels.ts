@@ -159,7 +159,7 @@ export const LEVELS: Level[] = [
   // Level 0: Hub Room
   {
     id: 0,
-    name: "Snake Room",
+    name: "Snake Room Hub",
     levelKey: "hub",
     player: { x: 400, y: 300 },
     size: { width: 800, height: 600 },

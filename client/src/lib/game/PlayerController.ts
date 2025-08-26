@@ -1,6 +1,3 @@
-import { Rectangle } from './types';
-import { checkAABBCollision, slideAlongWall } from './collision';
-
 export interface Position {
   x: number;
   y: number;
@@ -61,14 +58,12 @@ export class PlayerController {
   private boundaries: BoundaryConfig;
   private dashState: DashState;
   private lastDashInput: boolean;
-  private walls: Rectangle[];
 
   constructor(
     initialPosition: Position,
     size: Size,
     config: MovementConfig,
-    boundaries: BoundaryConfig,
-    walls: Rectangle[] = []
+    boundaries: BoundaryConfig
   ) {
     this.position = { ...initialPosition };
     this.size = { ...size };
@@ -76,7 +71,6 @@ export class PlayerController {
     this.targetVelocity = { x: 0, y: 0 };
     this.config = { ...config };
     this.boundaries = { ...boundaries };
-    this.walls = [...walls];
     this.dashState = {
       isDashing: false,
       dashStartPosition: { x: 0, y: 0 },
@@ -122,18 +116,8 @@ export class PlayerController {
       }
     }
 
-    // Store current position before movement
-    const oldPosition = { ...this.position };
-    
-    // Calculate intended position
     this.updatePosition(deltaTime);
-    const intendedPosition = { ...this.position };
-    
-    // Apply wall collision detection to get final safe position
-    const finalPosition = this.applyWallCollisions(intendedPosition);
-    
-    // Set final position (no additional boundary clamping needed)
-    this.position = finalPosition;
+    this.applyBoundaries();
 
     return { ...this.position };
   }
@@ -211,7 +195,6 @@ export class PlayerController {
   }
 
   private applyBoundaries(): void {
-    // Apply simple boundary clamping first
     this.position.x = Math.max(
       this.boundaries.minX,
       Math.min(this.boundaries.maxX - this.size.width, this.position.x)
@@ -220,34 +203,6 @@ export class PlayerController {
       this.boundaries.minY,
       Math.min(this.boundaries.maxY - this.size.height, this.position.y)
     );
-  }
-
-  private applyWallCollisions(intendedPosition: Position): Position {
-    // If no walls are defined, return intended position
-    if (this.walls.length === 0) {
-      return intendedPosition;
-    }
-
-    // Check if intended position collides with any wall
-    const playerRect = {
-      x: intendedPosition.x,
-      y: intendedPosition.y,
-      width: this.size.width,
-      height: this.size.height
-    };
-
-    const hasCollision = this.walls.some(wall => checkAABBCollision(playerRect, wall));
-    
-    if (hasCollision) {
-      console.log('🚧 WALL COLLISION! Player blocked:', {
-        playerRect: `${playerRect.x.toFixed(1)},${playerRect.y.toFixed(1)} ${playerRect.width}x${playerRect.height}`,
-        collidingWall: this.walls.find(wall => checkAABBCollision(playerRect, wall))
-      });
-      // Use slideAlongWall to find a valid position
-      return slideAlongWall(this.position, intendedPosition, this.walls, this.size);
-    }
-    
-    return intendedPosition;
   }
 
   private handleDashInput(input: InputState): void {
@@ -350,18 +305,13 @@ export class PlayerController {
   updateConfig(config: Partial<MovementConfig>): void {
     this.config = { ...this.config, ...config };
   }
-
-  setWalls(walls: Rectangle[]): void {
-    this.walls = [...walls];
-  }
 }
 
 // Factory function for unified movement system (used by both hub and game levels)
 export function createGamePlayerController(
   initialPosition: Position,
   size: Size,
-  boundaries: BoundaryConfig,
-  walls: Rectangle[] = []
+  boundaries: BoundaryConfig
 ): PlayerController {
   return new PlayerController(
     initialPosition,
@@ -375,8 +325,7 @@ export function createGamePlayerController(
       dashDistance: 120,  // Distance covered during 200ms dash (600 * 0.2 = 120 pixels)
       dashInvulnerabilityDistance: 60  // Invulnerable during first half of dash
     },
-    boundaries,
-    walls
+    boundaries
   );
 }
 
