@@ -274,7 +274,10 @@ const GameUI: React.FC = () => {
     <div className="absolute top-4 left-20 right-4 flex justify-between items-start z-5">
       <div className="flex gap-2">
         <Badge variant="secondary" className="bg-gray-800 text-white border-gray-600">
-          {LEVELS[currentLevel]?.name || 'Unknown Level'}
+          {(() => {
+            console.log('🎮 GameUI currentLevel:', currentLevel, 'Name:', LEVELS[currentLevel]?.name);
+            return LEVELS[currentLevel]?.name || 'Unknown Level';
+          })()}
         </Badge>
         {player.hasKey && (
           <Badge className="bg-yellow-600 text-white">

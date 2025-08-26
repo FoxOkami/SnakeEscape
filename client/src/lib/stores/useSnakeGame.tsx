@@ -643,6 +643,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
 
+      console.log('🎯 Starting level:', levelIndex, 'Name:', level.name);
       set({
         currentLevel: levelIndex,
         currentLevelKey: getLevelKeyByIndex(levelIndex),
