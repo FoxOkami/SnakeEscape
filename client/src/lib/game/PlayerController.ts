@@ -177,6 +177,8 @@ export class PlayerController {
     this.position.x += this.currentVelocity.x * dt;
     this.position.y += this.currentVelocity.y * dt;
     
+    // Debug log for collision detection issues
+    console.log(`Player Position: x=${this.position.x.toFixed(1)}, y=${this.position.y.toFixed(1)}`);
   }
 
   private applyBoundaries(): void {
