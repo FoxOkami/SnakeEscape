@@ -240,6 +240,10 @@ export class PlayerController {
     const hasCollision = this.walls.some(wall => checkAABBCollision(playerRect, wall));
     
     if (hasCollision) {
+      console.log('🚧 WALL COLLISION! Player blocked at:', {
+        x: intendedPosition.x.toFixed(1),
+        y: intendedPosition.y.toFixed(1)
+      });
       // Use slideAlongWall to find a valid position
       return slideAlongWall(this.position, intendedPosition, this.walls, this.size);
     }
