@@ -41,7 +41,7 @@ export interface InventoryItem {
   activatedAt?: number; // timestamp when activated
   expiresAt?: number; // timestamp when expires (for temporary items)
 }
-import { LEVELS, randomizeLevel2, getLevelKeyByIndex } from "../game/levels";
+import { LEVELS, randomizeLevel2, getLevelKeyByIndex, getLevelIndexByKey } from "../game/levels";
 import { checkAABBCollision, slideAlongWall } from "../game/collision";
 import { updateSnake } from "../game/entities";
 import { calculateLightBeam } from "../game/lightBeam";
