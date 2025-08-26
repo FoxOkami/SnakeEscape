@@ -535,7 +535,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           
           snake.bossState = 'chargingHalfway';
           snake.centerPauseStartTime = undefined;
-          console.log("Phase 3: Valerie charging halfway to player position");
         } else if (snake.bossPhase === 4) {
           // Phase 4: Exit to north and trigger snake rain
           // Increment phase 4 count and set movement pattern
@@ -567,7 +566,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             y: -130 // Move well above the screen (30 pixels further north)
           };
           
-          console.log(`Phase 4.${snake.phase4Count}: Valerie exiting to the north (${patternName} rain pattern)`);
         } else {
           // Normal behavior for other phases
           snake.bossState = 'tracking'; // Resume tracking player
@@ -623,7 +621,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.bossState = 'pausingAtHalfway';
           snake.halfwayPauseStartTime = currentTime;
           
-          console.log("Phase 3: Valerie reached halfway point, pausing for 250ms");
           
         } else if (!checkWallCollision(snake, newPosition, walls)) {
           // Continue moving toward halfway target
@@ -646,7 +643,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           const bounds = levelBounds || { width: 800, height: 600 };
           snake.centerTargetPosition = { x: bounds.width / 2, y: bounds.height / 2 };
           
-          console.log("Phase 3: Pause complete, returning to center at double speed");
         }
       }
       // Stay still during pause
@@ -669,7 +665,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.projectileBarrageStartTime = currentTime;
           snake.barrageProjectileCount = 0;
           
-          console.log("Phase 3: Valerie reached center, starting projectile barrage");
           
         } else if (!checkWallCollision(snake, newPosition, walls)) {
           // Continue moving toward center
@@ -691,7 +686,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.burstProjectileStarted = true;
           snake.barrageProjectileCount = 0; // This will track rounds (0-3)
           
-          console.log("Phase 3: Starting 4-round projectile burst barrage");
         }
         
         // Check if it's time to fire the next round
@@ -715,7 +709,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             };
             
             snake.barrageProjectileCount++;
-            console.log(`Phase 3: Firing round ${snake.barrageProjectileCount}/4 with ${roundShift}° shift`);
           }
         }
         
@@ -726,7 +719,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.projectileBarrageStartTime = undefined;
           snake.barrageProjectileCount = undefined;
           snake.burstProjectileStarted = false;
-          console.log("Phase 3: 4-round projectile burst barrage complete, resuming tracking");
         }
       }
       // Stay still during barrage
@@ -786,7 +778,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.snakeRainCount = 0;
           snake.snakeRainIds = [];
           
-          console.log("Phase 4: Valerie has exited north, starting snake rain");
           
         } else {
           // Continue moving toward exit
@@ -841,7 +832,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             sineFrequency: snake.sineFrequency
           };
           
-          console.log(`Phase 4: Spawning rain snake ${snake.snakeRainCount}/${maxRainSnakes} at x=${Math.round(randomX)}`);
         }
       }
       
@@ -856,7 +846,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.snakeRainStartTime = undefined;
           snake.snakeRainCount = undefined;
           snake.snakeRainIds = undefined;
-          console.log("Phase 4: Snake rain complete");
         }
       }
       
@@ -866,7 +855,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
     case 'phase4Complete':
       // Phase 4 is complete - transition to return state to move back to playable area
       if (!snake.phaseCompletionLogged) {
-        console.log("Phase 4: Boss fight complete, Valerie returning to playable area");
         snake.phaseCompletionLogged = true;
         
         // Set return target position (center of playable area)
@@ -894,7 +882,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.pauseStartTime = currentTime;
           snake.isInitialPause = false; // Use normal recovery duration
           
-          console.log("Phase 4: Valerie has returned to playable area, entering recovery");
           
         } else {
           // Continue moving toward return target

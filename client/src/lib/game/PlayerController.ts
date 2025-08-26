@@ -125,12 +125,6 @@ export class PlayerController {
   private calculateTargetVelocity(input: InputState): void {
     const moveSpeed = input.walking ? this.config.walkingSpeed : this.config.normalSpeed;
     
-    console.log(`⚙️ CONFIG [${this.config.useAcceleration ? 'GAME' : 'HUB'}]:`, {
-      configuredSpeed: moveSpeed,
-      normalSpeed: this.config.normalSpeed,
-      walkingSpeed: this.config.walkingSpeed,
-      useAcceleration: this.config.useAcceleration
-    });
     
     // Calculate target velocity based on input
     this.targetVelocity = { x: 0, y: 0 };
@@ -178,15 +172,6 @@ export class PlayerController {
     const oldPosition = { ...this.position };
     const velocityMagnitude = Math.sqrt(this.currentVelocity.x * this.currentVelocity.x + this.currentVelocity.y * this.currentVelocity.y);
     
-    if (velocityMagnitude > 0) {
-      console.log(`🔍 SPEED DEBUG [${this.config.useAcceleration ? 'GAME' : 'HUB'}]:`, {
-        deltaTime: deltaTime.toFixed(1),
-        dt: dt.toFixed(4),
-        velocity: velocityMagnitude.toFixed(1),
-        actualPixelsPerSecond: (velocityMagnitude / dt).toFixed(1),
-        movement: { x: (this.currentVelocity.x * dt).toFixed(2), y: (this.currentVelocity.y * dt).toFixed(2) }
-      });
-    }
     
     // Apply movement
     this.position.x += this.currentVelocity.x * dt;

@@ -1224,7 +1224,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
         
         if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
-          console.log("Spawning screensaver snake from environmental effects");
           const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
           newSnakes.push(screensaverSnake);
           // Clear the flag immediately after spawning
@@ -1391,7 +1390,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         });
 
       if (hitBySnake) {
-        console.log("💥 PLAYER HIT: invincible=" + updatedPlayer.isInvincible + ", dashInvulnerable=" + updatedDashState.isInvulnerable);
         // Apply damage: shield first, then health
         if (updatedPlayer.shieldHealth > 0) {
           // Damage shield first
@@ -1953,7 +1951,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                 !snake.hasReturnedToSpawn
               );
               
-              console.log(`Boss ${bossSnake.id}: ${returnedPhantoms.length} phantoms returned, ${remainingPhantoms.length} still active`);
               
               // Only resume tracking if ALL phantoms from this boss have returned
               if (remainingPhantoms.length === 0 && returnedPhantoms.length > 0) {
@@ -1961,7 +1958,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                 bossSnake.phantomIds = undefined;
                 bossSnake.phantomSpawnStartTime = undefined;
                 bossSnake.phantomSpawnCount = undefined;
-                console.log(`Boss snake ${bossSnake.id} resumed tracking after ALL ${returnedPhantoms.length} phantoms completed journey`);
               }
             }
             // Legacy single phantom support
@@ -1970,18 +1966,15 @@ export const useSnakeGame = create<SnakeGameState>()(
               if (legacyPhantom) {
                 bossSnake.bossState = 'tracking';
                 bossSnake.phantomId = undefined;
-                console.log("Boss snake", bossSnake.id, "resumed tracking after legacy phantom completed journey");
               }
             }
           });
           
           phantomsThatReturned.forEach(phantom => {
-            console.log("Processing phantom", phantom.id, "for removal");
           });
           
           // Remove all phantoms that have returned to spawn
           finalSnakes = finalSnakes.filter(snake => !(snake.type === 'phantom' && snake.hasReturnedToSpawn));
-          console.log("Removed", phantomsThatReturned.length, "phantom(s) from game:", phantomsThatReturned.map(p => p.id));
           
           // Reset the flag after a short delay
           setTimeout(() => {
@@ -1997,7 +1990,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       if (rainSnakesToRemove.length > 0) {
         finalSnakes = finalSnakes.filter(snake => !(snake.type === 'rainsnake' && snake.position.y > (state.levelSize?.height || 600) + 50));
-        console.log("Removed", rainSnakesToRemove.length, "rain snake(s) that fell off screen:", rainSnakesToRemove.map(s => s.id));
       }
 
       set({
@@ -3342,7 +3334,6 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     spawnPhantom: (spawnPosition: Position, phantomId: string, levelBounds?: { width: number; height: number }): Snake => {
-      console.log("Spawning phantom at position:", spawnPosition, "with ID:", phantomId);
       
       // Determine initial direction based on alternating pattern (every other phantom goes opposite direction)
       // Extract spawn count from phantom ID to determine direction
@@ -3368,7 +3359,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         rotationDirection = initialDirection === 'north' ? 'counterclockwise' : 'clockwise';
       }
       
-      console.log(`Projection ${spawnCount + 1}/8 created - moving ${initialDirection} (${rotationDirection})`);
       
       const phantom = {
         id: phantomId,
@@ -3389,12 +3379,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         phantomRotation: rotationDirection, // Rotation based on wall position and initial direction
         hasReturnedToSpawn: false
       };
-      // console.log("Created phantom snake:", phantom);
       return phantom;
     },
 
     spawnRainSnake: (spawnPosition: Position, rainSnakeId: string, movementPattern?: string, angle?: number, amplitude?: number, frequency?: number): Snake => {
-      console.log("Spawning rain snake at position:", spawnPosition, "with ID:", rainSnakeId);
       
       // Random speed between 150 and 600 (50% faster bottom end, 200% faster top end)
       const randomSpeed = 150 + Math.random() * 450;
@@ -3429,7 +3417,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         initialX: spawnPosition.x // Store initial X for sine wave calculation
       };
       
-      console.log(`Rain snake spawned with speed: ${Math.round(randomSpeed)}, pattern: ${movementPattern || 'straight'}`);
       return rainSnake;
     },
 
@@ -3509,7 +3496,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           });
         }
         
-        console.log(`Firing round ${burstRound + 1}/4 with ${roundAngleShift}° shift (${totalProjectiles} projectiles)`);
       } else if (isBossProjectiles) {
         // Phase 3 boss: Fallback to all 30 projectiles at once (if sequential parameters not provided)
         directions = [];
