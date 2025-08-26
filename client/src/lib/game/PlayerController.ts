@@ -132,9 +132,8 @@ export class PlayerController {
     // Apply wall collision detection to get final safe position
     const finalPosition = this.applyWallCollisions(intendedPosition);
     
-    // Apply simple boundary clamping as backup
+    // Set final position (no additional boundary clamping needed)
     this.position = finalPosition;
-    this.applyBoundaries();
 
     return { ...this.position };
   }
@@ -240,9 +239,9 @@ export class PlayerController {
     const hasCollision = this.walls.some(wall => checkAABBCollision(playerRect, wall));
     
     if (hasCollision) {
-      console.log('🚧 WALL COLLISION! Player blocked at:', {
-        x: intendedPosition.x.toFixed(1),
-        y: intendedPosition.y.toFixed(1)
+      console.log('🚧 WALL COLLISION! Player blocked:', {
+        playerRect: `${playerRect.x.toFixed(1)},${playerRect.y.toFixed(1)} ${playerRect.width}x${playerRect.height}`,
+        collidingWall: this.walls.find(wall => checkAABBCollision(playerRect, wall))
       });
       // Use slideAlongWall to find a valid position
       return slideAlongWall(this.position, intendedPosition, this.walls, this.size);
