@@ -4438,10 +4438,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Initialize controller if it doesn't exist
       if (!state.playerController) {
         const boundaries = {
-          minX: 0,
-          maxX: state.levelSize.width - 32,
-          minY: 0,
-          maxY: state.levelSize.height - 32
+          minX: 20,
+          maxX: state.levelSize.width - 20 - 32,
+          minY: 20,
+          maxY: state.levelSize.height - 20 - 32
         };
           
         const controller = createGamePlayerController(
@@ -4470,10 +4470,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Update boundaries for current level
       state.playerController.setBoundaries({
-        minX: 0,
-        maxX: state.levelSize.width - 32,
-        minY: 0,
-        maxY: state.levelSize.height - 32
+        minX: 20,
+        maxX: state.levelSize.width - 20 - 32,
+        minY: 20,
+        maxY: state.levelSize.height - 20 - 32
       });
       
       // Update position and size
