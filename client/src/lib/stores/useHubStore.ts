@@ -6,6 +6,7 @@ import {
   type CustomKeyBindings
 } from '../game/PlayerController';
 import { useSnakeGame } from './useSnakeGame';
+import { checkAABBCollision } from '../game/collision';
 
 
 interface Player {
@@ -238,14 +239,23 @@ export const useHubStore = create<HubStore>((set, get) => ({
   checkDoorInteraction: () => {
     const state = get();
     
-    // Check if player is near the door
-    const doorDistance = Math.sqrt(
-      Math.pow(state.player.position.x - state.door.position.x, 2) +
-      Math.pow(state.player.position.y - state.door.position.y, 2)
-    );
+    // Create rectangles for AABB collision detection (same as main game)
+    const playerRect = {
+      x: state.player.position.x,
+      y: state.player.position.y,
+      width: state.player.size.width,
+      height: state.player.size.height,
+    };
     
-    // If player has the key and is at the door, open it and start level 1
-    if (state.hasKey && doorDistance < 25) {
+    const doorRect = {
+      x: state.door.position.x,
+      y: state.door.position.y,
+      width: state.door.size.width,
+      height: state.door.size.height,
+    };
+    
+    // If player has the key and is colliding with the door, open it and start level 1
+    if (state.hasKey && checkAABBCollision(playerRect, doorRect)) {
       set({
         door: { ...state.door, isOpen: true },
         interactionState: 'startGame'
