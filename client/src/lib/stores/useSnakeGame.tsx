@@ -4383,36 +4383,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (!state.playerController) return;
       
-      // Get the intended position from unified controller
-      const intendedPosition = state.playerController.update(inputState, deltaTime);
-      
-      // Check wall collisions using existing collision system
-      const playerRect = {
-        x: intendedPosition.x,
-        y: intendedPosition.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
-      };
-
-      const currentWalls = get().getCurrentWalls();
-      const hasWallCollision = currentWalls.some((wall) =>
-        checkAABBCollision(playerRect, wall),
-      );
-
-      let finalPosition = intendedPosition;
-      
-      // If there's a wall collision, use slideAlongWall to maintain smooth movement
-      if (hasWallCollision) {
-        finalPosition = slideAlongWall(
-          state.player.position,
-          intendedPosition,
-          currentWalls,
-          state.player.size
-        );
-      }
-      
-      // Note: Don't call setPosition during gameplay as it interferes with dash state
-      // The PlayerController will sync naturally on the next frame
+      // PlayerController now handles wall collisions internally
+      const finalPosition = state.playerController.update(inputState, deltaTime);
       
       // Update dash state from controller
       const controllerDashState = state.playerController.getDashState();
@@ -4449,11 +4421,14 @@ export const useSnakeGame = create<SnakeGameState>()(
           minY: 0,
           maxY: state.levelSize.height - 32
         };
+
+        const currentWalls = get().getCurrentWalls();
           
         const controller = createGamePlayerController(
           state.player.position,
           state.player.size,
-          boundaries
+          boundaries,
+          currentWalls
         );
         
         set({ playerController: controller });
@@ -4481,6 +4456,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         minY: 0,
         maxY: state.levelSize.height - 32
       });
+      
+      // Update walls for current level
+      const currentWalls = get().getCurrentWalls();
+      state.playerController.setWalls(currentWalls);
       
       // Update position and size
       state.playerController.setPosition(state.player.position);
