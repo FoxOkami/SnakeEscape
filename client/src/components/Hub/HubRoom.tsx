@@ -426,7 +426,7 @@ const HubRoom: React.FC = () => {
         Math.pow(player.position.y - door.position.y, 2)
       );
       
-      if (doorDistance < 50 && interactionState === 'idle') {
+      if (doorDistance < 35 && interactionState === 'idle') {
         const message = hasKey ? 'Walk closer to enter Level 1' : 'Locked - Need key';
         drawStandardTooltip(
           message,

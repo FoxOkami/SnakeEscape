@@ -244,8 +244,8 @@ export const useHubStore = create<HubStore>((set, get) => ({
       Math.pow(state.player.position.y - state.door.position.y, 2)
     );
     
-    // If player has the key and is near the door, open it and start level 1
-    if (state.hasKey && doorDistance < 50) {
+    // If player has the key and is at the door, open it and start level 1
+    if (state.hasKey && doorDistance < 25) {
       set({
         door: { ...state.door, isOpen: true },
         interactionState: 'startGame'
