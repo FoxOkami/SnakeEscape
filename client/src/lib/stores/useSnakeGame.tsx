@@ -1850,6 +1850,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           updatedDoor = { ...state.door, isOpen: true };
         }
       }
+      // Level 2 (MacGruber) - player only needs the key
+      else if (state.currentLevelKey === "item_collection" && updatedPlayer.hasKey) {
+        updatedDoor = { ...state.door, isOpen: true };
+      }
       // Level 5 (logic gate puzzle) - player only needs the key
       else if (state.currentLevelKey === "light_switch" && updatedPlayer.hasKey) {
         updatedDoor = { ...state.door, isOpen: true };
@@ -1858,6 +1862,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       else if (
         state.currentLevelKey !== "light_reflection" &&
         state.currentLevelKey !== "light_switch" &&
+        state.currentLevelKey !== "item_collection" &&
         updatedPlayer.hasKey &&
         allSwitchesPressed
       ) {
