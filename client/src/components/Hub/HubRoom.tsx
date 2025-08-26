@@ -343,6 +343,16 @@ const HubRoom: React.FC = () => {
         ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
         ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
       }
+
+      // Temporary debug: red border around player collision box
+      ctx.strokeStyle = "red";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(
+        player.position.x,
+        player.position.y,
+        player.size.width,
+        player.size.height
+      );
       
       // Draw NPCs
       npcs.forEach(npc => {
