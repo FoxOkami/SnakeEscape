@@ -4439,9 +4439,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (!state.playerController) {
         const boundaries = {
           minX: 20,
-          maxX: state.levelSize.width - 20 - state.player.size.width,
+          maxX: state.levelSize.width - 20,
           minY: 20,
-          maxY: state.levelSize.height - 20 - state.player.size.height
+          maxY: state.levelSize.height - 20
         };
           
         const controller = createGamePlayerController(
@@ -4471,9 +4471,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Update boundaries for current level
       const boundaries = {
         minX: 20,
-        maxX: state.levelSize.width - 20 - state.player.size.width,
+        maxX: state.levelSize.width - 20,
         minY: 20,
-        maxY: state.levelSize.height - 20 - state.player.size.height
+        maxY: state.levelSize.height - 20
       };
       console.log('Setting player boundaries:', boundaries, 'Level size:', state.levelSize, 'Player size:', state.player.size);
       state.playerController.setBoundaries(boundaries);
