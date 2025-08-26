@@ -14,6 +14,7 @@ const GameUI: React.FC = () => {
     player,
     startGame,
     startFromLevel,
+    startLevelByName,
     resetGame,
     nextLevel,
     returnToMenu,
@@ -100,7 +101,7 @@ const GameUI: React.FC = () => {
                 <Button
                   key={level.id}
                   onClick={() => {
-                    startFromLevel(index);
+                    startLevelByName(level.levelKey);
                     setShowLevelSelect(false);
                   }}
                   className="h-20 flex flex-col items-center justify-center bg-gray-700 hover:bg-gray-600 text-white border border-gray-600 relative"

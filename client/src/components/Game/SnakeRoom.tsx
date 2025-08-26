@@ -21,6 +21,7 @@ const SnakeRoom: React.FC = () => {
     checkPathConnection,
     removeKeyWalls,
     startLevel,
+    startLevelByName,
     showInventory,
     openInventory,
     closeInventory,
@@ -97,8 +98,8 @@ const SnakeRoom: React.FC = () => {
               Math.pow(gameState_current.player.position.y - gameMaster.position.y, 2)
             );
             if (distance < 80) {
-              // Start Level 1 (index 1 in LEVELS array, since index 0 is hub)
-              startLevel(1);
+              // Start first game level using level name
+              startLevelByName('pattern_memory');
               return;
             }
           }

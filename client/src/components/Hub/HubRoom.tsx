@@ -22,7 +22,6 @@ const HubRoom: React.FC = () => {
     key,
     hasKey,
     showSettingsModal,
-    playerController,
     initializeHub,
     updateHub,
     interactWithNPC,
@@ -34,6 +33,7 @@ const HubRoom: React.FC = () => {
 
   const { 
     startLevel, 
+    startLevelByName,
     showInventory, 
     openInventory, 
     closeInventory, 
@@ -279,10 +279,10 @@ const HubRoom: React.FC = () => {
   // Handle game start
   useEffect(() => {
     if (interactionState === 'startGame') {
-      // Start level 1 (index 1 in LEVELS array, since index 0 is hub)
-      startLevel(1);
+      // Start first game level using level name
+      startLevelByName('pattern_memory');
     }
-  }, [interactionState, startLevel]);
+  }, [interactionState, startLevelByName]);
   
   useEffect(() => {
     const canvas = canvasRef.current;

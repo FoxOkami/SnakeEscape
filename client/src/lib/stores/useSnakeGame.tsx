@@ -70,6 +70,7 @@ interface SnakeGameState extends GameData {
   startGame: () => void;
   startFromLevel: (levelIndex: number) => void;
   startLevel: (levelIndex: number) => void;
+  startLevelByName: (levelKey: string) => void;
   resetGame: () => void;
   returnToHub: () => void;
   movePlayer: (direction: Position) => void;
@@ -4343,6 +4344,13 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     startLevel: (levelIndex: number) => {
       get().startFromLevel(levelIndex);
+    },
+
+    startLevelByName: (levelKey: string) => {
+      const levelIndex = getLevelIndexByKey(levelKey);
+      if (levelIndex >= 0) {
+        get().startFromLevel(levelIndex);
+      }
     },
 
     // Centralized function to handle all hub reset logic
