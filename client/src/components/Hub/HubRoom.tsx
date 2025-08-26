@@ -34,6 +34,7 @@ const HubRoom: React.FC = () => {
 
   const { 
     startLevel, 
+    nextLevel,
     showInventory, 
     openInventory, 
     closeInventory, 
@@ -410,13 +411,17 @@ const HubRoom: React.FC = () => {
         ctx.fillRect(player.position.x - 3, player.position.y - 3, 4, 4);
       }
       
-      // Draw door interaction prompt
+      // Draw door interaction prompt and handle collision
       const doorDistance = Math.sqrt(
         Math.pow(player.position.x - door.position.x, 2) +
         Math.pow(player.position.y - door.position.y, 2)
       );
       
-      if (doorDistance < 50 && interactionState === 'idle') {
+      if (doorDistance < 30 && hasKey && interactionState === 'idle') {
+        // Player is close enough to door and has key - trigger level progression
+        nextLevel();
+        return;
+      } else if (doorDistance < 50 && interactionState === 'idle') {
         const message = hasKey ? 'Walk closer to enter Level 1' : 'Locked - Need key';
         drawStandardTooltip(
           message,
