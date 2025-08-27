@@ -1101,9 +1101,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           position: newPosition,
         },
       });
-      
-      // Debug log for player coordinates
-      console.log(`Player position: x=${newPosition.x.toFixed(2)}, y=${newPosition.y.toFixed(2)}`);
     },
 
     updateGame: (deltaTime: number) => {
@@ -4410,6 +4407,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         currentVelocity: state.playerController.getCurrentVelocity(),
         targetVelocity: state.playerController.getTargetVelocity(),
       });
+      
+      // Debug log for player coordinates (game levels)
+      console.log(`Player position (Game): x=${finalPosition.x.toFixed(2)}, y=${finalPosition.y.toFixed(2)}`);
     },
 
     configurePlayerController: () => {
