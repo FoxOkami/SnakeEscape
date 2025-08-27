@@ -163,6 +163,7 @@ export function slideAlongWall(
   walls: Rectangle[],
   entitySize: { width: number; height: number }
 ): Position {
+  console.log(`slideAlongWall: from x=${from.x.toFixed(2)}, y=${from.y.toFixed(2)} to x=${intendedPosition.x.toFixed(2)}, y=${intendedPosition.y.toFixed(2)}`);
   // Calculate movement vector
   const movement = {
     x: intendedPosition.x - from.x,
@@ -249,22 +250,24 @@ export function slideAlongWall(
   const absMovementX = Math.abs(movement.x);
   const absMovementY = Math.abs(movement.y);
   
+  let result = from;
+  
   if (absMovementX > absMovementY) {
     // Horizontal movement is dominant
     if (canMoveHorizontally) {
-      return horizontalOnlyPos;
+      result = horizontalOnlyPos;
     } else if (canMoveVertically) {
-      return verticalOnlyPos;
+      result = verticalOnlyPos;
     }
   } else {
     // Vertical movement is dominant
     if (canMoveVertically) {
-      return verticalOnlyPos;
+      result = verticalOnlyPos;
     } else if (canMoveHorizontally) {
-      return horizontalOnlyPos;
+      result = horizontalOnlyPos;
     }
   }
   
-  // If neither direction works, stay in place
-  return from;
+  console.log(`slideAlongWall result: x=${result.x.toFixed(2)}, y=${result.y.toFixed(2)}`);
+  return result;
 }
