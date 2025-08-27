@@ -1836,36 +1836,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         updatedSwitches.length === 0 ||
         updatedSwitches.every((s) => s.isPressed);
 
-      // Level 3 (light reflection puzzle) - player must have key, crystal activated, and all mirrors used
-      if (
-        state.currentLevelKey === "light_reflection" &&
-        updatedPlayer.hasKey &&
-        updatedCrystal &&
-        updatedCrystal.isActivated
-      ) {
-        const allMirrorsUsed = updatedMirrors.every(
-          (mirror) => mirror.isReflecting,
-        );
-        if (allMirrorsUsed) {
-          updatedDoor = { ...state.door, isOpen: true };
-        }
-      }
-      // Level 2 (MacGruber) - player only needs the key
-      else if (state.currentLevelKey === "item_collection" && updatedPlayer.hasKey) {
-        updatedDoor = { ...state.door, isOpen: true };
-      }
-      // Level 5 (logic gate puzzle) - player only needs the key
-      else if (state.currentLevelKey === "light_switch" && updatedPlayer.hasKey) {
-        updatedDoor = { ...state.door, isOpen: true };
-      }
-      // Other levels - player must have key and all switches pressed
-      else if (
-        state.currentLevelKey !== "light_reflection" &&
-        state.currentLevelKey !== "light_switch" &&
-        state.currentLevelKey !== "item_collection" &&
-        updatedPlayer.hasKey &&
-        allSwitchesPressed
-      ) {
+      // All levels - door opens when player has the key (puzzles become optional)
+      if (updatedPlayer.hasKey) {
         updatedDoor = { ...state.door, isOpen: true };
       }
 
