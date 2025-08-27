@@ -197,6 +197,9 @@ export const useHubStore = create<HubStore>((set, get) => ({
         position: newPosition
       }
     });
+    
+    // Debug log for player coordinates (hub room)
+    console.log(`Player position (Hub): x=${newPosition.x.toFixed(2)}, y=${newPosition.y.toFixed(2)}`);
   },
   
   interactWithNPC: () => {
