@@ -163,7 +163,6 @@ export function slideAlongWall(
   walls: Rectangle[],
   entitySize: { width: number; height: number }
 ): Position {
-  console.log(`slideAlongWall: from x=${from.x.toFixed(2)}, y=${from.y.toFixed(2)} to x=${intendedPosition.x.toFixed(2)}, y=${intendedPosition.y.toFixed(2)}`);
   // Calculate movement vector
   const movement = {
     x: intendedPosition.x - from.x,
@@ -268,6 +267,5 @@ export function slideAlongWall(
     }
   }
   
-  console.log(`slideAlongWall result: x=${result.x.toFixed(2)}, y=${result.y.toFixed(2)}`);
   return result;
 }

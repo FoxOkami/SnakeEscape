@@ -4380,6 +4380,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           currentWalls,
           state.player.size
         );
+        
+        // Update the PlayerController's internal position to match the actual final position
+        // This prevents position accumulation when blocked by walls
+        state.playerController.setPosition(finalPosition);
       }
       
       // Note: Don't call setPosition during gameplay as it interferes with dash state
