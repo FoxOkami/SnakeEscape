@@ -4392,6 +4392,23 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Update dash state from controller
       const controllerDashState = state.playerController.getDashState();
       
+      // Calculate walking state for unified PlayerController system
+      // Check if walking key is currently pressed to update badge display
+      const keyBindings = useKeyBindings.getState().keyBindings;
+      const currentTime = Date.now();
+      
+      const isKeyActiveRecently = (keyCode: string) => {
+        return (
+          state.keysPressed.has(keyCode) ||
+          (state.keyStates.has(keyCode) &&
+            currentTime - state.keyStates.get(keyCode)! < 50)
+        );
+      };
+      
+      const isWalking =
+        isKeyActiveRecently(keyBindings.walking) ||
+        isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
+      
       // Update store state
       set({
         player: {
@@ -4410,6 +4427,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         },
         currentVelocity: state.playerController.getCurrentVelocity(),
         targetVelocity: state.playerController.getTargetVelocity(),
+        isWalking: isWalking,
       });
       
     },
