@@ -3,6 +3,7 @@ import { useHubStore } from '../../lib/stores/useHubStore';
 import { useSnakeGame } from '../../lib/stores/useSnakeGame';
 import { useKeyBindings, type KeyBindings } from '../../lib/stores/useKeyBindings';
 import { drawStandardTooltip, drawInteractionTooltip } from '../../lib/utils/tooltips';
+import { CHEAT_ITEMS } from '../../lib/game/items';
 import { InventoryModal } from '../ui/inventory';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -61,18 +62,7 @@ const HubRoom: React.FC = () => {
   const handleCheatCode = () => {
     if (cheatCodeInput.trim().toLowerCase() === 'tangential') {
       // Add Stack Radar item to inventory
-      const stackRadarItem = {
-        id: `stack_radar_${Date.now()}`, // Unique ID
-        name: 'Stack Radar',
-        description: 'Player speed drastically increased',
-        image: '🟨', // Yellow square emoji
-        duration: 'temporary' as const,
-        modifiers: {
-          playerSpeed: 2.0, // doubles player speed
-          walkSpeed: 2.0 // doubles walk speed
-        },
-        isActive: false
-      };
+      const stackRadarItem = CHEAT_ITEMS.stackRadar();
       addInventoryItem(stackRadarItem);
       
       // Show success feedback
@@ -81,18 +71,8 @@ const HubRoom: React.FC = () => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
     } else if (cheatCodeInput.trim().toLowerCase() === 'katra') {
-      // Add AG1 item to inventory
-      const ag1Item = {
-        id: `ag1_${Date.now()}`, // Unique ID
-        name: 'drinkable greens',
-        description: 'Player can handle 2 more bites',
-        image: '🛡️', // Shield emoji for protection
-        duration: 'permanent' as const,
-        modifiers: {
-          biteProtection: 2 // allows 2 additional bites before death
-        },
-        isActive: true // Permanent items should be active by default
-      };
+      // Add drinkable greens item to inventory
+      const ag1Item = CHEAT_ITEMS.drinkableGreens();
       addInventoryItem(ag1Item);
       
       // Immediately activate the item to apply shield health
@@ -105,17 +85,7 @@ const HubRoom: React.FC = () => {
       }, 1000); // Reset after 1 second
     } else if (cheatCodeInput.trim().toLowerCase() === 'stapling') {
       // Add Stapler item to inventory
-      const staplerItem = {
-        id: `stapler_${Date.now()}`, // Unique ID
-        name: 'Stapler',
-        description: "I'll build one",
-        image: '📎', // Paperclip emoji for stapler
-        duration: 'permanent' as const,
-        modifiers: {
-          snakeChaseMultiplier: 0 // sets all snake chase values to 0
-        },
-        isActive: true // Permanent items should be active by default
-      };
+      const staplerItem = CHEAT_ITEMS.stapler();
       addInventoryItem(staplerItem);
       
       // Immediately activate the item to apply effect
