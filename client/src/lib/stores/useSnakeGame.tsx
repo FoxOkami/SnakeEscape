@@ -447,13 +447,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Get current key bindings
         const keyBindings = useKeyBindings.getState().keyBindings;
         
-        // Check if walking using custom key binding
-        const isWalking =
-          isKeyActiveRecently(keyBindings.walking) ||
-          isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
-        
         // Check if dashing using custom key binding
         const isDashing = isKeyActiveRecently(keyBindings.dash);
+        
+        // Check if walking using custom key binding, but clear walking if dashing
+        const isWalkingKeyPressed =
+          isKeyActiveRecently(keyBindings.walking) ||
+          isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
+        const isWalking = isWalkingKeyPressed && !isDashing; // Clear walking when dashing
         
         // Get dynamic speeds based on inventory items
         const currentState = get();
@@ -4405,9 +4406,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         );
       };
       
-      const isWalking =
+      // Check if walking key is pressed, but clear walking if dashing
+      const isWalkingKeyPressed =
         isKeyActiveRecently(keyBindings.walking) ||
         isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
+      const isWalking = isWalkingKeyPressed && !controllerDashState.isDashing;
       
       // Update store state
       set({
