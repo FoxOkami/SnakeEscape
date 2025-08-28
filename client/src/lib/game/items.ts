@@ -1,6 +1,6 @@
 import { InventoryItem } from '../stores/useSnakeGame';
 
-export const CHEAT_ITEMS: Record<string, () => InventoryItem> = {
+export const GAME_ITEMS: Record<string, () => InventoryItem> = {
   stackRadar: () => ({
     id: `stack_radar_${Date.now()}`, // Unique ID
     name: 'Stack Radar',

@@ -3,7 +3,7 @@ import { useHubStore } from '../../lib/stores/useHubStore';
 import { useSnakeGame } from '../../lib/stores/useSnakeGame';
 import { useKeyBindings, type KeyBindings } from '../../lib/stores/useKeyBindings';
 import { drawStandardTooltip, drawInteractionTooltip } from '../../lib/utils/tooltips';
-import { CHEAT_ITEMS } from '../../lib/game/items';
+import { GAME_ITEMS } from '../../lib/game/items';
 import { InventoryModal } from '../ui/inventory';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -62,7 +62,7 @@ const HubRoom: React.FC = () => {
   const handleCheatCode = () => {
     if (cheatCodeInput.trim().toLowerCase() === 'tangential') {
       // Add Stack Radar item to inventory
-      const stackRadarItem = CHEAT_ITEMS.stackRadar();
+      const stackRadarItem = GAME_ITEMS.stackRadar();
       addInventoryItem(stackRadarItem);
       
       // Show success feedback
@@ -72,7 +72,7 @@ const HubRoom: React.FC = () => {
       }, 1000); // Reset after 1 second
     } else if (cheatCodeInput.trim().toLowerCase() === 'katra') {
       // Add drinkable greens item to inventory
-      const ag1Item = CHEAT_ITEMS.drinkableGreens();
+      const ag1Item = GAME_ITEMS.drinkableGreens();
       addInventoryItem(ag1Item);
       
       // Immediately activate the item to apply shield health
@@ -85,7 +85,7 @@ const HubRoom: React.FC = () => {
       }, 1000); // Reset after 1 second
     } else if (cheatCodeInput.trim().toLowerCase() === 'stapling') {
       // Add Stapler item to inventory
-      const staplerItem = CHEAT_ITEMS.stapler();
+      const staplerItem = GAME_ITEMS.stapler();
       addInventoryItem(staplerItem);
       
       // Immediately activate the item to apply effect
