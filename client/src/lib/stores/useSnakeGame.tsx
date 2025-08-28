@@ -3005,8 +3005,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         const playerRect = { ...player.position, ...player.size };
         const collision = checkAABBCollision(projectileRect, playerRect);
 
-        // Player is invincible either from before this frame or from a hit earlier in this frame
-        const isInvincible = player.isInvincible || playerHitThisFrame;
+        // Player is invincible either from before this frame, from a hit earlier in this frame, or during dash
+        const isInvincible = player.isInvincible || playerHitThisFrame || state.dashState.isInvulnerable;
 
         if (!isInvincible && collision) {
           // Player hit by projectile - first hit this frame
