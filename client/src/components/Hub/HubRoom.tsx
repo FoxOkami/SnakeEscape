@@ -41,6 +41,7 @@ const HubRoom: React.FC = () => {
     inventoryItems, 
     useInventoryItem,
     togglePermanentItem,
+    setKeyPressed, // Add this for key state synchronization
     player: gamePlayer // Get player data from main game store for health display
   } = useSnakeGame();
   
@@ -242,6 +243,9 @@ const HubRoom: React.FC = () => {
       
       setKeys(prev => new Set(prev).add(e.code));
       
+      // Also sync with the game store for UI features like walking badge
+      setKeyPressed(e.code, true);
+      
       if (interactionState === 'conversation') {
         if (e.code === keyBindings.up) {
           selectOption('yes');
@@ -265,6 +269,9 @@ const HubRoom: React.FC = () => {
         newKeys.delete(e.code);
         return newKeys;
       });
+      
+      // Also sync with the game store for UI features like walking badge
+      setKeyPressed(e.code, false);
     };
     
     window.addEventListener('keydown', handleKeyDown);
