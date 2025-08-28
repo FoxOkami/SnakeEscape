@@ -1490,6 +1490,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           ...updatedPlayer,
           position: teleportResult.targetPosition,
         };
+        // IMPORTANT: Update the PlayerController's internal position to match the teleport
+        // This prevents the PlayerController from overwriting the teleported position on the next frame
+        if (state.playerController) {
+          state.playerController.setPosition(teleportResult.targetPosition);
+        }
         // The teleporter state will be updated in the main set() call below
         set({ teleporters: teleportResult.teleporters });
       }
