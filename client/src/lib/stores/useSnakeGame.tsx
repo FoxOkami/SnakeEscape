@@ -3672,8 +3672,11 @@ export const useSnakeGame = create<SnakeGameState>()(
                 );
                 if (receiver) {
                   const teleportCooldownTime = currentTime + 500; // 500ms cooldown
+                  // Center the player on the receiver pad
+                  const targetX = receiver.x + (receiver.width / 2) - (state.player.size.width / 2);
+                  const targetY = receiver.y + (receiver.height / 2) - (state.player.size.height / 2);
                   teleportInfo = {
-                    targetPosition: { x: receiver.x, y: receiver.y },
+                    targetPosition: { x: targetX, y: targetY },
                     teleporters: updatedTeleporters.map((t, idx) =>
                       idx === index
                         ? {
