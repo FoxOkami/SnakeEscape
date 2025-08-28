@@ -985,10 +985,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (!item) return state;
         
         // Mark item as active (both temporary and permanent)
+        const currentTime = Date.now();
         const updatedItem = {
           ...item,
           isActive: true,
-          activatedAt: Date.now()
+          activatedAt: currentTime,
+          // Set expiration time for temporary items (30 seconds)
+          expiresAt: item.duration === 'temporary' ? currentTime + 30000 : undefined
         };
         
         // Calculate new shield health from all active items
