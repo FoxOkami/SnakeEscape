@@ -4409,18 +4409,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         isKeyActiveRecently(keyBindings.walking) ||
         isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
       
-      // Debug logging for walking state
-      if (state.currentLevelKey === "hub") {
-        console.log("🐍 Hub Walking Debug:", {
-          isWalking,
-          walkingKey: keyBindings.walking,
-          keysPressed: Array.from(state.keysPressed),
-          walkingKeyPressed: state.keysPressed.has(keyBindings.walking),
-          controlRightPressed: state.keysPressed.has("ControlRight"),
-          keyStates: Array.from(state.keyStates.keys())
-        });
-      }
-      
       // Update store state
       set({
         player: {

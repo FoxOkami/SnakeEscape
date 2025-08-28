@@ -781,6 +781,16 @@ const HubRoom: React.FC = () => {
             </Badge>
           );
         })()}
+        {(() => {
+          const gameState = useSnakeGame.getState();
+          const isWalking = gameState.isWalking;
+          
+          return isWalking ? (
+            <Badge className="bg-green-600 text-white">
+              🚶 Walking (Silent)
+            </Badge>
+          ) : null;
+        })()}
       </div>
       
       {/* Inventory Modal */}

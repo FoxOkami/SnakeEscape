@@ -287,12 +287,6 @@ const GameUI: React.FC = () => {
             🚶 Walking (Silent)
           </Badge>
         )}
-        {/* Debug badge for walking state visibility */}
-        {currentLevel === 0 && (
-          <Badge className={`${isWalking ? 'bg-green-600' : 'bg-red-600'} text-white`}>
-            🔍 Debug: Walk {isWalking ? 'ON' : 'OFF'}
-          </Badge>
-        )}
         {carriedItem && (
           <Badge className="bg-purple-600 text-white">
             🪨 Carrying {carriedItem.type} (E to drop{['rock', 'bottle', 'can'].includes(carriedItem.type) ? ', Click to throw' : ''})
