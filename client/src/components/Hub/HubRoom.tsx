@@ -33,6 +33,7 @@ const HubRoom: React.FC = () => {
 
   const { 
     startLevel, 
+    startLevelByName,
     showInventory, 
     openInventory, 
     closeInventory, 
@@ -40,6 +41,7 @@ const HubRoom: React.FC = () => {
     inventoryItems, 
     useInventoryItem,
     togglePermanentItem,
+    setKeyPressed, // Add this for key state synchronization
     player: gamePlayer // Get player data from main game store for health display
   } = useSnakeGame();
   
@@ -241,6 +243,9 @@ const HubRoom: React.FC = () => {
       
       setKeys(prev => new Set(prev).add(e.code));
       
+      // Also sync with the game store for UI features like walking badge
+      setKeyPressed(e.code, true);
+      
       if (interactionState === 'conversation') {
         if (e.code === keyBindings.up) {
           selectOption('yes');
@@ -264,6 +269,9 @@ const HubRoom: React.FC = () => {
         newKeys.delete(e.code);
         return newKeys;
       });
+      
+      // Also sync with the game store for UI features like walking badge
+      setKeyPressed(e.code, false);
     };
     
     window.addEventListener('keydown', handleKeyDown);
@@ -278,10 +286,10 @@ const HubRoom: React.FC = () => {
   // Handle game start
   useEffect(() => {
     if (interactionState === 'startGame') {
-      // Start level 1 (index 1 in LEVELS array, since index 0 is hub)
-      startLevel(1);
+      // Start first game level using level name
+      startLevelByName('pattern_memory');
     }
-  }, [interactionState, startLevel]);
+  }, [interactionState, startLevelByName]);
   
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -290,10 +298,11 @@ const HubRoom: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    let lastTime = 0;
+    let lastTime = performance.now(); // Initialize with current time like game levels
     
     const gameLoop = (currentTime: number) => {
-      const deltaTime = Math.min(currentTime - lastTime, 100);
+      const targetFrameTime = 1000 / 60; // 16.67ms for 60fps
+      const deltaTime = Math.min(currentTime - lastTime, targetFrameTime * 2); // Cap at 2 frames max, same as game levels
       lastTime = currentTime;
       
       // Update game state - don't update when settings modal or inventory is open
@@ -341,6 +350,16 @@ const HubRoom: React.FC = () => {
         ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
         ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
       }
+
+      // Temporary debug: red border around player collision box
+      ctx.strokeStyle = "red";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(
+        player.position.x,
+        player.position.y,
+        player.size.width,
+        player.size.height
+      );
       
       // Draw NPCs
       npcs.forEach(npc => {
@@ -414,8 +433,8 @@ const HubRoom: React.FC = () => {
         Math.pow(player.position.y - door.position.y, 2)
       );
       
-      if (doorDistance < 50 && interactionState === 'idle') {
-        const message = hasKey ? 'Walk closer to enter Level 1' : 'Locked - Need key';
+      if (doorDistance < 50 && interactionState === 'idle' && !hasKey) {
+        const message = 'Locked - Need key';
         drawStandardTooltip(
           message,
           ctx,
@@ -684,6 +703,20 @@ const HubRoom: React.FC = () => {
                       {editingKeyBinding === 'walking' ? '' : getKeyDisplayText(keyBindings.walking)}
                     </button>
                   </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Dash</span>
+                    <button 
+                      onClick={() => setEditingKeyBinding('dash')}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${
+                        editingKeyBinding === 'dash' 
+                          ? 'bg-white border-2 border-red-500 text-transparent' 
+                          : 'bg-gray-100 border hover:bg-gray-200'
+                      }`}
+                    >
+                      {editingKeyBinding === 'dash' ? '' : getKeyDisplayText(keyBindings.dash)}
+                    </button>
+                  </div>
                 </div>
                 
                 {(editingKeyBinding || keyBindingError) && (
@@ -695,7 +728,8 @@ const HubRoom: React.FC = () => {
                                                     editingKeyBinding === 'left' ? 'Move Left' :
                                                     editingKeyBinding === 'right' ? 'Move Right' :
                                                     editingKeyBinding === 'interact' ? 'Interact' : 
-                                                    editingKeyBinding === 'secondaryInteract' ? 'Secondary Item Interaction' : 'Walk (Hold)'}"`}
+                                                    editingKeyBinding === 'secondaryInteract' ? 'Secondary Item Interaction' : 
+                                                    editingKeyBinding === 'walking' ? 'Walk (Hold)' : 'Dash'}"`}
                     </p>
                   </div>
                 )}
@@ -727,11 +761,36 @@ const HubRoom: React.FC = () => {
       {/* Health Display */}
       {renderHealthDisplay()}
       
-      {/* Level name badge (same style as game levels) */}
-      <div className="absolute top-4 left-20 z-5">
+      {/* Level name badge and dash indicator (same style as game levels) */}
+      <div className="absolute top-4 left-20 z-5 flex gap-2">
         <Badge variant="secondary" className="bg-gray-800 text-white border-gray-600">
           Snake Room
         </Badge>
+        {(() => {
+          const gameState = useSnakeGame.getState();
+          if (!gameState.playerController) return null;
+          
+          const dashState = gameState.dashState;
+          const currentTime = performance.now();
+          const timeSinceLastDash = currentTime - dashState.lastDashTime;
+          const canDash = timeSinceLastDash >= dashState.cooldownDuration;
+          
+          return (
+            <Badge className={`${canDash ? 'bg-blue-600' : 'bg-gray-600'} text-white`}>
+              ⚡ Dash {canDash ? 'Ready' : 'Cooldown'}
+            </Badge>
+          );
+        })()}
+        {(() => {
+          const gameState = useSnakeGame.getState();
+          const isWalking = gameState.isWalking;
+          
+          return isWalking ? (
+            <Badge className="bg-green-600 text-white">
+              🚶 Walking (Silent)
+            </Badge>
+          ) : null;
+        })()}
       </div>
       
       {/* Inventory Modal */}

@@ -1015,7 +1015,6 @@ function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?
 }
 function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds?: { width: number; height: number }): Snake {
   if (!snake.isPhantom || !snake.originalSpawnPosition || !levelBounds) {
-    console.log("Phantom snake missing requirements:", { isPhantom: snake.isPhantom, hasSpawnPos: !!snake.originalSpawnPosition, hasLevelBounds: !!levelBounds });
     return snake;
   }
 
@@ -1023,7 +1022,6 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
 
   // Calculate movement speed (use time-based movement like other snakes)
   const moveSpeed = snake.speed * dt; // Use time-based movement for consistent speed regardless of framerate
-  // console.log("Phantom movement:", { direction: snake.phantomDirection, speed: moveSpeed, dt, snakeSpeed: snake.speed });
   
   let newPosition = { ...snake.position };
   let hitWall = false;

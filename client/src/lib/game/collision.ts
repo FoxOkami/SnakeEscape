@@ -187,56 +187,85 @@ export function slideAlongWall(
     return intendedPosition;
   }
   
-  // Try moving horizontally only (maintain full horizontal speed)
-  const horizontalOnlyPos = {
-    x: intendedPosition.x,
-    y: from.y
-  };
+  // Try moving horizontally only - find the furthest safe position
+  let horizontalOnlyPos = from;
+  let canMoveHorizontally = false;
   
-  const horizontalRect = {
-    x: horizontalOnlyPos.x,
-    y: horizontalOnlyPos.y,
-    width: entitySize.width,
-    height: entitySize.height
-  };
+  // Check horizontal movement in small increments to find safe position
+  const horizontalDirection = movement.x > 0 ? 1 : -1;
+  const horizontalDistance = Math.abs(movement.x);
   
-  const canMoveHorizontally = !walls.some(wall => checkAABBCollision(horizontalRect, wall));
+  for (let distance = 1; distance <= horizontalDistance; distance++) {
+    const testPos = {
+      x: from.x + horizontalDirection * distance,
+      y: from.y
+    };
+    
+    const testRect = {
+      x: testPos.x,
+      y: testPos.y,
+      width: entitySize.width,
+      height: entitySize.height
+    };
+    
+    if (!walls.some(wall => checkAABBCollision(testRect, wall))) {
+      horizontalOnlyPos = testPos;
+      canMoveHorizontally = true;
+    } else {
+      break; // Stop at first collision
+    }
+  }
   
-  // Try moving vertically only (maintain full vertical speed)
-  const verticalOnlyPos = {
-    x: from.x,
-    y: intendedPosition.y
-  };
+  // Try moving vertically only - find the furthest safe position
+  let verticalOnlyPos = from;
+  let canMoveVertically = false;
   
-  const verticalRect = {
-    x: verticalOnlyPos.x,
-    y: verticalOnlyPos.y,
-    width: entitySize.width,
-    height: entitySize.height
-  };
+  // Check vertical movement in small increments to find safe position
+  const verticalDirection = movement.y > 0 ? 1 : -1;
+  const verticalDistance = Math.abs(movement.y);
   
-  const canMoveVertically = !walls.some(wall => checkAABBCollision(verticalRect, wall));
+  for (let distance = 1; distance <= verticalDistance; distance++) {
+    const testPos = {
+      x: from.x,
+      y: from.y + verticalDirection * distance
+    };
+    
+    const testRect = {
+      x: testPos.x,
+      y: testPos.y,
+      width: entitySize.width,
+      height: entitySize.height
+    };
+    
+    if (!walls.some(wall => checkAABBCollision(testRect, wall))) {
+      verticalOnlyPos = testPos;
+      canMoveVertically = true;
+    } else {
+      break; // Stop at first collision
+    }
+  }
   
   // Prioritize the direction with larger movement component to maintain speed
   const absMovementX = Math.abs(movement.x);
   const absMovementY = Math.abs(movement.y);
   
+  let result = from;
+  
   if (absMovementX > absMovementY) {
     // Horizontal movement is dominant
     if (canMoveHorizontally) {
-      return horizontalOnlyPos;
+      result = horizontalOnlyPos;
     } else if (canMoveVertically) {
-      return verticalOnlyPos;
+      result = verticalOnlyPos;
     }
   } else {
     // Vertical movement is dominant
     if (canMoveVertically) {
-      return verticalOnlyPos;
+      result = verticalOnlyPos;
     } else if (canMoveHorizontally) {
-      return horizontalOnlyPos;
+      result = horizontalOnlyPos;
     }
   }
   
-  // If neither direction works, stay in place
-  return from;
+  return result;
 }

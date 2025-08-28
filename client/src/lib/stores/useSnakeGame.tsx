@@ -41,11 +41,18 @@ export interface InventoryItem {
   activatedAt?: number; // timestamp when activated
   expiresAt?: number; // timestamp when expires (for temporary items)
 }
-import { LEVELS, randomizeLevel2, getLevelKeyByIndex } from "../game/levels";
-import { checkAABBCollision } from "../game/collision";
+import { LEVELS, randomizeLevel2, getLevelKeyByIndex, getLevelIndexByKey } from "../game/levels";
+import { checkAABBCollision, slideAlongWall } from "../game/collision";
 import { updateSnake } from "../game/entities";
 import { calculateLightBeam } from "../game/lightBeam";
 import { useAudio } from "./useAudio";
+import { 
+  PlayerController, 
+  createGamePlayerController, 
+  keysToInputState,
+  type InputState,
+  type CustomKeyBindings 
+} from "../game/PlayerController";
 
 interface SnakeGameState extends GameData {
   // Levels data
@@ -63,6 +70,7 @@ interface SnakeGameState extends GameData {
   startGame: () => void;
   startFromLevel: (levelIndex: number) => void;
   startLevel: (levelIndex: number) => void;
+  startLevelByName: (levelKey: string) => void;
   resetGame: () => void;
   returnToHub: () => void;
   movePlayer: (direction: Position) => void;
@@ -79,6 +87,22 @@ interface SnakeGameState extends GameData {
   currentVelocity: Position;
   targetVelocity: Position;
   isWalking: boolean;
+  isDashing: boolean;
+  dashState: {
+    isActive: boolean;
+    startTime: number;
+    startPosition: { x: number; y: number };
+    direction: { x: number; y: number };
+    progress: number;
+    isInvulnerable: boolean;
+    lastDashTime: number;
+    cooldownDuration: number;
+  };
+  
+  // Unified Player Controller
+  playerController: PlayerController | null;
+  updatePlayerController: (deltaTime: number, inputState: InputState) => void;
+  configurePlayerController: () => void;
 
   // Item actions
   pickupItem: (itemId: string) => void;
@@ -166,8 +190,8 @@ interface SnakeGameState extends GameData {
   phantomRemovalInProgress?: boolean;
 }
 
-const BASE_PLAYER_SPEED = 0.2; // base pixels per second
-const BASE_WALKING_SPEED = 0.1; // base pixels per second when walking (shift held)
+const BASE_PLAYER_SPEED = 150; // base pixels per second
+const BASE_WALKING_SPEED = 75; // base pixels per second when walking (shift held)
 const ACCELERATION = 1; // pixels per second squared
 
 // Centralized function to calculate speed multipliers from inventory items
@@ -369,10 +393,24 @@ export const useSnakeGame = create<SnakeGameState>()(
     currentVelocity: { x: 0, y: 0 },
     targetVelocity: { x: 0, y: 0 },
     isWalking: false,
+    isDashing: false,
+    dashState: {
+      isActive: false,
+      startTime: 0,
+      startPosition: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      progress: 0,
+      isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
+    },
     keyStates: new Map(), // Track key state with timestamps
     showInventory: false,
     inventoryItems: [], // Inventory starts empty - items can be obtained through cheat codes
     randomizedSymbols: null, // Level 1 randomization
+    
+    // Unified Player Controller
+    playerController: null,
 
     setKeyPressed: (key: string, pressed: boolean) => {
       set((state) => {
@@ -409,10 +447,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Get current key bindings
         const keyBindings = useKeyBindings.getState().keyBindings;
         
-        // Check if walking using custom key binding
-        const isWalking =
+        // Check if dashing using custom key binding
+        const isDashing = isKeyActiveRecently(keyBindings.dash);
+        
+        // Check if walking using custom key binding, but clear walking if dashing
+        const isWalkingKeyPressed =
           isKeyActiveRecently(keyBindings.walking) ||
           isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
+        const isWalking = isWalkingKeyPressed && !isDashing; // Clear walking when dashing
         
         // Get dynamic speeds based on inventory items
         const currentState = get();
@@ -447,6 +489,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           keyStates: newKeyStates,
           targetVelocity: targetVelocity,
           isWalking: isWalking,
+          isDashing: isDashing,
         };
       });
     },
@@ -519,6 +562,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+    isDashing: false,
+    dashState: {
+      isActive: false,
+      startTime: 0,
+      startPosition: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      progress: 0,
+      isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
+    },
         hintState: null, // Initialize hint state
         randomizedSymbols: level1Randomization.randomizedSymbols, // Store randomized symbols
         // Store pre-randomized Level 2 data
@@ -648,6 +702,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+    isDashing: false,
+    dashState: {
+      isActive: false,
+      startTime: 0,
+      startPosition: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      progress: 0,
+      isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
+    },
         boulders: level.boulders
           ? level.boulders.map((boulder) => ({ ...boulder }))
           : [],
@@ -659,7 +724,13 @@ export const useSnakeGame = create<SnakeGameState>()(
           levelIndex === 2 ? undefined : get().level2RandomizedSwitches,
         level2RandomizedThrowableItems:
           levelIndex === 2 ? undefined : get().level2RandomizedThrowableItems,
+        
+        // Reset PlayerController to ensure it doesn't have old position
+        playerController: null,
       });
+      
+      // Force reconfigure PlayerController with new spawn position
+      get().configurePlayerController();
 
       // Auto-trigger hint for Level 1 only
       if (levelIndex === 1) {
@@ -736,6 +807,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+    isDashing: false,
+    dashState: {
+      isActive: false,
+      startTime: 0,
+      startPosition: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      progress: 0,
+      isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
+    },
       });
     },
 
@@ -853,7 +935,24 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
+    isDashing: false,
+    dashState: {
+      isActive: false,
+      startTime: 0,
+      startPosition: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      progress: 0,
+      isInvulnerable: false,
+      lastDashTime: 0,
+      cooldownDuration: 1500, // 1.5 seconds in milliseconds
+    },
+        
+        // Reset PlayerController to ensure it doesn't have old position
+        playerController: null,
       });
+      
+      // Force reconfigure PlayerController with new spawn position
+      get().configurePlayerController();
     },
 
     returnToMenu: () => {
@@ -1009,157 +1108,41 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.gameState !== "playing" || state.showInventory) return;
 
-      // --- SMOOTH PLAYER MOVEMENT ---
-      // Smoothly interpolate current velocity toward target velocity
-      let newVelocity = { ...state.currentVelocity };
-
-      // Calculate velocity difference
-      const velDiff = {
-        x: state.targetVelocity.x - state.currentVelocity.x,
-        y: state.targetVelocity.y - state.currentVelocity.y,
-      };
-
-      // Apply acceleration to approach target velocity
-      const maxAccel = ACCELERATION * deltaTime;
-
-      if (Math.abs(velDiff.x) > maxAccel) {
-        newVelocity.x += Math.sign(velDiff.x) * maxAccel;
-      } else {
-        newVelocity.x = state.targetVelocity.x;
+      // Initialize unified PlayerController if needed
+      if (!state.playerController) {
+        get().configurePlayerController();
       }
 
-      if (Math.abs(velDiff.y) > maxAccel) {
-        newVelocity.y += Math.sign(velDiff.y) * maxAccel;
-      } else {
-        newVelocity.y = state.targetVelocity.y;
-      }
-
-      // Calculate new player position based on velocity
-      const newPlayerPosition = {
-        x: state.player.position.x + newVelocity.x * deltaTime,
-        y: state.player.position.y + newVelocity.y * deltaTime,
+      // Convert current input state for PlayerController
+      const keyBindings = useKeyBindings.getState().keyBindings;
+      const inputState: InputState = {
+        up: state.keysPressed.has(keyBindings.up),
+        down: state.keysPressed.has(keyBindings.down),
+        left: state.keysPressed.has(keyBindings.left),
+        right: state.keysPressed.has(keyBindings.right),
+        walking: state.isWalking,
+        dash: state.isDashing
       };
 
-      // Check bounds and wall collisions for new position
-      let finalPosition = { ...state.player.position };
-      let finalVelocity = { ...newVelocity };
+      // Update player using unified controller
+      get().updatePlayerController(deltaTime, inputState);
 
-      // Check X movement
-      const testXPosition = {
-        x: newPlayerPosition.x,
-        y: state.player.position.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
-      };
-
-      // Check for environmental screensaver snake collisions (act as walls)
-      const environmentalSnakeCollisionX = state.snakes.some((snake) => {
-        if (snake.type !== 'screensaver' || !snake.id.includes('screensaver_snake_') || snake.speed > 0) {
-          return false; // Only landed environmental screensaver snakes block movement
-        }
-        return checkAABBCollision(testXPosition, {
-          x: snake.position.x,
-          y: snake.position.y,
-          width: snake.size.width,
-          height: snake.size.height
-        });
-      });
-
-      // Check for mini boulder collisions (landed ones act as walls)
-      const miniBoulderCollisionX = state.miniBoulders.some(boulder => {
-        if (!boulder.isLanded) return false;
-        return checkAABBCollision(testXPosition, {
-          x: boulder.position.x,
-          y: boulder.position.y,
-          width: boulder.size.width,
-          height: boulder.size.height
-        });
-      });
-
-      const canMoveX =
-        newPlayerPosition.x >= 0 &&
-        newPlayerPosition.x + state.player.size.width <=
-          state.levelSize.width &&
-        !get()
-          .getCurrentWalls()
-          .some((wall) => checkAABBCollision(testXPosition, wall)) &&
-        !environmentalSnakeCollisionX &&
-        !miniBoulderCollisionX;
-
-      if (canMoveX) {
-        finalPosition.x = newPlayerPosition.x;
-      } else {
-        finalVelocity.x = 0; // Stop horizontal movement when hitting wall
-        newVelocity.x = 0; // Also reset current velocity
-      }
-
-      // Check Y movement
-      const testYPosition = {
-        x: finalPosition.x,
-        y: newPlayerPosition.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
-      };
-
-      // Check for environmental screensaver snake collisions (act as walls) for Y movement
-      const environmentalSnakeCollisionY = state.snakes.some((snake) => {
-        if (snake.type !== 'screensaver' || !snake.id.includes('screensaver_snake_') || snake.speed > 0) {
-          return false; // Only landed environmental screensaver snakes block movement
-        }
-        return checkAABBCollision(testYPosition, {
-          x: snake.position.x,
-          y: snake.position.y,
-          width: snake.size.width,
-          height: snake.size.height
-        });
-      });
-
-      // Check for mini boulder collisions (landed ones act as walls) for Y movement
-      const miniBoulderCollisionY = state.miniBoulders.some(boulder => {
-        if (!boulder.isLanded) return false;
-        return checkAABBCollision(testYPosition, {
-          x: boulder.position.x,
-          y: boulder.position.y,
-          width: boulder.size.width,
-          height: boulder.size.height
-        });
-      });
-
-      const canMoveY =
-        newPlayerPosition.y >= 0 &&
-        newPlayerPosition.y + state.player.size.height <=
-          state.levelSize.height &&
-        !get()
-          .getCurrentWalls()
-          .some((wall) => checkAABBCollision(testYPosition, wall)) &&
-        !environmentalSnakeCollisionY &&
-        !miniBoulderCollisionY;
-
-      if (canMoveY) {
-        finalPosition.y = newPlayerPosition.y;
-      } else {
-        finalVelocity.y = 0; // Stop vertical movement when hitting wall
-        newVelocity.y = 0; // Also reset current velocity
-      }
-
-      let updatedPlayer = {
-        ...state.player,
-        position: finalPosition,
-      };
-
+      // Get updated state after PlayerController update
+      const updatedState = get();
+      
       // --- SNAKE AI ---
       // Generate player sounds for stalker snakes when not walking stealthily
       const playerSounds: Position[] = [];
-      const isMoving = newVelocity.x !== 0 || newVelocity.y !== 0;
+      const isMoving = updatedState.currentVelocity.x !== 0 || updatedState.currentVelocity.y !== 0;
       if (
         isMoving &&
-        !state.isWalking &&
-        updatedPlayer.position &&
-        typeof updatedPlayer.position.x === "number" &&
-        typeof updatedPlayer.position.y === "number"
+        !updatedState.isWalking &&
+        updatedState.player.position &&
+        typeof updatedState.player.position.x === "number" &&
+        typeof updatedState.player.position.y === "number"
       ) {
         // Player makes sound when moving normally (not walking stealthily)
-        playerSounds.push(updatedPlayer.position);
+        playerSounds.push(updatedState.player.position);
       }
 
       const currentWalls = get().getCurrentWalls();
@@ -1215,10 +1198,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // Apply snake chase multiplier to non-boss snakes (but not on Skate Rink level)
         let modifiedSnake = snake;
-        if (snake.type !== 'boss' && snakeChaseMultiplier !== 1 && state.currentLevelKey !== 'boss_valerie') {
+        if (snake.type !== 'boss' && snakeChaseMultiplier !== 1 && updatedState.currentLevelKey !== 'boss_valerie') {
           modifiedSnake = {
             ...snake,
-            chaseDistance: snake.chaseDistance ? snake.chaseDistance * snakeChaseMultiplier : 0,
             speed: snake.speed * Math.max(0.1, snakeChaseMultiplier) // Ensure minimum speed for animation
           };
         }
@@ -1227,31 +1209,30 @@ export const useSnakeGame = create<SnakeGameState>()(
           modifiedSnake,
           currentWalls,
           deltaTime,
-          updatedPlayer,
+          updatedState.player,
           playerSounds,
-          { ...state, quadrantLighting },
-          LEVELS[state.currentLevel]?.size,
-          state.boulders,
+          { ...updatedState, quadrantLighting },
+          LEVELS[updatedState.currentLevel]?.size,
+          updatedState.boulders,
         );
         
         // Check for environmental effects triggered by boss boulder collision
         if (updatedSnake.environmentalEffects?.spawnMiniBoulders) {
-          const spawnedMiniBoulders = get().spawnMiniBoulders(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
+          const spawnedMiniBoulders = get().spawnMiniBoulders(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
           newMiniBoulders.push(...spawnedMiniBoulders);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnMiniBoulders = false;
         }
         
         if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
-          console.log("Spawning screensaver snake from environmental effects");
-          const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
+          const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
           newSnakes.push(screensaverSnake);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnScreensaverSnake = false;
         }
         
         if (updatedSnake.environmentalEffects?.spawnPhotophobicSnake) {
-          const photophobicSnake = get().spawnPhotophobicSnake(updatedSnake.environmentalEffects.boulderHitPosition, state.levelSize);
+          const photophobicSnake = get().spawnPhotophobicSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
           newSnakes.push(photophobicSnake);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnPhotophobicSnake = false;
@@ -1353,6 +1334,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
 
+      // Initialize local player and dash state for modifications
+      let updatedPlayer = { ...updatedState.player };
+      let updatedDashState = { ...updatedState.dashState };
+
       // --- SHIELD HEALTH SYNCHRONIZATION ---
       // Keep shield health in sync with active items
       let totalBiteProtection = 0;
@@ -1394,6 +1379,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       const hitBySnake =
         !updatedPlayer.isInvincible &&
+        !updatedDashState.isInvulnerable &&
         updatedSnakes.some((snake) => {
           const snakeRect = {
             x: snake.position.x,
@@ -1431,7 +1417,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // --- THROWN ITEM PHYSICS ---
-      const currentTime = performance.now() / 1000;
+      const itemTime = performance.now() / 1000;
       let updatedThrowableItems = state.throwableItems.map((item) => {
         if (
           item.isThrown &&
@@ -1440,7 +1426,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           item.throwStartPos &&
           item.throwTargetPos
         ) {
-          const elapsedTime = currentTime - item.throwStartTime;
+          const elapsedTime = itemTime - item.throwStartTime;
           const progress = Math.min(elapsedTime / item.throwDuration, 1);
 
           if (progress >= 1) {
@@ -1851,31 +1837,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         updatedSwitches.length === 0 ||
         updatedSwitches.every((s) => s.isPressed);
 
-      // Level 3 (light reflection puzzle) - player must have key, crystal activated, and all mirrors used
-      if (
-        state.currentLevelKey === "light_reflection" &&
-        updatedPlayer.hasKey &&
-        updatedCrystal &&
-        updatedCrystal.isActivated
-      ) {
-        const allMirrorsUsed = updatedMirrors.every(
-          (mirror) => mirror.isReflecting,
-        );
-        if (allMirrorsUsed) {
-          updatedDoor = { ...state.door, isOpen: true };
-        }
-      }
-      // Level 5 (logic gate puzzle) - player only needs the key
-      else if (state.currentLevelKey === "light_switch" && updatedPlayer.hasKey) {
-        updatedDoor = { ...state.door, isOpen: true };
-      }
-      // Other levels - player must have key and all switches pressed
-      else if (
-        state.currentLevelKey !== "light_reflection" &&
-        state.currentLevelKey !== "light_switch" &&
-        updatedPlayer.hasKey &&
-        allSwitchesPressed
-      ) {
+      // All levels - door opens when player has the key (puzzles become optional)
+      if (updatedPlayer.hasKey) {
         updatedDoor = { ...state.door, isOpen: true };
       }
 
@@ -1966,7 +1929,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                 !snake.hasReturnedToSpawn
               );
               
-              console.log(`Boss ${bossSnake.id}: ${returnedPhantoms.length} phantoms returned, ${remainingPhantoms.length} still active`);
               
               // Only resume tracking if ALL phantoms from this boss have returned
               if (remainingPhantoms.length === 0 && returnedPhantoms.length > 0) {
@@ -1974,7 +1936,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                 bossSnake.phantomIds = undefined;
                 bossSnake.phantomSpawnStartTime = undefined;
                 bossSnake.phantomSpawnCount = undefined;
-                console.log(`Boss snake ${bossSnake.id} resumed tracking after ALL ${returnedPhantoms.length} phantoms completed journey`);
               }
             }
             // Legacy single phantom support
@@ -1983,18 +1944,15 @@ export const useSnakeGame = create<SnakeGameState>()(
               if (legacyPhantom) {
                 bossSnake.bossState = 'tracking';
                 bossSnake.phantomId = undefined;
-                console.log("Boss snake", bossSnake.id, "resumed tracking after legacy phantom completed journey");
               }
             }
           });
           
           phantomsThatReturned.forEach(phantom => {
-            console.log("Processing phantom", phantom.id, "for removal");
           });
           
           // Remove all phantoms that have returned to spawn
           finalSnakes = finalSnakes.filter(snake => !(snake.type === 'phantom' && snake.hasReturnedToSpawn));
-          console.log("Removed", phantomsThatReturned.length, "phantom(s) from game:", phantomsThatReturned.map(p => p.id));
           
           // Reset the flag after a short delay
           setTimeout(() => {
@@ -2010,16 +1968,16 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       if (rainSnakesToRemove.length > 0) {
         finalSnakes = finalSnakes.filter(snake => !(snake.type === 'rainsnake' && snake.position.y > (state.levelSize?.height || 600) + 50));
-        console.log("Removed", rainSnakesToRemove.length, "rain snake(s) that fell off screen:", rainSnakesToRemove.map(s => s.id));
       }
 
       set({
-        currentVelocity: newVelocity, // Use the updated velocity that includes wall collision resets
+        currentVelocity: state.playerController?.getCurrentVelocity() || { x: 0, y: 0 }, // Get velocity from PlayerController
         snakes: finalSnakes, // Use snakes after pit/projectile processing
         miniBoulders: newMiniBoulders, // Add the mini boulders to the state
         key: updatedKey,
         player: updatedPlayer,
         switches: updatedSwitches,
+        dashState: updatedDashState, // Update dash state
         door: updatedDoor,
         throwableItems: updatedThrowableItems,
         patternTiles: updatedPatternTiles,
@@ -3354,7 +3312,6 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     spawnPhantom: (spawnPosition: Position, phantomId: string, levelBounds?: { width: number; height: number }): Snake => {
-      console.log("Spawning phantom at position:", spawnPosition, "with ID:", phantomId);
       
       // Determine initial direction based on alternating pattern (every other phantom goes opposite direction)
       // Extract spawn count from phantom ID to determine direction
@@ -3380,7 +3337,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         rotationDirection = initialDirection === 'north' ? 'counterclockwise' : 'clockwise';
       }
       
-      console.log(`Projection ${spawnCount + 1}/8 created - moving ${initialDirection} (${rotationDirection})`);
       
       const phantom = {
         id: phantomId,
@@ -3401,12 +3357,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         phantomRotation: rotationDirection, // Rotation based on wall position and initial direction
         hasReturnedToSpawn: false
       };
-      // console.log("Created phantom snake:", phantom);
       return phantom;
     },
 
     spawnRainSnake: (spawnPosition: Position, rainSnakeId: string, movementPattern?: string, angle?: number, amplitude?: number, frequency?: number): Snake => {
-      console.log("Spawning rain snake at position:", spawnPosition, "with ID:", rainSnakeId);
       
       // Random speed between 150 and 600 (50% faster bottom end, 200% faster top end)
       const randomSpeed = 150 + Math.random() * 450;
@@ -3441,7 +3395,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         initialX: spawnPosition.x // Store initial X for sine wave calculation
       };
       
-      console.log(`Rain snake spawned with speed: ${Math.round(randomSpeed)}, pattern: ${movementPattern || 'straight'}`);
       return rainSnake;
     },
 
@@ -3521,7 +3474,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           });
         }
         
-        console.log(`Firing round ${burstRound + 1}/4 with ${roundAngleShift}° shift (${totalProjectiles} projectiles)`);
       } else if (isBossProjectiles) {
         // Phase 3 boss: Fallback to all 30 projectiles at once (if sequential parameters not provided)
         directions = [];
@@ -4358,6 +4310,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       get().startFromLevel(levelIndex);
     },
 
+    startLevelByName: (levelKey: string) => {
+      const levelIndex = getLevelIndexByKey(levelKey);
+      if (levelIndex >= 0) {
+        get().startFromLevel(levelIndex);
+      }
+    },
+
     // Centralized function to handle all hub reset logic
     resetForHub: () => {
       const state = get();
@@ -4389,6 +4348,140 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     returnToHub: () => {
       get().resetForHub();
+    },
+
+    // Unified Player Controller methods
+    updatePlayerController: (deltaTime: number, inputState: InputState) => {
+      const state = get();
+      if (!state.playerController) return;
+      
+      // Get the intended position from unified controller
+      const intendedPosition = state.playerController.update(inputState, deltaTime);
+      
+      // Check wall collisions using existing collision system
+      const playerRect = {
+        x: intendedPosition.x,
+        y: intendedPosition.y,
+        width: state.player.size.width,
+        height: state.player.size.height,
+      };
+
+      const currentWalls = get().getCurrentWalls();
+      const hasWallCollision = currentWalls.some((wall) =>
+        checkAABBCollision(playerRect, wall),
+      );
+
+      let finalPosition = intendedPosition;
+      
+      // If there's a wall collision, use slideAlongWall to maintain smooth movement
+      if (hasWallCollision) {
+        finalPosition = slideAlongWall(
+          state.player.position,
+          intendedPosition,
+          currentWalls,
+          state.player.size
+        );
+        
+        // Update the PlayerController's internal position to match the actual final position
+        // This prevents position accumulation when blocked by walls
+        state.playerController.setPosition(finalPosition);
+      }
+      
+      // Note: Don't call setPosition during gameplay as it interferes with dash state
+      // The PlayerController will sync naturally on the next frame
+      
+      // Update dash state from controller
+      const controllerDashState = state.playerController.getDashState();
+      
+      // Calculate walking state for unified PlayerController system
+      // Check if walking key is currently pressed to update badge display
+      const keyBindings = useKeyBindings.getState().keyBindings;
+      const currentTime = Date.now();
+      
+      const isKeyActiveRecently = (keyCode: string) => {
+        return (
+          state.keysPressed.has(keyCode) ||
+          (state.keyStates.has(keyCode) &&
+            currentTime - state.keyStates.get(keyCode)! < 50)
+        );
+      };
+      
+      // Check if walking key is pressed, but clear walking if dashing
+      const isWalkingKeyPressed =
+        isKeyActiveRecently(keyBindings.walking) ||
+        isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
+      const isWalking = isWalkingKeyPressed && !controllerDashState.isDashing;
+      
+      // Update store state
+      set({
+        player: {
+          ...state.player,
+          position: finalPosition,
+        },
+        dashState: {
+          isActive: controllerDashState.isDashing,
+          startTime: 0, // Not used in PlayerController
+          startPosition: controllerDashState.dashStartPosition,
+          direction: controllerDashState.dashDirection,
+          progress: controllerDashState.dashProgress,
+          isInvulnerable: controllerDashState.isInvulnerable,
+          lastDashTime: controllerDashState.lastDashTime,
+          cooldownDuration: controllerDashState.cooldownDuration,
+        },
+        currentVelocity: state.playerController.getCurrentVelocity(),
+        targetVelocity: state.playerController.getTargetVelocity(),
+        isWalking: isWalking,
+      });
+      
+    },
+
+    configurePlayerController: () => {
+      const state = get();
+      
+      // Initialize controller if it doesn't exist
+      if (!state.playerController) {
+        const boundaries = {
+          minX: 20,
+          maxX: state.levelSize.width - 20,
+          minY: 20,
+          maxY: state.levelSize.height - 20
+        };
+          
+        const controller = createGamePlayerController(
+          state.player.position,
+          state.player.size,
+          boundaries
+        );
+        
+        set({ playerController: controller });
+        return;
+      }
+      
+      // Use same configuration for all levels (including hub)
+      const inventoryItems = state.inventoryItems;
+      const speeds = getPlayerSpeeds(inventoryItems);
+      
+      state.playerController.updateConfig({
+        normalSpeed: speeds.playerSpeed,
+        walkingSpeed: speeds.walkingSpeed,
+        acceleration: 8,
+        useAcceleration: false, // Direct movement for all levels
+        dashSpeed: 1.0,
+        dashDistance: 96,
+        dashInvulnerabilityDistance: 32
+      });
+      
+      // Update boundaries for current level
+      const boundaries = {
+        minX: 20,
+        maxX: state.levelSize.width - 20,
+        minY: 20,
+        maxY: state.levelSize.height - 20
+      };
+      state.playerController.setBoundaries(boundaries);
+      
+      // Update position and size
+      state.playerController.setPosition(state.player.position);
     },
   })),
 );

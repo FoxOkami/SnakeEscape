@@ -1,0 +1,104 @@
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.46, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=164.70, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=166.82, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+slideAlongWall: from x=117.23, y=142.82 to x=168.81, y=142.82
+slideAlongWall result: x=117.23, y=142.82
+Player position (Game): x=117.23, y=142.82
+Player position (Game): x=170.81, y=142.82

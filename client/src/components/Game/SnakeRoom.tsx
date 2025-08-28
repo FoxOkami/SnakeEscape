@@ -21,6 +21,7 @@ const SnakeRoom: React.FC = () => {
     checkPathConnection,
     removeKeyWalls,
     startLevel,
+    startLevelByName,
     showInventory,
     openInventory,
     closeInventory,
@@ -97,8 +98,8 @@ const SnakeRoom: React.FC = () => {
               Math.pow(gameState_current.player.position.y - gameMaster.position.y, 2)
             );
             if (distance < 80) {
-              // Start Level 1 (index 1 in LEVELS array, since index 0 is hub)
-              startLevel(1);
+              // Start first game level using level name
+              startLevelByName('pattern_memory');
               return;
             }
           }
@@ -166,14 +167,11 @@ const SnakeRoom: React.FC = () => {
         }
 
         // On other levels, E key does item pickup/drop
-        console.log(`[E Key Debug] Level ${gameState_current.currentLevel}, carriedItem:`, gameState_current.carriedItem);
         if (gameState_current.carriedItem) {
           // If carrying something, drop it
-          console.log('[E Key Debug] Dropping item');
           dropItem();
         } else {
           // If not carrying anything, try to pick up the nearest item
-          console.log('[E Key Debug] Trying to pick up nearest item');
           pickupNearestItem();
         }
       }
@@ -189,7 +187,8 @@ const SnakeRoom: React.FC = () => {
         "ControlLeft", // Walking modifier fallback
         "ControlRight", // Walking modifier fallback
         currentKeyBindings.interact,
-        currentKeyBindings.secondaryInteract
+        currentKeyBindings.secondaryInteract,
+        currentKeyBindings.dash // Add dash key
       ];
       
       if (boundMovementKeys.includes(event.code)) {
@@ -213,7 +212,8 @@ const SnakeRoom: React.FC = () => {
         "ControlLeft", // Walking modifier fallback
         "ControlRight", // Walking modifier fallback
         currentKeyBindings.interact,
-        currentKeyBindings.secondaryInteract
+        currentKeyBindings.secondaryInteract,
+        currentKeyBindings.dash // Add dash key
       ];
       
       if (boundMovementKeys.includes(event.code)) {
