@@ -4375,6 +4375,14 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (!state.playerController) return;
       
+      // Update PlayerController speeds based on active inventory items
+      const speeds = getPlayerSpeeds(state.inventoryItems);
+      state.playerController.updateConfig({
+        normalSpeed: speeds.playerSpeed,
+        walkingSpeed: speeds.walkingSpeed
+      });
+      console.log(`DEBUG: Updated PlayerController speeds - normalSpeed: ${speeds.playerSpeed}, walkingSpeed: ${speeds.walkingSpeed}`);
+      
       // Get the intended position from unified controller
       const intendedPosition = state.playerController.update(inputState, deltaTime);
       
