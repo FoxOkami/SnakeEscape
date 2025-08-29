@@ -200,24 +200,16 @@ export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
   let walkSpeedMultiplier = 1;
   
   // Apply modifiers from active items
-  const currentTime = Date.now();
-  console.log('DEBUG: Calculating speed multipliers. Active items:', inventoryItems.filter(item => item.isActive));
-  
   inventoryItems.forEach(item => {
     if (item.isActive) {
-      console.log(`DEBUG: Processing active item: ${item.name}`, item.modifiers);
       if (item.modifiers.playerSpeed) {
-        console.log(`DEBUG: Applying playerSpeed multiplier: ${item.modifiers.playerSpeed}`);
         playerSpeedMultiplier *= item.modifiers.playerSpeed;
       }
       if (item.modifiers.walkSpeed) {
-        console.log(`DEBUG: Applying walkSpeed multiplier: ${item.modifiers.walkSpeed}`);
         walkSpeedMultiplier *= item.modifiers.walkSpeed;
       }
     }
   });
-  
-  console.log(`DEBUG: Final multipliers - playerSpeed: ${playerSpeedMultiplier}, walkSpeed: ${walkSpeedMultiplier}`);
   
   return {
     playerSpeedMultiplier,
@@ -228,12 +220,10 @@ export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
 // Helper function to calculate current player speeds with item modifiers (for game levels)
 function getPlayerSpeeds(inventoryItems: InventoryItem[]) {
   const multipliers = getSpeedMultipliers(inventoryItems);
-  const speeds = {
+  return {
     playerSpeed: BASE_PLAYER_SPEED * multipliers.playerSpeedMultiplier,
     walkingSpeed: BASE_WALKING_SPEED * multipliers.walkSpeedMultiplier
   };
-  console.log(`DEBUG: Calculated speeds - playerSpeed: ${speeds.playerSpeed}, walkingSpeed: ${speeds.walkingSpeed}`);
-  return speeds;
 }
 
 // Helper function to randomize Level 1
@@ -993,8 +983,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         const item = state.inventoryItems.find(i => i.id === itemId);
         if (!item) return state;
         
-        console.log(`DEBUG: Activating item: ${item.name}`, item.modifiers);
-        console.log('DEBUG: Current inventory items before activation:', state.inventoryItems.map(i => ({ name: i.name, isActive: i.isActive })));
         
         // Mark item as active (both temporary and permanent)
         const updatedItem = {
@@ -4381,7 +4369,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         normalSpeed: speeds.playerSpeed,
         walkingSpeed: speeds.walkingSpeed
       });
-      console.log(`DEBUG: Updated PlayerController speeds - normalSpeed: ${speeds.playerSpeed}, walkingSpeed: ${speeds.walkingSpeed}`);
       
       // Get the intended position from unified controller
       const intendedPosition = state.playerController.update(inputState, deltaTime);
