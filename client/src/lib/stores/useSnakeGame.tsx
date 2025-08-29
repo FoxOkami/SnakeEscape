@@ -202,7 +202,7 @@ export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
   // Apply modifiers from active items
   const currentTime = Date.now();
   inventoryItems.forEach(item => {
-    if (item.isActive && (!item.expiresAt || currentTime < item.expiresAt)) {
+    if (item.isActive) {
       if (item.modifiers.playerSpeed) {
         playerSpeedMultiplier *= item.modifiers.playerSpeed;
       }
@@ -985,13 +985,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (!item) return state;
         
         // Mark item as active (both temporary and permanent)
-        const currentTime = Date.now();
         const updatedItem = {
           ...item,
           isActive: true,
-          activatedAt: currentTime,
-          // Set expiration time for temporary items (30 seconds)
-          expiresAt: item.duration === 'temporary' ? currentTime + 30000 : undefined
+          activatedAt: Date.now()
         };
         
         // Calculate new shield health from all active items
@@ -1058,8 +1055,8 @@ export const useSnakeGame = create<SnakeGameState>()(
     clearTemporaryItems: () => {
       set((state) => ({
         inventoryItems: state.inventoryItems
-          .filter(item => item.duration !== 'temporary' || !item.isActive) // Remove used temporary items
-          // Keep permanent items as they are - don't deactivate them
+          .filter(item => item.duration === 'permanent') // Keep only permanent items
+          // Temporary items are removed when returning to hub
       }));
     },
 
