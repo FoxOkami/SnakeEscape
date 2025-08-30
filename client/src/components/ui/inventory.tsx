@@ -9,6 +9,7 @@ interface InventoryItem {
   modifiers: {
     playerSpeed?: number;
     walkSpeed?: number;
+    dashSpeed?: number;
     [key: string]: any;
   };
   isActive?: boolean;

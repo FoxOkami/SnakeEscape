@@ -33,6 +33,7 @@ export interface InventoryItem {
   modifiers: {
     playerSpeed?: number; // multiplier for player speed
     walkSpeed?: number; // multiplier for walk speed
+    dashSpeed?: number; // multiplier for dash speed
     biteProtection?: number; // additional bites player can take before dying
     snakeChaseMultiplier?: number; // multiplier for snake chase values (affects all non-boss snakes)
     [key: string]: any; // allow for future modifiers
@@ -198,6 +199,7 @@ const ACCELERATION = 1; // pixels per second squared
 export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
   let playerSpeedMultiplier = 1;
   let walkSpeedMultiplier = 1;
+  let dashSpeedMultiplier = 1;
   
   // Apply modifiers from active items
   inventoryItems.forEach(item => {
@@ -208,12 +210,16 @@ export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
       if (item.modifiers.walkSpeed) {
         walkSpeedMultiplier *= item.modifiers.walkSpeed;
       }
+      if (item.modifiers.dashSpeed) {
+        dashSpeedMultiplier *= item.modifiers.dashSpeed;
+      }
     }
   });
   
   return {
     playerSpeedMultiplier,
-    walkSpeedMultiplier
+    walkSpeedMultiplier,
+    dashSpeedMultiplier
   };
 }
 
@@ -222,7 +228,8 @@ function getPlayerSpeeds(inventoryItems: InventoryItem[]) {
   const multipliers = getSpeedMultipliers(inventoryItems);
   return {
     playerSpeed: BASE_PLAYER_SPEED * multipliers.playerSpeedMultiplier,
-    walkingSpeed: BASE_WALKING_SPEED * multipliers.walkSpeedMultiplier
+    walkingSpeed: BASE_WALKING_SPEED * multipliers.walkSpeedMultiplier,
+    dashSpeed: 600 * multipliers.dashSpeedMultiplier // Base dash speed of 600
   };
 }
 
@@ -4367,7 +4374,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       const speeds = getPlayerSpeeds(state.inventoryItems);
       state.playerController.updateConfig({
         normalSpeed: speeds.playerSpeed,
-        walkingSpeed: speeds.walkingSpeed
+        walkingSpeed: speeds.walkingSpeed,
+        dashSpeed: speeds.dashSpeed
       });
       
       // Get the intended position from unified controller
@@ -4481,7 +4489,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         walkingSpeed: speeds.walkingSpeed,
         acceleration: 8,
         useAcceleration: false, // Direct movement for all levels
-        dashSpeed: 1.0,
+        dashSpeed: speeds.dashSpeed,
         dashDistance: 96,
         dashInvulnerabilityDistance: 32
       });
