@@ -35,6 +35,7 @@ export interface InventoryItem {
     walkSpeed?: number; // multiplier for walk speed
     dashSpeed?: number; // multiplier for dash speed
     dashDuration?: number; // multiplier for dash duration
+    dashCooldown?: number; // multiplier for dash cooldown time
     biteProtection?: number; // additional bites player can take before dying
     snakeChaseMultiplier?: number; // multiplier for snake chase values (affects all non-boss snakes)
     [key: string]: any; // allow for future modifiers
@@ -202,6 +203,7 @@ export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
   let walkSpeedMultiplier = 1;
   let dashSpeedMultiplier = 1;
   let dashDurationMultiplier = 1;
+  let dashCooldownMultiplier = 1;
   
   // Apply modifiers from active items
   inventoryItems.forEach(item => {
@@ -218,6 +220,9 @@ export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
       if (item.modifiers.dashDuration) {
         dashDurationMultiplier *= item.modifiers.dashDuration;
       }
+      if (item.modifiers.dashCooldown) {
+        dashCooldownMultiplier *= item.modifiers.dashCooldown;
+      }
     }
   });
   
@@ -225,7 +230,8 @@ export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
     playerSpeedMultiplier,
     walkSpeedMultiplier,
     dashSpeedMultiplier,
-    dashDurationMultiplier
+    dashDurationMultiplier,
+    dashCooldownMultiplier
   };
 }
 
@@ -236,7 +242,8 @@ function getPlayerSpeeds(inventoryItems: InventoryItem[]) {
     playerSpeed: BASE_PLAYER_SPEED * multipliers.playerSpeedMultiplier,
     walkingSpeed: BASE_WALKING_SPEED * multipliers.walkSpeedMultiplier,
     dashSpeed: 600 * multipliers.dashSpeedMultiplier, // Base dash speed of 600
-    dashDuration: 200 * multipliers.dashDurationMultiplier // Base dash duration of 200ms
+    dashDuration: 200 * multipliers.dashDurationMultiplier, // Base dash duration of 200ms
+    dashCooldown: 1000 * multipliers.dashCooldownMultiplier // Base dash cooldown of 1000ms
   };
 }
 
@@ -4383,7 +4390,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         normalSpeed: speeds.playerSpeed,
         walkingSpeed: speeds.walkingSpeed,
         dashSpeed: speeds.dashSpeed,
-        dashDuration: speeds.dashDuration
+        dashDuration: speeds.dashDuration,
+        dashCooldown: speeds.dashCooldown
       });
       
       // Get the intended position from unified controller
@@ -4499,6 +4507,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         useAcceleration: false, // Direct movement for all levels
         dashSpeed: speeds.dashSpeed,
         dashDuration: speeds.dashDuration,
+        dashCooldown: speeds.dashCooldown,
         dashDistance: 96,
         dashInvulnerabilityDistance: 32
       });

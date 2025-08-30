@@ -11,6 +11,7 @@ interface InventoryItem {
     walkSpeed?: number;
     dashSpeed?: number;
     dashDuration?: number;
+    dashCooldown?: number;
     [key: string]: any;
   };
   isActive?: boolean;

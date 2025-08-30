@@ -104,6 +104,19 @@ const HubRoom: React.FC = () => {
       setTimeout(() => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.trim().toLowerCase() === "hypno") {
+      // Add Hypnodisc item to inventory
+      const hypnodiscItem = GAME_ITEMS.hypnodisc();
+      addInventoryItem(hypnodiscItem);
+
+      // Immediately activate the item to apply effect
+      useInventoryItem(hypnodiscItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
     } else if (cheatCodeInput.trim().toLowerCase() === "92 traverse") {
       // Add all GAME_ITEMS to inventory without activating them
       Object.values(GAME_ITEMS).forEach(itemFactory => {

@@ -22,6 +22,7 @@ export interface MovementConfig {
   dashDistance: number;
   dashInvulnerabilityDistance: number;
   dashDuration: number; // Duration of dash in milliseconds
+  dashCooldown?: number; // Cooldown between dashes in milliseconds
 }
 
 export interface BoundaryConfig {
@@ -79,7 +80,7 @@ export class PlayerController {
       dashProgress: 0,
       isInvulnerable: false,
       lastDashTime: 0,
-      cooldownDuration: 1500, // 1.5 seconds in milliseconds
+      cooldownDuration: config.dashCooldown || 1500, // Use config value or default 1.5 seconds
     };
     this.lastDashInput = false;
   }
@@ -289,6 +290,10 @@ export class PlayerController {
 
   updateConfig(config: Partial<MovementConfig>): void {
     this.config = { ...this.config, ...config };
+    // Update dash cooldown if provided
+    if (config.dashCooldown !== undefined) {
+      this.dashState.cooldownDuration = config.dashCooldown;
+    }
   }
 }
 
@@ -309,7 +314,8 @@ export function createGamePlayerController(
       dashSpeed: 600,     // High speed for time-based dash
       dashDistance: 120,  // Distance covered during 200ms dash (600 * 0.2 = 120 pixels)
       dashInvulnerabilityDistance: 60,  // Invulnerable during first half of dash
-      dashDuration: 200   // Duration of dash in milliseconds
+      dashDuration: 200,  // Duration of dash in milliseconds
+      dashCooldown: 1000  // Cooldown between dashes in milliseconds
     },
     boundaries
   );

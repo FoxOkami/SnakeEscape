@@ -50,4 +50,16 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     },
     isActive: true, // Permanent items should be active by default
   }),
+
+  hypnodisc: () => ({
+    id: `hypnodisc_${Date.now()}`, // Unique ID
+    name: "Hypnodisc",
+    description: "You are gonna love spiders after this.",
+    image: "😵‍💫", // Dizzy face emoji
+    duration: "permanent" as const,
+    modifiers: {
+      dashCooldown: 0.5, // 50% reduction in dash cooldown (half the wait time)
+    },
+    isActive: true, // Permanent items should be active by default
+  }),
 };
