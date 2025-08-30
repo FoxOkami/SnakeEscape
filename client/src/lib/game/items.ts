@@ -49,16 +49,4 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     },
     isActive: true, // Permanent items should be active by default
   }),
-
-  ag1: () => ({
-    id: `ag1_${Date.now()}`, // Unique ID
-    name: "AG1",
-    description: "Advanced protection system with 2 additional bite protection",
-    image: "🛡️", // Shield emoji
-    duration: "permanent" as const,
-    modifiers: {
-      biteProtection: 2, // 2 additional bites before death
-    },
-    isActive: true, // Permanent items should be active by default
-  }),
 };
