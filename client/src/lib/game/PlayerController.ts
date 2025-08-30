@@ -237,7 +237,7 @@ export class PlayerController {
     // Simple time-based dash: 200ms duration at high speed
     const currentTime = performance.now();
     const dashDuration = 200; // 200ms dash
-    const dashSpeed = 600; // Fast movement speed
+    const dashSpeed = this.config.dashSpeed; // Use config dash speed (affected by inventory modifiers)
     
     const timeSinceDashStart = currentTime - (this.dashState.lastDashTime || currentTime);
     

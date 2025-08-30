@@ -45,7 +45,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🏮", // Lantern emoji
     duration: "permanent" as const,
     modifiers: {
-      dashSpeed: 1.05, // 5% increase in dash speed
+      dashSpeed: 3.05, // 305% increase in dash speed
     },
     isActive: true, // Permanent items should be active by default
   }),
