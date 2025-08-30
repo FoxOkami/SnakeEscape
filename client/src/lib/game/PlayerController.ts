@@ -21,6 +21,7 @@ export interface MovementConfig {
   dashSpeed: number;
   dashDistance: number;
   dashInvulnerabilityDistance: number;
+  dashDuration: number; // Duration of dash in milliseconds
 }
 
 export interface BoundaryConfig {
@@ -234,9 +235,9 @@ export class PlayerController {
   private updateDash(deltaTime: number): void {
     if (!this.dashState.isDashing) return;
     
-    // Simple time-based dash: 200ms duration at high speed
+    // Simple time-based dash: configurable duration at configurable speed
     const currentTime = performance.now();
-    const dashDuration = 200; // 200ms dash
+    const dashDuration = this.config.dashDuration; // Use config dash duration (affected by inventory modifiers)
     const dashSpeed = this.config.dashSpeed; // Use config dash speed (affected by inventory modifiers)
     
     const timeSinceDashStart = currentTime - (this.dashState.lastDashTime || currentTime);
@@ -305,9 +306,10 @@ export function createGamePlayerController(
       walkingSpeed: 75,   // Comfortable walking speed
       acceleration: 8,    // Acceleration value (not used when useAcceleration is false)
       useAcceleration: false,  // Direct movement for consistent behavior across all areas
-      dashSpeed: 600,     // High speed for time-based dash (200ms duration)
+      dashSpeed: 600,     // High speed for time-based dash
       dashDistance: 120,  // Distance covered during 200ms dash (600 * 0.2 = 120 pixels)
-      dashInvulnerabilityDistance: 60  // Invulnerable during first half of dash
+      dashInvulnerabilityDistance: 60,  // Invulnerable during first half of dash
+      dashDuration: 200   // Duration of dash in milliseconds
     },
     boundaries
   );

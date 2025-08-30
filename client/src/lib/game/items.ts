@@ -46,6 +46,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     duration: "permanent" as const,
     modifiers: {
       dashSpeed: 3.05, // 305% increase in dash speed
+      dashDuration: 0.328, // ~67% decrease in duration (1/3.05) to maintain same distance
     },
     isActive: true, // Permanent items should be active by default
   }),

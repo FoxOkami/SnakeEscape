@@ -10,6 +10,7 @@ interface InventoryItem {
     playerSpeed?: number;
     walkSpeed?: number;
     dashSpeed?: number;
+    dashDuration?: number;
     [key: string]: any;
   };
   isActive?: boolean;
