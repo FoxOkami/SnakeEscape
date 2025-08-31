@@ -668,16 +668,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Calculate shield health from all active items (both permanent and temporary)
       const currentState = get();
       let totalBiteProtection = 0;
-      console.log(`📦 startFromLevel: Checking inventory items before transition:`, currentState.inventoryItems);
       currentState.inventoryItems.forEach(item => {
         if (item.isActive && item.modifiers.biteProtection) {
           totalBiteProtection += item.modifiers.biteProtection;
-          console.log(`🛡️ startFromLevel: Adding ${item.modifiers.biteProtection} bite protection from ${item.name} (${item.duration})`);
         }
       });
-      console.log(`🛡️ startFromLevel: Total bite protection: ${totalBiteProtection}`);
-
-      console.log(`🔄 startFromLevel: About to set new state with shieldHealth=${totalBiteProtection}`);
       set({
         currentLevel: levelIndex,
         currentLevelKey: getLevelKeyByIndex(levelIndex),
@@ -866,12 +861,9 @@ export const useSnakeGame = create<SnakeGameState>()(
     nextLevel: () => {
       const state = get();
       const nextLevelIndex = state.currentLevel + 1;
-      
-      console.log(`🔄 nextLevel called: current=${state.currentLevel}, next=${nextLevelIndex}, total levels=${LEVELS.length}`);
 
       if (nextLevelIndex >= LEVELS.length) {
         // All levels completed, return to hub
-        console.log('🏁 All levels completed, calling resetForHub');
         get().resetForHub();
         return;
       }
@@ -906,14 +898,11 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Calculate shield health from all active items (both permanent and temporary)
       let totalBiteProtection = 0;
-      console.log(`📦 nextLevel: Checking inventory items before transition:`, state.inventoryItems);
       state.inventoryItems.forEach(item => {
         if (item.isActive && item.modifiers.biteProtection) {
           totalBiteProtection += item.modifiers.biteProtection;
-          console.log(`🛡️ nextLevel: Adding ${item.modifiers.biteProtection} bite protection from ${item.name} (${item.duration})`);
         }
       });
-      console.log(`🛡️ nextLevel: Total bite protection: ${totalBiteProtection}`);
 
       set({
         currentLevel: nextLevelIndex,
@@ -1102,8 +1091,6 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     // Clear temporary items but keep permanent items active (called when returning to hub - end of run)
     clearTemporaryItems: () => {
-      console.log('🚨 clearTemporaryItems called - removing all temporary items!');
-      console.trace('clearTemporaryItems call stack');
       set((state) => ({
         inventoryItems: state.inventoryItems
           .filter(item => item.duration === 'permanent') // Keep only permanent items
@@ -1390,10 +1377,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       let updatedDashState = { ...updatedState.dashState };
 
       // --- SHIELD HEALTH SYNCHRONIZATION ---
-      // Keep shield health in sync with active items
+      // Keep shield health in sync with active items (both permanent and temporary)
       let totalBiteProtection = 0;
       state.inventoryItems.forEach(item => {
-        if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+        if (item.isActive && item.modifiers.biteProtection) {
           totalBiteProtection += item.modifiers.biteProtection;
         }
       });
@@ -4371,22 +4358,14 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     startLevelByName: (levelKey: string) => {
       const levelIndex = getLevelIndexByKey(levelKey);
-      console.log(`🔗 startLevelByName called with levelKey: ${levelKey}, resolved to index: ${levelIndex}`);
       if (levelIndex >= 0) {
         get().startFromLevel(levelIndex);
-        
-        // Check inventory state after startFromLevel completes
-        const stateAfter = get();
-        console.log(`📦 After startFromLevel: inventory items:`, stateAfter.inventoryItems);
-        console.log(`🛡️ After startFromLevel: player shieldHealth=${stateAfter.player.shieldHealth}, maxShieldHealth=${stateAfter.player.maxShieldHealth}`);
       }
     },
 
     // Centralized function to handle all hub reset logic
     resetForHub: () => {
       const state = get();
-      console.log('🏠 resetForHub called - this will clear temporary items');
-      console.trace('resetForHub call stack');
       state.clearTemporaryItems(); // Clear temporary items when returning to hub
       
       // Calculate shield health from remaining active permanent items
