@@ -106,4 +106,17 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     },
     isActive: true, // Permanent items should be active by default
   }),
+
+  lootGertysSausage: () => ({
+    id: `loot_gertys_sausage_${Date.now()}`, // Unique ID
+    name: "Loot Gerty's Sausage",
+    description: "Quite possibly the best sausage",
+    image: "🌭", // Hot dog emoji
+    duration: "temporary" as const,
+    modifiers: {
+      snakeSightMultiplier: 0.97, // 3% reduction in snake sight detection radius
+      snakeHearingMultiplier: 0.97, // 3% reduction in snake hearing detection radius
+    },
+    isActive: false,
+  }),
 };

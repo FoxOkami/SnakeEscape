@@ -1,6 +1,7 @@
 import { Snake, Player, Wall, Position, Boulder } from "./types";
 import { checkAABBCollision, getDistance, moveTowards, hasLineOfSight, getDirectionVector, findPathAroundWalls, slideAlongWall } from "./collision";
 import { updateBossSnake } from "./bossSnake";
+import { getSnakeDetectionMultipliers } from "../stores/useSnakeGame";
 
 export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[], gameState?: any, levelBounds?: { width: number; height: number }, boulders?: Boulder[]): Snake {
   const currentTime = Date.now();
@@ -13,35 +14,48 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
     // Snake is not active in current phase, return without updating
     return { ...snake, isChasing: false };
   }
-  
 
+  // Calculate detection multipliers from inventory items
+  let detectionMultipliers = { snakeSightMultiplier: 1, snakeHearingMultiplier: 1 };
+  if (gameState && gameState.inventoryItems) {
+    detectionMultipliers = getSnakeDetectionMultipliers(gameState.inventoryItems);
+  }
+
+  // Apply detection modifiers to snake ranges
+  const modifiedSnake = { ...snake };
+  if (modifiedSnake.sightRange) {
+    modifiedSnake.sightRange = modifiedSnake.sightRange * detectionMultipliers.snakeSightMultiplier;
+  }
+  if (modifiedSnake.hearingRange) {
+    modifiedSnake.hearingRange = modifiedSnake.hearingRange * detectionMultipliers.snakeHearingMultiplier;
+  }
 
   // Handle different snake types
-  switch (snake.type) {
+  switch (modifiedSnake.type) {
     case 'stalker':
-      return updateStalkerSnake(snake, walls, dt, player, sounds);
+      return updateStalkerSnake(modifiedSnake, walls, dt, player, sounds);
     case 'guard':
-      return updateGuardSnake(snake, walls, dt, player);
+      return updateGuardSnake(modifiedSnake, walls, dt, player);
     case 'burster':
-      return updateBursterSnake(snake, walls, dt, player, currentTime);
+      return updateBursterSnake(modifiedSnake, walls, dt, player, currentTime);
     case 'screensaver':
-      return updateScreensaverSnake(snake, walls, dt);
+      return updateScreensaverSnake(modifiedSnake, walls, dt);
     case 'plumber':
-      return updatePlumberSnake(snake, walls, dt, player, gameState);
+      return updatePlumberSnake(modifiedSnake, walls, dt, player, gameState);
     case 'spitter':
-      return updateSpitterSnake(snake, walls, dt);
+      return updateSpitterSnake(modifiedSnake, walls, dt);
     case 'photophobic':
-      return updatePhotophobicSnake(snake, walls, dt, player, sounds, currentTime, gameState);
+      return updatePhotophobicSnake(modifiedSnake, walls, dt, player, sounds, currentTime, gameState);
     case 'rattlesnake':
-      return updateRattlesnakeSnake(snake, walls, dt, player);
+      return updateRattlesnakeSnake(modifiedSnake, walls, dt, player);
     case 'boss':
-      return updateBossSnake(snake, walls, dt, player, currentTime, levelBounds, boulders);
+      return updateBossSnake(modifiedSnake, walls, dt, player, currentTime, levelBounds, boulders);
     case 'phantom':
-      return updatePhantomSnake(snake, walls, dt, levelBounds);
+      return updatePhantomSnake(modifiedSnake, walls, dt, levelBounds);
     case 'rainsnake':
-      return updateRainSnake(snake, walls, dt, levelBounds);
+      return updateRainSnake(modifiedSnake, walls, dt, levelBounds);
     default:
-      return snake;
+      return modifiedSnake;
   }
 }
 

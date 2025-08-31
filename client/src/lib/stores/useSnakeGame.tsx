@@ -38,6 +38,8 @@ export interface InventoryItem {
     dashCooldown?: number; // multiplier for dash cooldown time
     biteProtection?: number; // additional bites player can take before dying
     snakeChaseMultiplier?: number; // multiplier for snake chase values (affects all non-boss snakes)
+    snakeSightMultiplier?: number; // multiplier for snake sight detection radius
+    snakeHearingMultiplier?: number; // multiplier for snake hearing detection radius
     [key: string]: any; // allow for future modifiers
   };
   isActive?: boolean; // for temporary items
@@ -232,6 +234,28 @@ export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
     dashSpeedMultiplier,
     dashDurationMultiplier,
     dashCooldownMultiplier
+  };
+}
+
+export function getSnakeDetectionMultipliers(inventoryItems: InventoryItem[]) {
+  let snakeSightMultiplier = 1;
+  let snakeHearingMultiplier = 1;
+  
+  // Apply modifiers from active items
+  inventoryItems.forEach(item => {
+    if (item.isActive) {
+      if (item.modifiers.snakeSightMultiplier) {
+        snakeSightMultiplier *= item.modifiers.snakeSightMultiplier;
+      }
+      if (item.modifiers.snakeHearingMultiplier) {
+        snakeHearingMultiplier *= item.modifiers.snakeHearingMultiplier;
+      }
+    }
+  });
+  
+  return {
+    snakeSightMultiplier,
+    snakeHearingMultiplier
   };
 }
 
