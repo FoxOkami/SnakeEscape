@@ -1012,11 +1012,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           activatedAt: Date.now()
         };
         
-        // Calculate new shield health from all active items
+        // Calculate new shield health from all active items (both permanent and temporary)
         const updatedInventory = state.inventoryItems.map(i => i.id === itemId ? updatedItem : i);
         let totalBiteProtection = 0;
         updatedInventory.forEach(inventoryItem => {
-          if (inventoryItem.duration === 'permanent' && inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
+          if (inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
             totalBiteProtection += inventoryItem.modifiers.biteProtection;
           }
         });
@@ -1050,10 +1050,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Update inventory
         const updatedInventory = state.inventoryItems.map(i => i.id === itemId ? updatedItem : i);
         
-        // Recalculate shield health from all active permanent items
+        // Recalculate shield health from all active items (both permanent and temporary)
         let totalBiteProtection = 0;
         updatedInventory.forEach(inventoryItem => {
-          if (inventoryItem.duration === 'permanent' && inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
+          if (inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
             totalBiteProtection += inventoryItem.modifiers.biteProtection;
           }
         });
