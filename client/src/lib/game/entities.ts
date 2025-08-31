@@ -441,10 +441,12 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
   }
   
   // Calculate new position
+  console.log(`Speed calc: direction=${JSON.stringify(snake.direction)}, speed=${snake.speed}, dt=${dt}`);
   const newPosition = {
     x: snake.position.x + snake.direction.x * snake.speed * dt,
     y: snake.position.y + snake.direction.y * snake.speed * dt
   };
+  console.log(`Calculated movement: from (${snake.position.x}, ${snake.position.y}) to (${newPosition.x}, ${newPosition.y})`);
   
   // Simple bounds checking - reverse direction if hitting edge
   if (newPosition.x <= 20 || newPosition.x + snake.size.width >= 780) {

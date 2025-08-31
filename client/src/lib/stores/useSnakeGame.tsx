@@ -1259,7 +1259,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       console.log("About to update snakes:", newSnakes.length);
       const updatedSnakes = newSnakes.map((snake) => {
-        console.log(`Processing snake ${snake.id} (${snake.type}) at position:`, snake.position);
+        console.log(`Processing snake ${snake.id} (${snake.type}) at position:`, snake.position, `speed: ${snake.speed}`);
         // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
         // Allow patrolling and chasing rattlesnakes to be processed by normal AI
         if (
