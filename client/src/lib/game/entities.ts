@@ -454,58 +454,35 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
 
   // Check for wall collision
   if (checkWallCollision(snake, newPosition, walls)) {
-    // Hit a wall, determine which wall and pick a non-parallel direction
-    const currentDir = snake.direction;
-    let availableDirections = [...cardinalDirections];
+    // Hit a wall, pick a completely random new direction (original screensaver behavior)
+    let attempts = 0;
+    let foundValidDirection = false;
     
-    // Determine collision type based on current direction and position
-    const levelBounds = { x: 20, y: 20, width: 760, height: 560 };
-    const snakeRect = {
-      x: newPosition.x,
-      y: newPosition.y,
-      width: snake.size.width,
-      height: snake.size.height
-    };
-    
-    // Check which boundary was hit
-    const hitLeftWall = snakeRect.x <= levelBounds.x;
-    const hitRightWall = snakeRect.x + snakeRect.width >= levelBounds.x + levelBounds.width;
-    const hitTopWall = snakeRect.y <= levelBounds.y;
-    const hitBottomWall = snakeRect.y + snakeRect.height >= levelBounds.y + levelBounds.height;
-    
-    // Remove parallel directions based on which wall was hit
-    if (hitLeftWall || hitRightWall) {
-      // Hit vertical wall - remove purely vertical directions (North, South)
-      availableDirections = availableDirections.filter(dir => 
-        !(dir.x === 0 && dir.y !== 0) // Remove pure north/south
-      );
+    while (attempts < 10 && !foundValidDirection) {
+      // Pick a random direction that's different from current direction
+      let newDirection;
+      do {
+        const randomIndex = Math.floor(Math.random() * cardinalDirections.length);
+        newDirection = { ...cardinalDirections[randomIndex] };
+      } while (newDirection.x === snake.direction.x && newDirection.y === snake.direction.y);
+      
+      // Test if this new direction works
+      const testPosition = {
+        x: snake.position.x + newDirection.x * snake.speed * dt,
+        y: snake.position.y + newDirection.y * snake.speed * dt
+      };
+      
+      if (!checkWallCollision(snake, testPosition, walls)) {
+        snake.direction = newDirection;
+        snake.position = testPosition;
+        foundValidDirection = true;
+      }
+      attempts++;
     }
     
-    if (hitTopWall || hitBottomWall) {
-      // Hit horizontal wall - remove purely horizontal directions (East, West)
-      availableDirections = availableDirections.filter(dir => 
-        !(dir.y === 0 && dir.x !== 0) // Remove pure east/west
-      );
-    }
-    
-    // If we've filtered out too many directions, fall back to all directions
-    if (availableDirections.length === 0) {
-      availableDirections = [...cardinalDirections];
-    }
-    
-    // Pick a random direction from available non-parallel directions
-    const randomIndex = Math.floor(Math.random() * availableDirections.length);
-    snake.direction = { ...availableDirections[randomIndex] };
-    
-    // Try moving in the new direction
-    const retryPosition = {
-      x: snake.position.x + snake.direction.x * snake.speed * dt,
-      y: snake.position.y + snake.direction.y * snake.speed * dt
-    };
-    
-    // If the new direction is also blocked, stay in place for this frame
-    if (!checkWallCollision(snake, retryPosition, walls)) {
-      snake.position = retryPosition;
+    // If no valid direction found after attempts, just reverse direction
+    if (!foundValidDirection) {
+      snake.direction = { x: -snake.direction.x, y: -snake.direction.y };
     }
   } else {
     // No collision, move normally

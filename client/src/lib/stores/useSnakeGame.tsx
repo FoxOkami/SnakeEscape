@@ -3114,7 +3114,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         ) {
           const timeSinceLastFire = currentTime - snake.lastFireTime;
 
-          if (timeSinceLastFire >= snake.fireInterval) {
+          // Add minimum cooldown of 1 second even if fireInterval is shorter
+          const effectiveFireInterval = Math.max(snake.fireInterval, 1000);
+          
+          if (timeSinceLastFire >= effectiveFireInterval) {
             snakesToFire.push(snake.id);
             return {
               ...snake,
@@ -3978,6 +3981,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         const shouldEmerge =
           pit.lastEmergenceTime === 0 ||
           timeSinceLastEmergence >= totalWaitTime;
+          
+        // Debug rattlesnake emergence
+        if (pit.id === "pit1" && currentTime % 1000 < 50) { // Log every second
+          console.log(`Pit ${pit.id}: shouldEmerge=${shouldEmerge}, lastEmergenceTime=${pit.lastEmergenceTime}, timeSince=${timeSinceLastEmergence}, totalWait=${totalWaitTime}`);
+        }
 
         // Check if it's time for a new rattlesnake to emerge
         if (shouldEmerge) {
