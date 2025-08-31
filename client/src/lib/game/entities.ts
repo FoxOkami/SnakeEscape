@@ -432,9 +432,12 @@ function checkWallCollision(snake: Snake, newPosition: Position, walls: Wall[]):
 }
 
 function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake {
+  console.log(`updateScreensaverSnake called for ${snake.id}, dt: ${dt}, current position:`, snake.position);
+  
   // Force simple movement to test if snakes can move
   if (!snake.direction || (snake.direction.x === 0 && snake.direction.y === 0)) {
     snake.direction = { x: 1, y: 0 }; // Start moving right
+    console.log("Set initial direction to move right");
   }
   
   // Calculate new position
@@ -452,10 +455,13 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
   }
   
   // Always update position (bypass wall collision for testing)
+  const oldPosition = { ...snake.position };
   snake.position = {
     x: Math.max(20, Math.min(780 - snake.size.width, newPosition.x)),
     y: Math.max(20, Math.min(580 - snake.size.height, newPosition.y))
   };
+  
+  console.log(`Snake ${snake.id} moved from`, oldPosition, "to", snake.position);
   
   return snake;
 }

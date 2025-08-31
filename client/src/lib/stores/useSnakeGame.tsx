@@ -1175,7 +1175,11 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     updateGame: (deltaTime: number) => {
       const state = get();
-      if (state.gameState !== "playing" || state.showInventory) return;
+      console.log("updateGame called:", { deltaTime, gameState: state.gameState, showInventory: state.showInventory });
+      if (state.gameState !== "playing" || state.showInventory) {
+        console.log("updateGame blocked - game not playing or inventory open");
+        return;
+      }
 
       // Initialize unified PlayerController if needed
       if (!state.playerController) {
@@ -1253,7 +1257,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
       
+      console.log("About to update snakes:", newSnakes.length);
       const updatedSnakes = newSnakes.map((snake) => {
+        console.log(`Processing snake ${snake.id} (${snake.type}) at position:`, snake.position);
         // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
         // Allow patrolling and chasing rattlesnakes to be processed by normal AI
         if (
