@@ -677,6 +677,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       console.log(`🛡️ startFromLevel: Total bite protection: ${totalBiteProtection}`);
 
+      console.log(`🔄 startFromLevel: About to set new state with shieldHealth=${totalBiteProtection}`);
       set({
         currentLevel: levelIndex,
         currentLevelKey: getLevelKeyByIndex(levelIndex),
@@ -4370,8 +4371,14 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     startLevelByName: (levelKey: string) => {
       const levelIndex = getLevelIndexByKey(levelKey);
+      console.log(`🔗 startLevelByName called with levelKey: ${levelKey}, resolved to index: ${levelIndex}`);
       if (levelIndex >= 0) {
         get().startFromLevel(levelIndex);
+        
+        // Check inventory state after startFromLevel completes
+        const stateAfter = get();
+        console.log(`📦 After startFromLevel: inventory items:`, stateAfter.inventoryItems);
+        console.log(`🛡️ After startFromLevel: player shieldHealth=${stateAfter.player.shieldHealth}, maxShieldHealth=${stateAfter.player.maxShieldHealth}`);
       }
     },
 
