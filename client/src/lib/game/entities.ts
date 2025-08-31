@@ -343,26 +343,26 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
 
 function getPatrolTarget(snake: Snake): Position {
   if (!snake.patrolPoints || snake.patrolPoints.length === 0) {
-    // Generate a simple patrol pattern if none exists
+    // For snakes without patrol points, generate a wandering movement pattern
     if (!snake.fallbackTarget) {
-      // Create a small circular patrol around the spawn position
-      const radius = 50;
+      // Create initial random direction movement
       const angle = Math.random() * Math.PI * 2;
+      const distance = 100 + Math.random() * 100; // Random distance between 100-200 pixels
       snake.fallbackTarget = {
-        x: snake.position.x + Math.cos(angle) * radius,
-        y: snake.position.y + Math.sin(angle) * radius
+        x: Math.max(50, Math.min(750, snake.position.x + Math.cos(angle) * distance)),
+        y: Math.max(50, Math.min(550, snake.position.y + Math.sin(angle) * distance))
       };
     }
     
-    // Check if we've reached the fallback target
+    // Check if we've reached the fallback target (closer threshold for more movement)
     const distanceToFallback = getDistance(snake.position, snake.fallbackTarget);
-    if (distanceToFallback < 15) {
-      // Generate a new fallback target
-      const radius = 50;
+    if (distanceToFallback < 25) {
+      // Generate a new fallback target with bounds checking
       const angle = Math.random() * Math.PI * 2;
+      const distance = 80 + Math.random() * 80; // Shorter distances for more frequent direction changes
       snake.fallbackTarget = {
-        x: snake.position.x + Math.cos(angle) * radius,
-        y: snake.position.y + Math.sin(angle) * radius
+        x: Math.max(50, Math.min(750, snake.position.x + Math.cos(angle) * distance)),
+        y: Math.max(50, Math.min(550, snake.position.y + Math.sin(angle) * distance))
       };
     }
     
@@ -432,92 +432,31 @@ function checkWallCollision(snake: Snake, newPosition: Position, walls: Wall[]):
 }
 
 function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake {
-  // All screensaver snakes use the same behavior
-  // Eight cardinal directions: N, NE, E, SE, S, SW, W, NW
-  const cardinalDirections = [
-    { x: 0, y: -1 },   // North
-    { x: 1, y: -1 },   // Northeast
-    { x: 1, y: 0 },    // East
-    { x: 1, y: 1 },    // Southeast
-    { x: 0, y: 1 },    // South
-    { x: -1, y: 1 },   // Southwest
-    { x: -1, y: 0 },   // West
-    { x: -1, y: -1 }   // Northwest
-  ];
-
-  // If direction is not set or is zero, pick a random cardinal direction
+  // Force simple movement to test if snakes can move
   if (!snake.direction || (snake.direction.x === 0 && snake.direction.y === 0)) {
-    const randomIndex = Math.floor(Math.random() * cardinalDirections.length);
-    snake.direction = { ...cardinalDirections[randomIndex] };
+    snake.direction = { x: 1, y: 0 }; // Start moving right
   }
-
-  // Calculate new position based on current direction
+  
+  // Calculate new position
   const newPosition = {
     x: snake.position.x + snake.direction.x * snake.speed * dt,
     y: snake.position.y + snake.direction.y * snake.speed * dt
   };
-
-  // Check for wall collision
-  if (checkWallCollision(snake, newPosition, walls)) {
-    // Hit a wall, determine which wall and pick a non-parallel direction
-    const currentDir = snake.direction;
-    let availableDirections = [...cardinalDirections];
-    
-    // Determine collision type based on current direction and position
-    const levelBounds = { x: 20, y: 20, width: 760, height: 560 };
-    const snakeRect = {
-      x: newPosition.x,
-      y: newPosition.y,
-      width: snake.size.width,
-      height: snake.size.height
-    };
-    
-    // Check which boundary was hit
-    const hitLeftWall = snakeRect.x <= levelBounds.x;
-    const hitRightWall = snakeRect.x + snakeRect.width >= levelBounds.x + levelBounds.width;
-    const hitTopWall = snakeRect.y <= levelBounds.y;
-    const hitBottomWall = snakeRect.y + snakeRect.height >= levelBounds.y + levelBounds.height;
-    
-    // Remove parallel directions based on which wall was hit
-    if (hitLeftWall || hitRightWall) {
-      // Hit vertical wall - remove purely vertical directions (North, South)
-      availableDirections = availableDirections.filter(dir => 
-        !(dir.x === 0 && dir.y !== 0) // Remove pure north/south
-      );
-    }
-    
-    if (hitTopWall || hitBottomWall) {
-      // Hit horizontal wall - remove purely horizontal directions (East, West)
-      availableDirections = availableDirections.filter(dir => 
-        !(dir.y === 0 && dir.x !== 0) // Remove pure east/west
-      );
-    }
-    
-    // If we've filtered out too many directions, fall back to all directions
-    if (availableDirections.length === 0) {
-      availableDirections = [...cardinalDirections];
-    }
-    
-    // Pick a random direction from available non-parallel directions
-    const randomIndex = Math.floor(Math.random() * availableDirections.length);
-    snake.direction = { ...availableDirections[randomIndex] };
-    
-    // Try moving in the new direction
-    const retryPosition = {
-      x: snake.position.x + snake.direction.x * snake.speed * dt,
-      y: snake.position.y + snake.direction.y * snake.speed * dt
-    };
-    
-    // If the new direction is also blocked, stay in place for this frame
-    if (!checkWallCollision(snake, retryPosition, walls)) {
-      snake.position = retryPosition;
-    }
-  } else {
-    // No collision, move normally
-    snake.position = newPosition;
+  
+  // Simple bounds checking - reverse direction if hitting edge
+  if (newPosition.x <= 20 || newPosition.x + snake.size.width >= 780) {
+    snake.direction.x = -snake.direction.x;
   }
-
-  // Keep current direction for next frame
+  if (newPosition.y <= 20 || newPosition.y + snake.size.height >= 580) {
+    snake.direction.y = -snake.direction.y;
+  }
+  
+  // Always update position (bypass wall collision for testing)
+  snake.position = {
+    x: Math.max(20, Math.min(780 - snake.size.width, newPosition.x)),
+    y: Math.max(20, Math.min(580 - snake.size.height, newPosition.y))
+  };
+  
   return snake;
 }
 
