@@ -68,7 +68,7 @@ const HubRoom: React.FC = () => {
 
   // Handle cheat code processing
   const handleCheatCode = () => {
-    if (cheatCodeInput.trim().toLowerCase() === "tangential") {
+    if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "tangential") {
       // Add FIFO System item to inventory
       const fifoSystemItem = GAME_ITEMS.fifoSystem();
       addInventoryItem(fifoSystemItem);
@@ -78,7 +78,7 @@ const HubRoom: React.FC = () => {
       setTimeout(() => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
-    } else if (cheatCodeInput.trim().toLowerCase() === "sos") {
+    } else if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "sos") {
       // Add shiny object item to inventory
       const shinyobjectItem = GAME_ITEMS.shinyObject();
       addInventoryItem(shinyobjectItem);
@@ -91,7 +91,9 @@ const HubRoom: React.FC = () => {
       setTimeout(() => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
-    } else if (cheatCodeInput.trim().toLowerCase() === "stapling") {
+    } else if (
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "stapling"
+    ) {
       // Add Stapler item to inventory
       const staplerItem = GAME_ITEMS.stapler();
       addInventoryItem(staplerItem);
@@ -104,22 +106,11 @@ const HubRoom: React.FC = () => {
       setTimeout(() => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
-    } else if (cheatCodeInput.trim().toLowerCase() === "hypno") {
-      // Add Hypnodisc item to inventory
-      const hypnodiscItem = GAME_ITEMS.hypnodisc();
-      addInventoryItem(hypnodiscItem);
-
-      // Immediately activate the item to apply effect
-      useInventoryItem(hypnodiscItem.id);
-
-      // Show success feedback
-      setCheatCodeSuccess(true);
-      setTimeout(() => {
-        setCheatCodeSuccess(false);
-      }, 1000); // Reset after 1 second
-    } else if (cheatCodeInput.trim().toLowerCase() === "92 traverse") {
+    } else if (
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "92traverse"
+    ) {
       // Add all GAME_ITEMS to inventory without activating them
-      Object.values(GAME_ITEMS).forEach(itemFactory => {
+      Object.values(GAME_ITEMS).forEach((itemFactory) => {
         const item = itemFactory();
         // Set isActive to false to ensure items are not immediately activated
         item.isActive = false;
