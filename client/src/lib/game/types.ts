@@ -28,6 +28,7 @@ export interface Snake {
   type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic' | 'rattlesnake' | 'boss' | 'phantom' | 'rainsnake' | 'friendly';
   position: Position;
   spawnPoint?: Position; // Original spawn position for return behavior
+  fallbackTarget?: Position; // Generated patrol target for snakes without predefined patrol points
   size: Size;
   speed: number;
   direction: Position;

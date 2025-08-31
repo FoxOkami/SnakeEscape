@@ -343,7 +343,30 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
 
 function getPatrolTarget(snake: Snake): Position {
   if (!snake.patrolPoints || snake.patrolPoints.length === 0) {
-    return snake.position;
+    // Generate a simple patrol pattern if none exists
+    if (!snake.fallbackTarget) {
+      // Create a small circular patrol around the spawn position
+      const radius = 50;
+      const angle = Math.random() * Math.PI * 2;
+      snake.fallbackTarget = {
+        x: snake.position.x + Math.cos(angle) * radius,
+        y: snake.position.y + Math.sin(angle) * radius
+      };
+    }
+    
+    // Check if we've reached the fallback target
+    const distanceToFallback = getDistance(snake.position, snake.fallbackTarget);
+    if (distanceToFallback < 15) {
+      // Generate a new fallback target
+      const radius = 50;
+      const angle = Math.random() * Math.PI * 2;
+      snake.fallbackTarget = {
+        x: snake.position.x + Math.cos(angle) * radius,
+        y: snake.position.y + Math.sin(angle) * radius
+      };
+    }
+    
+    return snake.fallbackTarget;
   }
   
   // Ensure currentPatrolIndex is valid
@@ -375,7 +398,16 @@ function getPatrolTarget(snake: Snake): Position {
     // Validate the new target
     const newTarget = snake.patrolPoints[snake.currentPatrolIndex];
     if (!newTarget || typeof newTarget.x !== 'number' || typeof newTarget.y !== 'number') {
-      return snake.position;
+      // If patrol points are corrupted, generate a fallback target
+      if (!snake.fallbackTarget) {
+        const radius = 50;
+        const angle = Math.random() * Math.PI * 2;
+        snake.fallbackTarget = {
+          x: snake.position.x + Math.cos(angle) * radius,
+          y: snake.position.y + Math.sin(angle) * radius
+        };
+      }
+      return snake.fallbackTarget;
     }
   }
   
