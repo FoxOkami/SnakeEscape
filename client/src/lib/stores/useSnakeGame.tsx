@@ -673,6 +673,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           totalBiteProtection += item.modifiers.biteProtection;
         }
       });
+
+      // Preserve current shield health, but cap it at the new maximum
+      const preservedShieldHealth = Math.min(currentState.player.shieldHealth, totalBiteProtection);
+
       set({
         currentLevel: levelIndex,
         currentLevelKey: getLevelKeyByIndex(levelIndex),
@@ -684,7 +688,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           hasKey: false,
           health: 9,
           maxHealth: 9,
-          shieldHealth: totalBiteProtection,
+          shieldHealth: preservedShieldHealth,
           maxShieldHealth: totalBiteProtection,
           isInvincible: false,
           invincibilityEndTime: 0,
@@ -904,6 +908,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
 
+      // Preserve current shield health, but cap it at the new maximum
+      const preservedShieldHealth = Math.min(state.player.shieldHealth, totalBiteProtection);
+
       set({
         currentLevel: nextLevelIndex,
         currentLevelKey: getLevelKeyByIndex(nextLevelIndex),
@@ -915,7 +922,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           hasKey: false,
           health: state.player.health, // Preserve current health
           maxHealth: 9,
-          shieldHealth: totalBiteProtection, // Preserve shield from permanent items
+          shieldHealth: preservedShieldHealth, // Preserve current shield health
           maxShieldHealth: totalBiteProtection,
           isInvincible: false,
           invincibilityEndTime: 0,
