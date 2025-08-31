@@ -1175,11 +1175,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     updateGame: (deltaTime: number) => {
       const state = get();
-      console.log("updateGame called:", { deltaTime, gameState: state.gameState, showInventory: state.showInventory });
-      if (state.gameState !== "playing" || state.showInventory) {
-        console.log("updateGame blocked - game not playing or inventory open");
-        return;
-      }
+      if (state.gameState !== "playing" || state.showInventory) return;
 
       // Initialize unified PlayerController if needed
       if (!state.playerController) {
@@ -1257,9 +1253,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
       
-      console.log("About to update snakes:", newSnakes.length);
       const updatedSnakes = newSnakes.map((snake) => {
-        console.log(`Processing snake ${snake.id} (${snake.type}) at position:`, snake.position, `speed: ${snake.speed}`);
         // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
         // Allow patrolling and chasing rattlesnakes to be processed by normal AI
         if (
@@ -1981,7 +1975,8 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // --- UPDATE STATE ---
       // Process phantom completion and removal AFTER all snake updates
-      let finalSnakes = newSnakes.length > state.snakes.length ? [...newSnakes] : get().snakes;
+      // Use updatedSnakes (with position updates) as the base, then add any new snakes spawned
+      let finalSnakes = newSnakes.length > updatedSnakes.length ? [...newSnakes] : [...updatedSnakes];
       
       if (!get().phantomRemovalInProgress) {
         const phantomsThatReturned = finalSnakes.filter(snake => 

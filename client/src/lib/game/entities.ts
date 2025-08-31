@@ -432,39 +432,87 @@ function checkWallCollision(snake: Snake, newPosition: Position, walls: Wall[]):
 }
 
 function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake {
-  console.log(`updateScreensaverSnake called for ${snake.id}, dt: ${dt}, current position:`, snake.position);
-  
-  // Force simple movement to test if snakes can move
+  // Restore original screensaver behavior
+  const cardinalDirections = [
+    { x: 0, y: -1 }, // North
+    { x: 1, y: 0 },  // East
+    { x: 0, y: 1 },  // South
+    { x: -1, y: 0 }  // West
+  ];
+
+  // Set initial direction if snake doesn't have one
   if (!snake.direction || (snake.direction.x === 0 && snake.direction.y === 0)) {
-    snake.direction = { x: 1, y: 0 }; // Start moving right
-    console.log("Set initial direction to move right");
+    const randomIndex = Math.floor(Math.random() * cardinalDirections.length);
+    snake.direction = { ...cardinalDirections[randomIndex] };
   }
-  
+
   // Calculate new position
-  console.log(`Speed calc: direction=${JSON.stringify(snake.direction)}, speed=${snake.speed}, dt=${dt}`);
   const newPosition = {
     x: snake.position.x + snake.direction.x * snake.speed * dt,
     y: snake.position.y + snake.direction.y * snake.speed * dt
   };
-  console.log(`Calculated movement: from (${snake.position.x}, ${snake.position.y}) to (${newPosition.x}, ${newPosition.y})`);
-  
-  // Simple bounds checking - reverse direction if hitting edge
-  if (newPosition.x <= 20 || newPosition.x + snake.size.width >= 780) {
-    snake.direction.x = -snake.direction.x;
+
+  // Check for wall collision
+  if (checkWallCollision(snake, newPosition, walls)) {
+    // Hit a wall, determine which wall and pick a non-parallel direction
+    const currentDir = snake.direction;
+    let availableDirections = [...cardinalDirections];
+    
+    // Determine collision type based on current direction and position
+    const levelBounds = { x: 20, y: 20, width: 760, height: 560 };
+    const snakeRect = {
+      x: newPosition.x,
+      y: newPosition.y,
+      width: snake.size.width,
+      height: snake.size.height
+    };
+    
+    // Check which boundary was hit
+    const hitLeftWall = snakeRect.x <= levelBounds.x;
+    const hitRightWall = snakeRect.x + snakeRect.width >= levelBounds.x + levelBounds.width;
+    const hitTopWall = snakeRect.y <= levelBounds.y;
+    const hitBottomWall = snakeRect.y + snakeRect.height >= levelBounds.y + levelBounds.height;
+    
+    // Remove parallel directions based on which wall was hit
+    if (hitLeftWall || hitRightWall) {
+      // Hit vertical wall - remove purely vertical directions (North, South)
+      availableDirections = availableDirections.filter(dir => 
+        !(dir.x === 0 && dir.y !== 0) // Remove pure north/south
+      );
+    }
+    
+    if (hitTopWall || hitBottomWall) {
+      // Hit horizontal wall - remove purely horizontal directions (East, West)
+      availableDirections = availableDirections.filter(dir => 
+        !(dir.y === 0 && dir.x !== 0) // Remove pure east/west
+      );
+    }
+    
+    // If we've filtered out too many directions, fall back to all directions
+    if (availableDirections.length === 0) {
+      availableDirections = [...cardinalDirections];
+    }
+    
+    // Pick a random direction from available non-parallel directions
+    const randomIndex = Math.floor(Math.random() * availableDirections.length);
+    snake.direction = { ...availableDirections[randomIndex] };
+    
+    // Try moving in the new direction
+    const retryPosition = {
+      x: snake.position.x + snake.direction.x * snake.speed * dt,
+      y: snake.position.y + snake.direction.y * snake.speed * dt
+    };
+    
+    // If the new direction is also blocked, stay in place for this frame
+    if (!checkWallCollision(snake, retryPosition, walls)) {
+      snake.position = retryPosition;
+    }
+  } else {
+    // No collision, move normally
+    snake.position = newPosition;
   }
-  if (newPosition.y <= 20 || newPosition.y + snake.size.height >= 580) {
-    snake.direction.y = -snake.direction.y;
-  }
-  
-  // Always update position (bypass wall collision for testing)
-  const oldPosition = { ...snake.position };
-  snake.position = {
-    x: Math.max(20, Math.min(780 - snake.size.width, newPosition.x)),
-    y: Math.max(20, Math.min(580 - snake.size.height, newPosition.y))
-  };
-  
-  console.log(`Snake ${snake.id} moved from`, oldPosition, "to", snake.position);
-  
+
+  // Keep current direction for next frame
   return snake;
 }
 

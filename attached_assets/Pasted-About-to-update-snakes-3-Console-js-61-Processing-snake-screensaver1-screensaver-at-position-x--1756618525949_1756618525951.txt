@@ -1,0 +1,30 @@
+About to update snakes: 3
+Console.js:61 Processing snake screensaver1 (screensaver) at position: {x: 650, y: 80} speed: 125
+Console.js:61 updateScreensaverSnake called for screensaver1, dt: 0.012000000047672075, current position: {x: 650, y: 80}
+Console.js:61 Set initial direction to move right
+Console.js:61 Speed calc: direction={"x":1,"y":0}, speed=125, dt=0.012000000047672075
+Console.js:61 Calculated movement: from (650, 80) to (651.500000005959, 80)
+Console.js:61 Snake screensaver1 moved from {x: 650, y: 80} to {x: 651.500000005959, y: 80}
+Console.js:61 Processing snake screensaver2 (screensaver) at position: {x: 350, y: 450} speed: 125
+Console.js:61 updateScreensaverSnake called for screensaver2, dt: 0.012000000047672075, current position: {x: 350, y: 450}
+Console.js:61 Set initial direction to move right
+Console.js:61 Speed calc: direction={"x":1,"y":0}, speed=125, dt=0.012000000047672075
+Console.js:61 Calculated movement: from (350, 450) to (351.500000005959, 450)
+Console.js:61 Snake screensaver2 moved from {x: 350, y: 450} to {x: 351.500000005959, y: 450}
+Console.js:61 Processing snake stalker1 (stalker) at position: {x: 450, y: 360} speed: 45
+Console.js:61 updateGame called: {deltaTime: 10.200000047683716, gameState: 'playing', showInventory: false}
+Console.js:61 About to update snakes: 3
+Console.js:61 Processing snake screensaver1 (screensaver) at position: {x: 650, y: 80} speed: 125
+Console.js:61 updateScreensaverSnake called for screensaver1, dt: 0.010200000047683715, current position: {x: 650, y: 80}
+Console.js:61 Set initial direction to move right
+Console.js:61 Speed calc: direction={"x":1,"y":0}, speed=125, dt=0.010200000047683715
+Console.js:61 Calculated movement: from (650, 80) to (651.2750000059605, 80)
+Console.js:61 Snake screensaver1 moved from {x: 650, y: 80} to {x: 651.2750000059605, y: 80}
+Console.js:61 Processing snake screensaver2 (screensaver) at position: {x: 350, y: 450} speed: 125
+Console.js:61 updateScreensaverSnake called for screensaver2, dt: 0.010200000047683715, current position: {x: 350, y: 450}
+Console.js:61 Set initial direction to move right
+Console.js:61 Speed calc: direction={"x":1,"y":0}, speed=125, dt=0.010200000047683715
+Console.js:61 Calculated movement: from (350, 450) to (351.27500000596046, 450)
+Console.js:61 Snake screensaver2 moved from {x: 350, y: 450} to {x: 351.27500000596046, y: 450}
+Console.js:61 Processing snake stalker1 (stalker) at position: {x: 450, y: 360} speed: 45
+Console.js:61 updateGame called: {deltaTime: 5.7999999999883585, gameState: 'playing', showInventory: false}
