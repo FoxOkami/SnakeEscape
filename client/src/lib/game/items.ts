@@ -65,7 +65,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🟫", // Brown square emoji
     duration: "temporary" as const,
     modifiers: {
-      playerSpeed: 3.1, // increase run speed by 10%
+      playerSpeed: 1.1, // increase run speed by 10%
     },
     isActive: false,
   }),
@@ -90,7 +90,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🟥", // Red square emoji
     duration: "temporary" as const,
     modifiers: {
-      walkSpeed: 3.1, // increases walk speed by 10%
+      walkSpeed: 1.1, // increases walk speed by 10%
     },
     isActive: false,
   }),

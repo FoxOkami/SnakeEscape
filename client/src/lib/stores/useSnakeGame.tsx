@@ -769,6 +769,15 @@ export const useSnakeGame = create<SnakeGameState>()(
     resetGame: () => {
       const state = get();
       const level = LEVELS[state.currentLevel];
+      
+      // Calculate shield health from all active items (both permanent and temporary)
+      let totalBiteProtection = 0;
+      state.inventoryItems.forEach(item => {
+        if (item.isActive && item.modifiers.biteProtection) {
+          totalBiteProtection += item.modifiers.biteProtection;
+        }
+      });
+      
       set({
         gameState: "playing",
         player: {
@@ -778,8 +787,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           hasKey: false,
           health: 9,
           maxHealth: 9,
-          shieldHealth: 0,
-          maxShieldHealth: 0,
+          shieldHealth: totalBiteProtection,
+          maxShieldHealth: totalBiteProtection,
           isInvincible: false,
           invincibilityEndTime: 0,
         },
@@ -879,10 +888,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       }
 
-      // Calculate shield health from remaining active permanent items
+      // Calculate shield health from all active items (both permanent and temporary)
       let totalBiteProtection = 0;
       state.inventoryItems.forEach(item => {
-        if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+        if (item.isActive && item.modifiers.biteProtection) {
           totalBiteProtection += item.modifiers.biteProtection;
         }
       });
