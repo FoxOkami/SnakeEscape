@@ -486,10 +486,20 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
     { x: -1/sqrt2, y: -1/sqrt2 } // Northwest (normalized)
   ];
 
-  // Set initial diagonal direction if snake doesn't have one
+  // Set initial diagonal direction if snake doesn't have one OR convert non-diagonal to diagonal
   if (!snake.direction || (snake.direction.x === 0 && snake.direction.y === 0)) {
+    // Snake has no direction, give it a random diagonal
     const randomIndex = Math.floor(Math.random() * diagonalDirections.length);
     snake.direction = { ...diagonalDirections[randomIndex] };
+  } else {
+    // Check if current direction is diagonal (both x and y components are non-zero)
+    const isDiagonal = Math.abs(snake.direction.x) > 0.001 && Math.abs(snake.direction.y) > 0.001;
+    
+    if (!isDiagonal) {
+      // Snake has a cardinal direction, convert to diagonal
+      const randomIndex = Math.floor(Math.random() * diagonalDirections.length);
+      snake.direction = { ...diagonalDirections[randomIndex] };
+    }
   }
 
   
