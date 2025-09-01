@@ -499,7 +499,7 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
   }
 
   // Helper function to get compass direction name
-  const getCompassDirection = (dir) => {
+  const getCompassDirection = (dir: {x: number, y: number}) => {
     const directionNames = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
     const index = allDirections.findIndex(d => 
       Math.abs(d.x - dir.x) < 0.001 && Math.abs(d.y - dir.y) < 0.001
@@ -520,17 +520,18 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
     
     if (collisionInfo.hit && collisionInfo.normal) {
       // Get collision side for easier understanding
-      const getCollisionSide = (normal) => {
-        if (normal.x > 0) return 'right wall';
-        if (normal.x < 0) return 'left wall';
-        if (normal.y > 0) return 'bottom wall';
-        if (normal.y < 0) return 'top wall';
+      // NOTE: Normal points AWAY from the wall surface
+      const getCollisionSide = (normal: {x: number, y: number}) => {
+        if (normal.x > 0) return 'left wall';    // Normal points east = hit left wall
+        if (normal.x < 0) return 'right wall';   // Normal points west = hit right wall
+        if (normal.y > 0) return 'top wall';     // Normal points south = hit top wall
+        if (normal.y < 0) return 'bottom wall';  // Normal points north = hit bottom wall
         return 'unknown wall';
       };
       
       // Filter out directions that would move toward the hit side
-      const validDirections = [];
-      const blockedDirections = [];
+      const validDirections: {x: number, y: number}[] = [];
+      const blockedDirections: string[] = [];
       
       allDirections.forEach((dir, index) => {
         const dirName = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][index];
