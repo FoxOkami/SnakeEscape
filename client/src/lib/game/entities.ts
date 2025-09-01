@@ -495,20 +495,23 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
     const randomIndex = Math.floor(Math.random() * allDirections.length);
     snake.direction = { ...allDirections[randomIndex] };
     const directionNames = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-    console.log(`Snake ${snake.id} initial direction: ${directionNames[randomIndex]} (${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)})`);
+    console.log(`🐍 Snake ${snake.id} spawned going ${directionNames[randomIndex]}`);
   }
 
+  // Helper function to get compass direction name
+  const getCompassDirection = (dir) => {
+    const directionNames = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const index = allDirections.findIndex(d => 
+      Math.abs(d.x - dir.x) < 0.001 && Math.abs(d.y - dir.y) < 0.001
+    );
+    return directionNames[index] || `Custom(${dir.x.toFixed(2)},${dir.y.toFixed(2)})`;
+  };
+  
   // Calculate new position
   const newPosition = {
     x: snake.position.x + snake.direction.x * snake.speed * dt,
     y: snake.position.y + snake.direction.y * snake.speed * dt
   };
-  
-  // Debug diagonal movement
-  const isDiagonal = Math.abs(snake.direction.x) > 0.001 && Math.abs(snake.direction.y) > 0.001;
-  if (isDiagonal) {
-    console.log(`Snake ${snake.id} DIAGONAL: dir(${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)}) from(${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)}) to(${newPosition.x.toFixed(1)}, ${newPosition.y.toFixed(1)})`);
-  }
 
   // Check for wall collision
   if (checkWallCollision(snake, newPosition, walls)) {
@@ -516,18 +519,42 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
     const collisionInfo = getScreensaverCollisionInfo(snake, newPosition, walls);
     
     if (collisionInfo.hit && collisionInfo.normal) {
+      // Get collision side for easier understanding
+      const getCollisionSide = (normal) => {
+        if (normal.x > 0) return 'right wall';
+        if (normal.x < 0) return 'left wall';
+        if (normal.y > 0) return 'bottom wall';
+        if (normal.y < 0) return 'top wall';
+        return 'unknown wall';
+      };
+      
       // Filter out directions that would move toward the hit side
-      const validDirections = allDirections.filter(dir => {
-        // If collision normal points in a direction, avoid directions that have 
-        // a positive dot product with that normal (i.e., directions toward the wall)
+      const validDirections = [];
+      const blockedDirections = [];
+      
+      allDirections.forEach((dir, index) => {
+        const dirName = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][index];
         const dotProduct = dir.x * collisionInfo.normal!.x + dir.y * collisionInfo.normal!.y;
-        return dotProduct <= 0; // Only allow directions away from or perpendicular to the wall
+        
+        if (dotProduct <= 0) {
+          validDirections.push(dir);
+        } else {
+          blockedDirections.push(dirName);
+        }
       });
       
+      const collisionSide = getCollisionSide(collisionInfo.normal);
+      console.log(`🎯 Snake ${snake.id} hit ${collisionSide}, blocked: [${blockedDirections.join(', ')}]`);
+      
       if (validDirections.length > 0) {
+        const validNames = validDirections.map(dir => getCompassDirection(dir));
+        
         // Pick a random valid direction
         const randomIndex = Math.floor(Math.random() * validDirections.length);
         snake.direction = { ...validDirections[randomIndex] };
+        
+        const newDirectionName = getCompassDirection(snake.direction);
+        console.log(`🔄 Snake ${snake.id} chose ${newDirectionName} from [${validNames.join(', ')}]`);
         
         // Move in the new direction for the current frame
         const newDirectionPosition = {
@@ -538,6 +565,9 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
         // Only move if the new direction doesn't immediately cause another collision
         if (!checkWallCollision(snake, newDirectionPosition, walls)) {
           snake.position = newDirectionPosition;
+          console.log(`✅ Snake ${snake.id} bounced ${newDirectionName} successfully`);
+        } else {
+          console.log(`❌ Snake ${snake.id} ${newDirectionName} direction STILL hits wall!`);
         }
       } else {
         // Fallback: reverse direction and try to move
@@ -567,10 +597,10 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
     // No collision, move normally
     snake.position = newPosition;
     
-    // Debug successful diagonal movement
-    const isDiagonal = Math.abs(snake.direction.x) > 0.001 && Math.abs(snake.direction.y) > 0.001;
-    if (isDiagonal) {
-      console.log(`Snake ${snake.id} moved diagonally to (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
+    // Debug movement occasionally to avoid spam
+    if (Math.random() < 0.01) { // 1% chance to log
+      const currentDirection = getCompassDirection(snake.direction);
+      console.log(`🚶 Snake ${snake.id} moving ${currentDirection}`);
     }
   }
 
