@@ -494,6 +494,8 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
   if (!snake.direction || (snake.direction.x === 0 && snake.direction.y === 0)) {
     const randomIndex = Math.floor(Math.random() * allDirections.length);
     snake.direction = { ...allDirections[randomIndex] };
+    const directionNames = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    console.log(`Snake ${snake.id} initial direction: ${directionNames[randomIndex]} (${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)})`);
   }
 
   // Calculate new position
@@ -501,6 +503,12 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
     x: snake.position.x + snake.direction.x * snake.speed * dt,
     y: snake.position.y + snake.direction.y * snake.speed * dt
   };
+  
+  // Debug diagonal movement
+  const isDiagonal = Math.abs(snake.direction.x) > 0.001 && Math.abs(snake.direction.y) > 0.001;
+  if (isDiagonal) {
+    console.log(`Snake ${snake.id} DIAGONAL: dir(${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)}) from(${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)}) to(${newPosition.x.toFixed(1)}, ${newPosition.y.toFixed(1)})`);
+  }
 
   // Check for wall collision
   if (checkWallCollision(snake, newPosition, walls)) {
@@ -558,6 +566,12 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
   } else {
     // No collision, move normally
     snake.position = newPosition;
+    
+    // Debug successful diagonal movement
+    const isDiagonal = Math.abs(snake.direction.x) > 0.001 && Math.abs(snake.direction.y) > 0.001;
+    if (isDiagonal) {
+      console.log(`Snake ${snake.id} moved diagonally to (${snake.position.x.toFixed(1)}, ${snake.position.y.toFixed(1)})`);
+    }
   }
 
   // Keep current direction for next frame
