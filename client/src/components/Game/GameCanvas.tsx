@@ -1364,11 +1364,11 @@ const GameCanvas: React.FC = () => {
           ctx.globalAlpha = 0.5; // 50% transparency for phantoms
         }
 
-        // Main body
+        // Main body - round positions for smooth diagonal movement
         ctx.fillStyle = baseColor;
         ctx.fillRect(
-          snake.position.x,
-          snake.position.y,
+          Math.round(snake.position.x),
+          Math.round(snake.position.y),
           snake.size.width,
           snake.size.height,
         );
@@ -1414,11 +1414,13 @@ const GameCanvas: React.FC = () => {
             8,
           );
         } else if (snake.type === "screensaver") {
-          // Grid pattern for screensaver (screensaver-like pattern)
-          ctx.fillRect(snake.position.x + 3, snake.position.y + 3, 6, 6);
-          ctx.fillRect(snake.position.x + 15, snake.position.y + 3, 6, 6);
-          ctx.fillRect(snake.position.x + 3, snake.position.y + 15, 6, 6);
-          ctx.fillRect(snake.position.x + 15, snake.position.y + 15, 6, 6);
+          // Grid pattern for screensaver (screensaver-like pattern) - round positions
+          const roundedX = Math.round(snake.position.x);
+          const roundedY = Math.round(snake.position.y);
+          ctx.fillRect(roundedX + 3, roundedY + 3, 6, 6);
+          ctx.fillRect(roundedX + 15, roundedY + 3, 6, 6);
+          ctx.fillRect(roundedX + 3, roundedY + 15, 6, 6);
+          ctx.fillRect(roundedX + 15, roundedY + 15, 6, 6);
         } else if (snake.type === "plumber") {
           // Pipe junction pattern for plumber (cross shape like pipe fittings)
           const centerX = snake.position.x + snake.size.width / 2;

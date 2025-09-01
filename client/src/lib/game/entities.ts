@@ -494,9 +494,6 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
   if (!snake.direction || (snake.direction.x === 0 && snake.direction.y === 0)) {
     const randomIndex = Math.floor(Math.random() * allDirections.length);
     snake.direction = { ...allDirections[randomIndex] };
-    const directionNames = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-    const chosenName = directionNames[randomIndex];
-    console.log(`Screensaver snake ${snake.id} initial direction: ${chosenName} (${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)})`);
   }
 
   // Calculate new position
@@ -520,25 +517,12 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
       });
       
       if (validDirections.length > 0) {
-        // Log all valid directions for debugging
-        const directionNames = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-        const validNames = validDirections.map(dir => {
-          const index = allDirections.findIndex(d => 
-            Math.abs(d.x - dir.x) < 0.001 && Math.abs(d.y - dir.y) < 0.001
-          );
-          return directionNames[index] || 'Unknown';
-        });
-        
         // Pick a random valid direction
         const randomIndex = Math.floor(Math.random() * validDirections.length);
         snake.direction = { ...validDirections[randomIndex] };
-        
-        const chosenName = validNames[randomIndex];
-        console.log(`Screensaver snake ${snake.id} collision: normal(${collisionInfo.normal.x}, ${collisionInfo.normal.y}), chose ${chosenName} (${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)}) from options: [${validNames.join(', ')}]`);
       } else {
         // Fallback: reverse direction
         snake.direction = { x: -snake.direction.x, y: -snake.direction.y };
-        console.log(`Screensaver snake ${snake.id} collision: no valid directions, reversing`);
       }
     } else {
       // Fallback collision handling - just reverse direction
