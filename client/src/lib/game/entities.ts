@@ -520,13 +520,40 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
         // Pick a random valid direction
         const randomIndex = Math.floor(Math.random() * validDirections.length);
         snake.direction = { ...validDirections[randomIndex] };
+        
+        // Move in the new direction for the current frame
+        const newDirectionPosition = {
+          x: snake.position.x + snake.direction.x * snake.speed * dt,
+          y: snake.position.y + snake.direction.y * snake.speed * dt
+        };
+        
+        // Only move if the new direction doesn't immediately cause another collision
+        if (!checkWallCollision(snake, newDirectionPosition, walls)) {
+          snake.position = newDirectionPosition;
+        }
       } else {
-        // Fallback: reverse direction
+        // Fallback: reverse direction and try to move
         snake.direction = { x: -snake.direction.x, y: -snake.direction.y };
+        const reversePosition = {
+          x: snake.position.x + snake.direction.x * snake.speed * dt,
+          y: snake.position.y + snake.direction.y * snake.speed * dt
+        };
+        
+        if (!checkWallCollision(snake, reversePosition, walls)) {
+          snake.position = reversePosition;
+        }
       }
     } else {
-      // Fallback collision handling - just reverse direction
+      // Fallback collision handling - reverse direction and move
       snake.direction = { x: -snake.direction.x, y: -snake.direction.y };
+      const fallbackPosition = {
+        x: snake.position.x + snake.direction.x * snake.speed * dt,
+        y: snake.position.y + snake.direction.y * snake.speed * dt
+      };
+      
+      if (!checkWallCollision(snake, fallbackPosition, walls)) {
+        snake.position = fallbackPosition;
+      }
     }
   } else {
     // No collision, move normally
