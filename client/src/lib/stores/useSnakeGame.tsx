@@ -3982,20 +3982,9 @@ export const useSnakeGame = create<SnakeGameState>()(
           pit.lastEmergenceTime === 0 ||
           timeSinceLastEmergence >= totalWaitTime;
           
-        // Debug rattlesnake emergence
-        if (pit.id === "pit1" && currentTime % 1000 < 50) { // Log every second
-          console.log(`Pit ${pit.id}: shouldEmerge=${shouldEmerge}, lastEmergenceTime=${pit.lastEmergenceTime}, timeSince=${timeSinceLastEmergence}, totalWait=${totalWaitTime}`);
-          console.log(`Pit ${pit.id}: emergenceInterval=${pit.emergenceInterval}, condition1=${pit.lastEmergenceTime === 0}, condition2=${timeSinceLastEmergence >= totalWaitTime}`);
-        }
 
         // Check if it's time for a new rattlesnake to emerge
         if (shouldEmerge) {
-          // Debug: Check what snakes are available
-          if (pit.id === "pit1") {
-            const availableSnakes = updatedSnakes.filter(snake => pit.snakeIds.includes(snake.id));
-            console.log(`Pit ${pit.id} - Available snakes:`, availableSnakes.map(s => ({id: s.id, type: s.type, isInPit: s.isInPit})));
-          }
-          
           // Find the next rattlesnake to emerge (currently in pit)
           const rattlesnakeToEmerge = updatedSnakes.find(
             (snake) =>
@@ -4005,7 +3994,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           );
 
           if (rattlesnakeToEmerge) {
-            console.log(`Pit ${pit.id} - Emerging snake:`, rattlesnakeToEmerge.id);
             // Snake emerging from regular cycle
             // Emerge the rattlesnake
             const snakeIndex = updatedSnakes.findIndex(
@@ -4101,7 +4089,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                   // Pit is not lit, follow normal timing
                   if (
                     snake.patrolStartTime &&
-                    currentTime - snake.patrolStartTime >= 4000
+                    currentTime - snake.patrolStartTime >= (snake.patrolDuration || 4000)
                   ) {
                     // If currently chasing player, switch to chasing state for another 4 seconds
                     if (snake.isChasing) {
@@ -4134,10 +4122,10 @@ export const useSnakeGame = create<SnakeGameState>()(
                 // Pit is lit, continue chasing indefinitely until pit is no longer lit
                 // No time limit while pit is lit
               } else {
-                // Pit is not lit, chase for 4 seconds then return
+                // Pit is not lit, chase for configured duration then return
                 if (
                   snake.patrolStartTime &&
-                  currentTime - snake.patrolStartTime >= 4000
+                  currentTime - snake.patrolStartTime >= (snake.patrolDuration || 4000)
                 ) {
                   // Chase phase complete
                   updatedSnakes[snakeIndex] = {
