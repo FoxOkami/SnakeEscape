@@ -537,7 +537,9 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
         const dirName = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][index];
         const dotProduct = dir.x * collisionInfo.normal!.x + dir.y * collisionInfo.normal!.y;
         
-        if (dotProduct <= 0) {
+        // Block directions that point toward the wall (negative dot product with normal)
+        // Allow directions that point away from the wall (positive dot product with normal)
+        if (dotProduct >= 0) {
           validDirections.push(dir);
         } else {
           blockedDirections.push(dirName);
