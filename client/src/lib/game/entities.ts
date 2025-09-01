@@ -477,23 +477,19 @@ function getScreensaverCollisionInfo(snake: Snake, newPosition: Position, walls:
 }
 
 function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake {
-  // All 8 compass directions for screensaver snake movement (normalized)
+  // Only diagonal directions for screensaver snake movement (normalized)
   const sqrt2 = Math.sqrt(2);
-  const allDirections = [
-    { x: 0, y: -1 },           // North
+  const diagonalDirections = [
     { x: 1/sqrt2, y: -1/sqrt2 }, // Northeast (normalized)
-    { x: 1, y: 0 },            // East
     { x: 1/sqrt2, y: 1/sqrt2 },  // Southeast (normalized)
-    { x: 0, y: 1 },            // South
     { x: -1/sqrt2, y: 1/sqrt2 }, // Southwest (normalized)
-    { x: -1, y: 0 },           // West
     { x: -1/sqrt2, y: -1/sqrt2 } // Northwest (normalized)
   ];
 
-  // Set initial direction if snake doesn't have one
+  // Set initial diagonal direction if snake doesn't have one
   if (!snake.direction || (snake.direction.x === 0 && snake.direction.y === 0)) {
-    const randomIndex = Math.floor(Math.random() * allDirections.length);
-    snake.direction = { ...allDirections[randomIndex] };
+    const randomIndex = Math.floor(Math.random() * diagonalDirections.length);
+    snake.direction = { ...diagonalDirections[randomIndex] };
   }
 
   
@@ -505,61 +501,52 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
 
   // Check for wall collision
   if (checkWallCollision(snake, newPosition, walls)) {
-    // Get collision information to determine which side was hit
-    const collisionInfo = getScreensaverCollisionInfo(snake, newPosition, walls);
+    // Determine which side of the snake hit the wall and flip the appropriate axis
+    const snakeRect = {
+      x: newPosition.x,
+      y: newPosition.y,
+      width: snake.size.width,
+      height: snake.size.height
+    };
+
+    // Check which wall we hit to determine which side of the snake made contact
+    let hitVerticalWall = false;
+    let hitHorizontalWall = false;
     
-    if (collisionInfo.hit && collisionInfo.normal) {
-      // Filter out directions that would move toward the hit side
-      const validDirections: {x: number, y: number}[] = [];
-      
-      allDirections.forEach((dir) => {
-        const dotProduct = dir.x * collisionInfo.normal!.x + dir.y * collisionInfo.normal!.y;
+    for (const wall of walls) {
+      if (checkAABBCollision(snakeRect, wall)) {
+        // Calculate overlap on each axis to determine primary collision direction
+        const overlapX = Math.min(snakeRect.x + snakeRect.width - wall.x, wall.x + wall.width - snakeRect.x);
+        const overlapY = Math.min(snakeRect.y + snakeRect.height - wall.y, wall.y + wall.height - snakeRect.y);
         
-        // Block directions that point toward the wall (negative dot product with normal)
-        // Allow directions that point away from the wall (positive dot product with normal)
-        if (dotProduct >= 0) {
-          validDirections.push(dir);
+        if (overlapX < overlapY) {
+          // Hit left/right wall - flip X direction (west/east side of snake hit)
+          hitVerticalWall = true;
+        } else {
+          // Hit top/bottom wall - flip Y direction (north/south side of snake hit)
+          hitHorizontalWall = true;
         }
-      });
-      
-      if (validDirections.length > 0) {
-        // Pick a random valid direction
-        const randomIndex = Math.floor(Math.random() * validDirections.length);
-        snake.direction = { ...validDirections[randomIndex] };
-        
-        // Move in the new direction for the current frame
-        const newDirectionPosition = {
-          x: snake.position.x + snake.direction.x * snake.speed * dt,
-          y: snake.position.y + snake.direction.y * snake.speed * dt
-        };
-        
-        // Only move if the new direction doesn't immediately cause another collision
-        if (!checkWallCollision(snake, newDirectionPosition, walls)) {
-          snake.position = newDirectionPosition;
-        }
-      } else {
-        // Fallback: reverse direction and try to move
-        snake.direction = { x: -snake.direction.x, y: -snake.direction.y };
-        const reversePosition = {
-          x: snake.position.x + snake.direction.x * snake.speed * dt,
-          y: snake.position.y + snake.direction.y * snake.speed * dt
-        };
-        
-        if (!checkWallCollision(snake, reversePosition, walls)) {
-          snake.position = reversePosition;
-        }
+        break; // Only handle first collision
       }
-    } else {
-      // Fallback collision handling - reverse direction and move
-      snake.direction = { x: -snake.direction.x, y: -snake.direction.y };
-      const fallbackPosition = {
-        x: snake.position.x + snake.direction.x * snake.speed * dt,
-        y: snake.position.y + snake.direction.y * snake.speed * dt
-      };
-      
-      if (!checkWallCollision(snake, fallbackPosition, walls)) {
-        snake.position = fallbackPosition;
-      }
+    }
+    
+    // Flip the appropriate axis based on collision
+    if (hitVerticalWall) {
+      snake.direction.x = -snake.direction.x; // Flip X axis
+    }
+    if (hitHorizontalWall) {
+      snake.direction.y = -snake.direction.y; // Flip Y axis
+    }
+    
+    // Move in the new direction for the current frame
+    const bouncePosition = {
+      x: snake.position.x + snake.direction.x * snake.speed * dt,
+      y: snake.position.y + snake.direction.y * snake.speed * dt
+    };
+    
+    // Only move if the new direction doesn't immediately cause another collision
+    if (!checkWallCollision(snake, bouncePosition, walls)) {
+      snake.position = bouncePosition;
     }
   } else {
     // No collision, move normally
