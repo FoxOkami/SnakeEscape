@@ -431,19 +431,68 @@ function checkWallCollision(snake: Snake, newPosition: Position, walls: Wall[]):
   return false;
 }
 
+function getScreensaverCollisionInfo(snake: Snake, newPosition: Position, walls: Wall[]): { hit: boolean; wall?: Wall; normal?: { x: number; y: number } } {
+  const snakeRect = {
+    x: newPosition.x,
+    y: newPosition.y,
+    width: snake.size.width,
+    height: snake.size.height
+  };
+  
+  for (const wall of walls) {
+    if (checkAABBCollision(snakeRect, wall)) {
+      // Calculate which side of the wall was hit to determine normal
+      const snakeCenter = {
+        x: snakeRect.x + snakeRect.width / 2,
+        y: snakeRect.y + snakeRect.height / 2
+      };
+      
+      const wallCenter = {
+        x: wall.x + wall.width / 2,
+        y: wall.y + wall.height / 2
+      };
+      
+      // Calculate overlap on each axis
+      const overlapX = Math.min(snakeRect.x + snakeRect.width - wall.x, wall.x + wall.width - snakeRect.x);
+      const overlapY = Math.min(snakeRect.y + snakeRect.height - wall.y, wall.y + wall.height - snakeRect.y);
+      
+      let normal = { x: 0, y: 0 };
+      
+      // Determine collision normal based on smallest overlap
+      if (overlapX < overlapY) {
+        // Horizontal collision (left or right side of wall)
+        normal.x = snakeCenter.x < wallCenter.x ? -1 : 1;
+        normal.y = 0;
+      } else {
+        // Vertical collision (top or bottom side of wall)
+        normal.x = 0;
+        normal.y = snakeCenter.y < wallCenter.y ? -1 : 1;
+      }
+      
+      return { hit: true, wall, normal };
+    }
+  }
+  
+  return { hit: false };
+}
+
 function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake {
-  // Restore original screensaver behavior
-  const cardinalDirections = [
-    { x: 0, y: -1 }, // North
-    { x: 1, y: 0 },  // East
-    { x: 0, y: 1 },  // South
-    { x: -1, y: 0 }  // West
+  // All 8 compass directions for screensaver snake movement
+  const allDirections = [
+    { x: 0, y: -1 },   // North
+    { x: 1, y: -1 },   // Northeast
+    { x: 1, y: 0 },    // East
+    { x: 1, y: 1 },    // Southeast
+    { x: 0, y: 1 },    // South
+    { x: -1, y: 1 },   // Southwest
+    { x: -1, y: 0 },   // West
+    { x: -1, y: -1 }   // Northwest
   ];
 
   // Set initial direction if snake doesn't have one
   if (!snake.direction || (snake.direction.x === 0 && snake.direction.y === 0)) {
-    const randomIndex = Math.floor(Math.random() * cardinalDirections.length);
-    snake.direction = { ...cardinalDirections[randomIndex] };
+    const randomIndex = Math.floor(Math.random() * allDirections.length);
+    snake.direction = { ...allDirections[randomIndex] };
   }
 
   // Calculate new position
@@ -454,34 +503,28 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
 
   // Check for wall collision
   if (checkWallCollision(snake, newPosition, walls)) {
-    // Hit a wall, pick a completely random new direction (original screensaver behavior)
-    let attempts = 0;
-    let foundValidDirection = false;
+    // Get collision information to determine which side was hit
+    const collisionInfo = getScreensaverCollisionInfo(snake, newPosition, walls);
     
-    while (attempts < 10 && !foundValidDirection) {
-      // Pick a random direction that's different from current direction
-      let newDirection;
-      do {
-        const randomIndex = Math.floor(Math.random() * cardinalDirections.length);
-        newDirection = { ...cardinalDirections[randomIndex] };
-      } while (newDirection.x === snake.direction.x && newDirection.y === snake.direction.y);
+    if (collisionInfo.hit && collisionInfo.normal) {
+      // Filter out directions that would move toward the hit side
+      const validDirections = allDirections.filter(dir => {
+        // If collision normal points in a direction, avoid directions that have 
+        // a positive dot product with that normal (i.e., directions toward the wall)
+        const dotProduct = dir.x * collisionInfo.normal!.x + dir.y * collisionInfo.normal!.y;
+        return dotProduct <= 0; // Only allow directions away from or perpendicular to the wall
+      });
       
-      // Test if this new direction works
-      const testPosition = {
-        x: snake.position.x + newDirection.x * snake.speed * dt,
-        y: snake.position.y + newDirection.y * snake.speed * dt
-      };
-      
-      if (!checkWallCollision(snake, testPosition, walls)) {
-        snake.direction = newDirection;
-        snake.position = testPosition;
-        foundValidDirection = true;
+      if (validDirections.length > 0) {
+        // Pick a random valid direction
+        const randomIndex = Math.floor(Math.random() * validDirections.length);
+        snake.direction = { ...validDirections[randomIndex] };
+      } else {
+        // Fallback: reverse direction
+        snake.direction = { x: -snake.direction.x, y: -snake.direction.y };
       }
-      attempts++;
-    }
-    
-    // If no valid direction found after attempts, just reverse direction
-    if (!foundValidDirection) {
+    } else {
+      // Fallback collision handling - just reverse direction
       snake.direction = { x: -snake.direction.x, y: -snake.direction.y };
     }
   } else {
