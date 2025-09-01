@@ -477,22 +477,24 @@ function getScreensaverCollisionInfo(snake: Snake, newPosition: Position, walls:
 }
 
 function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake {
-  // All 8 compass directions for screensaver snake movement
+  // All 8 compass directions for screensaver snake movement (normalized)
+  const sqrt2 = Math.sqrt(2);
   const allDirections = [
-    { x: 0, y: -1 },   // North
-    { x: 1, y: -1 },   // Northeast
-    { x: 1, y: 0 },    // East
-    { x: 1, y: 1 },    // Southeast
-    { x: 0, y: 1 },    // South
-    { x: -1, y: 1 },   // Southwest
-    { x: -1, y: 0 },   // West
-    { x: -1, y: -1 }   // Northwest
+    { x: 0, y: -1 },           // North
+    { x: 1/sqrt2, y: -1/sqrt2 }, // Northeast (normalized)
+    { x: 1, y: 0 },            // East
+    { x: 1/sqrt2, y: 1/sqrt2 },  // Southeast (normalized)
+    { x: 0, y: 1 },            // South
+    { x: -1/sqrt2, y: 1/sqrt2 }, // Southwest (normalized)
+    { x: -1, y: 0 },           // West
+    { x: -1/sqrt2, y: -1/sqrt2 } // Northwest (normalized)
   ];
 
   // Set initial direction if snake doesn't have one
   if (!snake.direction || (snake.direction.x === 0 && snake.direction.y === 0)) {
     const randomIndex = Math.floor(Math.random() * allDirections.length);
     snake.direction = { ...allDirections[randomIndex] };
+    console.log(`Screensaver snake ${snake.id} initial direction: ${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)}`);
   }
 
   // Calculate new position
@@ -519,9 +521,11 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
         // Pick a random valid direction
         const randomIndex = Math.floor(Math.random() * validDirections.length);
         snake.direction = { ...validDirections[randomIndex] };
+        console.log(`Screensaver snake ${snake.id} collision: normal(${collisionInfo.normal.x}, ${collisionInfo.normal.y}), new direction: ${snake.direction.x.toFixed(3)}, ${snake.direction.y.toFixed(3)}, valid options: ${validDirections.length}`);
       } else {
         // Fallback: reverse direction
         snake.direction = { x: -snake.direction.x, y: -snake.direction.y };
+        console.log(`Screensaver snake ${snake.id} collision: no valid directions, reversing`);
       }
     } else {
       // Fallback collision handling - just reverse direction
