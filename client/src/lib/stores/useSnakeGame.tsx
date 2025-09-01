@@ -3985,10 +3985,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Debug rattlesnake emergence
         if (pit.id === "pit1" && currentTime % 1000 < 50) { // Log every second
           console.log(`Pit ${pit.id}: shouldEmerge=${shouldEmerge}, lastEmergenceTime=${pit.lastEmergenceTime}, timeSince=${timeSinceLastEmergence}, totalWait=${totalWaitTime}`);
+          console.log(`Pit ${pit.id}: emergenceInterval=${pit.emergenceInterval}, condition1=${pit.lastEmergenceTime === 0}, condition2=${timeSinceLastEmergence >= totalWaitTime}`);
         }
 
         // Check if it's time for a new rattlesnake to emerge
         if (shouldEmerge) {
+          // Debug: Check what snakes are available
+          if (pit.id === "pit1") {
+            const availableSnakes = updatedSnakes.filter(snake => pit.snakeIds.includes(snake.id));
+            console.log(`Pit ${pit.id} - Available snakes:`, availableSnakes.map(s => ({id: s.id, type: s.type, isInPit: s.isInPit})));
+          }
+          
           // Find the next rattlesnake to emerge (currently in pit)
           const rattlesnakeToEmerge = updatedSnakes.find(
             (snake) =>
@@ -3998,6 +4005,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           );
 
           if (rattlesnakeToEmerge) {
+            console.log(`Pit ${pit.id} - Emerging snake:`, rattlesnakeToEmerge.id);
             // Snake emerging from regular cycle
             // Emerge the rattlesnake
             const snakeIndex = updatedSnakes.findIndex(
