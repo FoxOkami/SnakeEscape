@@ -3978,12 +3978,16 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (snake.type === "rattlesnake" && snake.pitId) {
           // Find the snake's pit
           const pit = state.snakePits.find((p) => p.id === snake.pitId);
-          if (!pit) return;
+          if (!pit) {
+            console.log(`Rattlesnake ${snake.id} has no pit!`);
+            return;
+          }
 
           const pitPosition = { x: pit.x - 14, y: pit.y - 14 };
           
           // Initialize snake timing if needed
           if (!snake.patrolStartTime) {
+            console.log(`Initializing rattlesnake ${snake.id} at pit ${pit.id}`);
             updatedSnakes[snakeIndex] = {
               ...snake,
               patrolStartTime: currentTime,
@@ -4000,6 +4004,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           const cycleTime = patrolDuration + waitDuration;
           const timeInCycle = timeSincePatrolStart % cycleTime;
 
+          // Debug logging for pit1 snakes
+          if (pit.id === "pit1" && currentTime % 1000 < 50) {
+            console.log(`Rattlesnake ${snake.id}: timeInCycle=${timeInCycle}, patrolDuration=${patrolDuration}, waitDuration=${waitDuration}, isPatrolling=${timeInCycle < patrolDuration}`);
+          }
+
           if (timeInCycle < patrolDuration) {
             // Patrolling phase - let normal snake AI handle movement
             // Check if pit is lit - if so, stay in patrol phase longer
@@ -4012,6 +4021,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             // Waiting phase - stay at pit location  
             if (pit.isLightHit) {
               // Pit is lit, immediately start patrolling again
+              console.log(`Rattlesnake ${snake.id} pit is lit, restarting patrol`);
               updatedSnakes[snakeIndex] = {
                 ...snake,
                 patrolStartTime: currentTime,
