@@ -1254,14 +1254,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       
       const updatedSnakes = newSnakes.map((snake) => {
-        // Skip updating rattlesnakes that are in pits, returning to pit, or pausing - they'll be handled by updateSnakePits
-        // Allow patrolling and chasing rattlesnakes to be processed by normal AI
-        if (
-          snake.type === "rattlesnake" &&
-          (snake.isInPit ||
-            snake.rattlesnakeState === "returningToPit" ||
-            snake.rattlesnakeState === "pausing")
-        ) {
+        // Skip updating rattlesnakes - they're handled by our simplified patrol logic
+        if (snake.type === "rattlesnake") {
           return snake;
         }
         
@@ -4010,13 +4004,45 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
 
           if (timeInCycle < patrolDuration) {
-            // Patrolling phase - let normal snake AI handle movement
+            // Patrolling phase - move using basic patrol logic
+            if (snake.patrolPoints && snake.patrolPoints.length > 0) {
+              // Use basic patrol point following
+              const currentIndex = snake.currentPatrolIndex || 0;
+              const targetPoint = snake.patrolPoints[currentIndex];
+              
+              // Move towards target point
+              const dx = targetPoint.x - snake.position.x;
+              const dy = targetPoint.y - snake.position.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              
+              if (distance > 5) {
+                // Move towards target
+                const speed = snake.speed * (deltaTime / 1000);
+                const moveX = (dx / distance) * speed;
+                const moveY = (dy / distance) * speed;
+                
+                updatedSnakes[snakeIndex] = {
+                  ...snake,
+                  position: {
+                    x: snake.position.x + moveX,
+                    y: snake.position.y + moveY
+                  },
+                  direction: { x: dx / distance, y: dy / distance }
+                };
+              } else {
+                // Reached patrol point, move to next
+                const nextIndex = (currentIndex + 1) % snake.patrolPoints.length;
+                updatedSnakes[snakeIndex] = {
+                  ...snake,
+                  currentPatrolIndex: nextIndex
+                };
+              }
+            }
+            
             // Check if pit is lit - if so, stay in patrol phase longer
             if (pit.isLightHit) {
               // Pit is lit, continue patrolling (don't return to pit)
-              // Just let normal AI handle the movement
             }
-            // Normal patrol phase handled by regular snake AI
           } else {
             // Waiting phase - stay at pit location  
             if (pit.isLightHit) {
