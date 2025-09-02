@@ -1148,49 +1148,6 @@ const GameCanvas: React.FC = () => {
         });
       }
 
-      // Draw snake pits (holes in the ground)
-      snakePits.forEach((pit) => {
-        // Check if pit is being hit by light (change color to dark yellow)
-        const isLightHit = pit.isLightHit || false;
-
-        // Draw the pit as a dark circular hole
-        ctx.fillStyle = isLightHit ? "#1a1a00" : "#0a0a0a"; // Dark yellow if hit, black otherwise
-        ctx.beginPath();
-        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
-        ctx.fill();
-
-        // Add a gradient effect for depth
-        const gradient = ctx.createRadialGradient(
-          pit.x,
-          pit.y,
-          0,
-          pit.x,
-          pit.y,
-          pit.radius,
-        );
-        if (isLightHit) {
-          // Dark yellow gradient when light hits
-          gradient.addColorStop(0, "#2a2a00"); // Darker yellow center
-          gradient.addColorStop(0.7, "#1a1a00"); // Dark yellow
-          gradient.addColorStop(1, "#333300"); // Yellowish edge
-        } else {
-          // Normal black gradient
-          gradient.addColorStop(0, "#000000"); // Black center
-          gradient.addColorStop(0.7, "#1a1a1a"); // Dark gray
-          gradient.addColorStop(1, "#333333"); // Lighter edge
-        }
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
-        ctx.fill();
-
-        // Add subtle border to make it more visible
-        ctx.strokeStyle = isLightHit ? "#555500" : "#444444"; // Yellowish border if hit
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
-        ctx.stroke();
-      });
 
       // Draw boulders (Level 6 only)
       if (currentLevelKey === "boss_valerie") {
@@ -1259,10 +1216,6 @@ const GameCanvas: React.FC = () => {
       // Draw snakes with different visuals for each type
       // On Level 3, skip snakes here so they render on top of mirrors
       snakes.forEach((snake) => {
-        // Skip drawing rattlesnakes that are in the pit
-        if (snake.type === "rattlesnake" && snake.isInPit) {
-          return;
-        }
         // Skip drawing snakes on Level 3 - they'll be drawn after mirrors
         if (currentLevelKey === "grid_puzzle") {
           return;
@@ -1683,6 +1636,50 @@ const GameCanvas: React.FC = () => {
         }
       });
 
+      // Draw snake pits (holes in the ground) - drawn after snakes so they appear "inside" the pits
+      snakePits.forEach((pit) => {
+        // Check if pit is being hit by light (change color to dark yellow)
+        const isLightHit = pit.isLightHit || false;
+
+        // Draw the pit as a dark circular hole
+        ctx.fillStyle = isLightHit ? "#1a1a00" : "#0a0a0a"; // Dark yellow if hit, black otherwise
+        ctx.beginPath();
+        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Add a gradient effect for depth
+        const gradient = ctx.createRadialGradient(
+          pit.x,
+          pit.y,
+          0,
+          pit.x,
+          pit.y,
+          pit.radius,
+        );
+        if (isLightHit) {
+          // Dark yellow gradient when light hits
+          gradient.addColorStop(0, "#2a2a00"); // Darker yellow center
+          gradient.addColorStop(0.7, "#1a1a00"); // Dark yellow
+          gradient.addColorStop(1, "#333300"); // Yellowish edge
+        } else {
+          // Normal black gradient
+          gradient.addColorStop(0, "#000000"); // Black center
+          gradient.addColorStop(0.7, "#1a1a1a"); // Dark gray
+          gradient.addColorStop(1, "#333333"); // Lighter edge
+        }
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Add subtle border to make it more visible
+        ctx.strokeStyle = isLightHit ? "#555500" : "#444444"; // Yellowish border if hit
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+        ctx.stroke();
+      });
+
       // Draw light reflection elements (mirrors, crystal, light beam)
 
       // Note: For Level 5, the lighting effect is now handled by the background quadrant system above
@@ -1882,10 +1879,6 @@ const GameCanvas: React.FC = () => {
       // Draw snakes on Level 3 after mirrors (so they appear on top)
       if (currentLevelKey === "grid_puzzle") {
         snakes.forEach((snake) => {
-          // Skip drawing rattlesnakes that are in the pit
-          if (snake.type === "rattlesnake" && snake.isInPit) {
-            return;
-          }
 
           let baseColor = "#2d3748";
           let accentColor = "#ff6b6b";
