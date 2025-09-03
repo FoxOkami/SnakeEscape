@@ -638,6 +638,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     startFromLevel: (levelIndex: number) => {
+      console.log(`*** startFromLevel called for level ${levelIndex} - this will wipe rattlesnake properties ***`);
       if (levelIndex < 0 || levelIndex >= LEVELS.length) {
         return; // Invalid level index
       }
@@ -803,6 +804,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     resetGame: () => {
+      console.log("*** resetGame called - this will wipe rattlesnake properties ***");
       const state = get();
       const level = LEVELS[state.currentLevel];
       
@@ -887,6 +889,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     nextLevel: () => {
+      console.log("*** nextLevel called - this will wipe rattlesnake properties ***");
       const state = get();
       const nextLevelIndex = state.currentLevel + 1;
 
