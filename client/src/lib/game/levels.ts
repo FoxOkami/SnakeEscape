@@ -622,6 +622,7 @@ export const LEVELS: Level[] = [
         pitId: "pit1",
         isInPit: true,
         patrolDuration: 8000, // 4 seconds patrol
+        patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
       {
@@ -646,6 +647,7 @@ export const LEVELS: Level[] = [
         pitId: "pit1",
         isInPit: true,
         patrolDuration: 3500, // 3.5 seconds patrol
+        patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
       {
@@ -670,6 +672,7 @@ export const LEVELS: Level[] = [
         pitId: "pit1",
         isInPit: true,
         patrolDuration: 4500, // 4.5 seconds patrol
+        patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
       {
@@ -694,6 +697,7 @@ export const LEVELS: Level[] = [
         pitId: "pit2",
         isInPit: true,
         patrolDuration: 4500, // 4.5 seconds patrol
+        patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
       {
@@ -718,6 +722,7 @@ export const LEVELS: Level[] = [
         pitId: "pit2",
         isInPit: true,
         patrolDuration: 4500, // 4.5 seconds patrol
+        patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
     ],
