@@ -144,15 +144,15 @@ function getRandomizedLevel2PressurePlatePositions(): Array<{
 
 // Helper functions for level key management
 export function getLevelByKey(levelKey: string): Level | undefined {
-  return LEVELS.find(level => level.levelKey === levelKey);
+  return LEVELS.find((level) => level.levelKey === levelKey);
 }
 
 export function getLevelIndexByKey(levelKey: string): number {
-  return LEVELS.findIndex(level => level.levelKey === levelKey);
+  return LEVELS.findIndex((level) => level.levelKey === levelKey);
 }
 
 export function getLevelKeyByIndex(levelIndex: number): string {
-  return LEVELS[levelIndex]?.levelKey || 'hub';
+  return LEVELS[levelIndex]?.levelKey || "hub";
 }
 
 export const LEVELS: Level[] = [
@@ -185,7 +185,7 @@ export const LEVELS: Level[] = [
         chaseSpeed: 0,
         sightRange: 0,
         isChasing: false,
-      }
+      },
     ],
     door: { x: 0, y: 0, width: 30, height: 40, isOpen: false },
     key: { x: 0, y: 0, width: 20, height: 20, collected: false },
@@ -293,7 +293,7 @@ export const LEVELS: Level[] = [
         hasBeenActivated: false,
       },
       {
-        id: "tile2", 
+        id: "tile2",
         x: 250,
         y: 80,
         width: 40,
