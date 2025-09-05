@@ -3983,7 +3983,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           const pitPosition = { x: pit.x - 14, y: pit.y - 14 };
           
           // Initialize snake timing if needed
-          if (!snake.patrolStartTime) {
+          if (snake.patrolStartTime === undefined || snake.patrolStartTime === null) {
             console.log(`Initializing rattlesnake ${snake.id} at pit ${pit.id}`);
             updatedSnakes[snakeIndex] = {
               ...snake,
