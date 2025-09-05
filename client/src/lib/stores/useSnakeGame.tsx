@@ -4003,11 +4003,16 @@ export const useSnakeGame = create<SnakeGameState>()(
 
           // Debug logging for pit1 snakes
           if (pit.id === "pit1" && currentTime % 1000 < 50) {
-            console.log(`Rattlesnake ${snake.id}: timeInCycle=${timeInCycle}, patrolDuration=${patrolDuration}, waitDuration=${waitDuration}, isPatrolling=${timeInCycle < patrolDuration}`);
+            console.log(`Rattlesnake ${snake.id}: timeInCycle=${timeInCycle}, patrolDuration=${patrolDuration}, waitDuration=${waitDuration}, isPatrolling=${timeInCycle < patrolDuration}, pos=(${Math.round(snake.position.x)},${Math.round(snake.position.y)}), isInPit=${snake.isInPit}`);
           }
 
           if (timeInCycle < patrolDuration) {
-            // Patrolling phase - move using basic patrol logic
+            // Patrolling phase - ensure snake is marked as emerged and move using basic patrol logic
+            updatedSnakes[snakeIndex] = {
+              ...snake,
+              isInPit: false, // Mark as emerged during patrol phase
+            };
+            
             if (snake.patrolPoints && snake.patrolPoints.length > 0) {
               // Use basic patrol point following
               const currentIndex = snake.currentPatrolIndex || 0;
@@ -4056,10 +4061,11 @@ export const useSnakeGame = create<SnakeGameState>()(
                 patrolStartTime: currentTime,
               };
             } else {
-              // Wait at pit location
+              // Wait at pit location - mark snake as back in pit
               updatedSnakes[snakeIndex] = {
                 ...snake,
                 position: pitPosition,
+                isInPit: true, // Mark as back in pit during wait phase
                 isChasing: false, // Don't chase while waiting
               };
             }
