@@ -4024,6 +4024,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                 const moveX = (dx / distance) * speed;
                 const moveY = (dy / distance) * speed;
                 
+                console.log(`${snake.id} moving: from (${Math.round(snake.position.x)},${Math.round(snake.position.y)}) to (${Math.round(snake.position.x + moveX)},${Math.round(snake.position.y + moveY)}), setting isInPit=false`);
+                
                 updatedSnakes[snakeIndex] = {
                   ...snake,
                   position: {
@@ -4036,6 +4038,8 @@ export const useSnakeGame = create<SnakeGameState>()(
               } else {
                 // Reached patrol point, move to next
                 const nextIndex = (currentIndex + 1) % snake.patrolPoints.length;
+                console.log(`${snake.id} reached patrol point ${currentIndex}, moving to ${nextIndex}, setting isInPit=false`);
+                
                 updatedSnakes[snakeIndex] = {
                   ...snake,
                   currentPatrolIndex: nextIndex,
