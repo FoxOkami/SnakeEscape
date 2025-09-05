@@ -4002,57 +4002,16 @@ export const useSnakeGame = create<SnakeGameState>()(
           const timeInCycle = timeSincePatrolStart % cycleTime;
 
           // Debug logging for pit1 snakes
-          if (pit.id === "pit1" && currentTime % 1000 < 50) {
-            console.log(`Rattlesnake ${snake.id}: timeInCycle=${timeInCycle}, patrolDuration=${patrolDuration}, waitDuration=${waitDuration}, isPatrolling=${timeInCycle < patrolDuration}, pos=(${Math.round(snake.position.x)},${Math.round(snake.position.y)}), isInPit=${snake.isInPit}`);
+          if (pit.id === "pit1" && currentTime % 2000 < 50) {
+            console.log(`Rattlesnake ${snake.id}: timeInCycle=${timeInCycle}, patrolDuration=${patrolDuration}, waitDuration=${waitDuration}, isPatrolling=${timeInCycle < patrolDuration}, pos=(${Math.round(snake.position.x)},${Math.round(snake.position.y)}), isInPit=${snake.isInPit}, SETTING isInPit=${timeInCycle < patrolDuration ? 'false' : 'true'}`);
           }
 
           if (timeInCycle < patrolDuration) {
-            // Patrolling phase - ensure snake is marked as emerged and move using basic patrol logic
-            if (snake.patrolPoints && snake.patrolPoints.length > 0) {
-              // Use basic patrol point following
-              const currentIndex = snake.currentPatrolIndex || 0;
-              const targetPoint = snake.patrolPoints[currentIndex];
-              
-              // Move towards target point
-              const dx = targetPoint.x - snake.position.x;
-              const dy = targetPoint.y - snake.position.y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              
-              if (distance > 5) {
-                // Move towards target
-                const speed = snake.speed * (deltaTime / 1000);
-                const moveX = (dx / distance) * speed;
-                const moveY = (dy / distance) * speed;
-                
-                console.log(`${snake.id} moving: from (${Math.round(snake.position.x)},${Math.round(snake.position.y)}) to (${Math.round(snake.position.x + moveX)},${Math.round(snake.position.y + moveY)}), setting isInPit=false`);
-                
-                updatedSnakes[snakeIndex] = {
-                  ...snake,
-                  position: {
-                    x: snake.position.x + moveX,
-                    y: snake.position.y + moveY
-                  },
-                  direction: { x: dx / distance, y: dy / distance },
-                  isInPit: false, // Always mark as emerged during patrol
-                };
-              } else {
-                // Reached patrol point, move to next
-                const nextIndex = (currentIndex + 1) % snake.patrolPoints.length;
-                console.log(`${snake.id} reached patrol point ${currentIndex}, moving to ${nextIndex}, setting isInPit=false`);
-                
-                updatedSnakes[snakeIndex] = {
-                  ...snake,
-                  currentPatrolIndex: nextIndex,
-                  isInPit: false, // Always mark as emerged during patrol
-                };
-              }
-            } else {
-              // No patrol points, just mark as emerged
-              updatedSnakes[snakeIndex] = {
-                ...snake,
-                isInPit: false, // Mark as emerged during patrol phase
-              };
-            }
+            // Patrolling phase - just mark snake as emerged, let entities.ts handle movement
+            updatedSnakes[snakeIndex] = {
+              ...snake,
+              isInPit: false, // Mark as emerged - entities.ts will handle movement
+            };
             
             // Check if pit is lit - if so, stay in patrol phase longer
             if (pit.isLightHit) {
