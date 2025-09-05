@@ -4008,11 +4008,6 @@ export const useSnakeGame = create<SnakeGameState>()(
 
           if (timeInCycle < patrolDuration) {
             // Patrolling phase - ensure snake is marked as emerged and move using basic patrol logic
-            updatedSnakes[snakeIndex] = {
-              ...snake,
-              isInPit: false, // Mark as emerged during patrol phase
-            };
-            
             if (snake.patrolPoints && snake.patrolPoints.length > 0) {
               // Use basic patrol point following
               const currentIndex = snake.currentPatrolIndex || 0;
@@ -4035,16 +4030,24 @@ export const useSnakeGame = create<SnakeGameState>()(
                     x: snake.position.x + moveX,
                     y: snake.position.y + moveY
                   },
-                  direction: { x: dx / distance, y: dy / distance }
+                  direction: { x: dx / distance, y: dy / distance },
+                  isInPit: false, // Always mark as emerged during patrol
                 };
               } else {
                 // Reached patrol point, move to next
                 const nextIndex = (currentIndex + 1) % snake.patrolPoints.length;
                 updatedSnakes[snakeIndex] = {
                   ...snake,
-                  currentPatrolIndex: nextIndex
+                  currentPatrolIndex: nextIndex,
+                  isInPit: false, // Always mark as emerged during patrol
                 };
               }
+            } else {
+              // No patrol points, just mark as emerged
+              updatedSnakes[snakeIndex] = {
+                ...snake,
+                isInPit: false, // Mark as emerged during patrol phase
+              };
             }
             
             // Check if pit is lit - if so, stay in patrol phase longer
