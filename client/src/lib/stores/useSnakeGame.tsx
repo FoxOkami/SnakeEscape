@@ -3976,7 +3976,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                   }
 
                   // Snake emerging from light trigger
-                  newSnakes[snakeIndex] = {
+                  updatedSnakes[snakeIndex] = {
                     ...snake,
                     isInPit: false,
                     emergenceTime: currentTime,
