@@ -1250,7 +1250,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       let newMiniBoulders = [...state.miniBoulders];
       let newSnakes = [...state.snakes];
       
-      // Simple rattlesnake behavior: start at pit → wait 3s → patrol → return to pit → repeat
+      // Patrol-point based rattlesnake behavior: wait 3s → patrol all points → return to pit → repeat
       newSnakes.forEach((snake, index) => {
         if (snake.type === "rattlesnake" && snake.pitId) {
           const pit = state.snakePits.find((p) => p.id === snake.pitId);
@@ -1258,36 +1258,96 @@ export const useSnakeGame = create<SnakeGameState>()(
 
           const pitPosition = { x: pit.x - 14, y: pit.y - 14 };
           
-          // Initialize if needed
-          if (!snake.patrolStartTime) {
+          // Initialize rattlesnake state if needed
+          if (!snake.rattlesnakeState || !snake.patrolStartTime) {
             newSnakes[index] = {
               ...snake,
+              rattlesnakeState: "waiting",
               patrolStartTime: currentTime,
+              currentPatrolIndex: 0,
+              patrolDirection: 1,
               position: pitPosition,
               isInPit: true,
             };
             return;
           }
 
-          const elapsed = currentTime - snake.patrolStartTime;
-          const waitTime = 3000; // 3 seconds wait
-          const patrolTime = 10000; // 10 seconds patrol (adjust as needed)
-          const cycle = waitTime + patrolTime;
-          const timeInCycle = elapsed % cycle;
+          // State machine for rattlesnake behavior
+          switch (snake.rattlesnakeState) {
+            case "waiting":
+              // Wait 3 seconds at pit
+              const elapsed = currentTime - snake.patrolStartTime;
+              if (elapsed >= 3000) {
+                // Start patrolling
+                newSnakes[index] = {
+                  ...snake,
+                  rattlesnakeState: "patrolling",
+                  currentPatrolIndex: 0,
+                  patrolDirection: 1,
+                  isInPit: false,
+                };
+              } else {
+                // Still waiting
+                newSnakes[index] = {
+                  ...snake,
+                  position: pitPosition,
+                  isInPit: true,
+                };
+              }
+              break;
 
-          if (timeInCycle < waitTime) {
-            // Waiting at pit
-            newSnakes[index] = {
-              ...snake,
-              position: pitPosition,
-              isInPit: true,
-            };
-          } else {
-            // Patrolling - let entities.ts handle movement
-            newSnakes[index] = {
-              ...snake,
-              isInPit: false,
-            };
+            case "patrolling":
+              // Let entity system handle patrol movement, but check if completed
+              if (snake.patrolPoints && snake.patrolPoints.length > 0) {
+                // Check if reached final patrol point (completed full route)
+                if (snake.currentPatrolIndex >= snake.patrolPoints.length - 1 && snake.patrolDirection === 1) {
+                  // Completed patrol, start returning to pit
+                  newSnakes[index] = {
+                    ...snake,
+                    rattlesnakeState: "returningToPit",
+                    isInPit: false,
+                  };
+                } else {
+                  // Still patrolling
+                  newSnakes[index] = {
+                    ...snake,
+                    isInPit: false,
+                  };
+                }
+              } else {
+                // No patrol points, just return to pit immediately
+                newSnakes[index] = {
+                  ...snake,
+                  rattlesnakeState: "returningToPit",
+                  isInPit: false,
+                };
+              }
+              break;
+
+            case "returningToPit":
+              // Check if reached pit location
+              const distanceToPit = Math.sqrt(
+                Math.pow(snake.position.x - pitPosition.x, 2) + 
+                Math.pow(snake.position.y - pitPosition.y, 2)
+              );
+              
+              if (distanceToPit < 20) {
+                // Reached pit, start waiting again
+                newSnakes[index] = {
+                  ...snake,
+                  rattlesnakeState: "waiting",
+                  patrolStartTime: currentTime,
+                  position: pitPosition,
+                  isInPit: true,
+                };
+              } else {
+                // Still returning to pit
+                newSnakes[index] = {
+                  ...snake,
+                  isInPit: false,
+                };
+              }
+              break;
           }
         }
       });

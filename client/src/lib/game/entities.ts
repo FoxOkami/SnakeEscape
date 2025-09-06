@@ -1033,38 +1033,49 @@ function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?
     return snake;
   }
 
-  // Rattlesnakes patrol when emerged and can chase if they see the player
+  // Determine behavior based on rattlesnake state
   let targetPoint: Position = snake.position;
   
-  // Check if can see player and start chasing
-  if (player && snake.sightRange && snake.hearingRange) {
-    const distanceToPlayer = getDistance(snake.position, player.position);
-    const canSeePlayer = distanceToPlayer <= snake.sightRange && 
-                        hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
+  // Handle different rattlesnake states
+  if (snake.rattlesnakeState === "returningToPit") {
+    // Find the pit this snake belongs to and move toward it
+    const pitPosition = { x: 550 - 14, y: 450 - 14 }; // Default pit1 position, should be passed in properly
+    targetPoint = pitPosition;
     
-    // Also check hearing range for rattlesnakes
-    const canHearPlayer = distanceToPlayer <= snake.hearingRange;
-    
-    if (canSeePlayer || canHearPlayer) {
-      snake.isChasing = true;
-      targetPoint = player.position;
-    } else if (snake.isChasing) {
-      // Lost sight/sound, stop chasing after cooldown
-      snake.lostSightCooldown = (snake.lostSightCooldown || 0) + dt;
-      if (snake.lostSightCooldown >= 2.0) { // 2 second cooldown
-        snake.isChasing = false;
-        snake.lostSightCooldown = 0;
-      } else {
-        // Continue chasing for a bit
+    // Don't chase player when returning to pit
+    snake.isChasing = false;
+  } else {
+    // Normal patrol/chase behavior for "patrolling" state
+    // Check if can see player and start chasing
+    if (player && snake.sightRange && snake.hearingRange) {
+      const distanceToPlayer = getDistance(snake.position, player.position);
+      const canSeePlayer = distanceToPlayer <= snake.sightRange && 
+                          hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
+      
+      // Also check hearing range for rattlesnakes
+      const canHearPlayer = distanceToPlayer <= snake.hearingRange;
+      
+      if (canSeePlayer || canHearPlayer) {
+        snake.isChasing = true;
         targetPoint = player.position;
+      } else if (snake.isChasing) {
+        // Lost sight/sound, stop chasing after cooldown
+        snake.lostSightCooldown = (snake.lostSightCooldown || 0) + dt;
+        if (snake.lostSightCooldown >= 2.0) { // 2 second cooldown
+          snake.isChasing = false;
+          snake.lostSightCooldown = 0;
+        } else {
+          // Continue chasing for a bit
+          targetPoint = player.position;
+        }
+      } else {
+        // Default patrol behavior
+        targetPoint = getPatrolTarget(snake);
       }
     } else {
-      // Default patrol behavior
+      // No player reference, just patrol
       targetPoint = getPatrolTarget(snake);
     }
-  } else {
-    // No player reference, just patrol
-    targetPoint = getPatrolTarget(snake);
   }
   
   // Calculate movement speed
