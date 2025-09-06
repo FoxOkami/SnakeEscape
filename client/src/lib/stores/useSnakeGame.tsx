@@ -4002,8 +4002,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           const timeInCycle = timeSincePatrolStart % cycleTime;
 
           // Debug logging for pit1 snakes
-          if (pit.id === "pit1" && currentTime % 2000 < 50) {
-            console.log(`Rattlesnake ${snake.id}: timeInCycle=${timeInCycle}, patrolDuration=${patrolDuration}, waitDuration=${waitDuration}, isPatrolling=${timeInCycle < patrolDuration}, pos=(${Math.round(snake.position.x)},${Math.round(snake.position.y)}), isInPit=${snake.isInPit}, SETTING isInPit=${timeInCycle < patrolDuration ? 'false' : 'true'}`);
+          if (pit.id === "pit1" && currentTime % 1000 < 50) {
+            console.log(`Rattlesnake ${snake.id}: timeInCycle=${timeInCycle}, patrolDuration=${patrolDuration}, waitDuration=${waitDuration}, isPatrolling=${timeInCycle < patrolDuration}, pos=(${Math.round(snake.position.x)},${Math.round(snake.position.y)}), isInPit=${snake.isInPit}`);
           }
 
           if (timeInCycle < patrolDuration) {
