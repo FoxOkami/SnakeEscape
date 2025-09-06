@@ -1217,7 +1217,7 @@ const GameCanvas: React.FC = () => {
       // On Level 3, skip snakes here so they render on top of mirrors
       snakes.forEach((snake) => {
         // Skip drawing snakes on Level 3 - they'll be drawn after mirrors
-        if (currentLevelKey === "grid_puzzle") {
+        if (currentLevelKey === "light_reflection") {
           return;
         }
         // Skip rendering phase-restricted snakes that aren't in their active phase
@@ -1877,7 +1877,7 @@ const GameCanvas: React.FC = () => {
       });
 
       // Draw snakes on Level 3 after mirrors (so they appear on top)
-      if (currentLevelKey === "grid_puzzle") {
+      if (currentLevelKey === "light_reflection") {
         snakes.forEach((snake) => {
 
           let baseColor = "#2d3748";
