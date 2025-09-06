@@ -1250,19 +1250,22 @@ export const useSnakeGame = create<SnakeGameState>()(
       let newMiniBoulders = [...state.miniBoulders];
       let newSnakes = [...state.snakes];
       
-      // Patrol-point based rattlesnake behavior: wait 3s → patrol all points → return to pit → repeat
+      // Rotation-based rattlesnake behavior: Only 1 snake per pit patrols at a time, with 1s delays
+      let updatedSnakePits = [...state.snakePits];
+      
       newSnakes.forEach((snake, index) => {
         if (snake.type === "rattlesnake" && snake.pitId) {
-          const pit = state.snakePits.find((p) => p.id === snake.pitId);
-          if (!pit) return;
-
+          const pitIndex = updatedSnakePits.findIndex((p) => p.id === snake.pitId);
+          if (pitIndex === -1) return;
+          
+          const pit = updatedSnakePits[pitIndex];
           const pitPosition = { x: pit.x - 14, y: pit.y - 14 };
           
           // Initialize rattlesnake state if needed
           if (!snake.rattlesnakeState || !snake.patrolStartTime) {
             newSnakes[index] = {
               ...snake,
-              rattlesnakeState: "waiting",
+              rattlesnakeState: "inPit",
               patrolStartTime: currentTime,
               currentPatrolIndex: 0,
               patrolDirection: 1,
@@ -1272,13 +1275,15 @@ export const useSnakeGame = create<SnakeGameState>()(
             return;
           }
 
+          // Check if this snake is the one that should be patrolling for this pit
+          const currentSnakeId = pit.snakeIds[pit.currentSnakeIndex];
+          const isMyTurn = snake.id === currentSnakeId;
+          
           // State machine for rattlesnake behavior
           switch (snake.rattlesnakeState) {
-            case "waiting":
-              // Wait 3 seconds at pit
-              const elapsed = currentTime - snake.patrolStartTime;
-              if (elapsed >= 3000) {
-                // Start patrolling
+            case "inPit":
+              if (isMyTurn && currentTime >= pit.nextEmergenceTime && !pit.isSnakePatrolling) {
+                // Time to emerge and start patrolling
                 newSnakes[index] = {
                   ...snake,
                   rattlesnakeState: "patrolling",
@@ -1286,8 +1291,13 @@ export const useSnakeGame = create<SnakeGameState>()(
                   patrolDirection: 1,
                   isInPit: false,
                 };
+                // Mark this pit as having a snake patrolling
+                updatedSnakePits[pitIndex] = {
+                  ...pit,
+                  isSnakePatrolling: true,
+                };
               } else {
-                // Still waiting
+                // Stay in pit
                 newSnakes[index] = {
                   ...snake,
                   position: pitPosition,
@@ -1332,10 +1342,18 @@ export const useSnakeGame = create<SnakeGameState>()(
               );
               
               if (distanceToPit < 20) {
-                // Reached pit, start waiting again
+                // Reached pit - advance to next snake and set 1s delay
+                const nextSnakeIndex = (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
+                updatedSnakePits[pitIndex] = {
+                  ...pit,
+                  currentSnakeIndex: nextSnakeIndex,
+                  nextEmergenceTime: currentTime + 1000, // 1 second delay
+                  isSnakePatrolling: false,
+                };
+                
                 newSnakes[index] = {
                   ...snake,
-                  rattlesnakeState: "waiting",
+                  rattlesnakeState: "inPit",
                   patrolStartTime: currentTime,
                   position: pitPosition,
                   isInPit: true,
@@ -1351,6 +1369,9 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
         }
       });
+      
+      // Update snake pits in state
+      set({ snakePits: updatedSnakePits });
       
       // Calculate snake chase multiplier from active permanent items
       let snakeChaseMultiplier = 1; // Default multiplier

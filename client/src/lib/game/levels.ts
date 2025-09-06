@@ -735,8 +735,9 @@ export const LEVELS: Level[] = [
         y: 450,
         radius: 25,
         snakeIds: ["rattlesnake1", "rattlesnake2", "rattlesnake3"],
-        lastEmergenceTime: 0,
-        emergenceInterval: 3000, // 3 seconds between emergences
+        currentSnakeIndex: 0, // Which snake in the list should emerge next
+        nextEmergenceTime: 3000, // When the next snake should emerge (3s initial delay)
+        isSnakePatrolling: false, // Is a snake from this pit currently patrolling
       },
       {
         id: "pit2",
@@ -744,8 +745,9 @@ export const LEVELS: Level[] = [
         y: 150,
         radius: 25,
         snakeIds: ["rattlesnake4", "rattlesnake5"],
-        lastEmergenceTime: 0,
-        emergenceInterval: 3000, // 3 seconds between emergences
+        currentSnakeIndex: 0, // Which snake in the list should emerge next
+        nextEmergenceTime: 3000, // When the next snake should emerge (3s initial delay)
+        isSnakePatrolling: false, // Is a snake from this pit currently patrolling
       },
     ],
     lightSource: {
