@@ -1278,11 +1278,24 @@ export const useSnakeGame = create<SnakeGameState>()(
           // Check if this snake is the one that should be patrolling for this pit
           const currentSnakeId = pit.snakeIds[pit.currentSnakeIndex];
           const isMyTurn = snake.id === currentSnakeId;
+          const isPitLit = pit.isLightHit || false;
           
           // State machine for rattlesnake behavior
           switch (snake.rattlesnakeState) {
             case "inPit":
-              if (isMyTurn && currentTime >= pit.nextEmergenceTime && !pit.isSnakePatrolling) {
+              // If pit is lit, all snakes should emerge and patrol continuously
+              if (isPitLit) {
+                newSnakes[index] = {
+                  ...snake,
+                  rattlesnakeState: "patrolling",
+                  currentPatrolIndex: 0,
+                  patrolDirection: 1,
+                  isInPit: false,
+                  isLightEmergence: true,
+                };
+              }
+              // Normal one-at-a-time system when pit is not lit
+              else if (isMyTurn && currentTime >= pit.nextEmergenceTime && !pit.isSnakePatrolling) {
                 // Time to emerge and start patrolling
                 newSnakes[index] = {
                   ...snake,
@@ -1311,12 +1324,24 @@ export const useSnakeGame = create<SnakeGameState>()(
               if (snake.patrolPoints && snake.patrolPoints.length > 0) {
                 // Check if reached final patrol point (completed full route)
                 if (snake.currentPatrolIndex >= snake.patrolPoints.length - 1 && snake.patrolDirection === 1) {
-                  // Completed patrol, start returning to pit
-                  newSnakes[index] = {
-                    ...snake,
-                    rattlesnakeState: "returningToPit",
-                    isInPit: false,
-                  };
+                  // If pit is still lit, restart patrol instead of returning to pit
+                  if (isPitLit) {
+                    newSnakes[index] = {
+                      ...snake,
+                      currentPatrolIndex: 0, // Reset patrol to beginning
+                      patrolDirection: 1,
+                      isInPit: false,
+                      isLightEmergence: true,
+                    };
+                  } else {
+                    // Pit not lit, completed patrol, start returning to pit
+                    newSnakes[index] = {
+                      ...snake,
+                      rattlesnakeState: "returningToPit",
+                      isInPit: false,
+                      isLightEmergence: false,
+                    };
+                  }
                 } else {
                   // Still patrolling
                   newSnakes[index] = {
@@ -1325,46 +1350,70 @@ export const useSnakeGame = create<SnakeGameState>()(
                   };
                 }
               } else {
-                // No patrol points, just return to pit immediately
-                newSnakes[index] = {
-                  ...snake,
-                  rattlesnakeState: "returningToPit",
-                  isInPit: false,
-                };
+                // No patrol points
+                if (isPitLit) {
+                  // Keep patrolling if pit is lit (even without points)
+                  newSnakes[index] = {
+                    ...snake,
+                    isInPit: false,
+                    isLightEmergence: true,
+                  };
+                } else {
+                  // Return to pit if no points and not lit
+                  newSnakes[index] = {
+                    ...snake,
+                    rattlesnakeState: "returningToPit",
+                    isInPit: false,
+                    isLightEmergence: false,
+                  };
+                }
               }
               break;
 
             case "returningToPit":
-              // Check if reached pit location
-              const distanceToPit = Math.sqrt(
-                Math.pow(snake.position.x - pitPosition.x, 2) + 
-                Math.pow(snake.position.y - pitPosition.y, 2)
-              );
-              
-              if (distanceToPit < 20) {
-                // Reached pit - advance to next snake and set configurable delay
-                const nextSnakeIndex = (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
-                updatedSnakePits[pitIndex] = {
-                  ...pit,
-                  currentSnakeIndex: nextSnakeIndex,
-                  nextEmergenceTime: currentTime + pit.emergenceInterval, // Use configurable emergence interval
-                  lastEmergenceTime: currentTime,
-                  isSnakePatrolling: false,
-                };
-                
+              // If pit becomes lit while returning, immediately turn around and patrol
+              if (isPitLit) {
                 newSnakes[index] = {
                   ...snake,
-                  rattlesnakeState: "inPit",
-                  patrolStartTime: currentTime,
-                  position: pitPosition,
-                  isInPit: true,
+                  rattlesnakeState: "patrolling",
+                  currentPatrolIndex: 0,
+                  patrolDirection: 1,
+                  isInPit: false,
+                  isLightEmergence: true,
                 };
               } else {
-                // Still returning to pit
-                newSnakes[index] = {
-                  ...snake,
-                  isInPit: false,
-                };
+                // Check if reached pit location
+                const distanceToPit = Math.sqrt(
+                  Math.pow(snake.position.x - pitPosition.x, 2) + 
+                  Math.pow(snake.position.y - pitPosition.y, 2)
+                );
+                
+                if (distanceToPit < 20) {
+                  // Reached pit - advance to next snake and set configurable delay
+                  const nextSnakeIndex = (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
+                  updatedSnakePits[pitIndex] = {
+                    ...pit,
+                    currentSnakeIndex: nextSnakeIndex,
+                    nextEmergenceTime: currentTime + pit.emergenceInterval, // Use configurable emergence interval
+                    lastEmergenceTime: currentTime,
+                    isSnakePatrolling: false,
+                  };
+                  
+                  newSnakes[index] = {
+                    ...snake,
+                    rattlesnakeState: "inPit",
+                    patrolStartTime: currentTime,
+                    position: pitPosition,
+                    isInPit: true,
+                    isLightEmergence: false,
+                  };
+                } else {
+                  // Still returning to pit
+                  newSnakes[index] = {
+                    ...snake,
+                    isInPit: false,
+                  };
+                }
               }
               break;
           }
@@ -4029,74 +4078,14 @@ export const useSnakeGame = create<SnakeGameState>()(
             isLightHit: isCurrentlyHitByLight,
           };
 
-          // Light just started hitting the pit (trigger emergence)
+          // Light just started hitting the pit - state machine will handle snake emergence
           if (isCurrentlyHitByLight && !wasHitByLight) {
-            // Find all snakes in this pit that can emerge
-            const snakesInPit = updatedSnakes.filter(
-              (snake) =>
-                pit.snakeIds &&
-                pit.snakeIds.includes(snake.id) &&
-                snake.type === "rattlesnake" &&
-                snake.isInPit === true,
-            );
-
-            if (snakesInPit.length > 0) {
-              // Emerge all snakes in different cardinal directions
-              const cardinalDirections = ["north", "south", "east", "west"];
-
-              snakesInPit.forEach((snake, index) => {
-                const direction =
-                  cardinalDirections[index % cardinalDirections.length];
-                const snakeIndex = updatedSnakes.findIndex(
-                  (s) => s.id === snake.id,
-                );
-
-                if (snakeIndex !== -1) {
-                  // Calculate position based on direction
-                  let emergenceX = pit.x - 14;
-                  let emergenceY = pit.y - 14;
-
-                  switch (direction) {
-                    case "north":
-                      emergenceY -= 30;
-                      break;
-                    case "south":
-                      emergenceY += 30;
-                      break;
-                    case "east":
-                      emergenceX += 30;
-                      break;
-                    case "west":
-                      emergenceX -= 30;
-                      break;
-                  }
-
-                  // Snake emerging from light trigger
-                  updatedSnakes[snakeIndex] = {
-                    ...snake,
-                    isInPit: false,
-                    emergenceTime: currentTime,
-                    rattlesnakeState: "patrolling" as const,
-                    isLightEmergence: true,
-                    lightEmergenceDirection: direction as
-                      | "north"
-                      | "south"
-                      | "east"
-                      | "west",
-                    patrolStartTime: currentTime,
-                    isChasing: false,
-                    position: { x: emergenceX, y: emergenceY },
-                  };
-                }
-              });
-
-              // Update pit to track light emergence
-              updatedSnakePits[pitIndex] = {
-                ...updatedSnakePits[pitIndex],
-                lightEmergenceTime: currentTime,
-                isLightEmergence: true,
-              };
-            }
+            // Update pit to track light emergence
+            updatedSnakePits[pitIndex] = {
+              ...updatedSnakePits[pitIndex],
+              lightEmergenceTime: currentTime,
+              isLightEmergence: true,
+            };
           }
           // Light stopped hitting the pit
           else if (!isCurrentlyHitByLight && wasHitByLight) {
