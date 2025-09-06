@@ -206,6 +206,7 @@ export interface SnakePit extends Position {
   nextEmergenceTime: number; // When the next snake should emerge
   isSnakePatrolling: boolean; // Is a snake from this pit currently patrolling
   // Light detection properties
+  lit: boolean; // Whether light source is currently intersecting with this pit
   isLightHit?: boolean; // Whether light beam is currently hitting this pit
   lightEmergenceTime?: number; // When snakes emerged due to light hit
   isLightEmergence?: boolean; // Whether current emergence is due to light
