@@ -3,7 +3,7 @@ import { checkAABBCollision, getDistance, moveTowards, hasLineOfSight, getDirect
 import { updateBossSnake } from "./bossSnake";
 import { getSnakeDetectionMultipliers } from "../stores/useSnakeGame";
 
-export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[], gameState?: any, levelBounds?: { width: number; height: number }, boulders?: Boulder[]): Snake {
+export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[], gameState?: any, levelBounds?: { width: number; height: number }, boulders?: Boulder[], snakePits?: any[]): Snake {
   const currentTime = Date.now();
   
   // Convert deltaTime from milliseconds to seconds for calculations
@@ -47,7 +47,7 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
     case 'photophobic':
       return updatePhotophobicSnake(modifiedSnake, walls, dt, player, sounds, currentTime, gameState);
     case 'rattlesnake':
-      return updateRattlesnakeSnake(modifiedSnake, walls, dt, player);
+      return updateRattlesnakeSnake(modifiedSnake, walls, dt, player, snakePits);
     case 'boss':
       return updateBossSnake(modifiedSnake, walls, dt, player, currentTime, levelBounds, boulders);
     case 'phantom':
@@ -1027,7 +1027,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
   return snake;
 }
 
-function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?: Player): Snake {
+function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, snakePits?: any[]): Snake {
   // Skip processing if snake is still in pit
   if (snake.isInPit) {
     return snake;
@@ -1039,7 +1039,15 @@ function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?
   // Handle different rattlesnake states
   if (snake.rattlesnakeState === "returningToPit") {
     // Find the pit this snake belongs to and move toward it
-    const pitPosition = { x: 550 - 14, y: 450 - 14 }; // Default pit1 position, should be passed in properly
+    let pitPosition = { x: 550 - 14, y: 450 - 14 }; // Default pit1 position
+    
+    if (snakePits && snake.pitId) {
+      const pit = snakePits.find(p => p.id === snake.pitId);
+      if (pit) {
+        pitPosition = { x: pit.x - 14, y: pit.y - 14 };
+      }
+    }
+    
     targetPoint = pitPosition;
     
     // Don't chase player when returning to pit

@@ -1372,7 +1372,9 @@ export const useSnakeGame = create<SnakeGameState>()(
               updatedState.player,
               playerSounds,
               { ...updatedState, quadrantLighting },
-              { width: 800, height: 600 }
+              { width: 800, height: 600 },
+              undefined, // boulders
+              state.snakePits // Pass snake pits for pit position lookup
             );
           }
           return snake; // If in pit, just return as-is
