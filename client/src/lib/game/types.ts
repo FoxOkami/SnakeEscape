@@ -201,6 +201,10 @@ export interface SnakePit extends Position {
   snakeIds: string[]; // IDs of snakes that belong to this pit
   lastEmergenceTime: number; // When a snake last emerged
   emergenceInterval: number; // Time between emergences (3000ms = 3 seconds)
+  // Rotation system properties
+  currentSnakeIndex: number; // Which snake in the list should emerge next (0-based index)
+  nextEmergenceTime: number; // When the next snake should emerge
+  isSnakePatrolling: boolean; // Is a snake from this pit currently patrolling
   // Light detection properties
   isLightHit?: boolean; // Whether light beam is currently hitting this pit
   lightEmergenceTime?: number; // When snakes emerged due to light hit
