@@ -1257,9 +1257,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       
       const updatedSnakes = newSnakes.map((snake, index) => {
-        // For rattlesnakes, use our processed version if it exists
+        // Rattlesnakes are already processed above
         if (snake.type === "rattlesnake") {
-          return processedSnakes[index] || snake;
+          return snake;
         }
         
         // Apply snake chase multiplier to non-boss snakes (but not on Skate Rink level)
@@ -3932,7 +3932,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                   }
 
                   // Snake emerging from light trigger
-                  processedSnakes[snakeIndex] = {
+                  newSnakes[snakeIndex] = {
                     ...snake,
                     isInPit: false,
                     emergenceTime: currentTime,
@@ -3968,77 +3968,44 @@ export const useSnakeGame = create<SnakeGameState>()(
         });
       }
 
-      // Simplified rattlesnake management - no complex emergence logic needed
-
-      // Simple rattlesnake behavior - no complex state machine needed  
-      let processedSnakes = [...newSnakes]; // Copy for rattlesnake processing
-      processedSnakes.forEach((snake, snakeIndex) => {
+      // Simple rattlesnake behavior: start at pit → wait 3s → patrol → return to pit → repeat
+      newSnakes.forEach((snake, index) => {
         if (snake.type === "rattlesnake" && snake.pitId) {
-          // Find the snake's pit
           const pit = state.snakePits.find((p) => p.id === snake.pitId);
-          if (!pit) {
-            console.log(`Rattlesnake ${snake.id} has no pit!`);
-            return;
-          }
+          if (!pit) return;
 
           const pitPosition = { x: pit.x - 14, y: pit.y - 14 };
           
-          // Initialize snake timing if needed
-          if (snake.patrolStartTime === undefined || snake.patrolStartTime === null) {
-            console.log(`Initializing rattlesnake ${snake.id} at pit ${pit.id}`);
-            updatedSnakes[snakeIndex] = {
+          // Initialize if needed
+          if (!snake.patrolStartTime) {
+            newSnakes[index] = {
               ...snake,
               patrolStartTime: currentTime,
-              position: pitPosition, // Start at pit
+              position: pitPosition,
+              isInPit: true,
             };
             return;
           }
 
-          const timeSincePatrolStart = currentTime - snake.patrolStartTime;
-          const patrolDuration = snake.patrolDuration || 4000;
-          const waitDuration = pit.emergenceInterval || 3000;
+          const elapsed = currentTime - snake.patrolStartTime;
+          const waitTime = 3000; // 3 seconds wait
+          const patrolTime = 10000; // 10 seconds patrol (adjust as needed)
+          const cycle = waitTime + patrolTime;
+          const timeInCycle = elapsed % cycle;
 
-          // Simple cycle: patrol for patrolDuration, then wait at pit for waitDuration
-          const cycleTime = patrolDuration + waitDuration;
-          const timeInCycle = timeSincePatrolStart % cycleTime;
-
-          // Debug logging for pit1 snakes
-          if (pit.id === "pit1" && currentTime % 1000 < 50) {
-            console.log(`Rattlesnake ${snake.id}: timeInCycle=${timeInCycle}, patrolDuration=${patrolDuration}, waitDuration=${waitDuration}, isPatrolling=${timeInCycle < patrolDuration}, pos=(${Math.round(snake.position.x)},${Math.round(snake.position.y)}), isInPit=${snake.isInPit}`);
-          }
-
-          if (timeInCycle < patrolDuration) {
-            // Patrolling phase - just mark snake as emerged, let entities.ts handle movement
-            if (pit.id === "pit1") {
-              console.log(`SETTING ${snake.id} isInPit=false (was ${snake.isInPit})`);
-            }
-            updatedSnakes[snakeIndex] = {
+          if (timeInCycle < waitTime) {
+            // Waiting at pit
+            newSnakes[index] = {
               ...snake,
-              isInPit: false, // Mark as emerged - entities.ts will handle movement
+              position: pitPosition,
+              isInPit: true,
             };
-            
-            // Check if pit is lit - if so, stay in patrol phase longer
-            if (pit.isLightHit) {
-              // Pit is lit, continue patrolling (don't return to pit)
-            }
           } else {
-            // Waiting phase - stay at pit location  
-            if (pit.isLightHit) {
-              // Pit is lit, immediately start patrolling again
-              console.log(`Rattlesnake ${snake.id} pit is lit, restarting patrol`);
-              updatedSnakes[snakeIndex] = {
-                ...snake,
-                patrolStartTime: currentTime,
-              };
-            } else {
-              // Wait at pit location - mark snake as back in pit
-              updatedSnakes[snakeIndex] = {
-                ...snake,
-                position: pitPosition,
-                isInPit: true, // Mark as back in pit during wait phase
-                isChasing: false, // Don't chase while waiting
-              };
-            }
+            // Patrolling - let entities.ts handle movement
+            newSnakes[index] = {
+              ...snake,
+              isInPit: false,
+            };
           }
         }
       });
