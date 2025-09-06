@@ -4008,6 +4008,9 @@ export const useSnakeGame = create<SnakeGameState>()(
 
           if (timeInCycle < patrolDuration) {
             // Patrolling phase - just mark snake as emerged, let entities.ts handle movement
+            if (pit.id === "pit1") {
+              console.log(`SETTING ${snake.id} isInPit=false (was ${snake.isInPit})`);
+            }
             updatedSnakes[snakeIndex] = {
               ...snake,
               isInPit: false, // Mark as emerged - entities.ts will handle movement
