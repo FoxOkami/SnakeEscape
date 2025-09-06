@@ -740,7 +740,6 @@ export const LEVELS: Level[] = [
         lastEmergenceTime: 0, // When a snake last emerged
         emergenceInterval: 1000, // Time between snake emergences (1s delay)
         isSnakePatrolling: false, // Is a snake from this pit currently patrolling
-        lit: false, // Whether light source is currently intersecting with this pit
       },
       {
         id: "pit2",
@@ -753,7 +752,6 @@ export const LEVELS: Level[] = [
         lastEmergenceTime: 0, // When a snake last emerged
         emergenceInterval: 1000, // Time between snake emergences (1s delay)
         isSnakePatrolling: false, // Is a snake from this pit currently patrolling
-        lit: false, // Whether light source is currently intersecting with this pit
       },
     ],
     lightSource: {
