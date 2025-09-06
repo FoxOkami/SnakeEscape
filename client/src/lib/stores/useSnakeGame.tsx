@@ -1256,10 +1256,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
       
-      const updatedSnakes = newSnakes.map((snake) => {
-        // Skip updating rattlesnakes - they're handled by our simplified patrol logic
+      const updatedSnakes = newSnakes.map((snake, index) => {
+        // For rattlesnakes, use our processed version if it exists
         if (snake.type === "rattlesnake") {
-          return snake;
+          return processedSnakes[index] || snake;
         }
         
         // Apply snake chase multiplier to non-boss snakes (but not on Skate Rink level)
@@ -3932,7 +3932,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                   }
 
                   // Snake emerging from light trigger
-                  updatedSnakes[snakeIndex] = {
+                  processedSnakes[snakeIndex] = {
                     ...snake,
                     isInPit: false,
                     emergenceTime: currentTime,
@@ -3970,8 +3970,9 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Simplified rattlesnake management - no complex emergence logic needed
 
-      // Simple rattlesnake behavior - no complex state machine needed
-      updatedSnakes.forEach((snake, snakeIndex) => {
+      // Simple rattlesnake behavior - no complex state machine needed  
+      let processedSnakes = [...newSnakes]; // Copy for rattlesnake processing
+      processedSnakes.forEach((snake, snakeIndex) => {
         if (snake.type === "rattlesnake" && snake.pitId) {
           // Find the snake's pit
           const pit = state.snakePits.find((p) => p.id === snake.pitId);
