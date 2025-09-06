@@ -1180,6 +1180,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.gameState !== "playing" || state.showInventory) return;
 
+      const currentTime = Date.now();
+
       // Initialize unified PlayerController if needed
       if (!state.playerController) {
         get().configurePlayerController();
