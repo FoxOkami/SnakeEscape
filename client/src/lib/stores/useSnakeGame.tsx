@@ -1301,9 +1301,21 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       
       const updatedSnakes = newSnakes.map((snake, index) => {
-        // Rattlesnakes are already processed above
+        // Rattlesnakes need both timing logic AND entity updates for movement
         if (snake.type === "rattlesnake") {
-          return snake;
+          // If rattlesnake is out of pit, update it with entity logic
+          if (!snake.isInPit) {
+            return updateSnake(
+              snake,
+              currentWalls,
+              deltaTime,
+              updatedState.player,
+              playerSounds,
+              { ...updatedState, quadrantLighting },
+              { width: 800, height: 600 }
+            );
+          }
+          return snake; // If in pit, just return as-is
         }
         
         // Apply snake chase multiplier to non-boss snakes (but not on Skate Rink level)
