@@ -737,6 +737,8 @@ export const LEVELS: Level[] = [
         snakeIds: ["rattlesnake1", "rattlesnake2", "rattlesnake3"],
         currentSnakeIndex: 0, // Which snake in the list should emerge next
         nextEmergenceTime: 3000, // When the next snake should emerge (3s initial delay)
+        lastEmergenceTime: 0, // When a snake last emerged
+        emergenceInterval: 1000, // Time between snake emergences (1s delay)
         isSnakePatrolling: false, // Is a snake from this pit currently patrolling
       },
       {
@@ -747,6 +749,8 @@ export const LEVELS: Level[] = [
         snakeIds: ["rattlesnake4", "rattlesnake5"],
         currentSnakeIndex: 0, // Which snake in the list should emerge next
         nextEmergenceTime: 3000, // When the next snake should emerge (3s initial delay)
+        lastEmergenceTime: 0, // When a snake last emerged
+        emergenceInterval: 1000, // Time between snake emergences (1s delay)
         isSnakePatrolling: false, // Is a snake from this pit currently patrolling
       },
     ],
