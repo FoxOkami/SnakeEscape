@@ -1342,12 +1342,13 @@ export const useSnakeGame = create<SnakeGameState>()(
               );
               
               if (distanceToPit < 20) {
-                // Reached pit - advance to next snake and set 1s delay
+                // Reached pit - advance to next snake and set configurable delay
                 const nextSnakeIndex = (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
                 updatedSnakePits[pitIndex] = {
                   ...pit,
                   currentSnakeIndex: nextSnakeIndex,
-                  nextEmergenceTime: currentTime + 1000, // 1 second delay
+                  nextEmergenceTime: currentTime + pit.emergenceInterval, // Use configurable emergence interval
+                  lastEmergenceTime: currentTime,
                   isSnakePatrolling: false,
                 };
                 
