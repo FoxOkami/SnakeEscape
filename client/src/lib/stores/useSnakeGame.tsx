@@ -4026,6 +4026,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           // Always update the visual state first
           updatedSnakePits[pitIndex] = {
             ...pit,
+            lit: isCurrentlyHitByLight, // Update the lit property
             isLightHit: isCurrentlyHitByLight,
           };
 
@@ -4102,6 +4103,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           else if (!isCurrentlyHitByLight && wasHitByLight) {
             updatedSnakePits[pitIndex] = {
               ...updatedSnakePits[pitIndex],
+              lit: false, // Update the lit property when light stops hitting
               isLightEmergence: false,
             };
           }
