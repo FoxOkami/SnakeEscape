@@ -621,7 +621,7 @@ export const LEVELS: Level[] = [
         isChasing: false,
         pitId: "pit1",
         isInPit: true,
-        patrolDuration: 8000, // 4 seconds patrol
+        patrolDuration: 8000, // 8 seconds patrol
         patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
