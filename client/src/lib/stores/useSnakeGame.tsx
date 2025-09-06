@@ -1248,6 +1248,48 @@ export const useSnakeGame = create<SnakeGameState>()(
       let newMiniBoulders = [...state.miniBoulders];
       let newSnakes = [...state.snakes];
       
+      // Simple rattlesnake behavior: start at pit → wait 3s → patrol → return to pit → repeat
+      newSnakes.forEach((snake, index) => {
+        if (snake.type === "rattlesnake" && snake.pitId) {
+          const pit = state.snakePits.find((p) => p.id === snake.pitId);
+          if (!pit) return;
+
+          const pitPosition = { x: pit.x - 14, y: pit.y - 14 };
+          
+          // Initialize if needed
+          if (!snake.patrolStartTime) {
+            newSnakes[index] = {
+              ...snake,
+              patrolStartTime: currentTime,
+              position: pitPosition,
+              isInPit: true,
+            };
+            return;
+          }
+
+          const elapsed = currentTime - snake.patrolStartTime;
+          const waitTime = 3000; // 3 seconds wait
+          const patrolTime = 10000; // 10 seconds patrol (adjust as needed)
+          const cycle = waitTime + patrolTime;
+          const timeInCycle = elapsed % cycle;
+
+          if (timeInCycle < waitTime) {
+            // Waiting at pit
+            newSnakes[index] = {
+              ...snake,
+              position: pitPosition,
+              isInPit: true,
+            };
+          } else {
+            // Patrolling - let entities.ts handle movement
+            newSnakes[index] = {
+              ...snake,
+              isInPit: false,
+            };
+          }
+        }
+      });
+      
       // Calculate snake chase multiplier from active permanent items
       let snakeChaseMultiplier = 1; // Default multiplier
       state.inventoryItems.forEach(item => {
@@ -3967,48 +4009,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
         });
       }
-
-      // Simple rattlesnake behavior: start at pit → wait 3s → patrol → return to pit → repeat
-      newSnakes.forEach((snake, index) => {
-        if (snake.type === "rattlesnake" && snake.pitId) {
-          const pit = state.snakePits.find((p) => p.id === snake.pitId);
-          if (!pit) return;
-
-          const pitPosition = { x: pit.x - 14, y: pit.y - 14 };
-          
-          // Initialize if needed
-          if (!snake.patrolStartTime) {
-            newSnakes[index] = {
-              ...snake,
-              patrolStartTime: currentTime,
-              position: pitPosition,
-              isInPit: true,
-            };
-            return;
-          }
-
-          const elapsed = currentTime - snake.patrolStartTime;
-          const waitTime = 3000; // 3 seconds wait
-          const patrolTime = 10000; // 10 seconds patrol (adjust as needed)
-          const cycle = waitTime + patrolTime;
-          const timeInCycle = elapsed % cycle;
-
-          if (timeInCycle < waitTime) {
-            // Waiting at pit
-            newSnakes[index] = {
-              ...snake,
-              position: pitPosition,
-              isInPit: true,
-            };
-          } else {
-            // Patrolling - let entities.ts handle movement
-            newSnakes[index] = {
-              ...snake,
-              isInPit: false,
-            };
-          }
-        }
-      });
 
       // Update state with modified snakes and pits
       set({
