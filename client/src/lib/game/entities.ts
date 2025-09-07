@@ -43,7 +43,7 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
     case 'plumber':
       return updatePlumberSnake(modifiedSnake, walls, dt, player, gameState);
     case 'spitter':
-      return updateSpitterSnake(modifiedSnake, walls, dt);
+      return updateSpitterSnake(modifiedSnake, walls, dt, currentTime, gameState);
     case 'photophobic':
       return updatePhotophobicSnake(modifiedSnake, walls, dt, player, sounds, currentTime, gameState);
     case 'rattlesnake':
@@ -648,7 +648,7 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   return snake;
 }
 
-function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number): Snake {
+function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number, currentTime?: number, gameState?: any): Snake {
   // If snake has patrol points, follow them (like guard/stalker snakes)
   if (snake.patrolPoints && snake.patrolPoints.length > 0) {
     // Use patrol behavior like other snakes
@@ -726,6 +726,20 @@ function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number): Snake {
     } else {
       // No collision, move normally
       snake.position = newPosition;
+    }
+  }
+
+  // Handle firing logic if currentTime is provided
+  if (currentTime && snake.lastFireTime !== undefined && snake.fireInterval) {
+    const timeSinceLastFire = currentTime - snake.lastFireTime;
+    
+    if (timeSinceLastFire >= snake.fireInterval) {
+      // Update the snake's firing timestamp and shot count
+      snake.lastFireTime = currentTime;
+      snake.shotCount = (snake.shotCount || 0) + 1;
+      
+      // Set a flag that the main game loop can check to create projectiles
+      snake.shouldFire = true;
     }
   }
 

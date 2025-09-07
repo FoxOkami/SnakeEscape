@@ -1602,6 +1602,75 @@ export const useSnakeGame = create<SnakeGameState>()(
         return updatedSnake;
       });
 
+      // Handle spitter snake projectile firing
+      let newProjectilesToAdd: any[] = [];
+      updatedSnakes.forEach((snake) => {
+        if (snake.type === "spitter" && snake.shouldFire) {
+          const projectileSpeed = 0.6; // pixels per ms
+          const projectileSize = { width: 6, height: 6 };
+          const lifespan = 5000; // 5 seconds
+
+          // Check if we're on Level 4 for alternating pattern
+          const isLevel4 = state.currentLevelKey === "grid_puzzle";
+          let directions: { x: number; y: number }[];
+
+          if (isLevel4) {
+            const isOddShot = (snake.shotCount || 1) % 2 === 1;
+
+            if (isOddShot) {
+              // Odd shots: cardinal directions (N, S, E, W)
+              directions = [
+                { x: 0, y: -1 }, // North
+                { x: 1, y: 0 }, // East
+                { x: 0, y: 1 }, // South
+                { x: -1, y: 0 }, // West
+              ];
+            } else {
+              // Even shots: diagonal directions (NE, NW, SE, SW)
+              directions = [
+                { x: 1, y: -1 }, // Northeast
+                { x: -1, y: -1 }, // Northwest
+                { x: 1, y: 1 }, // Southeast
+                { x: -1, y: 1 }, // Southwest
+              ];
+            }
+          } else {
+            // Default behavior for other levels: all 8 directions
+            directions = [
+              { x: 0, y: -1 }, // North
+              { x: 1, y: -1 }, // Northeast
+              { x: 1, y: 0 }, // East
+              { x: 1, y: 1 }, // Southeast
+              { x: 0, y: 1 }, // South
+              { x: -1, y: 1 }, // Southwest
+              { x: -1, y: 0 }, // West
+              { x: -1, y: -1 }, // Northwest
+            ];
+          }
+
+          const newProjectiles = directions.map((dir, index) => ({
+            id: `${snake.id}_projectile_${Date.now()}_${index}`,
+            position: {
+              x: snake.position.x + snake.size.width / 2 - projectileSize.width / 2,
+              y: snake.position.y + snake.size.height / 2 - projectileSize.height / 2,
+            },
+            velocity: {
+              x: dir.x * projectileSpeed,
+              y: dir.y * projectileSpeed,
+            },
+            size: projectileSize,
+            createdAt: Date.now(),
+            lifespan,
+            color: "#00ff41", // Neon green
+          }));
+
+          newProjectilesToAdd = [...newProjectilesToAdd, ...newProjectiles];
+          
+          // Clear the shouldFire flag
+          snake.shouldFire = false;
+        }
+      });
+
       // Handle plumber snake tile rotations
       let updatedPatternTilesFromRotation = state.patternTiles;
       updatedSnakes.forEach((snake) => {
@@ -2278,6 +2347,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         currentVelocity: state.playerController?.getCurrentVelocity() || { x: 0, y: 0 }, // Get velocity from PlayerController
         snakes: finalSnakes, // Use snakes after pit/projectile processing
         miniBoulders: newMiniBoulders, // Add the mini boulders to the state
+        projectiles: [...(state.projectiles || []), ...newProjectilesToAdd], // Add new spitter projectiles
         key: updatedKey,
         player: updatedPlayer,
         switches: updatedSwitches,
@@ -3333,117 +3403,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         return true; // Keep projectile
       });
 
-      // Check which spitter snakes need to fire
-      const snakesToFire: string[] = [];
-      const updatedSnakes = state.snakes.map((snake) => {
-        if (
-          snake.type === "spitter" &&
-          snake.lastFireTime !== undefined &&
-          snake.fireInterval
-        ) {
-          const timeSinceLastFire = currentTime - snake.lastFireTime;
-
-          // Use the configured fireInterval directly
-          const effectiveFireInterval = snake.fireInterval;
-          
-          // Debug logging to track firing behavior
-          if (snake.id === "spitter1") {
-            console.log(`[${snake.id}] currentTime: ${currentTime}, lastFireTime: ${snake.lastFireTime}, timeSinceLastFire: ${timeSinceLastFire}, fireInterval: ${effectiveFireInterval}`);
-          }
-          
-          if (timeSinceLastFire >= effectiveFireInterval) {
-            console.log(`[${snake.id}] FIRING! Will update lastFireTime to: ${currentTime}`);
-            snakesToFire.push(snake.id);
-            return {
-              ...snake,
-              lastFireTime: currentTime,
-              shotCount: (snake.shotCount || 0) + 1, // Increment shot count
-            };
-          }
-        }
-        return snake;
-      });
-
-      // Fire projectiles for snakes that need it
-      let newProjectilesToAdd: any[] = [];
-      snakesToFire.forEach((snakeId) => {
-        const snake = updatedSnakes.find((s) => s.id === snakeId);
-        if (snake && snake.type === "spitter") {
-          const projectileSpeed = 0.6; // pixels per ms
-          const projectileSize = { width: 6, height: 6 };
-          const lifespan = 5000; // 5 seconds
-
-          // Check if we're on Level 4 for alternating pattern
-          const isLevel4 = state.currentLevelKey === "grid_puzzle"; // Level 4 is 0-indexed as 4
-          let directions: { x: number; y: number }[];
-
-          if (isLevel4) {
-            const isOddShot = (snake.shotCount || 1) % 2 === 1; // shotCount starts at 1 after increment
-
-            if (isOddShot) {
-              // Odd shots: cardinal directions (N, S, E, W)
-              directions = [
-                { x: 0, y: -1 }, // North
-                { x: 1, y: 0 }, // East
-                { x: 0, y: 1 }, // South
-                { x: -1, y: 0 }, // West
-              ];
-            } else {
-              // Even shots: diagonal directions (NE, NW, SE, SW)
-              directions = [
-                { x: 1, y: -1 }, // Northeast
-                { x: -1, y: -1 }, // Northwest
-                { x: 1, y: 1 }, // Southeast
-                { x: -1, y: 1 }, // Southwest
-              ];
-            }
-          } else {
-            // Default behavior for other levels: all 8 directions
-            directions = [
-              { x: 0, y: -1 }, // North
-              { x: 1, y: -1 }, // Northeast
-              { x: 1, y: 0 }, // East
-              { x: 1, y: 1 }, // Southeast
-              { x: 0, y: 1 }, // South
-              { x: -1, y: 1 }, // Southwest
-              { x: -1, y: 0 }, // West
-              { x: -1, y: -1 }, // Northwest
-            ];
-          }
-
-          const newProjectiles = directions.map((dir, index) => ({
-            id: `${snakeId}_projectile_${Date.now()}_${index}`,
-            position: {
-              x:
-                snake.position.x +
-                snake.size.width / 2 -
-                projectileSize.width / 2,
-              y:
-                snake.position.y +
-                snake.size.height / 2 -
-                projectileSize.height / 2,
-            },
-            velocity: {
-              x: dir.x * projectileSpeed,
-              y: dir.y * projectileSpeed,
-            },
-            size: projectileSize,
-            createdAt: Date.now(),
-            lifespan,
-            color: "#00ff41", // Neon green
-          }));
-
-          newProjectilesToAdd = [...newProjectilesToAdd, ...newProjectiles];
-        }
-      });
-
-      // Combine existing projectiles with new ones
-      const allProjectiles = [...updatedProjectiles, ...newProjectilesToAdd];
-
-      set({
-        projectiles: allProjectiles,
-        snakes: updatedSnakes,
-      });
+      // Spitter firing logic will be handled in the main snake update loop below
+      // This prevents the duplicate update issue
 
       return { hitCount };
     },
