@@ -3346,7 +3346,13 @@ export const useSnakeGame = create<SnakeGameState>()(
           // Use the configured fireInterval directly
           const effectiveFireInterval = snake.fireInterval;
           
+          // Debug logging to track firing behavior
+          if (snake.id === "spitter1") {
+            console.log(`[${snake.id}] currentTime: ${currentTime}, lastFireTime: ${snake.lastFireTime}, timeSinceLastFire: ${timeSinceLastFire}, fireInterval: ${effectiveFireInterval}`);
+          }
+          
           if (timeSinceLastFire >= effectiveFireInterval) {
+            console.log(`[${snake.id}] FIRING! Will update lastFireTime to: ${currentTime}`);
             snakesToFire.push(snake.id);
             return {
               ...snake,
