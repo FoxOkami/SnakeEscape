@@ -1335,11 +1335,18 @@ export const useSnakeGame = create<SnakeGameState>()(
                     };
                   } else {
                     // Pit not lit, completed patrol, start returning to pit
+                    // If this was a light emergence, increment the returning count
+                    if (snake.isLightEmergence) {
+                      updatedSnakePits[pitIndex] = {
+                        ...pit,
+                        lightEmergedSnakesReturning: (pit.lightEmergedSnakesReturning || 0) + 1,
+                      };
+                    }
                     newSnakes[index] = {
                       ...snake,
                       rattlesnakeState: "returningToPit",
                       isInPit: false,
-                      isLightEmergence: false,
+                      isLightEmergence: snake.isLightEmergence, // Keep the flag to track this snake
                     };
                   }
                 } else {
@@ -1360,11 +1367,18 @@ export const useSnakeGame = create<SnakeGameState>()(
                   };
                 } else {
                   // Return to pit if no points and not lit
+                  // If this was a light emergence, increment the returning count
+                  if (snake.isLightEmergence) {
+                    updatedSnakePits[pitIndex] = {
+                      ...pit,
+                      lightEmergedSnakesReturning: (pit.lightEmergedSnakesReturning || 0) + 1,
+                    };
+                  }
                   newSnakes[index] = {
                     ...snake,
                     rattlesnakeState: "returningToPit",
                     isInPit: false,
-                    isLightEmergence: false,
+                    isLightEmergence: snake.isLightEmergence, // Keep the flag to track this snake
                   };
                 }
               }
@@ -1389,15 +1403,44 @@ export const useSnakeGame = create<SnakeGameState>()(
                 );
                 
                 if (distanceToPit < 20) {
-                  // Reached pit - advance to next snake and set configurable delay
-                  const nextSnakeIndex = (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
-                  updatedSnakePits[pitIndex] = {
-                    ...pit,
-                    currentSnakeIndex: nextSnakeIndex,
-                    nextEmergenceTime: currentTime + pit.emergenceInterval, // Use configurable emergence interval
-                    lastEmergenceTime: currentTime,
-                    isSnakePatrolling: false,
-                  };
+                  // Reached pit - handle differently for light emerged vs normal snakes
+                  const wasLightEmergence = snake.isLightEmergence;
+                  const lightReturningCount = pit.lightEmergedSnakesReturning || 0;
+                  
+                  if (wasLightEmergence) {
+                    // This was a light-emerged snake returning
+                    const newReturningCount = Math.max(0, lightReturningCount - 1);
+                    
+                    // Only restart normal rotation when the LAST light-emerged snake returns
+                    if (newReturningCount === 0) {
+                      // Last snake returning from light emergence - restart normal rotation
+                      const nextSnakeIndex = (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
+                      updatedSnakePits[pitIndex] = {
+                        ...pit,
+                        currentSnakeIndex: nextSnakeIndex,
+                        nextEmergenceTime: currentTime + pit.emergenceInterval,
+                        lastEmergenceTime: currentTime,
+                        isSnakePatrolling: false,
+                        lightEmergedSnakesReturning: 0,
+                      };
+                    } else {
+                      // Still have more light-emerged snakes returning
+                      updatedSnakePits[pitIndex] = {
+                        ...pit,
+                        lightEmergedSnakesReturning: newReturningCount,
+                      };
+                    }
+                  } else {
+                    // Normal snake returning - advance rotation as usual
+                    const nextSnakeIndex = (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
+                    updatedSnakePits[pitIndex] = {
+                      ...pit,
+                      currentSnakeIndex: nextSnakeIndex,
+                      nextEmergenceTime: currentTime + pit.emergenceInterval,
+                      lastEmergenceTime: currentTime,
+                      isSnakePatrolling: false,
+                    };
+                  }
                   
                   newSnakes[index] = {
                     ...snake,

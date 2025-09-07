@@ -209,6 +209,7 @@ export interface SnakePit extends Position {
   isLightHit?: boolean; // Whether light beam is currently hitting this pit
   lightEmergenceTime?: number; // When snakes emerged due to light hit
   isLightEmergence?: boolean; // Whether current emergence is due to light
+  lightEmergedSnakesReturning?: number; // Count of snakes returning from light emergence
 }
 
 export interface Switch extends Rectangle {
