@@ -99,6 +99,7 @@ export interface Snake {
   recoilStartTime?: number; // When recoil animation started
   recoilDirection?: Position; // Direction of recoil movement
   recoilFromBoulder?: boolean; // Whether recoil was caused by boulder collision
+  currentChargeHitBoulder?: string; // ID of boulder hit during current charge (prevents multiple hits)
   // Enhanced boss behavior properties
   centerTargetPosition?: Position; // Target position when moving to center
   centerPauseStartTime?: number; // When center pause started

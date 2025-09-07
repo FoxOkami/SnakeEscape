@@ -182,6 +182,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       snake.bossColor = 'charging'; // Change to pink color
       snake.isChargingAtSnapshot = true;
       snake.chargeDistanceTraveled = 0; // Reset charge distance counter
+      snake.currentChargeHitBoulder = undefined; // Clear boulder hit tracking for new charge
       // Calculate and store the charge direction once at the start
       if (snake.playerSnapshot) {
         // Calculate direction from Valerie's center to player snapshot
@@ -216,11 +217,12 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         
         // Check for boulder collision first
         const hitBoulder = boulders ? checkBoulderCollision(snake, newPosition, boulders) : null;
-        if (hitBoulder) {
-          // Hit a boulder - damage it and track total hits
+        if (hitBoulder && !snake.currentChargeHitBoulder) {
+          // Hit a boulder for the first time during this charge - damage it and track total hits
           console.log(`🎯 BOULDER HIT: ${hitBoulder.id} - hitCount before: ${hitBoulder.hitCount}, maxHits: ${hitBoulder.maxHits}`);
           hitBoulder.hitCount += 1;
           snake.totalBoulderHits = (snake.totalBoulderHits || 0) + 1;
+          snake.currentChargeHitBoulder = hitBoulder.id; // Track which boulder we hit during this charge
           console.log(`🎯 BOULDER HIT: ${hitBoulder.id} - hitCount after: ${hitBoulder.hitCount}, will destroy: ${hitBoulder.hitCount >= hitBoulder.maxHits}`);
           if (hitBoulder.hitCount >= hitBoulder.maxHits) {
             hitBoulder.isDestroyed = true;
@@ -426,6 +428,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilStartTime = undefined;
           snake.recoilDirection = undefined;
           snake.chargeDistanceTraveled = 0; // Reset for next charge
+          snake.currentChargeHitBoulder = undefined; // Clear boulder hit tracking
 
         } else if (checkWallCollision(snake, newRecoilPosition, walls)) {
           // Hit another wall during recoil - stop at current position
@@ -455,6 +458,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.recoilStartTime = undefined;
           snake.recoilDirection = undefined;
           snake.chargeDistanceTraveled = 0; // Reset for next charge
+          snake.currentChargeHitBoulder = undefined; // Clear boulder hit tracking
 
         } else {
           // Continue recoiling safely
