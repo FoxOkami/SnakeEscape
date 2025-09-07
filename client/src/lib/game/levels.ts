@@ -970,7 +970,7 @@ export const LEVELS: Level[] = [
               chaseSpeed: 0,
               sightRange: 0,
               isChasing: false,
-              lastFireTime: Date.now(),
+              lastFireTime: 0, // Start with no recent fire time
               fireInterval: 3000, // 3 seconds
               shotCount: 0, // Start at 0 shots
             },

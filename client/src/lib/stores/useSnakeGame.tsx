@@ -3343,8 +3343,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         ) {
           const timeSinceLastFire = currentTime - snake.lastFireTime;
 
-          // Add minimum cooldown of 1 second even if fireInterval is shorter
-          const effectiveFireInterval = Math.max(snake.fireInterval, 1000);
+          // Use the configured fireInterval directly
+          const effectiveFireInterval = snake.fireInterval;
           
           if (timeSinceLastFire >= effectiveFireInterval) {
             snakesToFire.push(snake.id);
