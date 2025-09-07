@@ -3338,7 +3338,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       const updatedSnakes = state.snakes.map((snake) => {
         if (
           snake.type === "spitter" &&
-          snake.lastFireTime &&
+          snake.lastFireTime !== undefined &&
           snake.fireInterval
         ) {
           const timeSinceLastFire = currentTime - snake.lastFireTime;
