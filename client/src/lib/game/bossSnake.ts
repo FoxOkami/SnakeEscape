@@ -326,6 +326,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.bossColor = 'stunned';
           snake.isChargingAtSnapshot = false;
           snake.recoilFromBoulder = true; // Mark this recoil as boulder-caused
+          break; // Exit charging immediately after boulder collision
         } else {
           // Check for wall collision with detailed info
           const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);
