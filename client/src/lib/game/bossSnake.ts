@@ -218,11 +218,11 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         // Check for boulder collision first
         const hitBoulder = boulders ? checkBoulderCollision(snake, newPosition, boulders) : null;
         if (hitBoulder && !snake.currentChargeHitBoulder) {
-          // Hit a boulder for the first time during this charge - damage it and track total hits
+          // Hit a boulder for the first time during this charge - immediately mark it to prevent multiple hits
+          snake.currentChargeHitBoulder = hitBoulder.id; // Track which boulder we hit during this charge
           console.log(`🎯 BOULDER HIT: ${hitBoulder.id} - hitCount before: ${hitBoulder.hitCount}, maxHits: ${hitBoulder.maxHits}`);
           hitBoulder.hitCount += 1;
           snake.totalBoulderHits = (snake.totalBoulderHits || 0) + 1;
-          snake.currentChargeHitBoulder = hitBoulder.id; // Track which boulder we hit during this charge
           console.log(`🎯 BOULDER HIT: ${hitBoulder.id} - hitCount after: ${hitBoulder.hitCount}, will destroy: ${hitBoulder.hitCount >= hitBoulder.maxHits}`);
           if (hitBoulder.hitCount >= hitBoulder.maxHits) {
             hitBoulder.isDestroyed = true;
