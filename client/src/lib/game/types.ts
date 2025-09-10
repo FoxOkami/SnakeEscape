@@ -185,6 +185,11 @@ export interface Snake {
   sineAmplitude?: number; // Amplitude for sine wave movement
   sineFrequency?: number; // Frequency for sine wave movement
   initialX?: number; // Initial X position for sine wave calculation
+  
+  // Reentrancy guard properties
+  lastUpdateTime?: number; // Last frame time this snake was updated (prevents multiple updates per frame)
+  lastChargeCollisionTime?: number; // Last time a collision occurred during charging (debounce)
+  currentChargeId?: number; // Unique ID for each charge cycle (prevents collision interference)
 }
 
 export interface Wall extends Rectangle {}
@@ -368,6 +373,7 @@ export interface Boulder extends Rectangle {
   isDestroyed: boolean; // Whether the boulder has been destroyed
   destructionTime?: number; // When the boulder was destroyed (timestamp)
   hasSpawnedScreensaver?: boolean; // Whether this boulder has already spawned a screensaver snake
+  lastHitTime?: number; // Last time this boulder was hit (for debouncing multiple hits)
 }
 
 export interface MiniBoulder {

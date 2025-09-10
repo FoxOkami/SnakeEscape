@@ -131,6 +131,12 @@ function calculateChargeRampedSpeed(snake: Snake, currentTime: number): number {
 }
 
 export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number, levelBounds?: { width: number; height: number }, boulders?: Boulder[]): Snake {
+  // Reentrancy guard: prevent multiple updates per frame
+  if (snake.lastUpdateTime === currentTime) {
+    return snake; // Skip this update - already processed this frame
+  }
+  snake.lastUpdateTime = currentTime;
+  
   if (!player || !currentTime) {
     // Default patrol behavior when no player is present
     const targetPoint = getPatrolTarget(snake);
@@ -183,6 +189,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       snake.isChargingAtSnapshot = true;
       snake.chargeDistanceTraveled = 0; // Reset charge distance counter
       snake.currentChargeHitBoulder = undefined; // Clear boulder hit tracking for new charge
+      snake.currentChargeId = (snake.currentChargeId || 0) + 1; // Increment charge ID for this new charge
       // Calculate and store the charge direction once at the start
       if (snake.playerSnapshot) {
         // Calculate direction from Valerie's center to player snapshot
@@ -218,8 +225,19 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         // Check for boulder collision first - but don't move to the new position if we hit a boulder
         const hitBoulder = boulders ? checkBoulderCollision(snake, newPosition, boulders) : null;
         if (hitBoulder && !snake.currentChargeHitBoulder) {
+          // Double debounce protection: charge collision time and boulder hit time
+          if (snake.lastChargeCollisionTime === currentTime) {
+            break; // Skip this collision - already processed in this frame
+          }
+          if (hitBoulder.lastHitTime && currentTime - hitBoulder.lastHitTime < 120) {
+            break; // Skip this hit - boulder was hit too recently (within 120ms)
+          }
+          
           // Hit a boulder for the first time during this charge - immediately mark it to prevent multiple hits
           snake.currentChargeHitBoulder = hitBoulder.id; // Track which boulder we hit during this charge
+          snake.lastChargeCollisionTime = currentTime; // Mark collision time
+          hitBoulder.lastHitTime = currentTime; // Mark boulder hit time
+          
           console.log(`🎯 BOULDER HIT: ${hitBoulder.id} - hitCount before: ${hitBoulder.hitCount}, maxHits: ${hitBoulder.maxHits}`);
           hitBoulder.hitCount += 1;
           snake.totalBoulderHits = (snake.totalBoulderHits || 0) + 1;
@@ -326,7 +344,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.bossColor = 'stunned';
           snake.isChargingAtSnapshot = false;
           snake.recoilFromBoulder = true; // Mark this recoil as boulder-caused
-          break; // Exit charging immediately after boulder collision
+          return snake; // Return immediately after boulder collision to prevent further processing
         } else {
           // Check for wall collision with detailed info
           const collisionInfo = getWallCollisionInfo(snake, newPosition, walls);
