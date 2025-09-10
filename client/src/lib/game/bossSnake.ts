@@ -215,7 +215,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
         // Add to total charge distance
         snake.chargeDistanceTraveled += chargeDistance;
         
-        // Check for boulder collision first
+        // Check for boulder collision first - but don't move to the new position if we hit a boulder
         const hitBoulder = boulders ? checkBoulderCollision(snake, newPosition, boulders) : null;
         if (hitBoulder && !snake.currentChargeHitBoulder) {
           // Hit a boulder for the first time during this charge - immediately mark it to prevent multiple hits
@@ -371,6 +371,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             snake.recoilDirection = reflectedDirection;
             snake.bossColor = 'stunned';
             snake.isChargingAtSnapshot = false;
+            break; // Exit charging immediately after wall collision
           } else {
             // Continue charging in same direction
             snake.position = newPosition;
