@@ -268,12 +268,15 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             const currentlyDestroyedCount = boulders?.filter(b => b.isDestroyed).length || 0;
             const totalBouldersHit = boulders?.filter(b => b.hitCount > 0).length || 0;
             
+            console.log(`🐍 SCREENSAVER CHECK [Frame ${frameNumber || '?'}]: boulder=${hitBoulder.id}, hasSpawned=${hitBoulder.hasSpawnedScreensaver}, hitCount=${hitBoulder.hitCount}, totalHit=${totalBouldersHit}`);
+            
             // Only spawn on first hit of boulder if it's the 1st or 2nd boulder to be hit
             const shouldSpawnScreensaverSnake = !hitBoulder.hasSpawnedScreensaver && 
                                                hitBoulder.hitCount === 1 && 
                                                totalBouldersHit <= 2;
             
             if (shouldSpawnScreensaverSnake) {
+              console.log(`🐍 SCREENSAVER SPAWN [Frame ${frameNumber || '?'}]: Spawning screensaver snake for ${hitBoulder.id}`);
               hitBoulder.hasSpawnedScreensaver = true;
               // Only set environmental effects if not already set to prevent multiple spawns
               if (!snake.environmentalEffects?.spawnScreensaverSnake) {
