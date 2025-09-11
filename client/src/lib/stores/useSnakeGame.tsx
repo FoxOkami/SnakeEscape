@@ -1515,6 +1515,24 @@ export const useSnakeGame = create<SnakeGameState>()(
             updatedSnake.environmentalEffects.spawnPhotophobicSnake = false;
           }
           
+          if (updatedSnake.environmentalEffects?.spawnPhantom) {
+            console.log(`👻 GAME LOOP: Processing spawnPhantom for snake ${updatedSnake.id}`);
+            // Only spawn phantom if one doesn't already exist with this ID
+            const phantomExists = newSnakes.some(s => s.id === updatedSnake.environmentalEffects?.phantomId);
+            if (!phantomExists) {
+              const phantom = get().spawnPhantom(
+                updatedSnake.environmentalEffects.phantomSpawnPosition!, 
+                updatedSnake.environmentalEffects.phantomId!,
+                updatedSnake.environmentalEffects.phantomLevelBounds
+              );
+              console.log(`👻 GAME LOOP: Created phantom snake ${phantom.id} at position (${phantom.position.x}, ${phantom.position.y})`);
+              newSnakes.push(phantom);
+              console.log(`👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: ${newSnakes.length}`);
+            }
+            // Clear phantom spawn flag after spawning but keep other environmental effects
+            updatedSnake.environmentalEffects.spawnPhantom = false;
+          }
+          
           return updatedSnake;
         }
         

@@ -627,6 +627,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           }
           
           snake.bossState = 'waitingForPhantom';
+          console.log(`👻 PHASE 2 [Frame ${frameNumber || '?'}]: Valerie entering waitingForPhantom state at wall position (${snake.position.x}, ${snake.position.y})`);
           
         } else if (!checkWallCollision(snake, newPosition, walls)) {
           // Continue moving toward wall target
@@ -770,6 +771,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           const phantomId = `phantom_${Date.now()}_${snake.phantomSpawnCount}`;
           snake.phantomIds = snake.phantomIds || [];
           snake.phantomIds.push(phantomId);
+          console.log(`👻 PHANTOM SPAWN [Frame ${frameNumber || '?'}]: Spawning phantom ${snake.phantomSpawnCount + 1}/8 with ID ${phantomId}`);
           snake.phantomSpawnCount++;
           
 
