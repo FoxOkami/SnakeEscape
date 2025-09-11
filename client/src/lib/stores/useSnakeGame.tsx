@@ -49,6 +49,7 @@ export interface InventoryItem {
 import { LEVELS, randomizeLevel2, getLevelKeyByIndex, getLevelIndexByKey } from "../game/levels";
 import { checkAABBCollision, slideAlongWall } from "../game/collision";
 import { updateSnake } from "../game/entities";
+import { updateBossSnake } from "../game/bossSnake";
 import { calculateLightBeam } from "../game/lightBeam";
 import { useAudio } from "./useAudio";
 import { 
@@ -66,6 +67,9 @@ interface SnakeGameState extends GameData {
   // Pre-randomized Level 2 data (set when starting game)
   level2RandomizedSwitches?: Switch[];
   level2RandomizedThrowableItems?: any[];
+
+  // Debug frame tracking
+  frameNumber: number;
 
   // Performance optimization
   lastLightCheckTime?: number;
@@ -428,6 +432,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     boulders: [],
     miniBoulders: [],
     lastLightCheckTime: 0,
+    frameNumber: 0,
 
     puzzleShards: [],
     puzzlePedestal: null,
@@ -1181,6 +1186,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (state.gameState !== "playing" || state.showInventory) return;
 
       const currentTime = Date.now();
+      
+      // Increment frame counter for debugging
+      set((state) => ({ frameNumber: state.frameNumber + 1 }));
 
       // Initialize unified PlayerController if needed
       if (!state.playerController) {
@@ -1475,6 +1483,21 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       
       const updatedSnakes = newSnakes.map((snake, index) => {
+        // Handle boss snakes separately to pass frame number
+        if (snake.type === "boss") {
+          // Call updateBossSnake directly with frame number for debugging
+          return updateBossSnake(
+            snake,
+            currentWalls,
+            deltaTime / 1000, // Convert to seconds
+            updatedState.player,
+            currentTime,
+            LEVELS[updatedState.currentLevel]?.size,
+            updatedState.boulders,
+            get().frameNumber // Pass current frame number
+          );
+        }
+        
         // Rattlesnakes need both timing logic AND entity updates for movement
         if (snake.type === "rattlesnake") {
           // If rattlesnake is out of pit, update it with entity logic

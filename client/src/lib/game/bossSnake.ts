@@ -130,7 +130,7 @@ function calculateChargeRampedSpeed(snake: Snake, currentTime: number): number {
   return Math.min(rampedSpeed, snake.chargeMaxSpeed);
 }
 
-export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number, levelBounds?: { width: number; height: number }, boulders?: Boulder[]): Snake {
+export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number, levelBounds?: { width: number; height: number }, boulders?: Boulder[], frameNumber?: number): Snake {
   // Reentrancy guard: prevent multiple updates per frame
   if (snake.lastUpdateTime === currentTime) {
     return snake; // Skip this update - already processed this frame
@@ -238,10 +238,10 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.lastChargeCollisionTime = currentTime; // Mark collision time
           hitBoulder.lastHitTime = currentTime; // Mark boulder hit time
           
-          console.log(`🎯 BOULDER HIT: ${hitBoulder.id} - hitCount before: ${hitBoulder.hitCount}, maxHits: ${hitBoulder.maxHits}`);
+          console.log(`🎯 BOULDER HIT [Frame ${frameNumber || '?'}]: ${hitBoulder.id} - hitCount before: ${hitBoulder.hitCount}, maxHits: ${hitBoulder.maxHits}`);
           hitBoulder.hitCount += 1;
           snake.totalBoulderHits = (snake.totalBoulderHits || 0) + 1;
-          console.log(`🎯 BOULDER HIT: ${hitBoulder.id} - hitCount after: ${hitBoulder.hitCount}, will destroy: ${hitBoulder.hitCount >= hitBoulder.maxHits}`);
+          console.log(`🎯 BOULDER HIT [Frame ${frameNumber || '?'}]: ${hitBoulder.id} - hitCount after: ${hitBoulder.hitCount}, will destroy: ${hitBoulder.hitCount >= hitBoulder.maxHits}`);
           if (hitBoulder.hitCount >= hitBoulder.maxHits) {
             hitBoulder.isDestroyed = true;
             hitBoulder.destructionTime = currentTime; // Record when it was destroyed
@@ -334,7 +334,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             recoilTargetPosition = clampToBounds(recoilTargetPosition, snake.size, levelBounds);
           }
           
-          console.log(`🔄 BOULDER RECOIL: Starting recoil for ${hitBoulder.id}, distance: ${recoilDistance.toFixed(2)}`);
+          console.log(`🔄 BOULDER RECOIL [Frame ${frameNumber || '?'}]: Starting recoil for ${hitBoulder.id}, distance: ${recoilDistance.toFixed(2)}`);
           snake.bossState = 'recoiling';
           snake.recoilStartTime = currentTime;
           snake.recoilStartPosition = { ...snake.position };
@@ -424,7 +424,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           // Check if this recoil was from a boulder collision
           if (snake.recoilFromBoulder && levelBounds) {
             // Transition to moving to center
-            console.log(`🎯 RECOIL COMPLETE: Transitioning to movingToCenter after boulder collision`);
+            console.log(`🎯 RECOIL COMPLETE [Frame ${frameNumber || '?'}]: Transitioning to movingToCenter after boulder collision`);
             const centerPosition = {
               x: (levelBounds.width / 2) - (snake.size.width / 2),
               y: (levelBounds.height / 2) - (snake.size.height / 2)
