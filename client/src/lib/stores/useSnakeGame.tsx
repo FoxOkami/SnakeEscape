@@ -3829,7 +3829,9 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       let directions: { x: number; y: number }[];
 
+      console.log(`💥 CONDITION CHECK: isBossProjectiles=${isBossProjectiles}, burstRound=${burstRound}, roundAngleShift=${roundAngleShift}`);
       if (isBossProjectiles && burstRound !== undefined && roundAngleShift !== undefined) {
+        console.log(`💥 ENTERING BOSS PROJECTILE CREATION`);
         // Phase 3 boss: 4-round burst firing with angle shifts
         const totalProjectiles = 24;
         const angleStep = 360 / totalProjectiles; // 15 degrees per projectile
@@ -3850,6 +3852,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             y: Math.sin(angleRad)
           });
         }
+        console.log(`💥 PROJECTILE CREATE: Created ${directions.length} boss projectiles for round ${burstRound}`);
         
       } else if (isBossProjectiles) {
         // Phase 3 boss: Fallback to all 30 projectiles at once (if sequential parameters not provided)
@@ -3926,6 +3929,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         color: projectileColor,
       }));
 
+      console.log(`💥 PROJECTILE ADD: Adding ${newProjectiles.length} projectiles to game state. Total projectiles now: ${state.projectiles.length + newProjectiles.length}`);
       set({
         projectiles: [...state.projectiles, ...newProjectiles],
       });
