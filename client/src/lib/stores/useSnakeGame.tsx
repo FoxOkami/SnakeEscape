@@ -1486,7 +1486,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Handle boss snakes separately to pass frame number
         if (snake.type === "boss") {
           // Call updateBossSnake directly with frame number for debugging
-          return updateBossSnake(
+          const updatedSnake = updateBossSnake(
             snake,
             currentWalls,
             deltaTime / 1000, // Convert to seconds
@@ -1496,6 +1496,26 @@ export const useSnakeGame = create<SnakeGameState>()(
             updatedState.boulders,
             get().frameNumber // Pass current frame number
           );
+          
+          // Process environmental effects for boss snakes (same as other snakes)
+          if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
+            console.log(`🐍 GAME LOOP: Processing spawnScreensaverSnake for snake ${updatedSnake.id}`);
+            const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
+            console.log(`🐍 GAME LOOP: Created screensaver snake ${screensaverSnake.id} at position (${screensaverSnake.position.x}, ${screensaverSnake.position.y})`);
+            newSnakes.push(screensaverSnake);
+            console.log(`🐍 GAME LOOP: Added to newSnakes array, total newSnakes: ${newSnakes.length}`);
+            // Clear the flag immediately after spawning
+            updatedSnake.environmentalEffects.spawnScreensaverSnake = false;
+          }
+          
+          if (updatedSnake.environmentalEffects?.spawnPhotophobicSnake) {
+            const photophobicSnake = get().spawnPhotophobicSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
+            newSnakes.push(photophobicSnake);
+            // Clear the flag immediately after spawning
+            updatedSnake.environmentalEffects.spawnPhotophobicSnake = false;
+          }
+          
+          return updatedSnake;
         }
         
         // Rattlesnakes need both timing logic AND entity updates for movement
