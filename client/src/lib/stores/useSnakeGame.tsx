@@ -3817,9 +3817,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       const snake = state.snakes.find((s) => s.id === snakeId);
       if (!snake || (snake.type !== "spitter" && snake.type !== "boss")) return;
+      
+      console.log(`💥 FIRE DEBUG: Snake ${snakeId}, type: ${snake.type}, bossPhase: ${snake.bossPhase}, burstRound: ${burstRound}, roundAngleShift: ${roundAngleShift}`);
 
       // Boss projectiles (Phase 3 Valerie) vs regular spitter projectiles
       const isBossProjectiles = snake.type === "boss" && snake.bossPhase === 3;
+      console.log(`💥 FIRE DEBUG: isBossProjectiles = ${isBossProjectiles}`);
       const projectileSpeed = isBossProjectiles ? 0.4 : 0.3; // Boss projectiles are faster
       const projectileSize = { width: 8, height: 8 }; // Larger boss projectiles
       const lifespan = 6000; // 6 seconds for boss projectiles

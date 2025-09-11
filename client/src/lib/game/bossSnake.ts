@@ -696,6 +696,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.bossState = 'projectileBarrage';
           snake.projectileBarrageStartTime = currentTime;
           snake.barrageProjectileCount = 0;
+          console.log(`💥 PHASE 3 [Frame ${frameNumber || '?'}]: Valerie entering projectileBarrage state at center position (${snake.position.x}, ${snake.position.y})`);
           
           
         } else if (!checkWallCollision(snake, newPosition, walls)) {
@@ -728,6 +729,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           if (timeSinceStart >= nextRoundTime) {
             // Fire all 24 projectiles for this round simultaneously
             const roundShift = snake.barrageProjectileCount * degreeShift; // 0°, 3°, 6°, 9°
+            console.log(`💥 PROJECTILE FIRE [Frame ${frameNumber || '?'}]: Firing round ${snake.barrageProjectileCount + 1}/4 with ${roundShift}° shift`);
             
             snake.environmentalEffects = {
               spawnMiniBoulders: false,
