@@ -1546,8 +1546,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
         
         if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
+          console.log(`🐍 GAME LOOP: Processing spawnScreensaverSnake for snake ${updatedSnake.id}`);
           const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
+          console.log(`🐍 GAME LOOP: Created screensaver snake ${screensaverSnake.id} at position (${screensaverSnake.position.x}, ${screensaverSnake.position.y})`);
           newSnakes.push(screensaverSnake);
+          console.log(`🐍 GAME LOOP: Added to newSnakes array, total newSnakes: ${newSnakes.length}`);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnScreensaverSnake = false;
         }
