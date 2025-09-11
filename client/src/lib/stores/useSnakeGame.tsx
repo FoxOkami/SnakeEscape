@@ -1533,6 +1533,42 @@ export const useSnakeGame = create<SnakeGameState>()(
             updatedSnake.environmentalEffects.spawnPhantom = false;
           }
           
+          if (updatedSnake.environmentalEffects?.spawnRainSnake) {
+            console.log(`🌧️ GAME LOOP: Processing spawnRainSnake for snake ${updatedSnake.id}`);
+            // Only spawn rain snake if one doesn't already exist with this ID
+            const rainSnakeExists = newSnakes.some(s => s.id === updatedSnake.environmentalEffects?.rainSnakeId);
+            if (!rainSnakeExists) {
+              const rainSnake = get().spawnRainSnake(
+                updatedSnake.environmentalEffects.rainSnakeSpawnPosition!, 
+                updatedSnake.environmentalEffects.rainSnakeId!,
+                updatedSnake.environmentalEffects.rainMovementPattern,
+                updatedSnake.environmentalEffects.rainAngle,
+                updatedSnake.environmentalEffects.sineAmplitude,
+                updatedSnake.environmentalEffects.sineFrequency
+              );
+              console.log(`🌧️ GAME LOOP: Created rain snake ${rainSnake.id} at position (${rainSnake.position.x}, ${rainSnake.position.y})`);
+              newSnakes.push(rainSnake);
+            }
+            // Clear rain snake spawn flag after spawning
+            updatedSnake.environmentalEffects.spawnRainSnake = false;
+          }
+          
+          if (updatedSnake.environmentalEffects?.fireProjectiles && updatedSnake.environmentalEffects?.projectileSourceId) {
+            console.log(`💥 GAME LOOP: Processing fireProjectiles for snake ${updatedSnake.id}`);
+            // Fire projectiles for Phase 3 boss
+            get().fireProjectiles(
+              updatedSnake.environmentalEffects.projectileSourceId,
+              updatedSnake.environmentalEffects.sequentialProjectileIndex,
+              updatedSnake.environmentalEffects.projectileClockwise,
+              updatedSnake.environmentalEffects.startingAngle,
+              updatedSnake.environmentalEffects.burstRound,
+              updatedSnake.environmentalEffects.roundAngleShift
+            );
+            // Clear projectile firing flag after firing
+            updatedSnake.environmentalEffects.fireProjectiles = false;
+            updatedSnake.environmentalEffects.projectileSourceId = undefined;
+          }
+          
           return updatedSnake;
         }
         
