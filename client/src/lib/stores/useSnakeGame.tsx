@@ -3468,6 +3468,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         // Update position
         projectile.position.x += projectile.velocity.x * deltaTime;
         projectile.position.y += projectile.velocity.y * deltaTime;
+        
+        // Debug logging for boss projectiles to track their movement
+        if (projectile.id.includes('valerie') && Math.random() < 0.01) { // Log 1% of projectiles to avoid spam
+          console.log(`💥 PROJECTILE MOVE: ${projectile.id} at (${Math.round(projectile.position.x)}, ${Math.round(projectile.position.y)}) with velocity (${projectile.velocity.x.toFixed(2)}, ${projectile.velocity.y.toFixed(2)})`);
+        }
 
         // Check collision with player
         const projectileRect = { ...projectile.position, ...projectile.size };
@@ -3823,7 +3828,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Boss projectiles (Phase 3 Valerie) vs regular spitter projectiles
       const isBossProjectiles = snake.type === "boss" && snake.bossPhase === 3;
       console.log(`💥 FIRE DEBUG: isBossProjectiles = ${isBossProjectiles}`);
-      const projectileSpeed = isBossProjectiles ? 0.4 : 0.3; // Boss projectiles are faster
+      const projectileSpeed = isBossProjectiles ? 2.0 : 0.3; // Boss projectiles are much faster now
       const projectileSize = { width: 8, height: 8 }; // Larger boss projectiles
       const lifespan = 6000; // 6 seconds for boss projectiles
 
