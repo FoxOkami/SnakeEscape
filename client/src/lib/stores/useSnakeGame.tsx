@@ -3458,10 +3458,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       let playerHitThisFrame = false; // Track if player was hit this frame
       let collisionDetected = false; // Track if any collision was detected
 
+      console.log(`💥 UPDATE PROJECTILES: Starting with ${state.projectiles.length} projectiles, deltaTime: ${deltaTime}`);
+
       // Update projectile positions and remove expired ones
-      const updatedProjectiles = state.projectiles.filter((projectile) => {
+      const updatedProjectiles = state.projectiles.filter((projectile, index) => {
         const age = currentTime - projectile.createdAt;
         if (age > projectile.lifespan) {
+          console.log(`💥 PROJECTILE EXPIRED: ${projectile.id} age ${age}ms > lifespan ${projectile.lifespan}ms`);
           return false; // Remove expired projectile
         }
 
@@ -3487,6 +3490,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           collisionDetected = true;
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
+          console.log(`💥 PROJECTILE HIT PLAYER: ${projectile.id} removed due to player collision`);
 
           // Don't check for player death here - let the main game loop handle it
 
@@ -3495,18 +3499,30 @@ export const useSnakeGame = create<SnakeGameState>()(
 
         // Check collision with walls
         for (const wall of state.walls) {
-          if (
-            checkAABBCollision(
-              { ...projectile.position, ...projectile.size },
-              wall,
-            )
-          ) {
+          const projectileRect = { 
+            x: projectile.position?.x ?? projectile.x ?? 0,
+            y: projectile.position?.y ?? projectile.y ?? 0,
+            width: projectile.size?.width ?? projectile.width ?? 6,
+            height: projectile.size?.height ?? projectile.height ?? 6
+          };
+          
+          if (checkAABBCollision(projectileRect, wall)) {
+            console.log(`💥 PROJECTILE HIT WALL: ${projectile.id} removed due to wall collision at (${projectileRect.x}, ${projectileRect.y})`);
             return false; // Remove projectile on wall collision
           }
         }
 
         return true; // Keep projectile
       });
+
+      console.log(`💥 UPDATE PROJECTILES COMPLETE: Started with ${state.projectiles.length}, ended with ${updatedProjectiles.length} projectiles`);
+      
+      // Update the state with filtered projectiles
+      set({ projectiles: updatedProjectiles });
+      
+      // Verify state was updated
+      const verifyState = get();
+      console.log(`💥 UPDATE PROJECTILES VERIFY: After set, state has ${verifyState.projectiles.length} projectiles`);
 
       // Spitter firing logic will be handled in the main snake update loop below
       // This prevents the duplicate update issue
@@ -3934,10 +3950,19 @@ export const useSnakeGame = create<SnakeGameState>()(
         color: projectileColor,
       }));
 
-      console.log(`💥 PROJECTILE ADD: Adding ${newProjectiles.length} projectiles to game state. Total projectiles now: ${state.projectiles.length + newProjectiles.length}`);
+      console.log(`💥 PROJECTILE ADD: Adding ${newProjectiles.length} projectiles to game state. Current projectiles: ${state.projectiles.length}, Total after: ${state.projectiles.length + newProjectiles.length}`);
+      console.log(`💥 PROJECTILE DETAILS: First projectile:`, newProjectiles[0]);
+      
+      const updatedProjectiles = [...state.projectiles, ...newProjectiles];
+      console.log(`💥 PROJECTILE SET STATE: About to set ${updatedProjectiles.length} projectiles`);
+      
       set({
-        projectiles: [...state.projectiles, ...newProjectiles],
+        projectiles: updatedProjectiles,
       });
+      
+      // Verify state was set correctly
+      const verifyState = get();
+      console.log(`💥 PROJECTILE VERIFY: After set, state has ${verifyState.projectiles.length} projectiles`);
     },
 
     collectPuzzleShard: (shardId: string) => {
