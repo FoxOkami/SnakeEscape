@@ -1801,6 +1801,10 @@ const GameCanvas: React.FC = () => {
       }
 
       // Draw projectiles
+      if (currentLevelKey === "boss_valerie" && projectiles.length > 0) {
+        console.log(`🎨 RENDER: Drawing ${projectiles.length} projectiles in level ${currentLevelKey}`);
+      }
+      
       projectiles.forEach((projectile) => {
         // Handle both nested and flat schemas for robust rendering
         const x = projectile.position?.x ?? projectile.x ?? 0;

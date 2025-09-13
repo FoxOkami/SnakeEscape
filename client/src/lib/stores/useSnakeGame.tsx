@@ -3935,6 +3935,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         color: projectileColor,
       }));
 
+      // Add targeted debugging for Valerie
+      if (snake.type === "boss" && snake.bossPhase === 3) {
+        console.log(`🎯 FIREPROJECTILES: Adding ${newProjectiles.length} projectiles to state (currently has ${state.projectiles.length})`);
+      }
+      
       set({
         projectiles: [...state.projectiles, ...newProjectiles],
       });
