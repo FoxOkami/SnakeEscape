@@ -3506,14 +3506,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         return true; // Keep projectile
       });
 
-      // Add targeted logging for Valerie level only
-      if (state.currentLevelKey === "boss_valerie") {
-        const removedCount = state.projectiles.length - updatedProjectiles.length;
-        if (removedCount > 0) {
-          console.log(`🔥 VALERIE UPDATE: Removed ${removedCount} projectiles. ${state.projectiles.length} → ${updatedProjectiles.length}`);
-        }
-      }
-      
       // Update the state with filtered projectiles
       set({ projectiles: updatedProjectiles });
 
@@ -3943,15 +3935,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         color: projectileColor,
       }));
 
-      // Add targeted logging for Valerie projectiles only
-      if (snake.type === "boss" && snake.bossPhase === 3) {
-        console.log(`🔥 VALERIE: Adding ${newProjectiles.length} projectiles. Current: ${state.projectiles.length}, New total: ${state.projectiles.length + newProjectiles.length}`);
-      }
-      
-      // Fix race condition: get fresh state before updating
-      const freshState = get();
       set({
-        projectiles: [...freshState.projectiles, ...newProjectiles],
+        projectiles: [...state.projectiles, ...newProjectiles],
       });
     },
 

@@ -743,6 +743,8 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             };
             
             snake.barrageProjectileCount++;
+            // Exit immediately after firing one round to prevent multiple rounds firing in same frame
+            break;
           }
         }
         
