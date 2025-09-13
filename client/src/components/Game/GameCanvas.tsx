@@ -1801,17 +1801,12 @@ const GameCanvas: React.FC = () => {
       }
 
       // Draw projectiles
-      console.log(`💥 PROJECTILE RENDER: Rendering ${projectiles.length} projectiles for level ${currentLevelKey}`);
-      projectiles.forEach((projectile, index) => {
+      projectiles.forEach((projectile) => {
         // Handle both nested and flat schemas for robust rendering
         const x = projectile.position?.x ?? projectile.x ?? 0;
         const y = projectile.position?.y ?? projectile.y ?? 0;
         const width = projectile.size?.width ?? projectile.width ?? 6;
         const height = projectile.size?.height ?? projectile.height ?? 6;
-        
-        if (index < 3) { // Log first 3 projectiles for debugging
-          console.log(`💥 PROJECTILE: ${projectile.id} at (${x}, ${y}) size (${width}x${height}) color ${projectile.color}`);
-        }
         
         ctx.fillStyle = projectile.color || "#ff0000"; // Default to red if no color
         ctx.fillRect(x, y, width, height);
@@ -2917,17 +2912,12 @@ const GameCanvas: React.FC = () => {
           }
 
           // Redraw projectiles on top of darkness overlay (Level 6 only)
-          console.log(`💥 DARKNESS PROJECTILE RENDER: Rendering ${projectiles.length} projectiles on darkness overlay`);
-          projectiles.forEach((projectile, index) => {
+          projectiles.forEach((projectile) => {
             // Handle both nested and flat schemas for robust rendering
             const x = projectile.position?.x ?? projectile.x ?? 0;
             const y = projectile.position?.y ?? projectile.y ?? 0;
             const width = projectile.size?.width ?? projectile.width ?? 6;
             const height = projectile.size?.height ?? projectile.height ?? 6;
-            
-            if (index < 3) { // Log first 3 projectiles for debugging
-              console.log(`💥 DARKNESS PROJECTILE: ${projectile.id} at (${x}, ${y}) size (${width}x${height}) color ${projectile.color}`);
-            }
             
             ctx.fillStyle = projectile.color || "#ff0000"; // Default to red if no color
             ctx.fillRect(x, y, width, height);

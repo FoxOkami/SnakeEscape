@@ -3458,13 +3458,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       let playerHitThisFrame = false; // Track if player was hit this frame
       let collisionDetected = false; // Track if any collision was detected
 
-      console.log(`💥 UPDATE PROJECTILES: Starting with ${state.projectiles.length} projectiles, deltaTime: ${deltaTime}`);
-
       // Update projectile positions and remove expired ones
       const updatedProjectiles = state.projectiles.filter((projectile, index) => {
         const age = currentTime - projectile.createdAt;
         if (age > projectile.lifespan) {
-          console.log(`💥 PROJECTILE EXPIRED: ${projectile.id} age ${age}ms > lifespan ${projectile.lifespan}ms`);
           return false; // Remove expired projectile
         }
 
@@ -3472,10 +3469,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         projectile.position.x += projectile.velocity.x * deltaTime;
         projectile.position.y += projectile.velocity.y * deltaTime;
         
-        // Debug logging for boss projectiles to track their movement
-        if (projectile.id.includes('valerie') && Math.random() < 0.01) { // Log 1% of projectiles to avoid spam
-          console.log(`💥 PROJECTILE MOVE: ${projectile.id} at (${Math.round(projectile.position.x)}, ${Math.round(projectile.position.y)}) with velocity (${projectile.velocity.x.toFixed(2)}, ${projectile.velocity.y.toFixed(2)})`);
-        }
 
         // Check collision with player
         const projectileRect = { ...projectile.position, ...projectile.size };
@@ -3490,7 +3483,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           collisionDetected = true;
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
-          console.log(`💥 PROJECTILE HIT PLAYER: ${projectile.id} removed due to player collision`);
 
           // Don't check for player death here - let the main game loop handle it
 
@@ -3507,7 +3499,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           };
           
           if (checkAABBCollision(projectileRect, wall)) {
-            console.log(`💥 PROJECTILE HIT WALL: ${projectile.id} removed due to wall collision at (${projectileRect.x}, ${projectileRect.y})`);
             return false; // Remove projectile on wall collision
           }
         }
@@ -3515,14 +3506,16 @@ export const useSnakeGame = create<SnakeGameState>()(
         return true; // Keep projectile
       });
 
-      console.log(`💥 UPDATE PROJECTILES COMPLETE: Started with ${state.projectiles.length}, ended with ${updatedProjectiles.length} projectiles`);
+      // Add targeted logging for Valerie level only
+      if (state.currentLevelKey === "boss_valerie") {
+        const removedCount = state.projectiles.length - updatedProjectiles.length;
+        if (removedCount > 0) {
+          console.log(`🔥 VALERIE UPDATE: Removed ${removedCount} projectiles. ${state.projectiles.length} → ${updatedProjectiles.length}`);
+        }
+      }
       
       // Update the state with filtered projectiles
       set({ projectiles: updatedProjectiles });
-      
-      // Verify state was updated
-      const verifyState = get();
-      console.log(`💥 UPDATE PROJECTILES VERIFY: After set, state has ${verifyState.projectiles.length} projectiles`);
 
       // Spitter firing logic will be handled in the main snake update loop below
       // This prevents the duplicate update issue
@@ -3950,19 +3943,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         color: projectileColor,
       }));
 
-      console.log(`💥 PROJECTILE ADD: Adding ${newProjectiles.length} projectiles to game state. Current projectiles: ${state.projectiles.length}, Total after: ${state.projectiles.length + newProjectiles.length}`);
-      console.log(`💥 PROJECTILE DETAILS: First projectile:`, newProjectiles[0]);
-      
-      const updatedProjectiles = [...state.projectiles, ...newProjectiles];
-      console.log(`💥 PROJECTILE SET STATE: About to set ${updatedProjectiles.length} projectiles`);
+      // Add targeted logging for Valerie projectiles only
+      if (snake.type === "boss" && snake.bossPhase === 3) {
+        console.log(`🔥 VALERIE: Adding ${newProjectiles.length} projectiles. Current: ${state.projectiles.length}, New total: ${state.projectiles.length + newProjectiles.length}`);
+      }
       
       set({
-        projectiles: updatedProjectiles,
+        projectiles: [...state.projectiles, ...newProjectiles],
       });
-      
-      // Verify state was set correctly
-      const verifyState = get();
-      console.log(`💥 PROJECTILE VERIFY: After set, state has ${verifyState.projectiles.length} projectiles`);
     },
 
     collectPuzzleShard: (shardId: string) => {
