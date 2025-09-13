@@ -3462,6 +3462,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       const updatedProjectiles = state.projectiles.filter((projectile, index) => {
         const age = currentTime - projectile.createdAt;
         if (age > projectile.lifespan) {
+          // Add debugging for Valerie level expired projectiles
+          if (state.currentLevelKey === "boss_valerie") {
+            console.log(`⏰ EXPIRED: Projectile expired after ${age}ms (lifespan: ${projectile.lifespan}ms)`);
+          }
           return false; // Remove expired projectile
         }
 
@@ -3499,6 +3503,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           };
           
           if (checkAABBCollision(projectileRect, wall)) {
+            // Add debugging for Valerie level wall collisions
+            if (state.currentLevelKey === "boss_valerie") {
+              console.log(`🧱 WALL COLLISION: Projectile at (${projectileRect.x}, ${projectileRect.y}) hit wall at (${wall.x}, ${wall.y})`);
+            }
             return false; // Remove projectile on wall collision
           }
         }
