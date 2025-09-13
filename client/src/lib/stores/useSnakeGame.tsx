@@ -3948,8 +3948,10 @@ export const useSnakeGame = create<SnakeGameState>()(
         console.log(`🔥 VALERIE: Adding ${newProjectiles.length} projectiles. Current: ${state.projectiles.length}, New total: ${state.projectiles.length + newProjectiles.length}`);
       }
       
+      // Fix race condition: get fresh state before updating
+      const freshState = get();
       set({
-        projectiles: [...state.projectiles, ...newProjectiles],
+        projectiles: [...freshState.projectiles, ...newProjectiles],
       });
     },
 
