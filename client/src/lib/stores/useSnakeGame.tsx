@@ -3861,24 +3861,40 @@ export const useSnakeGame = create<SnakeGameState>()(
         const totalProjectiles = 24;
         const angleStep = 360 / totalProjectiles; // 15 degrees per projectile
         
+        console.log(`💥 CALCULATION DEBUG: totalProjectiles=${totalProjectiles}, angleStep=${angleStep}, roundAngleShift=${roundAngleShift}`);
+        
         directions = [];
-        for (let i = 0; i < totalProjectiles; i++) {
-          // Calculate angle for this projectile with round shift applied
-          const baseAngle = i * angleStep; // 0°, 24°, 48°, etc.
-          const shiftedAngle = baseAngle + roundAngleShift; // Add 0°, 3°, 6°, or 9° shift
+        try {
+          for (let i = 0; i < totalProjectiles; i++) {
+            // Calculate angle for this projectile with round shift applied
+            const baseAngle = i * angleStep; // 0°, 15°, 30°, etc.
+            const shiftedAngle = baseAngle + roundAngleShift; // Add 0°, 3°, 6°, or 9° shift
+            
+            // Normalize angle to 0-360 range
+            const normalizedAngle = ((shiftedAngle % 360) + 360) % 360;
+            
+            // Convert to radians and create direction
+            const angleRad = normalizedAngle * (Math.PI / 180);
+            const dir = {
+              x: Math.cos(angleRad),
+              y: Math.sin(angleRad)
+            };
+            
+            // Validate direction values
+            if (isNaN(dir.x) || isNaN(dir.y)) {
+              console.log(`❌ INVALID DIRECTION: Projectile ${i} has NaN direction: (${dir.x}, ${dir.y}), angle=${normalizedAngle}`);
+              continue;
+            }
+            
+            directions.push(dir);
+          }
           
-          // Normalize angle to 0-360 range
-          const normalizedAngle = ((shiftedAngle % 360) + 360) % 360;
-          
-          // Convert to radians and create direction
-          const angleRad = normalizedAngle * (Math.PI / 180);
-          directions.push({
-            x: Math.cos(angleRad),
-            y: Math.sin(angleRad)
-          });
+          console.log(`💥 PROJECTILE CREATE: Created ${directions.length} boss projectiles for round ${burstRound}`);
+          console.log(`💥 POST-CREATE DEBUG: About to continue to state update...`);
+        } catch (error) {
+          console.log(`❌ PROJECTILE CREATION ERROR:`, error);
+          return; // Exit early on error
         }
-        console.log(`💥 PROJECTILE CREATE: Created ${directions.length} boss projectiles for round ${burstRound}`);
-        console.log(`💥 POST-CREATE DEBUG: About to continue to state update...`);
         
       } else if (isBossProjectiles) {
         // Phase 3 boss: Fallback to all 30 projectiles at once (if sequential parameters not provided)
