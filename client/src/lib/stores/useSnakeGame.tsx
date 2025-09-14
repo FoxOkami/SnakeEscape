@@ -3505,21 +3505,30 @@ export const useSnakeGame = create<SnakeGameState>()(
           return false; // Remove projectile
         }
 
-        // Check collision with walls
-        for (const wall of state.walls) {
-          const projectileRect = { 
-            x: projectile.position?.x ?? projectile.x ?? 0,
-            y: projectile.position?.y ?? projectile.y ?? 0,
-            width: projectile.size?.width ?? projectile.width ?? 6,
-            height: projectile.size?.height ?? projectile.height ?? 6
-          };
-          
-          if (checkAABBCollision(projectileRect, wall)) {
-            // Add debugging for Valerie level wall collisions
-            if (state.currentLevelKey === "boss_valerie") {
-              console.log(`🧱 WALL COLLISION: Projectile ${projectile.id} at (${projectileRect.x.toFixed(1)}, ${projectileRect.y.toFixed(1)}) size (${projectileRect.width}x${projectileRect.height}) hit wall at (${wall.x}, ${wall.y}) size (${wall.width}x${wall.height})`);
+        // Check collision with walls - boss projectiles with wall penetration can pass through
+        const allowWallPenetration = projectile.canPenetrateWalls && state.currentLevelKey === "boss_valerie";
+        
+        if (!allowWallPenetration) {
+          for (const wall of state.walls) {
+            const projectileRect = { 
+              x: projectile.position?.x ?? projectile.x ?? 0,
+              y: projectile.position?.y ?? projectile.y ?? 0,
+              width: projectile.size?.width ?? projectile.width ?? 6,
+              height: projectile.size?.height ?? projectile.height ?? 6
+            };
+            
+            if (checkAABBCollision(projectileRect, wall)) {
+              // Add debugging for wall collisions
+              if (state.currentLevelKey === "boss_valerie") {
+                console.log(`🧱 WALL COLLISION: Projectile ${projectile.id} at (${projectileRect.x.toFixed(1)}, ${projectileRect.y.toFixed(1)}) size (${projectileRect.width}x${projectileRect.height}) hit wall at (${wall.x}, ${wall.y}) size (${wall.width}x${wall.height})`);
+              }
+              return false; // Remove projectile on wall collision
             }
-            return false; // Remove projectile on wall collision
+          }
+        } else {
+          // Boss projectiles pass through walls - add debug logging
+          if (state.currentLevelKey === "boss_valerie") {
+            console.log(`🌟 BOSS PROJECTILE: ${projectile.id} passing through walls (wall penetration enabled)`);
           }
         }
 
@@ -3985,6 +3994,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         createdAt: Date.now(),
         lifespan,
         color: projectileColor,
+        canPenetrateWalls: isBossProjectiles, // Boss projectiles in Phase 3 can pass through walls
       }));
       
       // Add spawn position debugging for Valerie
