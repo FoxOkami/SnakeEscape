@@ -156,7 +156,7 @@ interface SnakeGameState extends GameData {
     playerKilled: boolean;
   };
   spawnSpitterSnake: (position: Position) => void;
-  fireProjectiles: (snakeId: string) => void;
+  fireProjectiles: (snakeId: string, sequentialIndex?: number, clockwise?: boolean, startingAngle?: number, burstRound?: number, roundAngleShift?: number) => void;
 
   // Phase system actions
   updatePhase: (deltaTime: number) => void;
