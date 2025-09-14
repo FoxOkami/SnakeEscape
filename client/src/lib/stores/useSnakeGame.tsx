@@ -3878,6 +3878,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           });
         }
         console.log(`💥 PROJECTILE CREATE: Created ${directions.length} boss projectiles for round ${burstRound}`);
+        console.log(`💥 POST-CREATE DEBUG: About to continue to state update...`);
         
       } else if (isBossProjectiles) {
         // Phase 3 boss: Fallback to all 30 projectiles at once (if sequential parameters not provided)
@@ -3960,8 +3961,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // Check if spawn position collides with walls
         const spawnRect = { x: spawnX, y: spawnY, width: projectileSize.width, height: projectileSize.height };
-        const state = get();
-        for (const wall of state.walls) {
+        const currentState = get(); // Fresh state call to avoid stale state
+        for (const wall of currentState.walls) {
           if (checkAABBCollision(spawnRect, wall)) {
             console.log(`❌ SPAWN COLLISION: Projectile spawn position (${spawnX}, ${spawnY}) immediately collides with wall at (${wall.x}, ${wall.y})`);
           }
@@ -3970,12 +3971,17 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Add targeted debugging for Valerie
       if (snake.type === "boss" && snake.bossPhase === 3) {
-        console.log(`🎯 FIREPROJECTILES: Adding ${newProjectiles.length} projectiles to state (currently has ${state.projectiles.length})`);
+        // Get fresh state to avoid stale state issues
+        const freshState = get();
+        console.log(`🎯 FIREPROJECTILES: Adding ${newProjectiles.length} projectiles to state (currently has ${freshState.projectiles.length})`);
         console.log(`🎯 PROJECTILE SAMPLE: First projectile - pos: (${newProjectiles[0]?.position.x}, ${newProjectiles[0]?.position.y}), vel: (${newProjectiles[0]?.velocity.x}, ${newProjectiles[0]?.velocity.y}), lifespan: ${newProjectiles[0]?.lifespan}ms`);
+        console.log(`🎯 STATE UPDATE: About to update state with ${[...freshState.projectiles, ...newProjectiles].length} total projectiles`);
       }
       
+      // Get fresh state for the actual update to avoid stale state
+      const finalState = get();
       set({
-        projectiles: [...state.projectiles, ...newProjectiles],
+        projectiles: [...finalState.projectiles, ...newProjectiles],
       });
     },
 
