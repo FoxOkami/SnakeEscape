@@ -3890,6 +3890,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
           
           console.log(`💥 PROJECTILE CREATE: Created ${directions.length} boss projectiles for round ${burstRound}`);
+          console.log(`💥 DEBUG CHECKPOINT 1: Immediately after projectile creation`);
+          console.log(`💥 DEBUG CHECKPOINT 2: directions array length = ${directions.length}`);
           console.log(`💥 POST-CREATE DEBUG: About to continue to state update...`);
         } catch (error) {
           console.log(`❌ PROJECTILE CREATION ERROR:`, error);
