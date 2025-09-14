@@ -1802,7 +1802,7 @@ const GameCanvas: React.FC = () => {
 
       // Draw projectiles
       if (currentLevelKey === "boss_valerie") {
-        console.log(`🎨 CANVAS DEBUG: Projectiles received in GameCanvas - length: ${projectiles.length}, level: ${currentLevelKey}`);
+        console.log(`🎨 CANVAS DEBUG: Projectiles received in GameCanvas - length: ${projectiles.length}, level: ${currentLevelKey}, timestamp: ${Date.now()}`);
         if (projectiles.length > 0) {
           console.log(`🎨 RENDER: Drawing ${projectiles.length} projectiles in level ${currentLevelKey}`);
           console.log(`🎨 SAMPLE PROJECTILE:`, projectiles[0]);

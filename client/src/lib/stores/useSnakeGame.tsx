@@ -4022,9 +4022,22 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Get fresh state for the actual update to avoid stale state
       const finalState = get();
+      const updatedProjectiles = [...finalState.projectiles, ...newProjectiles];
+      
+      // Add debugging to track state update
+      if (snake.type === "boss" && snake.bossPhase === 3) {
+        console.log(`🔄 STATE UPDATE: Before set() - finalState.projectiles.length: ${finalState.projectiles.length}, adding: ${newProjectiles.length}, total will be: ${updatedProjectiles.length}`);
+      }
+      
       set({
-        projectiles: [...finalState.projectiles, ...newProjectiles],
+        projectiles: updatedProjectiles,
       });
+      
+      // Verify the state was actually updated
+      if (snake.type === "boss" && snake.bossPhase === 3) {
+        const verifyState = get();
+        console.log(`✅ STATE VERIFIED: After set() - projectiles.length: ${verifyState.projectiles.length}`);
+      }
     },
 
     collectPuzzleShard: (shardId: string) => {
