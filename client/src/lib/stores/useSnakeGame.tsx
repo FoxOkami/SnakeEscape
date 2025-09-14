@@ -3464,7 +3464,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (age > projectile.lifespan) {
           // Add debugging for Valerie level expired projectiles
           if (state.currentLevelKey === "boss_valerie") {
-            console.log(`⏰ EXPIRED: Projectile expired after ${age}ms (lifespan: ${projectile.lifespan}ms)`);
+            console.log(`⏰ EXPIRED: Projectile ${projectile.id} expired after ${age}ms (lifespan: ${projectile.lifespan}ms)`);
           }
           return false; // Remove expired projectile
         }
@@ -3495,6 +3495,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           hitCount = 1; // Only one hit per frame allowed
           playerHitThisFrame = true; // Prevent additional hits this frame
 
+          // Add debugging for Valerie level player hits
+          if (state.currentLevelKey === "boss_valerie") {
+            console.log(`🎯 PLAYER HIT: Projectile ${projectile.id} hit player`);
+          }
+
           // Don't check for player death here - let the main game loop handle it
 
           return false; // Remove projectile
@@ -3512,7 +3517,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           if (checkAABBCollision(projectileRect, wall)) {
             // Add debugging for Valerie level wall collisions
             if (state.currentLevelKey === "boss_valerie") {
-              console.log(`🧱 WALL COLLISION: Projectile at (${projectileRect.x.toFixed(1)}, ${projectileRect.y.toFixed(1)}) size (${projectileRect.width}x${projectileRect.height}) hit wall at (${wall.x}, ${wall.y}) size (${wall.width}x${wall.height})`);
+              console.log(`🧱 WALL COLLISION: Projectile ${projectile.id} at (${projectileRect.x.toFixed(1)}, ${projectileRect.y.toFixed(1)}) size (${projectileRect.width}x${projectileRect.height}) hit wall at (${wall.x}, ${wall.y}) size (${wall.width}x${wall.height})`);
             }
             return false; // Remove projectile on wall collision
           }
@@ -3524,6 +3529,15 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Update the state with filtered projectiles
       if (state.currentLevelKey === "boss_valerie" && (state.projectiles.length > 0 || updatedProjectiles.length > 0)) {
         console.log(`🎯 PROJECTILE UPDATE: Before: ${state.projectiles.length}, After: ${updatedProjectiles.length}, Removed: ${state.projectiles.length - updatedProjectiles.length}`);
+        
+        // Log remaining projectiles for debugging
+        if (updatedProjectiles.length > 0 && updatedProjectiles.length <= 5) {
+          updatedProjectiles.forEach((proj, i) => {
+            console.log(`🎯 REMAINING PROJ ${i}: ${proj.id} at (${proj.position.x.toFixed(1)}, ${proj.position.y.toFixed(1)}) age=${Date.now() - proj.createdAt}ms`);
+          });
+        } else if (updatedProjectiles.length > 5) {
+          console.log(`🎯 REMAINING PROJECTS: ${updatedProjectiles.length} total projectiles still active`);
+        }
       }
       
       set({ projectiles: updatedProjectiles });
