@@ -3470,8 +3470,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
 
         // Update position
+        const oldX = projectile.position.x;
+        const oldY = projectile.position.y;
         projectile.position.x += projectile.velocity.x * deltaTime;
         projectile.position.y += projectile.velocity.y * deltaTime;
+        
+        // Add debugging for Valerie level projectile movement
+        if (state.currentLevelKey === "boss_valerie" && index === 0) {
+          console.log(`🚀 PROJECTILE MOVE: deltaTime=${deltaTime.toFixed(4)}, moved from (${oldX.toFixed(1)}, ${oldY.toFixed(1)}) to (${projectile.position.x.toFixed(1)}, ${projectile.position.y.toFixed(1)}), vel=(${projectile.velocity.x.toFixed(2)}, ${projectile.velocity.y.toFixed(2)})`);
+        }
         
 
         // Check collision with player
@@ -3505,7 +3512,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           if (checkAABBCollision(projectileRect, wall)) {
             // Add debugging for Valerie level wall collisions
             if (state.currentLevelKey === "boss_valerie") {
-              console.log(`🧱 WALL COLLISION: Projectile at (${projectileRect.x}, ${projectileRect.y}) hit wall at (${wall.x}, ${wall.y})`);
+              console.log(`🧱 WALL COLLISION: Projectile at (${projectileRect.x.toFixed(1)}, ${projectileRect.y.toFixed(1)}) size (${projectileRect.width}x${projectileRect.height}) hit wall at (${wall.x}, ${wall.y}) size (${wall.width}x${wall.height})`);
             }
             return false; // Remove projectile on wall collision
           }
