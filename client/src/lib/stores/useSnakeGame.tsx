@@ -3935,14 +3935,14 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       const projectileColor = isBossProjectiles ? "#ff4444" : "#00ff41"; // Red for boss, green for spitters
 
+      const spawnX = snake.position.x + snake.size.width / 2 - projectileSize.width / 2;
+      const spawnY = snake.position.y + snake.size.height / 2 - projectileSize.height / 2;
+      
       const newProjectiles = directions.map((dir, index) => ({
         id: `${snakeId}_projectile_${Date.now()}_${index}`,
         position: {
-          x: snake.position.x + snake.size.width / 2 - projectileSize.width / 2,
-          y:
-            snake.position.y +
-            snake.size.height / 2 -
-            projectileSize.height / 2,
+          x: spawnX,
+          y: spawnY,
         },
         velocity: {
           x: dir.x * projectileSpeed,
@@ -3953,6 +3953,20 @@ export const useSnakeGame = create<SnakeGameState>()(
         lifespan,
         color: projectileColor,
       }));
+      
+      // Add spawn position debugging for Valerie
+      if (snake.type === "boss" && snake.bossPhase === 3) {
+        console.log(`🎯 SPAWN DEBUG: Boss at (${snake.position.x}, ${snake.position.y}) size (${snake.size.width}x${snake.size.height}), projectiles spawn at (${spawnX}, ${spawnY})`);
+        
+        // Check if spawn position collides with walls
+        const spawnRect = { x: spawnX, y: spawnY, width: projectileSize.width, height: projectileSize.height };
+        const state = get();
+        for (const wall of state.walls) {
+          if (checkAABBCollision(spawnRect, wall)) {
+            console.log(`❌ SPAWN COLLISION: Projectile spawn position (${spawnX}, ${spawnY}) immediately collides with wall at (${wall.x}, ${wall.y})`);
+          }
+        }
+      }
 
       // Add targeted debugging for Valerie
       if (snake.type === "boss" && snake.bossPhase === 3) {
