@@ -3515,6 +3515,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
 
       // Update the state with filtered projectiles
+      if (state.currentLevelKey === "boss_valerie" && (state.projectiles.length > 0 || updatedProjectiles.length > 0)) {
+        console.log(`🎯 PROJECTILE UPDATE: Before: ${state.projectiles.length}, After: ${updatedProjectiles.length}, Removed: ${state.projectiles.length - updatedProjectiles.length}`);
+      }
+      
       set({ projectiles: updatedProjectiles });
 
       // Spitter firing logic will be handled in the main snake update loop below
@@ -3946,6 +3950,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Add targeted debugging for Valerie
       if (snake.type === "boss" && snake.bossPhase === 3) {
         console.log(`🎯 FIREPROJECTILES: Adding ${newProjectiles.length} projectiles to state (currently has ${state.projectiles.length})`);
+        console.log(`🎯 PROJECTILE SAMPLE: First projectile - pos: (${newProjectiles[0]?.position.x}, ${newProjectiles[0]?.position.y}), vel: (${newProjectiles[0]?.velocity.x}, ${newProjectiles[0]?.velocity.y}), lifespan: ${newProjectiles[0]?.lifespan}ms`);
       }
       
       set({

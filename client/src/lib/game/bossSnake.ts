@@ -726,6 +726,8 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           const timeSinceStart = currentTime - snake.projectileBarrageStartTime;
           const nextRoundTime = snake.barrageProjectileCount * roundInterval;
           
+          console.log(`⏰ TIMING DEBUG [Frame ${frameNumber || '?'}]: currentTime=${currentTime}, startTime=${snake.projectileBarrageStartTime}, timeSinceStart=${timeSinceStart}, nextRoundTime=${nextRoundTime}, roundCount=${snake.barrageProjectileCount}`);
+          
           if (timeSinceStart >= nextRoundTime) {
             // Fire all 24 projectiles for this round simultaneously
             const roundShift = snake.barrageProjectileCount * degreeShift; // 0°, 3°, 6°, 9°
