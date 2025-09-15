@@ -3012,21 +3012,21 @@ const GameCanvas: React.FC = () => {
         draw(ctx);
       }
 
-      if (gameState === "playing") {
-        const deltaTime = currentTime - lastTimeRef.current; // Keep in milliseconds
-        lastTimeRef.current = currentTime;
+      // Always calculate deltaTime and call updateGame (let updateGame handle its own gating)
+      const deltaTime = currentTime - lastTimeRef.current; // Keep in milliseconds
+      lastTimeRef.current = currentTime;
 
-        // Fixed timestep for smooth 60fps animation
-        const targetFrameTime = 1000 / 60; // 16.67ms for 60fps
-        const clampedDeltaTime = Math.min(deltaTime, targetFrameTime * 2); // Cap at 2 frames max
+      // Fixed timestep for smooth 60fps animation
+      const targetFrameTime = 1000 / 60; // 16.67ms for 60fps
+      const clampedDeltaTime = Math.min(deltaTime, targetFrameTime * 2); // Cap at 2 frames max
 
-        if (clampedDeltaTime > 0) {
-          updateGame(clampedDeltaTime);
+      if (clampedDeltaTime > 0) {
+        console.log(`🎬 ANIMATE TICK: deltaTime=${clampedDeltaTime.toFixed(2)}ms`);
+        updateGame(clampedDeltaTime);
+        if (gameState === "playing") {
           updateFlow(clampedDeltaTime);
           updateHint(clampedDeltaTime);
         }
-      } else {
-        lastTimeRef.current = currentTime;
       }
 
       animationFrameRef.current = requestAnimationFrame(gameLoop);

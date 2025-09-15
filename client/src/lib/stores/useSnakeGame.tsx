@@ -1182,8 +1182,15 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     updateGame: (deltaTime: number) => {
+      console.log(`🔥 UPDATE GAME CALLED: deltaTime=${deltaTime}`);
       const state = get();
+      console.log(`🔥 STATE CHECK: gameState=${state.gameState}, currentLevelKey=${state.currentLevelKey}, showInventory=${state.showInventory}`);
       if (state.gameState !== "playing" || state.showInventory) return;
+      
+      // Basic debug to verify game loop is running
+      if (state.currentLevelKey === "boss_valerie") {
+        console.log(`🎮 GAME LOOP: boss_valerie level running, deltaTime=${deltaTime}, frameNumber=${state.frameNumber || 0}`);
+      }
 
       const currentTime = Date.now();
       
