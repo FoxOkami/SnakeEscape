@@ -1483,6 +1483,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
       
       const updatedSnakes = newSnakes.map((snake, index) => {
+        // Debug: Log all snakes in boss_valerie level
+        if (updatedState.currentLevelKey === "boss_valerie") {
+          console.log(`🐍 SNAKE DEBUG: Snake ${index}: id=${snake.id}, type=${snake.type}, position=(${snake.position.x}, ${snake.position.y})`);
+        }
+        
         // Handle boss snakes separately to pass frame number
         if (snake.type === "boss") {
           // Call updateBossSnake directly with frame number for debugging

@@ -131,6 +131,14 @@ function calculateChargeRampedSpeed(snake: Snake, currentTime: number): number {
 }
 
 export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number, levelBounds?: { width: number; height: number }, boulders?: Boulder[], frameNumber?: number): Snake {
+  console.log(`🎯 BOSS UPDATE START: totalHits=${snake.totalBoulderHits || 0}, bossPhase=${snake.bossPhase}, bossState=${snake.bossState}, frame=${frameNumber || '?'}`);
+  
+  // Debug boulder state
+  if (boulders && boulders.length > 0) {
+    const destroyedCount = boulders.filter(b => b.isDestroyed).length;
+    console.log(`🎯 BOULDER DEBUG: ${destroyedCount}/${boulders.length} boulders destroyed`);
+  }
+  
   // Reentrancy guard: prevent multiple updates per frame
   if (snake.lastUpdateTime === currentTime) {
     return snake; // Skip this update - already processed this frame
@@ -709,6 +717,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
 
     case 'projectileBarrage':
       // Phase 3: Fire 4 rounds of 24 projectiles each, with 500ms between rounds and 3-degree shifts
+      console.log(`🎯 PROJECTILE BARRAGE STATE ENTERED: Frame ${frameNumber || '?'}, currentTime=${currentTime}`);
       if (snake.projectileBarrageStartTime && snake.barrageProjectileCount !== undefined) {
         const maxRounds = 4;
         const roundInterval = 500; // 500ms between rounds
@@ -948,6 +957,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
   // Update boss phase based on total boulder hits
   // Phase 1: 0-1 hits, Phase 2: 2-3 hits, Phase 3: 4-5 hits, Phase 4: 6+ hits
   const totalHits = snake.totalBoulderHits || 0;
+  const oldPhase = snake.bossPhase;
   if (totalHits >= 6) {
     snake.bossPhase = 4;
   } else if (totalHits >= 4) {
@@ -956,6 +966,16 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
     snake.bossPhase = 2;
   } else {
     snake.bossPhase = 1;
+  }
+  
+  // Debug phase transitions
+  if (oldPhase !== snake.bossPhase) {
+    console.log(`🎯 BOSS PHASE CHANGE: ${oldPhase} → ${snake.bossPhase} (${totalHits} total hits)`);
+  }
+  
+  // Debug current state for phase 3
+  if (snake.bossPhase === 3) {
+    console.log(`🎯 PHASE 3 STATUS: State=${snake.bossState}, TotalHits=${totalHits}, Frame=${frameNumber || '?'}`);
   }
 
   snake.isChasing = true;
