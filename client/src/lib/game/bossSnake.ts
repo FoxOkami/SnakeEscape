@@ -704,6 +704,7 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.bossState = 'projectileBarrage';
           snake.projectileBarrageStartTime = currentTime;
           snake.barrageProjectileCount = 0;
+          snake.hasFiredBarrage = false; // Initialize one-shot barrage flag
           console.log(`💥 PHASE 3 [Frame ${frameNumber || '?'}]: Valerie entering projectileBarrage state at center position (${snake.position.x}, ${snake.position.y})`);
           
           

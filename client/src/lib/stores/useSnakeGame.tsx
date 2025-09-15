@@ -1583,6 +1583,17 @@ export const useSnakeGame = create<SnakeGameState>()(
             updatedSnake.environmentalEffects.fireProjectiles = false;
             updatedSnake.environmentalEffects.projectileSourceId = undefined;
           }
+
+          // One-shot barrage trigger for Phase 3 boss (more reliable than environmental effects)
+          if (updatedSnake.type === 'boss' && 
+              updatedSnake.bossPhase === 3 && 
+              updatedSnake.bossState === 'projectileBarrage' && 
+              !updatedSnake.hasFiredBarrage) {
+            console.log(`🎯 ONE-SHOT BARRAGE: Firing projectiles for ${updatedSnake.id} in phase ${updatedSnake.bossPhase}`);
+            // Fire the first round immediately
+            get().fireProjectiles(updatedSnake.id, undefined, undefined, undefined, 0, 0);
+            updatedSnake.hasFiredBarrage = true; // Prevent multiple firings
+          }
           
           return updatedSnake;
       });
