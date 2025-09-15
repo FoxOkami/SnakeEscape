@@ -1802,10 +1802,7 @@ const GameCanvas: React.FC = () => {
 
       // Draw projectiles
       if (currentLevelKey === "boss_valerie") {
-        console.log(`🎨 CANVAS DEBUG: Projectiles received in GameCanvas - length: ${projectiles.length}, level: ${currentLevelKey}, timestamp: ${Date.now()}`);
         if (projectiles.length > 0) {
-          console.log(`🎨 RENDER: Drawing ${projectiles.length} projectiles in level ${currentLevelKey}`);
-          console.log(`🎨 SAMPLE PROJECTILE:`, projectiles[0]);
         }
       }
       
@@ -3021,7 +3018,6 @@ const GameCanvas: React.FC = () => {
       const clampedDeltaTime = Math.min(deltaTime, targetFrameTime * 2); // Cap at 2 frames max
 
       if (clampedDeltaTime > 0) {
-        console.log(`🎬 ANIMATE TICK: deltaTime=${clampedDeltaTime.toFixed(2)}ms`);
         updateGame(clampedDeltaTime);
         if (gameState === "playing") {
           updateFlow(clampedDeltaTime);
