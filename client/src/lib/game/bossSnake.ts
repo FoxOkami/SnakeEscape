@@ -717,59 +717,31 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
       break;
 
     case 'projectileBarrage':
-      // Phase 3: Fire 4 rounds of 24 projectiles each, with 500ms between rounds and 3-degree shifts
+      // Phase 3: Simplified projectile firing - just fire once when entering this state
       console.log(`🎯 PROJECTILE BARRAGE STATE ENTERED: Frame ${frameNumber || '?'}, currentTime=${currentTime}`);
-      if (snake.projectileBarrageStartTime && snake.barrageProjectileCount !== undefined) {
-        const maxRounds = 4;
-        const roundInterval = 500; // 500ms between rounds
-        const degreeShift = 3; // 3-degree shift per round
-        
-        // Initialize burst firing if not started
-        if (!snake.burstProjectileStarted) {
-          snake.burstProjectileStarted = true;
-          snake.barrageProjectileCount = 0; // This will track rounds (0-3)
-          
-        }
-        
-        // Check if it's time to fire the next round
-        if (snake.barrageProjectileCount < maxRounds) {
-          const timeSinceStart = currentTime - snake.projectileBarrageStartTime;
-          const nextRoundTime = snake.barrageProjectileCount * roundInterval;
-          
-          console.log(`⏰ TIMING DEBUG [Frame ${frameNumber || '?'}]: currentTime=${currentTime}, startTime=${snake.projectileBarrageStartTime}, timeSinceStart=${timeSinceStart}, nextRoundTime=${nextRoundTime}, roundCount=${snake.barrageProjectileCount}`);
-          
-          if (timeSinceStart >= nextRoundTime) {
-            // Fire all 24 projectiles for this round simultaneously
-            const roundShift = snake.barrageProjectileCount * degreeShift; // 0°, 3°, 6°, 9°
-            console.log(`💥 PROJECTILE FIRE [Frame ${frameNumber || '?'}]: Firing round ${snake.barrageProjectileCount + 1}/4 with ${roundShift}° shift`);
-            
-            snake.environmentalEffects = {
-              spawnMiniBoulders: false,
-              spawnScreensaverSnake: false,
-              spawnPhantom: false,
-              boulderHitPosition: { x: 0, y: 0 }, // Not used for projectiles
-              fireProjectiles: true, // Flag for projectile firing
-              projectileSourceId: snake.id, // Which snake is firing
-              burstRound: snake.barrageProjectileCount, // Which round (0-3)
-              roundAngleShift: roundShift // Angle shift for this round
-            };
-            
-            snake.barrageProjectileCount++;
-            // Exit immediately after firing one round to prevent multiple rounds firing in same frame
-            break;
-          }
-        }
-        
-        // Wait additional time after firing all rounds before resuming tracking
-        const totalBarrageDuration = (maxRounds * roundInterval) + 500; // All rounds + 500ms pause
-        if (currentTime - snake.projectileBarrageStartTime >= totalBarrageDuration) {
-          snake.bossState = 'tracking';
-          snake.projectileBarrageStartTime = undefined;
-          snake.barrageProjectileCount = undefined;
-          snake.burstProjectileStarted = false;
-        }
+      
+      // Fire projectiles immediately when entering this state (one-shot)
+      if (!snake.hasFiredBarrage) {
+        console.log(`💥 FIRING PROJECTILES: Boss ${snake.id} firing 24 projectiles in phase 3`);
+        snake.environmentalEffects = {
+          spawnMiniBoulders: false,
+          spawnScreensaverSnake: false,
+          spawnPhantom: false,
+          boulderHitPosition: { x: 0, y: 0 },
+          fireProjectiles: true,
+          projectileSourceId: snake.id,
+          burstRound: 0,
+          roundAngleShift: 0
+        };
+        snake.hasFiredBarrage = true;
       }
-      // Stay still during barrage
+      
+      // Return to tracking after 1 second
+      if (snake.projectileBarrageStartTime && currentTime - snake.projectileBarrageStartTime >= 1000) {
+        snake.bossState = 'tracking';
+        snake.projectileBarrageStartTime = undefined;
+        snake.hasFiredBarrage = false; // Reset for next phase 3 cycle
+      }
       break;
 
     case 'waitingForPhantom':

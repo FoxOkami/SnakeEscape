@@ -111,6 +111,7 @@ export interface Snake {
   chargeBaseSpeed?: number; // Starting speed for current charge
   chargeMaxSpeed?: number; // Maximum speed for charge
   isInitialPause?: boolean; // Whether this is the first pause to let player adjust
+  hasFiredBarrage?: boolean; // Whether projectile barrage has been fired in current phase 3 state
   
   // Environmental effects triggered when boss hits boulder
   environmentalEffects?: {
