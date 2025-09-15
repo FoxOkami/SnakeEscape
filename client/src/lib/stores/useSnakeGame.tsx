@@ -643,7 +643,6 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     startFromLevel: (levelIndex: number) => {
-      console.log(`*** startFromLevel called for level ${levelIndex} - this will wipe rattlesnake properties ***`);
       if (levelIndex < 0 || levelIndex >= LEVELS.length) {
         return; // Invalid level index
       }
@@ -809,7 +808,6 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     resetGame: () => {
-      console.log("*** resetGame called - this will wipe rattlesnake properties ***");
       const state = get();
       const level = LEVELS[state.currentLevel];
       
@@ -894,7 +892,6 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     nextLevel: () => {
-      console.log("*** nextLevel called - this will wipe rattlesnake properties ***");
       const state = get();
       const nextLevelIndex = state.currentLevel + 1;
 
@@ -1182,14 +1179,11 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     updateGame: (deltaTime: number) => {
-      console.log(`🔥 UPDATE GAME CALLED: deltaTime=${deltaTime}`);
       const state = get();
-      console.log(`🔥 STATE CHECK: gameState=${state.gameState}, currentLevelKey=${state.currentLevelKey}, showInventory=${state.showInventory}`);
       if (state.gameState !== "playing" || state.showInventory) return;
       
       // Basic debug to verify game loop is running
       if (state.currentLevelKey === "boss_valerie") {
-        console.log(`🎮 GAME LOOP: boss_valerie level running, deltaTime=${deltaTime}, frameNumber=${state.frameNumber || 0}`);
       }
 
       const currentTime = Date.now();
@@ -1497,7 +1491,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       const updatedBossSnakes = bossSnakes.map((snake) => {
         // Debug: Log boss snakes in boss_valerie level
         if (updatedState.currentLevelKey === "boss_valerie") {
-          console.log(`🐍 BOSS SNAKE DEBUG: id=${snake.id}, type=${snake.type}, position=(${snake.position.x}, ${snake.position.y}), totalHits=${snake.totalBoulderHits || 0}`);
         }
         
         // Call updateBossSnake directly with frame number for debugging
@@ -1514,11 +1507,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           
           // Process environmental effects for boss snakes (same as other snakes)
           if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
-            console.log(`🐍 GAME LOOP: Processing spawnScreensaverSnake for snake ${updatedSnake.id}`);
             const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
-            console.log(`🐍 GAME LOOP: Created screensaver snake ${screensaverSnake.id} at position (${screensaverSnake.position.x}, ${screensaverSnake.position.y})`);
             newSnakes.push(screensaverSnake);
-            console.log(`🐍 GAME LOOP: Added to newSnakes array, total newSnakes: ${newSnakes.length}`);
             // Clear the flag immediately after spawning
             updatedSnake.environmentalEffects.spawnScreensaverSnake = false;
           }
@@ -1531,7 +1521,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
           
           if (updatedSnake.environmentalEffects?.spawnPhantom) {
-            console.log(`👻 GAME LOOP: Processing spawnPhantom for snake ${updatedSnake.id}`);
             // Only spawn phantom if one doesn't already exist with this ID
             const phantomExists = newSnakes.some(s => s.id === updatedSnake.environmentalEffects?.phantomId);
             if (!phantomExists) {
@@ -1540,16 +1529,13 @@ export const useSnakeGame = create<SnakeGameState>()(
                 updatedSnake.environmentalEffects.phantomId!,
                 updatedSnake.environmentalEffects.phantomLevelBounds
               );
-              console.log(`👻 GAME LOOP: Created phantom snake ${phantom.id} at position (${phantom.position.x}, ${phantom.position.y})`);
               newSnakes.push(phantom);
-              console.log(`👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: ${newSnakes.length}`);
             }
             // Clear phantom spawn flag after spawning but keep other environmental effects
             updatedSnake.environmentalEffects.spawnPhantom = false;
           }
           
           if (updatedSnake.environmentalEffects?.spawnRainSnake) {
-            console.log(`🌧️ GAME LOOP: Processing spawnRainSnake for snake ${updatedSnake.id}`);
             // Only spawn rain snake if one doesn't already exist with this ID
             const rainSnakeExists = newSnakes.some(s => s.id === updatedSnake.environmentalEffects?.rainSnakeId);
             if (!rainSnakeExists) {
@@ -1561,7 +1547,6 @@ export const useSnakeGame = create<SnakeGameState>()(
                 updatedSnake.environmentalEffects.sineAmplitude,
                 updatedSnake.environmentalEffects.sineFrequency
               );
-              console.log(`🌧️ GAME LOOP: Created rain snake ${rainSnake.id} at position (${rainSnake.position.x}, ${rainSnake.position.y})`);
               newSnakes.push(rainSnake);
             }
             // Clear rain snake spawn flag after spawning
@@ -1569,7 +1554,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
           
           if (updatedSnake.environmentalEffects?.fireProjectiles && updatedSnake.environmentalEffects?.projectileSourceId) {
-            console.log(`💥 GAME LOOP: Processing fireProjectiles for snake ${updatedSnake.id}`);
             // Fire projectiles for Phase 3 boss
             get().fireProjectiles(
               updatedSnake.environmentalEffects.projectileSourceId,
@@ -1588,7 +1572,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           if (updatedSnake.type === 'boss' && 
               updatedSnake.bossPhase === 3 && 
               !updatedSnake.hasFiredBarrage) {
-            console.log(`🎯 DIRECT FIRE: Firing projectiles for boss ${updatedSnake.id} in phase 3`);
             get().fireProjectiles(updatedSnake.id, undefined, undefined, undefined, 0, 0);
             updatedSnake.hasFiredBarrage = true;
           }
@@ -1600,7 +1583,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       const updatedNonBossSnakes = nonBossSnakes.map((snake, index) => {
         // Debug: Log non-boss snakes in boss_valerie level
         if (updatedState.currentLevelKey === "boss_valerie") {
-          console.log(`🐍 NON-BOSS SNAKE DEBUG: Snake ${index}: id=${snake.id}, type=${snake.type}, position=(${snake.position.x}, ${snake.position.y})`);
         }
         
         // Rattlesnakes need both timing logic AND entity updates for movement
@@ -1651,11 +1633,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
         
         if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
-          console.log(`🐍 GAME LOOP: Processing spawnScreensaverSnake for snake ${updatedSnake.id}`);
           const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
-          console.log(`🐍 GAME LOOP: Created screensaver snake ${screensaverSnake.id} at position (${screensaverSnake.position.x}, ${screensaverSnake.position.y})`);
           newSnakes.push(screensaverSnake);
-          console.log(`🐍 GAME LOOP: Added to newSnakes array, total newSnakes: ${newSnakes.length}`);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnScreensaverSnake = false;
         }
@@ -3498,7 +3477,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         if (age > projectile.lifespan) {
           // Add debugging for Valerie level expired projectiles
           if (state.currentLevelKey === "boss_valerie") {
-            console.log(`⏰ EXPIRED: Projectile ${projectile.id} expired after ${age}ms (lifespan: ${projectile.lifespan}ms)`);
           }
           return false; // Remove expired projectile
         }
@@ -3511,7 +3489,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         // Add debugging for Valerie level projectile movement
         if (state.currentLevelKey === "boss_valerie" && index === 0) {
-          console.log(`🚀 PROJECTILE MOVE: deltaTime=${deltaTime.toFixed(4)}, moved from (${oldX.toFixed(1)}, ${oldY.toFixed(1)}) to (${projectile.position.x.toFixed(1)}, ${projectile.position.y.toFixed(1)}), vel=(${projectile.velocity.x.toFixed(2)}, ${projectile.velocity.y.toFixed(2)})`);
         }
         
 
@@ -3531,7 +3508,6 @@ export const useSnakeGame = create<SnakeGameState>()(
 
           // Add debugging for Valerie level player hits
           if (state.currentLevelKey === "boss_valerie") {
-            console.log(`🎯 PLAYER HIT: Projectile ${projectile.id} hit player`);
           }
 
           // Don't check for player death here - let the main game loop handle it
@@ -3554,7 +3530,6 @@ export const useSnakeGame = create<SnakeGameState>()(
             if (checkAABBCollision(projectileRect, wall)) {
               // Add debugging for wall collisions
               if (state.currentLevelKey === "boss_valerie") {
-                console.log(`🧱 WALL COLLISION: Projectile ${projectile.id} at (${projectileRect.x.toFixed(1)}, ${projectileRect.y.toFixed(1)}) size (${projectileRect.width}x${projectileRect.height}) hit wall at (${wall.x}, ${wall.y}) size (${wall.width}x${wall.height})`);
               }
               return false; // Remove projectile on wall collision
             }
@@ -3562,7 +3537,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         } else {
           // Boss projectiles pass through walls - add debug logging
           if (state.currentLevelKey === "boss_valerie") {
-            console.log(`🌟 BOSS PROJECTILE: ${projectile.id} passing through walls (wall penetration enabled)`);
           }
         }
 
@@ -3571,15 +3545,12 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Update the state with filtered projectiles
       if (state.currentLevelKey === "boss_valerie" && (state.projectiles.length > 0 || updatedProjectiles.length > 0)) {
-        console.log(`🎯 PROJECTILE UPDATE: Before: ${state.projectiles.length}, After: ${updatedProjectiles.length}, Removed: ${state.projectiles.length - updatedProjectiles.length}`);
         
         // Log remaining projectiles for debugging
         if (updatedProjectiles.length > 0 && updatedProjectiles.length <= 5) {
           updatedProjectiles.forEach((proj, i) => {
-            console.log(`🎯 REMAINING PROJ ${i}: ${proj.id} at (${proj.position.x.toFixed(1)}, ${proj.position.y.toFixed(1)}) age=${Date.now() - proj.createdAt}ms`);
           });
         } else if (updatedProjectiles.length > 5) {
-          console.log(`🎯 REMAINING PROJECTS: ${updatedProjectiles.length} total projectiles still active`);
         }
       }
       
@@ -3900,25 +3871,20 @@ export const useSnakeGame = create<SnakeGameState>()(
       const snake = state.snakes.find((s) => s.id === snakeId);
       if (!snake || (snake.type !== "spitter" && snake.type !== "boss")) return;
       
-      console.log(`💥 FIRE DEBUG: Snake ${snakeId}, type: ${snake.type}, bossPhase: ${snake.bossPhase}, burstRound: ${burstRound}, roundAngleShift: ${roundAngleShift}`);
 
       // Boss projectiles (Phase 3 Valerie) vs regular spitter projectiles
       const isBossProjectiles = snake.type === "boss" && snake.bossPhase === 3;
-      console.log(`💥 FIRE DEBUG: isBossProjectiles = ${isBossProjectiles}`);
       const projectileSpeed = isBossProjectiles ? 2.0 : 0.3; // Boss projectiles are much faster now
       const projectileSize = { width: 8, height: 8 }; // Larger boss projectiles
       const lifespan = 6000; // 6 seconds for boss projectiles
 
       let directions: { x: number; y: number }[];
 
-      console.log(`💥 CONDITION CHECK: isBossProjectiles=${isBossProjectiles}, burstRound=${burstRound}, roundAngleShift=${roundAngleShift}`);
       if (isBossProjectiles && burstRound !== undefined && roundAngleShift !== undefined) {
-        console.log(`💥 ENTERING BOSS PROJECTILE CREATION`);
         // Phase 3 boss: 4-round burst firing with angle shifts
         const totalProjectiles = 24;
         const angleStep = 360 / totalProjectiles; // 15 degrees per projectile
         
-        console.log(`💥 CALCULATION DEBUG: totalProjectiles=${totalProjectiles}, angleStep=${angleStep}, roundAngleShift=${roundAngleShift}`);
         
         directions = [];
         try {
@@ -3939,19 +3905,13 @@ export const useSnakeGame = create<SnakeGameState>()(
             
             // Validate direction values
             if (isNaN(dir.x) || isNaN(dir.y)) {
-              console.log(`❌ INVALID DIRECTION: Projectile ${i} has NaN direction: (${dir.x}, ${dir.y}), angle=${normalizedAngle}`);
               continue;
             }
             
             directions.push(dir);
           }
           
-          console.log(`💥 PROJECTILE CREATE: Created ${directions.length} boss projectiles for round ${burstRound}`);
-          console.log(`💥 DEBUG CHECKPOINT 1: Immediately after projectile creation`);
-          console.log(`💥 DEBUG CHECKPOINT 2: directions array length = ${directions.length}`);
-          console.log(`💥 POST-CREATE DEBUG: About to continue to state update...`);
         } catch (error) {
-          console.log(`❌ PROJECTILE CREATION ERROR:`, error);
           return; // Exit early on error
         }
         
@@ -4033,14 +3993,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Add spawn position debugging for Valerie
       if (snake.type === "boss" && snake.bossPhase === 3) {
-        console.log(`🎯 SPAWN DEBUG: Boss at (${snake.position.x}, ${snake.position.y}) size (${snake.size.width}x${snake.size.height}), projectiles spawn at (${spawnX}, ${spawnY})`);
         
         // Check if spawn position collides with walls
         const spawnRect = { x: spawnX, y: spawnY, width: projectileSize.width, height: projectileSize.height };
         const currentState = get(); // Fresh state call to avoid stale state
         for (const wall of currentState.walls) {
           if (checkAABBCollision(spawnRect, wall)) {
-            console.log(`❌ SPAWN COLLISION: Projectile spawn position (${spawnX}, ${spawnY}) immediately collides with wall at (${wall.x}, ${wall.y})`);
           }
         }
       }
@@ -4049,9 +4007,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (snake.type === "boss" && snake.bossPhase === 3) {
         // Get fresh state to avoid stale state issues
         const freshState = get();
-        console.log(`🎯 FIREPROJECTILES: Adding ${newProjectiles.length} projectiles to state (currently has ${freshState.projectiles.length})`);
-        console.log(`🎯 PROJECTILE SAMPLE: First projectile - pos: (${newProjectiles[0]?.position.x}, ${newProjectiles[0]?.position.y}), vel: (${newProjectiles[0]?.velocity.x}, ${newProjectiles[0]?.velocity.y}), lifespan: ${newProjectiles[0]?.lifespan}ms`);
-        console.log(`🎯 STATE UPDATE: About to update state with ${[...freshState.projectiles, ...newProjectiles].length} total projectiles`);
       }
       
       // Get fresh state for the actual update to avoid stale state
@@ -4060,7 +4015,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       
       // Add debugging to track state update
       if (snake.type === "boss" && snake.bossPhase === 3) {
-        console.log(`🔄 STATE UPDATE: Before set() - finalState.projectiles.length: ${finalState.projectiles.length}, adding: ${newProjectiles.length}, total will be: ${updatedProjectiles.length}`);
       }
       
       set({
@@ -4070,7 +4024,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Verify the state was actually updated
       if (snake.type === "boss" && snake.bossPhase === 3) {
         const verifyState = get();
-        console.log(`✅ STATE VERIFIED: After set() - projectiles.length: ${verifyState.projectiles.length}`);
       }
     },
 
