@@ -1482,25 +1482,28 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
       
-      const updatedSnakes = newSnakes.map((snake, index) => {
-        // Debug: Log all snakes in boss_valerie level
+      // Handle boss snakes first to avoid TypeScript narrowing issues
+      const bossSnakes = newSnakes.filter((snake): snake is Snake => snake.type === "boss");
+      const nonBossSnakes = newSnakes.filter(snake => snake.type !== "boss");
+      
+      // Process boss snakes separately
+      const updatedBossSnakes = bossSnakes.map((snake) => {
+        // Debug: Log boss snakes in boss_valerie level
         if (updatedState.currentLevelKey === "boss_valerie") {
-          console.log(`🐍 SNAKE DEBUG: Snake ${index}: id=${snake.id}, type=${snake.type}, position=(${snake.position.x}, ${snake.position.y})`);
+          console.log(`🐍 BOSS SNAKE DEBUG: id=${snake.id}, type=${snake.type}, position=(${snake.position.x}, ${snake.position.y}), totalHits=${snake.totalBoulderHits || 0}`);
         }
         
-        // Handle boss snakes separately to pass frame number
-        if (snake.type === "boss") {
-          // Call updateBossSnake directly with frame number for debugging
-          const updatedSnake = updateBossSnake(
-            snake,
-            currentWalls,
-            deltaTime / 1000, // Convert to seconds
-            updatedState.player,
-            currentTime,
-            LEVELS[updatedState.currentLevel]?.size,
-            updatedState.boulders,
-            get().frameNumber // Pass current frame number
-          );
+        // Call updateBossSnake directly with frame number for debugging
+        const updatedSnake = updateBossSnake(
+          snake,
+          currentWalls,
+          deltaTime / 1000, // Convert to seconds
+          updatedState.player,
+          currentTime,
+          LEVELS[updatedState.currentLevel]?.size,
+          updatedState.boulders,
+          get().frameNumber // Pass current frame number
+        );
           
           // Process environmental effects for boss snakes (same as other snakes)
           if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
@@ -1575,6 +1578,13 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
           
           return updatedSnake;
+      });
+      
+      // Process non-boss snakes separately  
+      const updatedNonBossSnakes = nonBossSnakes.map((snake, index) => {
+        // Debug: Log non-boss snakes in boss_valerie level
+        if (updatedState.currentLevelKey === "boss_valerie") {
+          console.log(`🐍 NON-BOSS SNAKE DEBUG: Snake ${index}: id=${snake.id}, type=${snake.type}, position=(${snake.position.x}, ${snake.position.y})`);
         }
         
         // Rattlesnakes need both timing logic AND entity updates for movement
@@ -1706,6 +1716,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         
         return updatedSnake;
       });
+      
+      // Combine boss and non-boss snakes back together
+      const updatedSnakes = [...updatedBossSnakes, ...updatedNonBossSnakes];
 
       // Handle spitter snake projectile firing
       let newProjectilesToAdd: any[] = [];
