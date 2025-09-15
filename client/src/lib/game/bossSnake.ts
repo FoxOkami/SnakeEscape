@@ -131,12 +131,10 @@ function calculateChargeRampedSpeed(snake: Snake, currentTime: number): number {
 }
 
 export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number, levelBounds?: { width: number; height: number }, boulders?: Boulder[], frameNumber?: number): Snake {
-  console.log(`🎯 BOSS UPDATE START: totalHits=${snake.totalBoulderHits || 0}, bossPhase=${snake.bossPhase}, bossState=${snake.bossState}, frame=${frameNumber || '?'}`);
   
   // Debug boulder state
   if (boulders && boulders.length > 0) {
     const destroyedCount = boulders.filter(b => b.isDestroyed).length;
-    console.log(`🎯 BOULDER DEBUG: ${destroyedCount}/${boulders.length} boulders destroyed`);
   }
   
   // Reentrancy guard: prevent multiple updates per frame
@@ -246,10 +244,8 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.lastChargeCollisionTime = currentTime; // Mark collision time
           hitBoulder.lastHitTime = currentTime; // Mark boulder hit time
           
-          console.log(`🎯 BOULDER HIT [Frame ${frameNumber || '?'}]: ${hitBoulder.id} - hitCount before: ${hitBoulder.hitCount}, maxHits: ${hitBoulder.maxHits}`);
           hitBoulder.hitCount += 1;
           snake.totalBoulderHits = (snake.totalBoulderHits || 0) + 1;
-          console.log(`🎯 BOULDER HIT [Frame ${frameNumber || '?'}]: ${hitBoulder.id} - hitCount after: ${hitBoulder.hitCount}, will destroy: ${hitBoulder.hitCount >= hitBoulder.maxHits}`);
           if (hitBoulder.hitCount >= hitBoulder.maxHits) {
             hitBoulder.isDestroyed = true;
             hitBoulder.destructionTime = currentTime; // Record when it was destroyed
@@ -276,7 +272,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             const currentlyDestroyedCount = boulders?.filter(b => b.isDestroyed).length || 0;
             const totalBouldersHit = boulders?.filter(b => b.hitCount > 0).length || 0;
             
-            console.log(`🐍 SCREENSAVER CHECK [Frame ${frameNumber || '?'}]: boulder=${hitBoulder.id}, hasSpawned=${hitBoulder.hasSpawnedScreensaver}, hitCount=${hitBoulder.hitCount}, totalHit=${totalBouldersHit}`);
             
             // Only spawn on first hit of boulder if it's the 1st or 2nd boulder to be hit
             const shouldSpawnScreensaverSnake = !hitBoulder.hasSpawnedScreensaver && 
@@ -284,7 +279,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
                                                totalBouldersHit <= 2;
             
             if (shouldSpawnScreensaverSnake) {
-              console.log(`🐍 SCREENSAVER SPAWN [Frame ${frameNumber || '?'}]: Spawning screensaver snake for ${hitBoulder.id}`);
               hitBoulder.hasSpawnedScreensaver = true;
               // Only set environmental effects if not already set to prevent multiple spawns
               if (!snake.environmentalEffects?.spawnScreensaverSnake) {
@@ -345,7 +339,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
             recoilTargetPosition = clampToBounds(recoilTargetPosition, snake.size, levelBounds);
           }
           
-          console.log(`🔄 BOULDER RECOIL [Frame ${frameNumber || '?'}]: Starting recoil for ${hitBoulder.id}, distance: ${recoilDistance.toFixed(2)}`);
           snake.bossState = 'recoiling';
           snake.recoilStartTime = currentTime;
           snake.recoilStartPosition = { ...snake.position };
@@ -435,7 +428,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           // Check if this recoil was from a boulder collision
           if (snake.recoilFromBoulder && levelBounds) {
             // Transition to moving to center
-            console.log(`🎯 RECOIL COMPLETE [Frame ${frameNumber || '?'}]: Transitioning to movingToCenter after boulder collision`);
             const centerPosition = {
               x: (levelBounds.width / 2) - (snake.size.width / 2),
               y: (levelBounds.height / 2) - (snake.size.height / 2)
@@ -635,7 +627,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           }
           
           snake.bossState = 'waitingForPhantom';
-          console.log(`👻 PHASE 2 [Frame ${frameNumber || '?'}]: Valerie entering waitingForPhantom state at wall position (${snake.position.x}, ${snake.position.y})`);
           
         } else if (!checkWallCollision(snake, newPosition, walls)) {
           // Continue moving toward wall target
@@ -705,7 +696,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.projectileBarrageStartTime = currentTime;
           snake.barrageProjectileCount = 0;
           snake.hasFiredBarrage = false; // Initialize one-shot barrage flag
-          console.log(`💥 PHASE 3 [Frame ${frameNumber || '?'}]: Valerie entering projectileBarrage state at center position (${snake.position.x}, ${snake.position.y})`);
           
           
         } else if (!checkWallCollision(snake, newPosition, walls)) {
@@ -718,11 +708,9 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
 
     case 'projectileBarrage':
       // Phase 3: Simplified projectile firing - just fire once when entering this state
-      console.log(`🎯 PROJECTILE BARRAGE STATE ENTERED: Frame ${frameNumber || '?'}, currentTime=${currentTime}`);
       
       // Fire projectiles immediately when entering this state (one-shot)
       if (!snake.hasFiredBarrage) {
-        console.log(`💥 FIRING PROJECTILES: Boss ${snake.id} firing 24 projectiles in phase 3`);
         snake.environmentalEffects = {
           spawnMiniBoulders: false,
           spawnScreensaverSnake: false,
@@ -759,7 +747,6 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
           const phantomId = `phantom_${Date.now()}_${snake.phantomSpawnCount}`;
           snake.phantomIds = snake.phantomIds || [];
           snake.phantomIds.push(phantomId);
-          console.log(`👻 PHANTOM SPAWN [Frame ${frameNumber || '?'}]: Spawning phantom ${snake.phantomSpawnCount + 1}/8 with ID ${phantomId}`);
           snake.phantomSpawnCount++;
           
 
@@ -943,12 +930,10 @@ export function updateBossSnake(snake: Snake, walls: Wall[], dt: number, player?
   
   // Debug phase transitions
   if (oldPhase !== snake.bossPhase) {
-    console.log(`🎯 BOSS PHASE CHANGE: ${oldPhase} → ${snake.bossPhase} (${totalHits} total hits)`);
   }
   
   // Debug current state for phase 3
   if (snake.bossPhase === 3) {
-    console.log(`🎯 PHASE 3 STATUS: State=${snake.bossState}, TotalHits=${totalHits}, Frame=${frameNumber || '?'}`);
   }
 
   snake.isChasing = true;
