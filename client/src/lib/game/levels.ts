@@ -184,6 +184,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
     ],
@@ -239,6 +240,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
       {
@@ -253,6 +255,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
       {
@@ -272,7 +275,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 85,
         sightRange: 0, // Stalkers are blind
+        baseSightRange: 0,
         hearingRange: 150,
+        baseHearingRange: 150,
         isChasing: false,
         soundCooldown: 0,
       },
@@ -419,7 +424,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 120,
         sightRange: 0, // Stalkers are blind
+        baseSightRange: 0,
         hearingRange: 200,
+        baseHearingRange: 200,
         isChasing: false,
         soundCooldown: 0,
       },
@@ -440,7 +447,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 120,
         sightRange: 0, // Stalkers are blind
+        baseSightRange: 0,
         hearingRange: 200,
+        baseHearingRange: 200,
         isChasing: false,
         soundCooldown: 0,
       },
@@ -461,6 +470,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 90,
         sightRange: 200,
+        baseSightRange: 200,
         isChasing: false,
         dashSpeed: 200,
         isDashing: false,
@@ -479,6 +489,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0, // Never chases
         sightRange: 0, // Doesn't care about player
+        baseSightRange: 0,
         isChasing: false,
       },
     ],
@@ -576,6 +587,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
       {
@@ -596,6 +608,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 120,
         sightRange: 150,
+        baseSightRange: 150,
         isChasing: false,
         lostSightCooldown: 0,
       },
@@ -617,7 +630,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 110,
         sightRange: 120,
+        baseSightRange: 120,
         hearingRange: 180,
+        baseHearingRange: 180,
         isChasing: false,
         pitId: "pit1",
         isInPit: true,
@@ -642,7 +657,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 115,
         sightRange: 130,
+        baseSightRange: 130,
         hearingRange: 170,
+        baseHearingRange: 170,
         isChasing: false,
         pitId: "pit1",
         isInPit: true,
@@ -667,7 +684,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 105,
         sightRange: 110,
+        baseSightRange: 110,
         hearingRange: 160,
+        baseHearingRange: 160,
         isChasing: false,
         pitId: "pit1",
         isInPit: true,
@@ -692,7 +711,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 105,
         sightRange: 110,
+        baseSightRange: 110,
         hearingRange: 160,
+        baseHearingRange: 160,
         isChasing: false,
         pitId: "pit2",
         isInPit: true,
@@ -717,7 +738,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 105,
         sightRange: 110,
+        baseSightRange: 110,
         hearingRange: 160,
+        baseHearingRange: 160,
         isChasing: false,
         pitId: "pit2",
         isInPit: true,
@@ -872,6 +895,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
             },
             {
@@ -886,6 +910,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
@@ -905,6 +930,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
@@ -924,6 +950,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
@@ -943,6 +970,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
@@ -969,6 +997,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
               lastFireTime: 0, // Start with no recent fire time
               fireInterval: 3000, // 3 seconds
@@ -1094,6 +1123,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
       {
@@ -1111,7 +1141,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 125,
         sightRange: 0, // Stalkers are blind
+        baseSightRange: 0,
         hearingRange: 300,
+        baseHearingRange: 300,
         isChasing: false,
         soundCooldown: 0,
       },
@@ -1127,6 +1159,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
       {
@@ -1148,6 +1181,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 150,
         sightRange: 100,
+        baseSightRange: 100,
         isChasing: false,
         lostSightCooldown: 0,
       },
@@ -1168,7 +1202,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 250, // Very fast when berserk
         sightRange: 150, // Good sight range when berserk
+        baseSightRange: 150,
         hearingRange: 200, // Can hear player when in darkness
+        baseHearingRange: 200,
         isChasing: false,
         isInDarkness: true, // Start in darkness state
         isBerserk: false,
@@ -1192,7 +1228,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 250, // Very fast when berserk
         sightRange: 150, // Good sight range when berserk
+        baseSightRange: 150,
         hearingRange: 200, // Can hear player when in darkness
+        baseHearingRange: 200,
         isChasing: false,
         isInDarkness: true, // Start in darkness state
         isBerserk: false,
@@ -1216,7 +1254,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 250, // Very fast when berserk
         sightRange: 150, // Good sight range when berserk
+        baseSightRange: 150,
         hearingRange: 200, // Can hear player when in darkness
+        baseHearingRange: 200,
         isChasing: false,
         isInDarkness: true, // Start in darkness state
         isBerserk: false,
@@ -1429,7 +1469,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 150,
         sightRange: 800, // Entire level width
+        baseSightRange: 800,
         hearingRange: 600, // Entire level height
+        baseHearingRange: 600,
         isChasing: false,
       },
     ],
