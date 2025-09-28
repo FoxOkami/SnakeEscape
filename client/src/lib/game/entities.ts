@@ -21,13 +21,13 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
     detectionMultipliers = getSnakeDetectionMultipliers(gameState.inventoryItems);
   }
 
-  // Apply detection modifiers to snake ranges
+  // Apply detection modifiers to snake ranges using base values
   const modifiedSnake = { ...snake };
-  if (modifiedSnake.sightRange) {
-    modifiedSnake.sightRange = modifiedSnake.sightRange * detectionMultipliers.snakeSightMultiplier;
+  if (modifiedSnake.baseSightRange !== undefined) {
+    modifiedSnake.sightRange = modifiedSnake.baseSightRange * detectionMultipliers.snakeSightMultiplier;
   }
-  if (modifiedSnake.hearingRange) {
-    modifiedSnake.hearingRange = modifiedSnake.hearingRange * detectionMultipliers.snakeHearingMultiplier;
+  if (modifiedSnake.baseHearingRange !== undefined) {
+    modifiedSnake.hearingRange = modifiedSnake.baseHearingRange * detectionMultipliers.snakeHearingMultiplier;
   }
 
   // Handle different snake types
