@@ -2456,12 +2456,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         updatedPlayer,
       );
 
-      const testState1 = get();
-      console.log(2460, "state1", [
-        ...(testState1.projectiles || []),
-        ...newProjectilesToAdd,
-      ]);
-
       // Handle projectile hits to player
       if (projectileResult.hitCount > 0) {
         updatedPlayer.health -= projectileResult.hitCount;
@@ -2485,12 +2479,6 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- ENVIRONMENTAL EFFECTS ---
       // Update mini boulders physics and lifetime
       get().updateMiniBoulders(deltaTime);
-
-      const testState2 = get();
-      console.log(2487, "state2", [
-        ...(testState2.projectiles || []),
-        ...newProjectilesToAdd,
-      ]);
 
       // --- UPDATE STATE ---
       // Process phantom completion and removal AFTER all snake updates
@@ -3607,11 +3595,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       ) {
         return { hitCount: 0 };
       }
-      /* THOUGHT:
-      projectiles for boss are no longer in state at this point, but are
-      for spitter
-      */
-      console.log(3607, state.projectiles);
+      
       const player = currentPlayer || state.player; // Use provided player state or fall back to state
       const currentTime = Date.now();
       let hitCount = 0;
@@ -3623,7 +3607,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         (projectile, index) => {
           const age = currentTime - projectile.createdAt;
           if (age > projectile.lifespan) {
-            console.log(3619, projectile.id, "removed: age");
             return false; // Remove expired projectile
           }
 
@@ -3632,14 +3615,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           const oldY = projectile.position.y;
           projectile.position.x += projectile.velocity.x * deltaTime;
           projectile.position.y += projectile.velocity.y * deltaTime;
-
-          console.log(
-            3629,
-            projectile.id,
-            `age:${age}`,
-            `x:${oldX}->${projectile.position.x}`,
-            `y:${oldY}->${projectile.position.y}`,
-          );
 
           // Check collision with player
           const projectileRect = { ...projectile.position, ...projectile.size };
@@ -3659,7 +3634,6 @@ export const useSnakeGame = create<SnakeGameState>()(
             playerHitThisFrame = true; // Prevent additional hits this frame
 
             // Don't check for player death here - let the main game loop handle it
-            console.log(3655, projectile.id, "removed: player collision");
             return false; // Remove projectile
           }
 
@@ -3678,19 +3652,16 @@ export const useSnakeGame = create<SnakeGameState>()(
               };
 
               if (checkAABBCollision(projectileRect, wall)) {
-                console.log(3677, projectile.id, "removed: wall collision");
                 return false; // Remove projectile on wall collision
               }
             }
           } else {
           }
 
-          console.log(3684, projectile.id, "retained");
           return true; // Keep projectile
         },
       );
 
-      console.log(3689, updatedProjectiles);
       // after this log and before 2580 log, we lose the projectiles in state
       set({ projectiles: updatedProjectiles });
 
@@ -4127,7 +4098,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         ...newProjectiles,
       ];
 
-      console.log(4125, updatedProjectiles);
       set({
         projectiles: updatedProjectiles,
       });
