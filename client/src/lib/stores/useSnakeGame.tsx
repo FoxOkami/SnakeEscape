@@ -2585,20 +2585,14 @@ export const useSnakeGame = create<SnakeGameState>()(
         );
       }
 
-      const testState3 = get();
-      console.log(2587, "state3", [
-        ...(testState3.projectiles || []),
-        ...newProjectilesToAdd,
-      ]);
-
-      set({
-        currentVelocity: state.playerController?.getCurrentVelocity() || {
+      set((current) => ({
+        currentVelocity: current.playerController?.getCurrentVelocity() || {
           x: 0,
           y: 0,
         }, // Get velocity from PlayerController
         snakes: finalSnakes, // Use snakes after pit/projectile processing
         miniBoulders: newMiniBoulders, // Add the mini boulders to the state
-        projectiles: [...(state.projectiles || []), ...newProjectilesToAdd], // Add new spitter projectiles
+        projectiles: [...(current.projectiles || []), ...newProjectilesToAdd], // Add new spitter projectiles atomically
         key: updatedKey,
         player: updatedPlayer,
         switches: updatedSwitches,
@@ -2611,14 +2605,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         mirrors: updatedMirrors,
         crystal: updatedCrystal,
         boulders: updatedBoulders,
-      });
-
-      const testState4 = get();
-      console.log(2611, "state4", [
-        ...(testState4.projectiles || []),
-        ...newProjectilesToAdd,
-      ]);
-      // TODO: determine why the save above is losing the boss projectiles
+      }));
     },
 
     pickupItem: (itemId: string) => {
