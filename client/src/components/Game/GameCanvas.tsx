@@ -1799,14 +1799,9 @@ const GameCanvas: React.FC = () => {
           );
         }
       }
-
-      // Draw projectiles
-      if (currentLevelKey === "boss_valerie") {
-        if (projectiles.length > 0) {
-        }
-      }
       
       projectiles.forEach((projectile) => {
+        
         // Handle both nested and flat schemas for robust rendering
         const x = projectile.position?.x ?? projectile.x ?? 0;
         const y = projectile.position?.y ?? projectile.y ?? 0;

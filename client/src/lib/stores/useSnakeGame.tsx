@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
-import { useKeyBindings } from './useKeyBindings';
+import { useKeyBindings } from "./useKeyBindings";
 import {
   GameData,
   GameState,
@@ -29,7 +29,7 @@ export interface InventoryItem {
   name: string;
   description: string;
   image: string;
-  duration: 'permanent' | 'temporary';
+  duration: "permanent" | "temporary";
   modifiers: {
     playerSpeed?: number; // multiplier for player speed
     walkSpeed?: number; // multiplier for walk speed
@@ -46,18 +46,23 @@ export interface InventoryItem {
   activatedAt?: number; // timestamp when activated
   expiresAt?: number; // timestamp when expires (for temporary items)
 }
-import { LEVELS, randomizeLevel2, getLevelKeyByIndex, getLevelIndexByKey } from "../game/levels";
+import {
+  LEVELS,
+  randomizeLevel2,
+  getLevelKeyByIndex,
+  getLevelIndexByKey,
+} from "../game/levels";
 import { checkAABBCollision, slideAlongWall } from "../game/collision";
 import { updateSnake } from "../game/entities";
 import { updateBossSnake } from "../game/bossSnake";
 import { calculateLightBeam } from "../game/lightBeam";
 import { useAudio } from "./useAudio";
-import { 
-  PlayerController, 
-  createGamePlayerController, 
+import {
+  PlayerController,
+  createGamePlayerController,
   keysToInputState,
   type InputState,
-  type CustomKeyBindings 
+  type CustomKeyBindings,
 } from "../game/PlayerController";
 
 interface SnakeGameState extends GameData {
@@ -107,7 +112,7 @@ interface SnakeGameState extends GameData {
     lastDashTime: number;
     cooldownDuration: number;
   };
-  
+
   // Unified Player Controller
   playerController: PlayerController | null;
   updatePlayerController: (deltaTime: number, inputState: InputState) => void;
@@ -156,7 +161,14 @@ interface SnakeGameState extends GameData {
     playerKilled: boolean;
   };
   spawnSpitterSnake: (position: Position) => void;
-  fireProjectiles: (snakeId: string, sequentialIndex?: number, clockwise?: boolean, startingAngle?: number, burstRound?: number, roundAngleShift?: number) => void;
+  fireProjectiles: (
+    snakeId: string,
+    sequentialIndex?: number,
+    clockwise?: boolean,
+    startingAngle?: number,
+    burstRound?: number,
+    roundAngleShift?: number,
+  ) => void;
 
   // Phase system actions
   updatePhase: (deltaTime: number) => void;
@@ -210,9 +222,9 @@ export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
   let dashSpeedMultiplier = 1;
   let dashDurationMultiplier = 1;
   let dashCooldownMultiplier = 1;
-  
+
   // Apply modifiers from active items
-  inventoryItems.forEach(item => {
+  inventoryItems.forEach((item) => {
     if (item.isActive) {
       if (item.modifiers.playerSpeed) {
         playerSpeedMultiplier *= item.modifiers.playerSpeed;
@@ -231,22 +243,22 @@ export function getSpeedMultipliers(inventoryItems: InventoryItem[]) {
       }
     }
   });
-  
+
   return {
     playerSpeedMultiplier,
     walkSpeedMultiplier,
     dashSpeedMultiplier,
     dashDurationMultiplier,
-    dashCooldownMultiplier
+    dashCooldownMultiplier,
   };
 }
 
 export function getSnakeDetectionMultipliers(inventoryItems: InventoryItem[]) {
   let snakeSightMultiplier = 1;
   let snakeHearingMultiplier = 1;
-  
+
   // Apply modifiers from active items
-  inventoryItems.forEach(item => {
+  inventoryItems.forEach((item) => {
     if (item.isActive) {
       if (item.modifiers.snakeSightMultiplier) {
         snakeSightMultiplier *= item.modifiers.snakeSightMultiplier;
@@ -256,10 +268,10 @@ export function getSnakeDetectionMultipliers(inventoryItems: InventoryItem[]) {
       }
     }
   });
-  
+
   return {
     snakeSightMultiplier,
-    snakeHearingMultiplier
+    snakeHearingMultiplier,
   };
 }
 
@@ -271,7 +283,7 @@ function getPlayerSpeeds(inventoryItems: InventoryItem[]) {
     walkingSpeed: BASE_WALKING_SPEED * multipliers.walkSpeedMultiplier,
     dashSpeed: 600 * multipliers.dashSpeedMultiplier, // Base dash speed of 600
     dashDuration: 200 * multipliers.dashDurationMultiplier, // Base dash duration of 200ms
-    dashCooldown: 1000 * multipliers.dashCooldownMultiplier // Base dash cooldown of 1000ms
+    dashCooldown: 1000 * multipliers.dashCooldownMultiplier, // Base dash cooldown of 1000ms
   };
 }
 
@@ -457,7 +469,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     showInventory: false,
     inventoryItems: [], // Inventory starts empty - items can be obtained through cheat codes
     randomizedSymbols: null, // Level 1 randomization
-    
+
     // Unified Player Controller
     playerController: null,
 
@@ -495,16 +507,16 @@ export const useSnakeGame = create<SnakeGameState>()(
 
         // Get current key bindings
         const keyBindings = useKeyBindings.getState().keyBindings;
-        
+
         // Check if dashing using custom key binding
         const isDashing = isKeyActiveRecently(keyBindings.dash);
-        
+
         // Check if walking using custom key binding, but clear walking if dashing
         const isWalkingKeyPressed =
           isKeyActiveRecently(keyBindings.walking) ||
           isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
         const isWalking = isWalkingKeyPressed && !isDashing; // Clear walking when dashing
-        
+
         // Get dynamic speeds based on inventory items
         const currentState = get();
         const speeds = getPlayerSpeeds(currentState.inventoryItems);
@@ -611,17 +623,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
-    isDashing: false,
-    dashState: {
-      isActive: false,
-      startTime: 0,
-      startPosition: { x: 0, y: 0 },
-      direction: { x: 0, y: 0 },
-      progress: 0,
-      isInvulnerable: false,
-      lastDashTime: 0,
-      cooldownDuration: 1500, // 1.5 seconds in milliseconds
-    },
+        isDashing: false,
+        dashState: {
+          isActive: false,
+          startTime: 0,
+          startPosition: { x: 0, y: 0 },
+          direction: { x: 0, y: 0 },
+          progress: 0,
+          isInvulnerable: false,
+          lastDashTime: 0,
+          cooldownDuration: 1500, // 1.5 seconds in milliseconds
+        },
         hintState: null, // Initialize hint state
         randomizedSymbols: level1Randomization.randomizedSymbols, // Store randomized symbols
         // Store pre-randomized Level 2 data
@@ -697,14 +709,17 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Calculate shield health from all active items (both permanent and temporary)
       const currentState = get();
       let totalBiteProtection = 0;
-      currentState.inventoryItems.forEach(item => {
+      currentState.inventoryItems.forEach((item) => {
         if (item.isActive && item.modifiers.biteProtection) {
           totalBiteProtection += item.modifiers.biteProtection;
         }
       });
 
       // Preserve current shield health, but cap it at the new maximum
-      const preservedShieldHealth = Math.min(currentState.player.shieldHealth, totalBiteProtection);
+      const preservedShieldHealth = Math.min(
+        currentState.player.shieldHealth,
+        totalBiteProtection,
+      );
 
       set({
         currentLevel: levelIndex,
@@ -763,17 +778,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
-    isDashing: false,
-    dashState: {
-      isActive: false,
-      startTime: 0,
-      startPosition: { x: 0, y: 0 },
-      direction: { x: 0, y: 0 },
-      progress: 0,
-      isInvulnerable: false,
-      lastDashTime: 0,
-      cooldownDuration: 1500, // 1.5 seconds in milliseconds
-    },
+        isDashing: false,
+        dashState: {
+          isActive: false,
+          startTime: 0,
+          startPosition: { x: 0, y: 0 },
+          direction: { x: 0, y: 0 },
+          progress: 0,
+          isInvulnerable: false,
+          lastDashTime: 0,
+          cooldownDuration: 1500, // 1.5 seconds in milliseconds
+        },
         boulders: level.boulders
           ? level.boulders.map((boulder) => ({ ...boulder }))
           : [],
@@ -785,11 +800,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           levelIndex === 2 ? undefined : get().level2RandomizedSwitches,
         level2RandomizedThrowableItems:
           levelIndex === 2 ? undefined : get().level2RandomizedThrowableItems,
-        
+
         // Reset PlayerController to ensure it doesn't have old position
         playerController: null,
       });
-      
+
       // Force reconfigure PlayerController with new spawn position
       get().configurePlayerController();
 
@@ -810,15 +825,15 @@ export const useSnakeGame = create<SnakeGameState>()(
     resetGame: () => {
       const state = get();
       const level = LEVELS[state.currentLevel];
-      
+
       // Calculate shield health from all active items (both permanent and temporary)
       let totalBiteProtection = 0;
-      state.inventoryItems.forEach(item => {
+      state.inventoryItems.forEach((item) => {
         if (item.isActive && item.modifiers.biteProtection) {
           totalBiteProtection += item.modifiers.biteProtection;
         }
       });
-      
+
       set({
         gameState: "playing",
         player: {
@@ -877,17 +892,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
-    isDashing: false,
-    dashState: {
-      isActive: false,
-      startTime: 0,
-      startPosition: { x: 0, y: 0 },
-      direction: { x: 0, y: 0 },
-      progress: 0,
-      isInvulnerable: false,
-      lastDashTime: 0,
-      cooldownDuration: 1500, // 1.5 seconds in milliseconds
-    },
+        isDashing: false,
+        dashState: {
+          isActive: false,
+          startTime: 0,
+          startPosition: { x: 0, y: 0 },
+          direction: { x: 0, y: 0 },
+          progress: 0,
+          isInvulnerable: false,
+          lastDashTime: 0,
+          cooldownDuration: 1500, // 1.5 seconds in milliseconds
+        },
       });
     },
 
@@ -931,14 +946,17 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Calculate shield health from all active items (both permanent and temporary)
       let totalBiteProtection = 0;
-      state.inventoryItems.forEach(item => {
+      state.inventoryItems.forEach((item) => {
         if (item.isActive && item.modifiers.biteProtection) {
           totalBiteProtection += item.modifiers.biteProtection;
         }
       });
 
       // Preserve current shield health, but cap it at the new maximum
-      const preservedShieldHealth = Math.min(state.player.shieldHealth, totalBiteProtection);
+      const preservedShieldHealth = Math.min(
+        state.player.shieldHealth,
+        totalBiteProtection,
+      );
 
       set({
         currentLevel: nextLevelIndex,
@@ -1008,22 +1026,22 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: { x: 0, y: 0 },
         keysPressed: new Set(),
         isWalking: false,
-    isDashing: false,
-    dashState: {
-      isActive: false,
-      startTime: 0,
-      startPosition: { x: 0, y: 0 },
-      direction: { x: 0, y: 0 },
-      progress: 0,
-      isInvulnerable: false,
-      lastDashTime: 0,
-      cooldownDuration: 1500, // 1.5 seconds in milliseconds
-    },
-        
+        isDashing: false,
+        dashState: {
+          isActive: false,
+          startTime: 0,
+          startPosition: { x: 0, y: 0 },
+          direction: { x: 0, y: 0 },
+          progress: 0,
+          isInvulnerable: false,
+          lastDashTime: 0,
+          cooldownDuration: 1500, // 1.5 seconds in milliseconds
+        },
+
         // Reset PlayerController to ensure it doesn't have old position
         playerController: null,
       });
-      
+
       // Force reconfigure PlayerController with new spawn position
       get().configurePlayerController();
     },
@@ -1042,34 +1060,40 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     addInventoryItem: (item: InventoryItem) => {
       set((state) => ({
-        inventoryItems: [...state.inventoryItems, item]
+        inventoryItems: [...state.inventoryItems, item],
       }));
     },
 
     removeInventoryItem: (itemId: string) => {
       set((state) => ({
-        inventoryItems: state.inventoryItems.filter(item => item.id !== itemId)
+        inventoryItems: state.inventoryItems.filter(
+          (item) => item.id !== itemId,
+        ),
       }));
     },
 
     useInventoryItem: (itemId: string) => {
       set((state) => {
-        const item = state.inventoryItems.find(i => i.id === itemId);
+        const item = state.inventoryItems.find((i) => i.id === itemId);
         if (!item) return state;
-        
-        
+
         // Mark item as active (both temporary and permanent)
         const updatedItem = {
           ...item,
           isActive: true,
-          activatedAt: Date.now()
+          activatedAt: Date.now(),
         };
-        
+
         // Calculate new shield health from all active items (both permanent and temporary)
-        const updatedInventory = state.inventoryItems.map(i => i.id === itemId ? updatedItem : i);
+        const updatedInventory = state.inventoryItems.map((i) =>
+          i.id === itemId ? updatedItem : i,
+        );
         let totalBiteProtection = 0;
-        updatedInventory.forEach(inventoryItem => {
-          if (inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
+        updatedInventory.forEach((inventoryItem) => {
+          if (
+            inventoryItem.isActive &&
+            inventoryItem.modifiers.biteProtection
+          ) {
             totalBiteProtection += inventoryItem.modifiers.biteProtection;
           }
         });
@@ -1078,35 +1102,40 @@ export const useSnakeGame = create<SnakeGameState>()(
         const updatedPlayer = {
           ...state.player,
           maxShieldHealth: totalBiteProtection,
-          shieldHealth: totalBiteProtection
+          shieldHealth: totalBiteProtection,
         };
-        
+
         return {
           inventoryItems: updatedInventory,
-          player: updatedPlayer
+          player: updatedPlayer,
         };
       });
     },
 
     togglePermanentItem: (itemId: string) => {
       set((state) => {
-        const item = state.inventoryItems.find(i => i.id === itemId);
-        if (!item || item.duration !== 'permanent') return state;
-        
+        const item = state.inventoryItems.find((i) => i.id === itemId);
+        if (!item || item.duration !== "permanent") return state;
+
         // Toggle the active state
         const updatedItem = {
           ...item,
           isActive: !item.isActive,
-          activatedAt: item.isActive ? undefined : Date.now()
+          activatedAt: item.isActive ? undefined : Date.now(),
         };
-        
+
         // Update inventory
-        const updatedInventory = state.inventoryItems.map(i => i.id === itemId ? updatedItem : i);
-        
+        const updatedInventory = state.inventoryItems.map((i) =>
+          i.id === itemId ? updatedItem : i,
+        );
+
         // Recalculate shield health from all active items (both permanent and temporary)
         let totalBiteProtection = 0;
-        updatedInventory.forEach(inventoryItem => {
-          if (inventoryItem.isActive && inventoryItem.modifiers.biteProtection) {
+        updatedInventory.forEach((inventoryItem) => {
+          if (
+            inventoryItem.isActive &&
+            inventoryItem.modifiers.biteProtection
+          ) {
             totalBiteProtection += inventoryItem.modifiers.biteProtection;
           }
         });
@@ -1115,12 +1144,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         const updatedPlayer = {
           ...state.player,
           maxShieldHealth: totalBiteProtection,
-          shieldHealth: totalBiteProtection
+          shieldHealth: totalBiteProtection,
         };
-        
+
         return {
           inventoryItems: updatedInventory,
-          player: updatedPlayer
+          player: updatedPlayer,
         };
       });
     },
@@ -1128,9 +1157,10 @@ export const useSnakeGame = create<SnakeGameState>()(
     // Clear temporary items but keep permanent items active (called when returning to hub - end of run)
     clearTemporaryItems: () => {
       set((state) => ({
-        inventoryItems: state.inventoryItems
-          .filter(item => item.duration === 'permanent') // Keep only permanent items
-          // Temporary items are removed when returning to hub
+        inventoryItems: state.inventoryItems.filter(
+          (item) => item.duration === "permanent",
+        ), // Keep only permanent items
+        // Temporary items are removed when returning to hub
       }));
     },
 
@@ -1181,13 +1211,9 @@ export const useSnakeGame = create<SnakeGameState>()(
     updateGame: (deltaTime: number) => {
       const state = get();
       if (state.gameState !== "playing" || state.showInventory) return;
-      
-      // Basic debug to verify game loop is running
-      if (state.currentLevelKey === "boss_valerie") {
-      }
 
       const currentTime = Date.now();
-      
+
       // Increment frame counter for debugging
       set((state) => ({ frameNumber: state.frameNumber + 1 }));
 
@@ -1204,7 +1230,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         left: state.keysPressed.has(keyBindings.left),
         right: state.keysPressed.has(keyBindings.right),
         walking: state.isWalking,
-        dash: state.isDashing
+        dash: state.isDashing,
       };
 
       // Update player using unified controller
@@ -1212,11 +1238,13 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Get updated state after PlayerController update
       const updatedState = get();
-      
+
       // --- SNAKE AI ---
       // Generate player sounds for stalker snakes when not walking stealthily
       const playerSounds: Position[] = [];
-      const isMoving = updatedState.currentVelocity.x !== 0 || updatedState.currentVelocity.y !== 0;
+      const isMoving =
+        updatedState.currentVelocity.x !== 0 ||
+        updatedState.currentVelocity.y !== 0;
       if (
         isMoving &&
         !updatedState.isWalking &&
@@ -1258,18 +1286,20 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       let newMiniBoulders = [...state.miniBoulders];
       let newSnakes = [...state.snakes];
-      
+
       // Rotation-based rattlesnake behavior: Only 1 snake per pit patrols at a time, with 1s delays
       let updatedSnakePits = [...state.snakePits];
-      
+
       newSnakes.forEach((snake, index) => {
         if (snake.type === "rattlesnake" && snake.pitId) {
-          const pitIndex = updatedSnakePits.findIndex((p) => p.id === snake.pitId);
+          const pitIndex = updatedSnakePits.findIndex(
+            (p) => p.id === snake.pitId,
+          );
           if (pitIndex === -1) return;
-          
+
           const pit = updatedSnakePits[pitIndex];
           const pitPosition = { x: pit.x - 14, y: pit.y - 14 };
-          
+
           // Initialize rattlesnake state if needed
           if (!snake.rattlesnakeState || !snake.patrolStartTime) {
             newSnakes[index] = {
@@ -1288,7 +1318,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           const currentSnakeId = pit.snakeIds[pit.currentSnakeIndex];
           const isMyTurn = snake.id === currentSnakeId;
           const isPitLit = pit.isLightHit || false;
-          
+
           // State machine for rattlesnake behavior
           switch (snake.rattlesnakeState) {
             case "inPit":
@@ -1304,7 +1334,11 @@ export const useSnakeGame = create<SnakeGameState>()(
                 };
               }
               // Normal one-at-a-time system when pit is not lit
-              else if (isMyTurn && currentTime >= pit.nextEmergenceTime && !pit.isSnakePatrolling) {
+              else if (
+                isMyTurn &&
+                currentTime >= pit.nextEmergenceTime &&
+                !pit.isSnakePatrolling
+              ) {
                 // Time to emerge and start patrolling
                 newSnakes[index] = {
                   ...snake,
@@ -1332,7 +1366,10 @@ export const useSnakeGame = create<SnakeGameState>()(
               // Let entity system handle patrol movement, but check if completed
               if (snake.patrolPoints && snake.patrolPoints.length > 0) {
                 // Check if reached final patrol point (completed full route)
-                if (snake.currentPatrolIndex >= snake.patrolPoints.length - 1 && snake.patrolDirection === 1) {
+                if (
+                  snake.currentPatrolIndex >= snake.patrolPoints.length - 1 &&
+                  snake.patrolDirection === 1
+                ) {
                   // If pit is still lit, restart patrol instead of returning to pit
                   if (isPitLit) {
                     newSnakes[index] = {
@@ -1348,7 +1385,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                     if (snake.isLightEmergence) {
                       updatedSnakePits[pitIndex] = {
                         ...pit,
-                        lightEmergedSnakesReturning: (pit.lightEmergedSnakesReturning || 0) + 1,
+                        lightEmergedSnakesReturning:
+                          (pit.lightEmergedSnakesReturning || 0) + 1,
                       };
                     }
                     newSnakes[index] = {
@@ -1380,7 +1418,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                   if (snake.isLightEmergence) {
                     updatedSnakePits[pitIndex] = {
                       ...pit,
-                      lightEmergedSnakesReturning: (pit.lightEmergedSnakesReturning || 0) + 1,
+                      lightEmergedSnakesReturning:
+                        (pit.lightEmergedSnakesReturning || 0) + 1,
                     };
                   }
                   newSnakes[index] = {
@@ -1407,23 +1446,28 @@ export const useSnakeGame = create<SnakeGameState>()(
               } else {
                 // Check if reached pit location
                 const distanceToPit = Math.sqrt(
-                  Math.pow(snake.position.x - pitPosition.x, 2) + 
-                  Math.pow(snake.position.y - pitPosition.y, 2)
+                  Math.pow(snake.position.x - pitPosition.x, 2) +
+                    Math.pow(snake.position.y - pitPosition.y, 2),
                 );
-                
+
                 if (distanceToPit < 20) {
                   // Reached pit - handle differently for light emerged vs normal snakes
                   const wasLightEmergence = snake.isLightEmergence;
-                  const lightReturningCount = pit.lightEmergedSnakesReturning || 0;
-                  
+                  const lightReturningCount =
+                    pit.lightEmergedSnakesReturning || 0;
+
                   if (wasLightEmergence) {
                     // This was a light-emerged snake returning
-                    const newReturningCount = Math.max(0, lightReturningCount - 1);
-                    
+                    const newReturningCount = Math.max(
+                      0,
+                      lightReturningCount - 1,
+                    );
+
                     // Only restart normal rotation when the LAST light-emerged snake returns
                     if (newReturningCount === 0) {
                       // Last snake returning from light emergence - restart normal rotation
-                      const nextSnakeIndex = (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
+                      const nextSnakeIndex =
+                        (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
                       updatedSnakePits[pitIndex] = {
                         ...pit,
                         currentSnakeIndex: nextSnakeIndex,
@@ -1441,7 +1485,8 @@ export const useSnakeGame = create<SnakeGameState>()(
                     }
                   } else {
                     // Normal snake returning - advance rotation as usual
-                    const nextSnakeIndex = (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
+                    const nextSnakeIndex =
+                      (pit.currentSnakeIndex + 1) % pit.snakeIds.length;
                     updatedSnakePits[pitIndex] = {
                       ...pit,
                       currentSnakeIndex: nextSnakeIndex,
@@ -1450,7 +1495,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                       isSnakePatrolling: false,
                     };
                   }
-                  
+
                   newSnakes[index] = {
                     ...snake,
                     rattlesnakeState: "inPit",
@@ -1471,28 +1516,30 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
         }
       });
-      
+
       // Update snake pits in state
       set({ snakePits: updatedSnakePits });
-      
+
       // Calculate snake chase multiplier from active permanent items
       let snakeChaseMultiplier = 1; // Default multiplier
-      state.inventoryItems.forEach(item => {
-        if (item.duration === 'permanent' && item.isActive && item.modifiers.snakeChaseMultiplier !== undefined) {
+      state.inventoryItems.forEach((item) => {
+        if (
+          item.duration === "permanent" &&
+          item.isActive &&
+          item.modifiers.snakeChaseMultiplier !== undefined
+        ) {
           snakeChaseMultiplier *= item.modifiers.snakeChaseMultiplier;
         }
       });
-      
+
       // Handle boss snakes first to avoid TypeScript narrowing issues
-      const bossSnakes = newSnakes.filter((snake): snake is Snake => snake.type === "boss");
-      const nonBossSnakes = newSnakes.filter(snake => snake.type !== "boss");
-      
+      const bossSnakes = newSnakes.filter(
+        (snake): snake is Snake => snake.type === "boss",
+      );
+      const nonBossSnakes = newSnakes.filter((snake) => snake.type !== "boss");
+
       // Process boss snakes separately
       const updatedBossSnakes = bossSnakes.map((snake) => {
-        // Debug: Log boss snakes in boss_valerie level
-        if (updatedState.currentLevelKey === "boss_valerie") {
-        }
-        
         // Call updateBossSnake directly with frame number for debugging
         const updatedSnake = updateBossSnake(
           snake,
@@ -1502,89 +1549,96 @@ export const useSnakeGame = create<SnakeGameState>()(
           currentTime,
           LEVELS[updatedState.currentLevel]?.size,
           updatedState.boulders,
-          get().frameNumber // Pass current frame number
+          get().frameNumber, // Pass current frame number
         );
-          
-          // Process environmental effects for boss snakes (same as other snakes)
-          if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
-            const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
-            newSnakes.push(screensaverSnake);
-            // Clear the flag immediately after spawning
-            updatedSnake.environmentalEffects.spawnScreensaverSnake = false;
-          }
-          
-          if (updatedSnake.environmentalEffects?.spawnPhotophobicSnake) {
-            const photophobicSnake = get().spawnPhotophobicSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
-            newSnakes.push(photophobicSnake);
-            // Clear the flag immediately after spawning
-            updatedSnake.environmentalEffects.spawnPhotophobicSnake = false;
-          }
-          
-          if (updatedSnake.environmentalEffects?.spawnPhantom) {
-            // Only spawn phantom if one doesn't already exist with this ID
-            const phantomExists = newSnakes.some(s => s.id === updatedSnake.environmentalEffects?.phantomId);
-            if (!phantomExists) {
-              const phantom = get().spawnPhantom(
-                updatedSnake.environmentalEffects.phantomSpawnPosition!, 
-                updatedSnake.environmentalEffects.phantomId!,
-                updatedSnake.environmentalEffects.phantomLevelBounds
-              );
-              newSnakes.push(phantom);
-            }
-            // Clear phantom spawn flag after spawning but keep other environmental effects
-            updatedSnake.environmentalEffects.spawnPhantom = false;
-          }
-          
-          if (updatedSnake.environmentalEffects?.spawnRainSnake) {
-            // Only spawn rain snake if one doesn't already exist with this ID
-            const rainSnakeExists = newSnakes.some(s => s.id === updatedSnake.environmentalEffects?.rainSnakeId);
-            if (!rainSnakeExists) {
-              const rainSnake = get().spawnRainSnake(
-                updatedSnake.environmentalEffects.rainSnakeSpawnPosition!, 
-                updatedSnake.environmentalEffects.rainSnakeId!,
-                updatedSnake.environmentalEffects.rainMovementPattern,
-                updatedSnake.environmentalEffects.rainAngle,
-                updatedSnake.environmentalEffects.sineAmplitude,
-                updatedSnake.environmentalEffects.sineFrequency
-              );
-              newSnakes.push(rainSnake);
-            }
-            // Clear rain snake spawn flag after spawning
-            updatedSnake.environmentalEffects.spawnRainSnake = false;
-          }
-          
-          if (updatedSnake.environmentalEffects?.fireProjectiles && updatedSnake.environmentalEffects?.projectileSourceId) {
-            // Fire projectiles for Phase 3 boss
-            get().fireProjectiles(
-              updatedSnake.environmentalEffects.projectileSourceId,
-              updatedSnake.environmentalEffects.sequentialProjectileIndex,
-              updatedSnake.environmentalEffects.projectileClockwise,
-              updatedSnake.environmentalEffects.startingAngle,
-              updatedSnake.environmentalEffects.burstRound,
-              updatedSnake.environmentalEffects.roundAngleShift
-            );
-            // Clear projectile firing flag after firing
-            updatedSnake.environmentalEffects.fireProjectiles = false;
-            updatedSnake.environmentalEffects.projectileSourceId = undefined;
-          }
 
-          // Direct projectile firing for Phase 3 boss (bypass environmental effects)
-          if (updatedSnake.type === 'boss' && 
-              updatedSnake.bossPhase === 3 && 
-              !updatedSnake.hasFiredBarrage) {
-            get().fireProjectiles(updatedSnake.id, undefined, undefined, undefined, 0, 0);
-            updatedSnake.hasFiredBarrage = true;
-          }
-          
-          return updatedSnake;
-      });
-      
-      // Process non-boss snakes separately  
-      const updatedNonBossSnakes = nonBossSnakes.map((snake, index) => {
-        // Debug: Log non-boss snakes in boss_valerie level
-        if (updatedState.currentLevelKey === "boss_valerie") {
+        // Process environmental effects for boss snakes (same as other snakes)
+        if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
+          const screensaverSnake = get().spawnScreensaverSnake(
+            updatedSnake.environmentalEffects.boulderHitPosition,
+            updatedState.levelSize,
+          );
+          newSnakes.push(screensaverSnake);
+          // Clear the flag immediately after spawning
+          updatedSnake.environmentalEffects.spawnScreensaverSnake = false;
         }
-        
+
+        if (updatedSnake.environmentalEffects?.spawnPhotophobicSnake) {
+          const photophobicSnake = get().spawnPhotophobicSnake(
+            updatedSnake.environmentalEffects.boulderHitPosition,
+            updatedState.levelSize,
+          );
+          newSnakes.push(photophobicSnake);
+          // Clear the flag immediately after spawning
+          updatedSnake.environmentalEffects.spawnPhotophobicSnake = false;
+        }
+
+        if (updatedSnake.environmentalEffects?.spawnPhantom) {
+          // Only spawn phantom if one doesn't already exist with this ID
+          const phantomExists = newSnakes.some(
+            (s) => s.id === updatedSnake.environmentalEffects?.phantomId,
+          );
+          if (!phantomExists) {
+            const phantom = get().spawnPhantom(
+              updatedSnake.environmentalEffects.phantomSpawnPosition!,
+              updatedSnake.environmentalEffects.phantomId!,
+              updatedSnake.environmentalEffects.phantomLevelBounds,
+            );
+            newSnakes.push(phantom);
+          }
+          // Clear phantom spawn flag after spawning but keep other environmental effects
+          updatedSnake.environmentalEffects.spawnPhantom = false;
+        }
+
+        if (updatedSnake.environmentalEffects?.spawnRainSnake) {
+          // Only spawn rain snake if one doesn't already exist with this ID
+          const rainSnakeExists = newSnakes.some(
+            (s) => s.id === updatedSnake.environmentalEffects?.rainSnakeId,
+          );
+          if (!rainSnakeExists) {
+            const rainSnake = get().spawnRainSnake(
+              updatedSnake.environmentalEffects.rainSnakeSpawnPosition!,
+              updatedSnake.environmentalEffects.rainSnakeId!,
+              updatedSnake.environmentalEffects.rainMovementPattern,
+              updatedSnake.environmentalEffects.rainAngle,
+              updatedSnake.environmentalEffects.sineAmplitude,
+              updatedSnake.environmentalEffects.sineFrequency,
+            );
+            newSnakes.push(rainSnake);
+          }
+          // Clear rain snake spawn flag after spawning
+          updatedSnake.environmentalEffects.spawnRainSnake = false;
+        }
+
+        if (
+          updatedSnake.environmentalEffects?.fireProjectiles &&
+          updatedSnake.environmentalEffects?.projectileSourceId
+        ) {
+          // Fire projectiles for Phase 3 boss
+          get().fireProjectiles(
+            updatedSnake.environmentalEffects.projectileSourceId,
+            updatedSnake.environmentalEffects.sequentialProjectileIndex,
+            updatedSnake.environmentalEffects.projectileClockwise,
+            updatedSnake.environmentalEffects.startingAngle,
+            updatedSnake.environmentalEffects.burstRound,
+            updatedSnake.environmentalEffects.roundAngleShift,
+          );
+          // Clear projectile firing flag after firing
+          updatedSnake.environmentalEffects.fireProjectiles = false;
+          updatedSnake.environmentalEffects.projectileSourceId = undefined;
+          updatedSnake.environmentalEffects.sequentialProjectileIndex =
+            undefined;
+          updatedSnake.environmentalEffects.projectileClockwise = undefined;
+          updatedSnake.environmentalEffects.startingAngle = undefined;
+          updatedSnake.environmentalEffects.burstRound = undefined;
+          updatedSnake.environmentalEffects.roundAngleShift = undefined;
+        }
+
+        return updatedSnake;
+      });
+
+      // Process non-boss snakes separately
+      const updatedNonBossSnakes = nonBossSnakes.map((snake, index) => {
         // Rattlesnakes need both timing logic AND entity updates for movement
         if (snake.type === "rattlesnake") {
           // If rattlesnake is out of pit, update it with entity logic
@@ -1598,21 +1652,25 @@ export const useSnakeGame = create<SnakeGameState>()(
               { ...updatedState, quadrantLighting },
               { width: 800, height: 600 },
               undefined, // boulders
-              state.snakePits // Pass snake pits for pit position lookup
+              state.snakePits, // Pass snake pits for pit position lookup
             );
           }
           return snake; // If in pit, just return as-is
         }
-        
+
         // Apply snake chase multiplier to non-boss snakes (but not on Skate Rink level)
         let modifiedSnake = snake;
-        if (snake.type !== 'boss' && snakeChaseMultiplier !== 1 && updatedState.currentLevelKey !== 'boss_valerie') {
+        if (
+          snake.type !== "boss" &&
+          snakeChaseMultiplier !== 1 &&
+          updatedState.currentLevelKey !== "boss_valerie"
+        ) {
           modifiedSnake = {
             ...snake,
-            speed: snake.speed * Math.max(0.1, snakeChaseMultiplier) // Ensure minimum speed for animation
+            speed: snake.speed * Math.max(0.1, snakeChaseMultiplier), // Ensure minimum speed for animation
           };
         }
-        
+
         const updatedSnake = updateSnake(
           modifiedSnake,
           currentWalls,
@@ -1623,95 +1681,117 @@ export const useSnakeGame = create<SnakeGameState>()(
           LEVELS[updatedState.currentLevel]?.size,
           updatedState.boulders,
         );
-        
+
         // Check for environmental effects triggered by boss boulder collision
         if (updatedSnake.environmentalEffects?.spawnMiniBoulders) {
-          const spawnedMiniBoulders = get().spawnMiniBoulders(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
+          const spawnedMiniBoulders = get().spawnMiniBoulders(
+            updatedSnake.environmentalEffects.boulderHitPosition,
+            updatedState.levelSize,
+          );
           newMiniBoulders.push(...spawnedMiniBoulders);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnMiniBoulders = false;
         }
-        
+
         if (updatedSnake.environmentalEffects?.spawnScreensaverSnake) {
-          const screensaverSnake = get().spawnScreensaverSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
+          const screensaverSnake = get().spawnScreensaverSnake(
+            updatedSnake.environmentalEffects.boulderHitPosition,
+            updatedState.levelSize,
+          );
           newSnakes.push(screensaverSnake);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnScreensaverSnake = false;
         }
-        
+
         if (updatedSnake.environmentalEffects?.spawnPhotophobicSnake) {
-          const photophobicSnake = get().spawnPhotophobicSnake(updatedSnake.environmentalEffects.boulderHitPosition, updatedState.levelSize);
+          const photophobicSnake = get().spawnPhotophobicSnake(
+            updatedSnake.environmentalEffects.boulderHitPosition,
+            updatedState.levelSize,
+          );
           newSnakes.push(photophobicSnake);
           // Clear the flag immediately after spawning
           updatedSnake.environmentalEffects.spawnPhotophobicSnake = false;
         }
-        
+
         if (updatedSnake.environmentalEffects?.spawnPhantom) {
           // Only spawn phantom if one doesn't already exist with this ID
-          const phantomExists = newSnakes.some(s => s.id === updatedSnake.environmentalEffects?.phantomId);
+          const phantomExists = newSnakes.some(
+            (s) => s.id === updatedSnake.environmentalEffects?.phantomId,
+          );
           if (!phantomExists) {
             const phantom = get().spawnPhantom(
-              updatedSnake.environmentalEffects.phantomSpawnPosition!, 
+              updatedSnake.environmentalEffects.phantomSpawnPosition!,
               updatedSnake.environmentalEffects.phantomId!,
-              updatedSnake.environmentalEffects.phantomLevelBounds
+              updatedSnake.environmentalEffects.phantomLevelBounds,
             );
             newSnakes.push(phantom);
           }
           // Clear phantom spawn flag after spawning but keep other environmental effects
           updatedSnake.environmentalEffects.spawnPhantom = false;
         }
-        
+
         if (updatedSnake.environmentalEffects?.spawnRainSnake) {
           // Only spawn rain snake if one doesn't already exist with this ID
-          const rainSnakeExists = newSnakes.some(s => s.id === updatedSnake.environmentalEffects?.rainSnakeId);
+          const rainSnakeExists = newSnakes.some(
+            (s) => s.id === updatedSnake.environmentalEffects?.rainSnakeId,
+          );
           if (!rainSnakeExists) {
             const rainSnake = get().spawnRainSnake(
-              updatedSnake.environmentalEffects.rainSnakeSpawnPosition!, 
+              updatedSnake.environmentalEffects.rainSnakeSpawnPosition!,
               updatedSnake.environmentalEffects.rainSnakeId!,
               updatedSnake.environmentalEffects.rainMovementPattern,
               updatedSnake.environmentalEffects.rainAngle,
               updatedSnake.environmentalEffects.sineAmplitude,
-              updatedSnake.environmentalEffects.sineFrequency
+              updatedSnake.environmentalEffects.sineFrequency,
             );
             newSnakes.push(rainSnake);
           }
           // Clear rain snake spawn flag after spawning
           updatedSnake.environmentalEffects.spawnRainSnake = false;
         }
-        
-        if (updatedSnake.environmentalEffects?.fireProjectiles && updatedSnake.environmentalEffects?.projectileSourceId) {
+
+        if (
+          updatedSnake.environmentalEffects?.fireProjectiles &&
+          updatedSnake.environmentalEffects?.projectileSourceId
+        ) {
+          // TODO: determine if this makes sense here... I think this block is for non-boss snakes
+          // this doesn't seem to ever be used... might this be needed for projectiles?!
           // Fire projectiles for Phase 3 boss
+          console.log("[1754] get().fireProjectiles");
           get().fireProjectiles(
             updatedSnake.environmentalEffects.projectileSourceId,
             updatedSnake.environmentalEffects.sequentialProjectileIndex,
             updatedSnake.environmentalEffects.projectileClockwise,
             updatedSnake.environmentalEffects.startingAngle,
             updatedSnake.environmentalEffects.burstRound,
-            updatedSnake.environmentalEffects.roundAngleShift
+            updatedSnake.environmentalEffects.roundAngleShift,
           );
           // Clear projectile firing flag after firing
           updatedSnake.environmentalEffects.fireProjectiles = false;
           updatedSnake.environmentalEffects.projectileSourceId = undefined;
-          updatedSnake.environmentalEffects.sequentialProjectileIndex = undefined;
+          updatedSnake.environmentalEffects.sequentialProjectileIndex =
+            undefined;
           updatedSnake.environmentalEffects.projectileClockwise = undefined;
           updatedSnake.environmentalEffects.startingAngle = undefined;
           updatedSnake.environmentalEffects.burstRound = undefined;
           updatedSnake.environmentalEffects.roundAngleShift = undefined;
         }
-        
+
         // Clear environmental effects after processing (except phantom spawning which is handled separately)
-        if (updatedSnake.environmentalEffects && 
-            !updatedSnake.environmentalEffects.spawnMiniBoulders &&
-            !updatedSnake.environmentalEffects.spawnScreensaverSnake &&
-            !updatedSnake.environmentalEffects.spawnPhotophobicSnake &&
-            !updatedSnake.environmentalEffects.spawnPhantom &&
-            !updatedSnake.environmentalEffects.fireProjectiles) {
+        if (
+          updatedSnake.environmentalEffects &&
+          !updatedSnake.environmentalEffects.spawnMiniBoulders &&
+          !updatedSnake.environmentalEffects.spawnScreensaverSnake &&
+          !updatedSnake.environmentalEffects.spawnPhotophobicSnake &&
+          !updatedSnake.environmentalEffects.spawnPhantom &&
+          !updatedSnake.environmentalEffects.fireProjectiles
+        ) {
           updatedSnake.environmentalEffects = undefined;
         }
-        
+
         return updatedSnake;
       });
-      
+
       // Combine boss and non-boss snakes back together
       const updatedSnakes = [...updatedBossSnakes, ...updatedNonBossSnakes];
 
@@ -1764,8 +1844,14 @@ export const useSnakeGame = create<SnakeGameState>()(
           const newProjectiles = directions.map((dir, index) => ({
             id: `${snake.id}_projectile_${Date.now()}_${index}`,
             position: {
-              x: snake.position.x + snake.size.width / 2 - projectileSize.width / 2,
-              y: snake.position.y + snake.size.height / 2 - projectileSize.height / 2,
+              x:
+                snake.position.x +
+                snake.size.width / 2 -
+                projectileSize.width / 2,
+              y:
+                snake.position.y +
+                snake.size.height / 2 -
+                projectileSize.height / 2,
             },
             velocity: {
               x: dir.x * projectileSpeed,
@@ -1778,7 +1864,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           }));
 
           newProjectilesToAdd = [...newProjectilesToAdd, ...newProjectiles];
-          
+
           // Clear the shouldFire flag
           snake.shouldFire = false;
         }
@@ -1821,7 +1907,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- SHIELD HEALTH SYNCHRONIZATION ---
       // Keep shield health in sync with active items (both permanent and temporary)
       let totalBiteProtection = 0;
-      state.inventoryItems.forEach(item => {
+      state.inventoryItems.forEach((item) => {
         if (item.isActive && item.modifiers.biteProtection) {
           totalBiteProtection += item.modifiers.biteProtection;
         }
@@ -2101,7 +2187,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
           return !(isTopWall || isBottomWall || isLeftWall || isRightWall);
         });
-        
+
         set({ walls: keyRoomWalls });
       }
 
@@ -2336,19 +2422,29 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- LEVEL 6 BOULDER MECHANICS ---
       // Check if all boulders are destroyed and spawn key if needed
       let updatedBoulders = state.boulders;
-      if (state.currentLevelKey === "boss_valerie" && state.boulders.length > 0) {
+      if (
+        state.currentLevelKey === "boss_valerie" &&
+        state.boulders.length > 0
+      ) {
         // Level 6 (0-indexed as 6)
-        const destroyedBoulders = state.boulders.filter(boulder => boulder.isDestroyed);
-        const allBouldersDestroyed = destroyedBoulders.length === state.boulders.length;
-        
+        const destroyedBoulders = state.boulders.filter(
+          (boulder) => boulder.isDestroyed,
+        );
+        const allBouldersDestroyed =
+          destroyedBoulders.length === state.boulders.length;
+
         // If all boulders are destroyed and key hasn't been spawned yet (key starts hidden)
-        if (allBouldersDestroyed && updatedKey.x === -100 && updatedKey.y === -100) {
+        if (
+          allBouldersDestroyed &&
+          updatedKey.x === -100 &&
+          updatedKey.y === -100
+        ) {
           // Spawn key at the center of the map (800x600 level)
           updatedKey = {
             ...updatedKey,
             x: 400 - 10, // Center of map (400) minus half key width (10)
             y: 300 - 10, // Center of map (300) minus half key height (10)
-            collected: false
+            collected: false,
           };
         }
       }
@@ -2359,6 +2455,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         deltaTime,
         updatedPlayer,
       );
+
+      const testState1 = get();
+      console.log(2460, "state1", [
+        ...(testState1.projectiles || []),
+        ...newProjectilesToAdd,
+      ]);
 
       // Handle projectile hits to player
       if (projectileResult.hitCount > 0) {
@@ -2384,41 +2486,57 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Update mini boulders physics and lifetime
       get().updateMiniBoulders(deltaTime);
 
+      const testState2 = get();
+      console.log(2487, "state2", [
+        ...(testState2.projectiles || []),
+        ...newProjectilesToAdd,
+      ]);
+
       // --- UPDATE STATE ---
       // Process phantom completion and removal AFTER all snake updates
       // Use updatedSnakes (with position updates) as the base, then add any new snakes spawned
-      let finalSnakes = newSnakes.length > updatedSnakes.length ? [...newSnakes] : [...updatedSnakes];
-      
+      let finalSnakes =
+        newSnakes.length > updatedSnakes.length
+          ? [...newSnakes]
+          : [...updatedSnakes];
+
       if (!get().phantomRemovalInProgress) {
-        const phantomsThatReturned = finalSnakes.filter(snake => 
-          snake.type === 'phantom' && 
-          snake.hasReturnedToSpawn && 
-          !snake.processedForRemoval
+        const phantomsThatReturned = finalSnakes.filter(
+          (snake) =>
+            snake.type === "phantom" &&
+            snake.hasReturnedToSpawn &&
+            !snake.processedForRemoval,
         );
-        
+
         if (phantomsThatReturned.length > 0) {
-          set(state => ({ ...state, phantomRemovalInProgress: true }));
-          
+          set((state) => ({ ...state, phantomRemovalInProgress: true }));
+
           // Group phantoms by their boss (look for phantoms that belong to the same boss)
-          const bossSnakes = finalSnakes.filter(snake => snake.type === 'boss' && snake.bossState === 'waitingForPhantom');
-          
-          bossSnakes.forEach(bossSnake => {
+          const bossSnakes = finalSnakes.filter(
+            (snake) =>
+              snake.type === "boss" && snake.bossState === "waitingForPhantom",
+          );
+
+          bossSnakes.forEach((bossSnake) => {
             if (bossSnake.phantomIds && bossSnake.phantomIds.length > 0) {
               // Check how many of this boss's phantoms have returned
               const bossPhantomIds = bossSnake.phantomIds;
-              const returnedPhantoms = phantomsThatReturned.filter(phantom => 
-                bossPhantomIds.includes(phantom.id)
+              const returnedPhantoms = phantomsThatReturned.filter((phantom) =>
+                bossPhantomIds.includes(phantom.id),
               );
-              const remainingPhantoms = finalSnakes.filter(snake => 
-                snake.type === 'phantom' && 
-                bossPhantomIds.includes(snake.id) && 
-                !snake.hasReturnedToSpawn
+              const remainingPhantoms = finalSnakes.filter(
+                (snake) =>
+                  snake.type === "phantom" &&
+                  bossPhantomIds.includes(snake.id) &&
+                  !snake.hasReturnedToSpawn,
               );
-              
-              
+
               // Only resume tracking if ALL phantoms from this boss have returned
-              if (remainingPhantoms.length === 0 && returnedPhantoms.length > 0) {
-                bossSnake.bossState = 'tracking';
+              if (
+                remainingPhantoms.length === 0 &&
+                returnedPhantoms.length > 0
+              ) {
+                bossSnake.bossState = "tracking";
                 bossSnake.phantomIds = undefined;
                 bossSnake.phantomSpawnStartTime = undefined;
                 bossSnake.phantomSpawnCount = undefined;
@@ -2426,38 +2544,58 @@ export const useSnakeGame = create<SnakeGameState>()(
             }
             // Legacy single phantom support
             else if (bossSnake.phantomId) {
-              const legacyPhantom = phantomsThatReturned.find(phantom => phantom.id === bossSnake.phantomId);
+              const legacyPhantom = phantomsThatReturned.find(
+                (phantom) => phantom.id === bossSnake.phantomId,
+              );
               if (legacyPhantom) {
-                bossSnake.bossState = 'tracking';
+                bossSnake.bossState = "tracking";
                 bossSnake.phantomId = undefined;
               }
             }
           });
-          
-          phantomsThatReturned.forEach(phantom => {
-          });
-          
+
+          phantomsThatReturned.forEach((phantom) => {});
+
           // Remove all phantoms that have returned to spawn
-          finalSnakes = finalSnakes.filter(snake => !(snake.type === 'phantom' && snake.hasReturnedToSpawn));
-          
+          finalSnakes = finalSnakes.filter(
+            (snake) => !(snake.type === "phantom" && snake.hasReturnedToSpawn),
+          );
+
           // Reset the flag after a short delay
           setTimeout(() => {
-            set(state => ({ ...state, phantomRemovalInProgress: false }));
+            set((state) => ({ ...state, phantomRemovalInProgress: false }));
           }, 100);
         }
       }
 
       // Remove rain snakes that have fallen off the bottom of the screen
-      const rainSnakesToRemove = finalSnakes.filter(snake => 
-        snake.type === 'rainsnake' && snake.position.y > (state.levelSize?.height || 600) + 50
+      const rainSnakesToRemove = finalSnakes.filter(
+        (snake) =>
+          snake.type === "rainsnake" &&
+          snake.position.y > (state.levelSize?.height || 600) + 50,
       );
-      
+
       if (rainSnakesToRemove.length > 0) {
-        finalSnakes = finalSnakes.filter(snake => !(snake.type === 'rainsnake' && snake.position.y > (state.levelSize?.height || 600) + 50));
+        finalSnakes = finalSnakes.filter(
+          (snake) =>
+            !(
+              snake.type === "rainsnake" &&
+              snake.position.y > (state.levelSize?.height || 600) + 50
+            ),
+        );
       }
 
+      const testState3 = get();
+      console.log(2587, "state3", [
+        ...(testState3.projectiles || []),
+        ...newProjectilesToAdd,
+      ]);
+
       set({
-        currentVelocity: state.playerController?.getCurrentVelocity() || { x: 0, y: 0 }, // Get velocity from PlayerController
+        currentVelocity: state.playerController?.getCurrentVelocity() || {
+          x: 0,
+          y: 0,
+        }, // Get velocity from PlayerController
         snakes: finalSnakes, // Use snakes after pit/projectile processing
         miniBoulders: newMiniBoulders, // Add the mini boulders to the state
         projectiles: [...(state.projectiles || []), ...newProjectilesToAdd], // Add new spitter projectiles
@@ -2474,6 +2612,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         crystal: updatedCrystal,
         boulders: updatedBoulders,
       });
+
+      const testState4 = get();
+      console.log(2611, "state4", [
+        ...(testState4.projectiles || []),
+        ...newProjectilesToAdd,
+      ]);
+      // TODO: determine why the save above is losing the boss projectiles
     },
 
     pickupItem: (itemId: string) => {
@@ -2641,7 +2786,11 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     rotateMirror: (direction: "clockwise" | "counterclockwise") => {
       const state = get();
-      if (state.gameState !== "playing" || state.currentLevelKey !== "light_reflection") return; // Only on level 3 (0-indexed)
+      if (
+        state.gameState !== "playing" ||
+        state.currentLevelKey !== "light_reflection"
+      )
+        return; // Only on level 3 (0-indexed)
 
       // Find mirror within interaction range
       const nearbyMirror = state.mirrors.find((mirror) => {
@@ -3465,6 +3614,17 @@ export const useSnakeGame = create<SnakeGameState>()(
     // Projectile system functions
     updateProjectiles: (deltaTime: number, currentPlayer?: any) => {
       const state = get();
+      if (
+        state.currentLevelKey !== "boss_valerie" &&
+        state.currentLevelKey !== "grid_puzzle"
+      ) {
+        return { hitCount: 0 };
+      }
+      /* THOUGHT:
+      projectiles for boss are no longer in state at this point, but are
+      for spitter
+      */
+      console.log(3607, state.projectiles);
       const player = currentPlayer || state.player; // Use provided player state or fall back to state
       const currentTime = Date.now();
       let hitCount = 0;
@@ -3472,88 +3632,79 @@ export const useSnakeGame = create<SnakeGameState>()(
       let collisionDetected = false; // Track if any collision was detected
 
       // Update projectile positions and remove expired ones
-      const updatedProjectiles = state.projectiles.filter((projectile, index) => {
-        const age = currentTime - projectile.createdAt;
-        if (age > projectile.lifespan) {
-          // Add debugging for Valerie level expired projectiles
-          if (state.currentLevelKey === "boss_valerie") {
-          }
-          return false; // Remove expired projectile
-        }
-
-        // Update position
-        const oldX = projectile.position.x;
-        const oldY = projectile.position.y;
-        projectile.position.x += projectile.velocity.x * deltaTime;
-        projectile.position.y += projectile.velocity.y * deltaTime;
-        
-        // Add debugging for Valerie level projectile movement
-        if (state.currentLevelKey === "boss_valerie" && index === 0) {
-        }
-        
-
-        // Check collision with player
-        const projectileRect = { ...projectile.position, ...projectile.size };
-        const playerRect = { ...player.position, ...player.size };
-        const collision = checkAABBCollision(projectileRect, playerRect);
-
-        // Player is invincible either from before this frame, from a hit earlier in this frame, or during dash
-        const isInvincible = player.isInvincible || playerHitThisFrame || state.dashState.isInvulnerable;
-
-        if (!isInvincible && collision) {
-          // Player hit by projectile - first hit this frame
-          collisionDetected = true;
-          hitCount = 1; // Only one hit per frame allowed
-          playerHitThisFrame = true; // Prevent additional hits this frame
-
-          // Add debugging for Valerie level player hits
-          if (state.currentLevelKey === "boss_valerie") {
+      const updatedProjectiles = state.projectiles.filter(
+        (projectile, index) => {
+          const age = currentTime - projectile.createdAt;
+          if (age > projectile.lifespan) {
+            console.log(3619, projectile.id, "removed: age");
+            return false; // Remove expired projectile
           }
 
-          // Don't check for player death here - let the main game loop handle it
+          // Update position
+          const oldX = projectile.position.x;
+          const oldY = projectile.position.y;
+          projectile.position.x += projectile.velocity.x * deltaTime;
+          projectile.position.y += projectile.velocity.y * deltaTime;
 
-          return false; // Remove projectile
-        }
+          console.log(
+            3629,
+            projectile.id,
+            `age:${age}`,
+            `x:${oldX}->${projectile.position.x}`,
+            `y:${oldY}->${projectile.position.y}`,
+          );
 
-        // Check collision with walls - boss projectiles with wall penetration can pass through
-        const allowWallPenetration = projectile.canPenetrateWalls && state.currentLevelKey === "boss_valerie";
-        
-        if (!allowWallPenetration) {
-          for (const wall of state.walls) {
-            const projectileRect = { 
-              x: projectile.position?.x ?? projectile.x ?? 0,
-              y: projectile.position?.y ?? projectile.y ?? 0,
-              width: projectile.size?.width ?? projectile.width ?? 6,
-              height: projectile.size?.height ?? projectile.height ?? 6
-            };
-            
-            if (checkAABBCollision(projectileRect, wall)) {
-              // Add debugging for wall collisions
-              if (state.currentLevelKey === "boss_valerie") {
+          // Check collision with player
+          const projectileRect = { ...projectile.position, ...projectile.size };
+          const playerRect = { ...player.position, ...player.size };
+          const collision = checkAABBCollision(projectileRect, playerRect);
+
+          // Player is invincible either from before this frame, from a hit earlier in this frame, or during dash
+          const isInvincible =
+            player.isInvincible ||
+            playerHitThisFrame ||
+            state.dashState.isInvulnerable;
+
+          if (!isInvincible && collision) {
+            // Player hit by projectile - first hit this frame
+            collisionDetected = true;
+            hitCount = 1; // Only one hit per frame allowed
+            playerHitThisFrame = true; // Prevent additional hits this frame
+
+            // Don't check for player death here - let the main game loop handle it
+            console.log(3655, projectile.id, "removed: player collision");
+            return false; // Remove projectile
+          }
+
+          // Check collision with walls - boss projectiles with wall penetration can pass through
+          const allowWallPenetration =
+            projectile.canPenetrateWalls &&
+            state.currentLevelKey === "boss_valerie";
+
+          if (!allowWallPenetration) {
+            for (const wall of state.walls) {
+              const projectileRect = {
+                x: projectile.position?.x ?? projectile.x ?? 0,
+                y: projectile.position?.y ?? projectile.y ?? 0,
+                width: projectile.size?.width ?? projectile.width ?? 6,
+                height: projectile.size?.height ?? projectile.height ?? 6,
+              };
+
+              if (checkAABBCollision(projectileRect, wall)) {
+                console.log(3677, projectile.id, "removed: wall collision");
+                return false; // Remove projectile on wall collision
               }
-              return false; // Remove projectile on wall collision
             }
+          } else {
           }
-        } else {
-          // Boss projectiles pass through walls - add debug logging
-          if (state.currentLevelKey === "boss_valerie") {
-          }
-        }
 
-        return true; // Keep projectile
-      });
+          console.log(3684, projectile.id, "retained");
+          return true; // Keep projectile
+        },
+      );
 
-      // Update the state with filtered projectiles
-      if (state.currentLevelKey === "boss_valerie" && (state.projectiles.length > 0 || updatedProjectiles.length > 0)) {
-        
-        // Log remaining projectiles for debugging
-        if (updatedProjectiles.length > 0 && updatedProjectiles.length <= 5) {
-          updatedProjectiles.forEach((proj, i) => {
-          });
-        } else if (updatedProjectiles.length > 5) {
-        }
-      }
-      
+      console.log(3689, updatedProjectiles);
+      // after this log and before 2580 log, we lose the projectiles in state
       set({ projectiles: updatedProjectiles });
 
       // Spitter firing logic will be handled in the main snake update loop below
@@ -3563,62 +3714,68 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     // Environmental effects for boss boulder collisions
-    spawnMiniBoulders: (centerPosition: Position, levelSize: { width: number; height: number }): MiniBoulder[] => {
+    spawnMiniBoulders: (
+      centerPosition: Position,
+      levelSize: { width: number; height: number },
+    ): MiniBoulder[] => {
       const miniBoulders: MiniBoulder[] = [];
       const currentTime = Date.now();
-      
+
       // Spawn 10 mini boulders at random locations on the map
       for (let i = 0; i < 10; i++) {
         const randomX = Math.random() * (levelSize.width - 20); // 20x20 size
         const randomY = Math.random() * (levelSize.height - 20);
-        
+
         miniBoulders.push({
           id: `mini_boulder_${currentTime}_${i}`,
           position: {
             x: randomX,
-            y: randomY // Spawn directly on the map
+            y: randomY, // Spawn directly on the map
           },
           size: { width: 20, height: 20 },
           velocity: {
             x: 0, // No movement
-            y: 0
+            y: 0,
           },
           gravity: 0, // No gravity needed
           isLanded: true, // Already "landed"
-          spawnTime: currentTime
+          spawnTime: currentTime,
         });
       }
-      
+
       return miniBoulders;
     },
 
-    spawnScreensaverSnake: (centerPosition: Position, levelSize: { width: number; height: number }): Snake => {
+    spawnScreensaverSnake: (
+      centerPosition: Position,
+      levelSize: { width: number; height: number },
+    ): Snake => {
       const currentTime = Date.now();
-      
+
       // Use the provided center position directly (Valerie's position)
       const spawnX = centerPosition.x;
       const spawnY = centerPosition.y;
-      
+
       // Give it a random cardinal direction to start moving
       const cardinalDirections = [
-        { x: 0, y: -1 },   // North
-        { x: 1, y: -1 },   // Northeast  
-        { x: 1, y: 0 },    // East
-        { x: 1, y: 1 },    // Southeast
-        { x: 0, y: 1 },    // South
-        { x: -1, y: 1 },   // Southwest
-        { x: -1, y: 0 },   // West
-        { x: -1, y: -1 }   // Northwest
+        { x: 0, y: -1 }, // North
+        { x: 1, y: -1 }, // Northeast
+        { x: 1, y: 0 }, // East
+        { x: 1, y: 1 }, // Southeast
+        { x: 0, y: 1 }, // South
+        { x: -1, y: 1 }, // Southwest
+        { x: -1, y: 0 }, // West
+        { x: -1, y: -1 }, // Northwest
       ];
       const randomIndex = Math.floor(Math.random() * cardinalDirections.length);
       const initialDirection = cardinalDirections[randomIndex];
 
       return {
         id: `screensaver_snake_${currentTime}`,
-        type: 'screensaver',
+        type: "screensaver",
         position: {
           x: spawnX,
-          y: spawnY
+          y: spawnY,
         },
         size: { width: 60, height: 60 },
         speed: 125 + Math.random() * 125, // Random speed between 125 and 250
@@ -3628,45 +3785,57 @@ export const useSnakeGame = create<SnakeGameState>()(
         patrolDirection: 1,
         chaseSpeed: 0, // Screensaver snakes don't chase
         sightRange: 0,
-        isChasing: false
+        isChasing: false,
       };
     },
 
-    spawnPhotophobicSnake: (centerPosition: Position, levelSize: { width: number; height: number }): Snake => {
+    spawnPhotophobicSnake: (
+      centerPosition: Position,
+      levelSize: { width: number; height: number },
+    ): Snake => {
       const currentTime = Date.now();
       const state = get();
-      
+
       // Count existing photophobic snakes to determine if this is the first or second
-      const existingPhotophobicSnakes = state.snakes.filter(snake => snake.type === 'photophobic');
+      const existingPhotophobicSnakes = state.snakes.filter(
+        (snake) => snake.type === "photophobic",
+      );
       const isFirstPhotophobicSnake = existingPhotophobicSnakes.length === 0;
-      
+
       // Spawn at Valerie's center position
-      const spawnX = Math.max(16, Math.min(centerPosition.x - 16, levelSize.width - 32));
-      const spawnY = Math.max(16, Math.min(centerPosition.y - 16, levelSize.height - 32));
-      
+      const spawnX = Math.max(
+        16,
+        Math.min(centerPosition.x - 16, levelSize.width - 32),
+      );
+      const spawnY = Math.max(
+        16,
+        Math.min(centerPosition.y - 16, levelSize.height - 32),
+      );
+
       // Determine initial lighting state based on current level
       let isDark = false;
-      
+
       if (state.currentLevelKey === "grid_puzzle") {
         // Level 5 (0-indexed as 4) - Use switch-based quadrant lighting
         const isInTopLeft = spawnX < 390 && spawnY < 290;
         const isInTopRight = spawnX > 410 && spawnY < 290;
         const isInBottomLeft = spawnX < 390 && spawnY > 310;
         const isInBottomRight = spawnX > 410 && spawnY > 310;
-        
+
         const switches = state.switches || [];
-        const A = switches.find((s) => s.id === "light_switch")?.isPressed || false;
+        const A =
+          switches.find((s) => s.id === "light_switch")?.isPressed || false;
         const B = switches.find((s) => s.id === "switch_1")?.isPressed || false;
         const C = switches.find((s) => s.id === "switch_2")?.isPressed || false;
         const D = switches.find((s) => s.id === "switch_3")?.isPressed || false;
         const E = switches.find((s) => s.id === "switch_4")?.isPressed || false;
         const F = switches.find((s) => s.id === "switch_5")?.isPressed || false;
-        
+
         const topLeftLit = (A && !B) || (!A && B); // A XOR B
         const topRightLit = C && D; // C AND D
         const bottomLeftLit = !(E && F); // NOT (E AND F)
         const bottomRightLit = topLeftLit && topRightLit; // (A XOR B) AND (C AND D)
-        
+
         if (isInTopLeft) {
           isDark = !topLeftLit;
         } else if (isInTopRight) {
@@ -3679,28 +3848,29 @@ export const useSnakeGame = create<SnakeGameState>()(
       } else if (state.currentLevelKey === "light_switch") {
         // Level 6 (0-indexed as 5) - Boulder-based lighting
         // ON → OFF (1st) → ON (2nd) → OFF (3rd) → ON (4th)
-        const destroyedBoulders = state.boulders?.filter(boulder => boulder.isDestroyed) || [];
+        const destroyedBoulders =
+          state.boulders?.filter((boulder) => boulder.isDestroyed) || [];
         const destroyedCount = destroyedBoulders.length;
-        
+
         if (destroyedCount === 0) {
           isDark = false; // Light is on at start
         } else if (destroyedCount === 1) {
-          isDark = true;  // Light is off after 1st boulder
+          isDark = true; // Light is off after 1st boulder
         } else if (destroyedCount === 2) {
           isDark = false; // Light is on after 2nd boulder
         } else if (destroyedCount === 3) {
-          isDark = true;  // Light is off after 3rd boulder
+          isDark = true; // Light is off after 3rd boulder
         } else {
           isDark = false; // Light is on after 4th boulder
         }
       }
-      
+
       // Give it a random initial direction
       const directions = [
-        { x: 0, y: -1 },   // North
-        { x: 1, y: 0 },    // East
-        { x: 0, y: 1 },    // South
-        { x: -1, y: 0 },   // West
+        { x: 0, y: -1 }, // North
+        { x: 1, y: 0 }, // East
+        { x: 0, y: 1 }, // South
+        { x: -1, y: 0 }, // West
       ];
       const randomIndex = Math.floor(Math.random() * directions.length);
       const initialDirection = directions[randomIndex];
@@ -3712,14 +3882,14 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       return {
         id: `photophobic_snake_${currentTime}`,
-        type: 'photophobic',
+        type: "photophobic",
         position: {
           x: spawnX,
-          y: spawnY
+          y: spawnY,
         },
         spawnPoint: {
           x: spawnX,
-          y: spawnY
+          y: spawnY,
         },
         size: { width: 32, height: 32 },
         speed: Math.round(baseSpeed * speedMultiplier), // 60 for first, 80 for second
@@ -3738,36 +3908,41 @@ export const useSnakeGame = create<SnakeGameState>()(
       };
     },
 
-    spawnPhantom: (spawnPosition: Position, phantomId: string, levelBounds?: { width: number; height: number }): Snake => {
-      
+    spawnPhantom: (
+      spawnPosition: Position,
+      phantomId: string,
+      levelBounds?: { width: number; height: number },
+    ): Snake => {
       // Determine initial direction based on alternating pattern (every other phantom goes opposite direction)
       // Extract spawn count from phantom ID to determine direction
-      const idParts = phantomId.split('_');
+      const idParts = phantomId.split("_");
       const spawnCount = idParts.length >= 3 ? parseInt(idParts[2]) : 0;
-      
+
       // Every other phantom starts in opposite direction (alternating north/south)
       // Spawn count 0, 2, 4, 6... start north
       // Spawn count 1, 3, 5, 7... start south
-      const initialDirection = (spawnCount % 2 === 0) ? 'north' : 'south';
-      const directionVector = initialDirection === 'north' ? { x: 0, y: -1 } : { x: 0, y: 1 };
-      
+      const initialDirection = spawnCount % 2 === 0 ? "north" : "south";
+      const directionVector =
+        initialDirection === "north" ? { x: 0, y: -1 } : { x: 0, y: 1 };
+
       // Determine rotation direction based on wall position and initial direction
-      // When on west wall: north=clockwise, south=counterclockwise  
+      // When on west wall: north=clockwise, south=counterclockwise
       // When on east wall: north=counterclockwise, south=clockwise
       const screenCenter = levelBounds ? levelBounds.width / 2 : 400;
       const isOnWestWall = spawnPosition.x < screenCenter;
-      
-      let rotationDirection: 'clockwise' | 'counterclockwise';
+
+      let rotationDirection: "clockwise" | "counterclockwise";
       if (isOnWestWall) {
-        rotationDirection = initialDirection === 'north' ? 'clockwise' : 'counterclockwise';
+        rotationDirection =
+          initialDirection === "north" ? "clockwise" : "counterclockwise";
       } else {
-        rotationDirection = initialDirection === 'north' ? 'counterclockwise' : 'clockwise';
+        rotationDirection =
+          initialDirection === "north" ? "counterclockwise" : "clockwise";
       }
-      
-      
+
       const phantom = {
         id: phantomId,
-        type: 'phantom' as const,
+        type: "phantom" as const,
         position: { x: spawnPosition.x, y: spawnPosition.y },
         size: { width: 130, height: 130 }, // Same size as boss Valerie (130x130)
         speed: 540, // Triple Valerie's max speed for extremely fast phantom movement
@@ -3780,29 +3955,35 @@ export const useSnakeGame = create<SnakeGameState>()(
         isChasing: false,
         isPhantom: true,
         originalSpawnPosition: { x: spawnPosition.x, y: spawnPosition.y },
-        phantomDirection: initialDirection as 'north' | 'south',
+        phantomDirection: initialDirection as "north" | "south",
         phantomRotation: rotationDirection, // Rotation based on wall position and initial direction
-        hasReturnedToSpawn: false
+        hasReturnedToSpawn: false,
       };
       return phantom;
     },
 
-    spawnRainSnake: (spawnPosition: Position, rainSnakeId: string, movementPattern?: string, angle?: number, amplitude?: number, frequency?: number): Snake => {
-      
+    spawnRainSnake: (
+      spawnPosition: Position,
+      rainSnakeId: string,
+      movementPattern?: string,
+      angle?: number,
+      amplitude?: number,
+      frequency?: number,
+    ): Snake => {
       // Random speed between 150 and 600 (50% faster bottom end, 200% faster top end)
       const randomSpeed = 150 + Math.random() * 450;
-      
+
       // Set direction based on movement pattern
       let direction = { x: 0, y: 1 }; // Default straight down
-      if (movementPattern === 'angled' && angle) {
+      if (movementPattern === "angled" && angle) {
         // Convert 30-degree angle to direction vector
         const radians = (angle * Math.PI) / 180;
         direction = { x: Math.sin(radians), y: Math.cos(radians) };
       }
-      
+
       const rainSnake = {
         id: rainSnakeId,
-        type: 'rainsnake' as const,
+        type: "rainsnake" as const,
         position: { x: spawnPosition.x, y: spawnPosition.y },
         size: { width: 40, height: 40 }, // Standard snake size
         speed: randomSpeed,
@@ -3815,26 +3996,29 @@ export const useSnakeGame = create<SnakeGameState>()(
         isChasing: false,
         isRainSnake: true,
         rainSpeed: randomSpeed,
-        rainMovementPattern: movementPattern as 'straight' | 'angled' | 'sine' | undefined,
+        rainMovementPattern: movementPattern as
+          | "straight"
+          | "angled"
+          | "sine"
+          | undefined,
         rainAngle: angle,
         sineAmplitude: amplitude,
         sineFrequency: frequency,
-        initialX: spawnPosition.x // Store initial X for sine wave calculation
+        initialX: spawnPosition.x, // Store initial X for sine wave calculation
       };
-      
+
       return rainSnake;
     },
 
     updateMiniBoulders: (deltaTime: number) => {
       const state = get();
-      
-      const updatedMiniBoulders = state.miniBoulders
-        .filter((boulder) => {
-          // Remove mini boulders that are older than 30 seconds
-          const age = Date.now() - boulder.spawnTime;
-          return age < 30000;
-        });
-      
+
+      const updatedMiniBoulders = state.miniBoulders.filter((boulder) => {
+        // Remove mini boulders that are older than 30 seconds
+        const age = Date.now() - boulder.spawnTime;
+        return age < 30000;
+      });
+
       set({ miniBoulders: updatedMiniBoulders });
     },
 
@@ -3866,114 +4050,72 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
     },
 
-    fireProjectiles: (snakeId: string, sequentialIndex?: number, clockwise?: boolean, startingAngle?: number, burstRound?: number, roundAngleShift?: number) => {
+    fireProjectiles: (
+      snakeId: string,
+      sequentialIndex?: number,
+      clockwise?: boolean,
+      startingAngle?: number,
+      burstRound?: number,
+      roundAngleShift?: number,
+    ) => {
       const state = get();
       const snake = state.snakes.find((s) => s.id === snakeId);
       if (!snake || (snake.type !== "spitter" && snake.type !== "boss")) return;
-      
 
       // Boss projectiles (Phase 3 Valerie) vs regular spitter projectiles
       const isBossProjectiles = snake.type === "boss" && snake.bossPhase === 3;
-      const projectileSpeed = isBossProjectiles ? 2.0 : 0.3; // Boss projectiles are much faster now
-      const projectileSize = { width: 8, height: 8 }; // Larger boss projectiles
+      const projectileSpeed = isBossProjectiles ? 0.6 : 0.3;
+      const projectileSize = { width: 8, height: 8 };
       const lifespan = 6000; // 6 seconds for boss projectiles
 
       let directions: { x: number; y: number }[];
 
-      if (isBossProjectiles && burstRound !== undefined && roundAngleShift !== undefined) {
+      if (
+        isBossProjectiles &&
+        burstRound !== undefined &&
+        roundAngleShift !== undefined
+      ) {
         // Phase 3 boss: 4-round burst firing with angle shifts
         const totalProjectiles = 24;
         const angleStep = 360 / totalProjectiles; // 15 degrees per projectile
-        
-        
+
         directions = [];
         try {
           for (let i = 0; i < totalProjectiles; i++) {
             // Calculate angle for this projectile with round shift applied
             const baseAngle = i * angleStep; // 0°, 15°, 30°, etc.
             const shiftedAngle = baseAngle + roundAngleShift; // Add 0°, 3°, 6°, or 9° shift
-            
+
             // Normalize angle to 0-360 range
             const normalizedAngle = ((shiftedAngle % 360) + 360) % 360;
-            
+
             // Convert to radians and create direction
             const angleRad = normalizedAngle * (Math.PI / 180);
             const dir = {
               x: Math.cos(angleRad),
-              y: Math.sin(angleRad)
+              y: Math.sin(angleRad),
             };
-            
+
             // Validate direction values
             if (isNaN(dir.x) || isNaN(dir.y)) {
               continue;
             }
-            
+
             directions.push(dir);
           }
-          
         } catch (error) {
+          console.error("projectile fire error", error);
           return; // Exit early on error
         }
-        
-      } else if (isBossProjectiles) {
-        // Phase 3 boss: Fallback to all 30 projectiles at once (if sequential parameters not provided)
-        directions = [];
-        for (let i = 0; i < 30; i++) {
-          const angle = (i * 12) * (Math.PI / 180); // Convert 12-degree increments to radians
-          directions.push({
-            x: Math.cos(angle),
-            y: Math.sin(angle)
-          });
-        }
-      } else if (state.currentLevelKey === "grid_puzzle") { // Level 4 spitter behavior
-        // Check if we're on Level 4 for alternating pattern
-        // Increment shot count for this manual fire
-        const newShotCount = (snake.shotCount || 0) + 1;
-        const isOddShot = newShotCount % 2 === 1;
-
-        if (isOddShot) {
-          // Odd shots: cardinal directions (N, S, E, W)
-          directions = [
-            { x: 0, y: -1 }, // North
-            { x: 1, y: 0 }, // East
-            { x: 0, y: 1 }, // South
-            { x: -1, y: 0 }, // West
-          ];
-        } else {
-          // Even shots: diagonal directions (NE, NW, SE, SW)
-          directions = [
-            { x: 1, y: -1 }, // Northeast
-            { x: -1, y: -1 }, // Northwest
-            { x: 1, y: 1 }, // Southeast
-            { x: -1, y: 1 }, // Southwest
-          ];
-        }
-
-        // Update the snake's shot count
-        set({
-          snakes: state.snakes.map((s) =>
-            s.id === snakeId ? { ...s, shotCount: newShotCount } : s,
-          ),
-        });
-      } else {
-        // Default behavior for other levels: all 8 directions
-        directions = [
-          { x: 0, y: -1 }, // North
-          { x: 1, y: -1 }, // Northeast
-          { x: 1, y: 0 }, // East
-          { x: 1, y: 1 }, // Southeast
-          { x: 0, y: 1 }, // South
-          { x: -1, y: 1 }, // Southwest
-          { x: -1, y: 0 }, // West
-          { x: -1, y: -1 }, // Northwest
-        ];
       }
 
       const projectileColor = isBossProjectiles ? "#ff4444" : "#00ff41"; // Red for boss, green for spitters
 
-      const spawnX = snake.position.x + snake.size.width / 2 - projectileSize.width / 2;
-      const spawnY = snake.position.y + snake.size.height / 2 - projectileSize.height / 2;
-      
+      const spawnX =
+        snake.position.x + snake.size.width / 2 - projectileSize.width / 2;
+      const spawnY =
+        snake.position.y + snake.size.height / 2 - projectileSize.height / 2;
+
       const newProjectiles = directions.map((dir, index) => ({
         id: `${snakeId}_projectile_${Date.now()}_${index}`,
         position: {
@@ -3990,41 +4132,18 @@ export const useSnakeGame = create<SnakeGameState>()(
         color: projectileColor,
         canPenetrateWalls: isBossProjectiles, // Boss projectiles in Phase 3 can pass through walls
       }));
-      
-      // Add spawn position debugging for Valerie
-      if (snake.type === "boss" && snake.bossPhase === 3) {
-        
-        // Check if spawn position collides with walls
-        const spawnRect = { x: spawnX, y: spawnY, width: projectileSize.width, height: projectileSize.height };
-        const currentState = get(); // Fresh state call to avoid stale state
-        for (const wall of currentState.walls) {
-          if (checkAABBCollision(spawnRect, wall)) {
-          }
-        }
-      }
 
-      // Add targeted debugging for Valerie
-      if (snake.type === "boss" && snake.bossPhase === 3) {
-        // Get fresh state to avoid stale state issues
-        const freshState = get();
-      }
-      
       // Get fresh state for the actual update to avoid stale state
       const finalState = get();
-      const updatedProjectiles = [...finalState.projectiles, ...newProjectiles];
-      
-      // Add debugging to track state update
-      if (snake.type === "boss" && snake.bossPhase === 3) {
-      }
-      
+      const updatedProjectiles = [
+        ...(finalState.projectiles || []),
+        ...newProjectiles,
+      ];
+
+      console.log(4125, updatedProjectiles);
       set({
         projectiles: updatedProjectiles,
       });
-      
-      // Verify the state was actually updated
-      if (snake.type === "boss" && snake.bossPhase === 3) {
-        const verifyState = get();
-      }
     },
 
     collectPuzzleShard: (shardId: string) => {
@@ -4084,7 +4203,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Level 6: Add non-destroyed boulders as walls
-      if (state.currentLevelKey === "boss_valerie" && state.boulders.length > 0) {
+      if (
+        state.currentLevelKey === "boss_valerie" &&
+        state.boulders.length > 0
+      ) {
         const boulderWalls = state.boulders
           .filter((boulder) => !boulder.isDestroyed)
           .map((boulder) => ({
@@ -4146,8 +4268,14 @@ export const useSnakeGame = create<SnakeGameState>()(
                 if (receiver) {
                   const teleportCooldownTime = currentTime + 500; // 500ms cooldown
                   // Center the player on the receiver pad
-                  const targetX = receiver.x + (receiver.width / 2) - (state.player.size.width / 2);
-                  const targetY = receiver.y + (receiver.height / 2) - (state.player.size.height / 2);
+                  const targetX =
+                    receiver.x +
+                    receiver.width / 2 -
+                    state.player.size.width / 2;
+                  const targetY =
+                    receiver.y +
+                    receiver.height / 2 -
+                    state.player.size.height / 2;
                   teleportInfo = {
                     targetPosition: { x: targetX, y: targetY },
                     teleporters: updatedTeleporters.map((t, idx) =>
@@ -4453,17 +4581,21 @@ export const useSnakeGame = create<SnakeGameState>()(
     resetForHub: () => {
       const state = get();
       state.clearTemporaryItems(); // Clear temporary items when returning to hub
-      
+
       // Calculate shield health from remaining active permanent items
       let totalBiteProtection = 0;
-      state.inventoryItems.forEach(item => {
-        if (item.duration === 'permanent' && item.isActive && item.modifiers.biteProtection) {
+      state.inventoryItems.forEach((item) => {
+        if (
+          item.duration === "permanent" &&
+          item.isActive &&
+          item.modifiers.biteProtection
+        ) {
           totalBiteProtection += item.modifiers.biteProtection;
         }
       });
-      
+
       // Reset player health to full and apply shield protection
-      set({ 
+      set({
         gameState: "hub",
         currentLevel: 0,
         currentLevelKey: "hub",
@@ -4473,8 +4605,8 @@ export const useSnakeGame = create<SnakeGameState>()(
           shieldHealth: totalBiteProtection, // Apply shield from permanent items
           maxShieldHealth: totalBiteProtection,
           isInvincible: false,
-          invincibilityEndTime: 0
-        }
+          invincibilityEndTime: 0,
+        },
       });
     },
 
@@ -4486,7 +4618,7 @@ export const useSnakeGame = create<SnakeGameState>()(
     updatePlayerController: (deltaTime: number, inputState: InputState) => {
       const state = get();
       if (!state.playerController) return;
-      
+
       // Update PlayerController speeds based on active inventory items
       const speeds = getPlayerSpeeds(state.inventoryItems);
       state.playerController.updateConfig({
@@ -4494,12 +4626,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         walkingSpeed: speeds.walkingSpeed,
         dashSpeed: speeds.dashSpeed,
         dashDuration: speeds.dashDuration,
-        dashCooldown: speeds.dashCooldown
+        dashCooldown: speeds.dashCooldown,
       });
-      
+
       // Get the intended position from unified controller
-      const intendedPosition = state.playerController.update(inputState, deltaTime);
-      
+      const intendedPosition = state.playerController.update(
+        inputState,
+        deltaTime,
+      );
+
       // Check wall collisions using existing collision system
       const playerRect = {
         x: intendedPosition.x,
@@ -4514,32 +4649,32 @@ export const useSnakeGame = create<SnakeGameState>()(
       );
 
       let finalPosition = intendedPosition;
-      
+
       // If there's a wall collision, use slideAlongWall to maintain smooth movement
       if (hasWallCollision) {
         finalPosition = slideAlongWall(
           state.player.position,
           intendedPosition,
           currentWalls,
-          state.player.size
+          state.player.size,
         );
-        
+
         // Update the PlayerController's internal position to match the actual final position
         // This prevents position accumulation when blocked by walls
         state.playerController.setPosition(finalPosition);
       }
-      
+
       // Note: Don't call setPosition during gameplay as it interferes with dash state
       // The PlayerController will sync naturally on the next frame
-      
+
       // Update dash state from controller
       const controllerDashState = state.playerController.getDashState();
-      
+
       // Calculate walking state for unified PlayerController system
       // Check if walking key is currently pressed to update badge display
       const keyBindings = useKeyBindings.getState().keyBindings;
       const currentTime = Date.now();
-      
+
       const isKeyActiveRecently = (keyCode: string) => {
         return (
           state.keysPressed.has(keyCode) ||
@@ -4547,13 +4682,13 @@ export const useSnakeGame = create<SnakeGameState>()(
             currentTime - state.keyStates.get(keyCode)! < 50)
         );
       };
-      
+
       // Check if walking key is pressed, but clear walking if dashing
       const isWalkingKeyPressed =
         isKeyActiveRecently(keyBindings.walking) ||
         isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
       const isWalking = isWalkingKeyPressed && !controllerDashState.isDashing;
-      
+
       // Update store state
       set({
         player: {
@@ -4574,35 +4709,34 @@ export const useSnakeGame = create<SnakeGameState>()(
         targetVelocity: state.playerController.getTargetVelocity(),
         isWalking: isWalking,
       });
-      
     },
 
     configurePlayerController: () => {
       const state = get();
-      
+
       // Initialize controller if it doesn't exist
       if (!state.playerController) {
         const boundaries = {
           minX: 20,
           maxX: state.levelSize.width - 20,
           minY: 20,
-          maxY: state.levelSize.height - 20
+          maxY: state.levelSize.height - 20,
         };
-          
+
         const controller = createGamePlayerController(
           state.player.position,
           state.player.size,
-          boundaries
+          boundaries,
         );
-        
+
         set({ playerController: controller });
         return;
       }
-      
+
       // Use same configuration for all levels (including hub)
       const inventoryItems = state.inventoryItems;
       const speeds = getPlayerSpeeds(inventoryItems);
-      
+
       state.playerController.updateConfig({
         normalSpeed: speeds.playerSpeed,
         walkingSpeed: speeds.walkingSpeed,
@@ -4612,18 +4746,18 @@ export const useSnakeGame = create<SnakeGameState>()(
         dashDuration: speeds.dashDuration,
         dashCooldown: speeds.dashCooldown,
         dashDistance: 96,
-        dashInvulnerabilityDistance: 32
+        dashInvulnerabilityDistance: 32,
       });
-      
+
       // Update boundaries for current level
       const boundaries = {
         minX: 20,
         maxX: state.levelSize.width - 20,
         minY: 20,
-        maxY: state.levelSize.height - 20
+        maxY: state.levelSize.height - 20,
       };
       state.playerController.setBoundaries(boundaries);
-      
+
       // Update position and size
       state.playerController.setPosition(state.player.position);
     },
