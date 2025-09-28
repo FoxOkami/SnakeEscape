@@ -38,6 +38,8 @@ export interface Snake {
   chaseSpeed: number;
   sightRange: number;
   hearingRange?: number; // For stalkers and rattlesnakes
+  baseSightRange: number; // Original sight range before modifiers
+  baseHearingRange?: number; // Original hearing range before modifiers
   isChasing: boolean;
   chaseTarget?: Position;
   lastHeardSound?: Position;
