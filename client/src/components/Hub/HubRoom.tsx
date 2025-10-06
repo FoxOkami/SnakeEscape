@@ -92,6 +92,18 @@ const HubRoom: React.FC = () => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
     } else if (
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "farmtotable"
+    ) {
+      // Add shiny object item to inventory
+      const lootgertyssausageItem = GAME_ITEMS.lootGertysSausage();
+      addInventoryItem(lootgertyssausageItem);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (
       cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "stapling"
     ) {
       // Add Stapler item to inventory
