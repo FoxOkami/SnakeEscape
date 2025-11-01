@@ -56,7 +56,6 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
   if (!isOpen) return null;
 
   const permanentItems = items.filter(item => item.duration === "permanent");
-  const temporaryItems = items.filter(item => item.duration === "temporary");
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -72,29 +71,22 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
         </div>
         
         <div className="space-y-6">
-          {/* Permanent Items Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800">Permanent Items</h3>
             {permanentItems.length > 0 ? (
               <div className="space-y-2">
                 {permanentItems.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3 border rounded-lg bg-green-50 border-green-200 hover:bg-green-100 transition-colors"
+                    className={`p-3 border rounded-lg transition-colors ${
+                      item.isActive 
+                        ? 'bg-green-100 border-green-300 hover:bg-green-200' 
+                        : 'bg-gray-100 border-gray-300 hover:bg-gray-200'
+                    }`}
                   >
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">{item.image || "📦"}</span>
                         <span className="font-medium text-sm text-gray-800">{item.name}</span>
-                        {item.isActive ? (
-                          <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
-                            Active
-                          </span>
-                        ) : (
-                          <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded">
-                            Inactive
-                          </span>
-                        )}
                       </div>
                       {onTogglePermanentItem && (
                         <button
@@ -115,54 +107,8 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
               </div>
             ) : (
               <div className="text-center py-6 text-gray-500">
-                <p className="text-sm">No permanent items collected yet</p>
+                <p className="text-sm">No items collected yet</p>
                 <p className="text-xs mt-1">Complete levels to unlock items!</p>
-              </div>
-            )}
-          </div>
-
-          {/* Temporary Items Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800">Temporary Items</h3>
-            {temporaryItems.length > 0 ? (
-              <div className="space-y-2">
-                {temporaryItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3 border rounded-lg bg-orange-50 border-orange-200 hover:bg-orange-100 transition-colors"
-                  >
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{item.image || "⏳"}</span>
-                        <span className="font-medium text-sm text-gray-800">{item.name}</span>
-                        {item.isActive && (
-                          <span className="text-xs bg-orange-600 text-white px-2 py-1 rounded">
-                            Active
-                          </span>
-                        )}
-                      </div>
-                      {!item.isActive && onUseItem && (
-                        <button
-                          onClick={() => onUseItem(item.id)}
-                          className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                        >
-                          Use
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-600 ml-7">{item.description}</p>
-                    {item.isActive && (
-                      <p className="text-xs text-blue-600 ml-7 mt-1">
-                        Active for this run
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6 text-gray-500">
-                <p className="text-sm">No temporary items in inventory</p>
-                <p className="text-xs mt-1">Items may be found in levels</p>
               </div>
             )}
           </div>
