@@ -68,10 +68,195 @@ const HubRoom: React.FC = () => {
 
   // Handle cheat code processing
   const handleCheatCode = () => {
+    /*-----------*/
+    /* Permanent */
+    /*-----------*/
     if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "tangential") {
-      // Add FIFO System item to inventory
-      const fifoSystemItem = GAME_ITEMS.fifoSystem();
-      addInventoryItem(fifoSystemItem);
+      // Add LIFO System item to inventory
+      const lifoSystemItem = GAME_ITEMS.lifoSystem();
+      addInventoryItem(lifoSystemItem);
+
+      // Immediately activate the item
+      useInventoryItem(lifoSystemItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "thementalist"
+    ) {
+      // Add hypnodisc item to inventory
+      const hypnodiscItem = GAME_ITEMS.hypnodisc();
+      addInventoryItem(hypnodiscItem);
+
+      // Immediately activate the item
+      useInventoryItem(hypnodiscItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "@sun") {
+      // Add object item to inventory
+      const natures2ndCarrotItem = GAME_ITEMS.natures2ndCarrot();
+      addInventoryItem(natures2ndCarrotItem);
+
+      // Immediately activate the item
+      useInventoryItem(natures2ndCarrotItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "upacreek"
+    ) {
+      // Add object item to inventory
+      const rangeFinderItem = GAME_ITEMS.rangeFinder();
+      addInventoryItem(rangeFinderItem);
+
+      // Immediately activate the item
+      useInventoryItem(rangeFinderItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "rice") {
+      // Add object item to inventory
+      const copperLinedGlovesItem = GAME_ITEMS.copperLinedGloves();
+      addInventoryItem(copperLinedGlovesItem);
+
+      // Immediately activate the item
+      useInventoryItem(copperLinedGlovesItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "piper") {
+      // Add object item to inventory
+      const fluteItem = GAME_ITEMS.flute();
+      addInventoryItem(fluteItem);
+
+      // Immediately activate the item
+      useInventoryItem(fluteItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "mountain"
+    ) {
+      // Add object item to inventory
+      const butterJoggersItem = GAME_ITEMS.butterJoggers();
+      addInventoryItem(butterJoggersItem);
+
+      // Immediately activate the item to apply shield health
+      useInventoryItem(butterJoggersItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "pilates") {
+      // Add object item to inventory
+      const grippySocksItem = GAME_ITEMS.grippySocks();
+      addInventoryItem(grippySocksItem);
+
+      // Immediately activate the item to apply shield health
+      useInventoryItem(grippySocksItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "honorralph"
+    ) {
+      // Add object item to inventory
+      const xxlButtonUpTItem = GAME_ITEMS.xxlButtonUpT();
+      addInventoryItem(xxlButtonUpTItem);
+
+      // Immediately activate the item to apply shield health
+      useInventoryItem(xxlButtonUpTItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "bryson") {
+      // Add object item to inventory
+      const redFlatCapItem = GAME_ITEMS.redFlatCap();
+      addInventoryItem(redFlatCapItem);
+
+      // Immediately activate the item to apply shield health
+      useInventoryItem(redFlatCapItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "takes10") {
+      // Add object item to inventory
+      const creepyStuffedOwlItem = GAME_ITEMS.creepyStuffedOwl();
+      addInventoryItem(creepyStuffedOwlItem);
+
+      // Immediately activate the item to apply shield health
+      useInventoryItem(creepyStuffedOwlItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "feelthejoy"
+    ) {
+      // Add object item to inventory
+      const joysFeetItem = GAME_ITEMS.joysFeet();
+      addInventoryItem(joysFeetItem);
+
+      // Immediately activate the item to apply shield health
+      useInventoryItem(joysFeetItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "zimzam") {
+      // Add object item to inventory
+      const yoyoItem = GAME_ITEMS.yoyo();
+      addInventoryItem(yoyoItem);
+
+      // Immediately activate the item to apply shield health
+      useInventoryItem(yoyoItem.id);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "chinese") {
+      // Add object item to inventory
+      const fingerTrapItem = GAME_ITEMS.fingerTrap();
+      addInventoryItem(fingerTrapItem);
+
+      // Immediately activate the item to apply shield health
+      useInventoryItem(fingerTrapItem.id);
 
       // Show success feedback
       setCheatCodeSuccess(true);
@@ -79,7 +264,7 @@ const HubRoom: React.FC = () => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
     } else if (cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "sos") {
-      // Add shiny object item to inventory
+      // Add object item to inventory
       const shinyobjectItem = GAME_ITEMS.shinyObject();
       addInventoryItem(shinyobjectItem);
 
@@ -92,9 +277,24 @@ const HubRoom: React.FC = () => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
     } else if (
+      /*-----------*/
+      /* Temporary */
+      /*-----------*/
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "twistpic"
+    ) {
+      // Add object item to inventory
+      const cinnamonRoll2005Item = GAME_ITEMS.cinnamonRoll2005();
+      addInventoryItem(cinnamonRoll2005Item);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (
       cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "farmtotable"
     ) {
-      // Add shiny object item to inventory
+      // Add object item to inventory
       const lootgertyssausageItem = GAME_ITEMS.lootGertysSausage();
       addInventoryItem(lootgertyssausageItem);
 
@@ -104,6 +304,9 @@ const HubRoom: React.FC = () => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
     } else if (
+      /*-----------------*/
+      /* Not Purchasable */
+      /*-----------------*/
       cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "stapling"
     ) {
       // Add Stapler item to inventory
@@ -119,6 +322,9 @@ const HubRoom: React.FC = () => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
     } else if (
+      /*------------*/
+      /* Everything */
+      /*------------*/
       cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "92traverse"
     ) {
       // Add all GAME_ITEMS to inventory without activating them
