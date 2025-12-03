@@ -28,6 +28,7 @@ export interface Snake {
   type: 'stalker' | 'guard' | 'burster' | 'screensaver' | 'plumber' | 'spitter' | 'photophobic' | 'rattlesnake' | 'boss' | 'phantom' | 'rainsnake' | 'friendly';
   position: Position;
   spawnPoint?: Position; // Original spawn position for return behavior
+  fallbackTarget?: Position; // Generated patrol target for snakes without predefined patrol points
   size: Size;
   speed: number;
   direction: Position;
@@ -37,6 +38,8 @@ export interface Snake {
   chaseSpeed: number;
   sightRange: number;
   hearingRange?: number; // For stalkers and rattlesnakes
+  baseSightRange: number; // Original sight range before modifiers
+  baseHearingRange?: number; // Original hearing range before modifiers
   isChasing: boolean;
   chaseTarget?: Position;
   lastHeardSound?: Position;
@@ -58,6 +61,7 @@ export interface Snake {
   fireInterval?: number; // Time between shots (3000ms = 3 seconds)
   movementAxis?: 'horizontal' | 'vertical'; // Whether spitter moves east-west or north-south
   shotCount?: number; // Track shot number for alternating patterns
+  shouldFire?: boolean; // Flag set when snake needs to fire projectiles
   // Phase system properties
   activePhase?: 'A' | 'B' | 'C'; // Phase restriction for Level 5
   // Photophobic-specific properties
@@ -97,6 +101,7 @@ export interface Snake {
   recoilStartTime?: number; // When recoil animation started
   recoilDirection?: Position; // Direction of recoil movement
   recoilFromBoulder?: boolean; // Whether recoil was caused by boulder collision
+  currentChargeHitBoulder?: string; // ID of boulder hit during current charge (prevents multiple hits)
   // Enhanced boss behavior properties
   centerTargetPosition?: Position; // Target position when moving to center
   centerPauseStartTime?: number; // When center pause started
@@ -108,6 +113,7 @@ export interface Snake {
   chargeBaseSpeed?: number; // Starting speed for current charge
   chargeMaxSpeed?: number; // Maximum speed for charge
   isInitialPause?: boolean; // Whether this is the first pause to let player adjust
+  hasFiredBarrage?: boolean; // Whether projectile barrage has been fired in current phase 3 state
   
   // Environmental effects triggered when boss hits boulder
   environmentalEffects?: {
@@ -182,6 +188,11 @@ export interface Snake {
   sineAmplitude?: number; // Amplitude for sine wave movement
   sineFrequency?: number; // Frequency for sine wave movement
   initialX?: number; // Initial X position for sine wave calculation
+  
+  // Reentrancy guard properties
+  lastUpdateTime?: number; // Last frame time this snake was updated (prevents multiple updates per frame)
+  lastChargeCollisionTime?: number; // Last time a collision occurred during charging (debounce)
+  currentChargeId?: number; // Unique ID for each charge cycle (prevents collision interference)
 }
 
 export interface Wall extends Rectangle {}
@@ -200,10 +211,15 @@ export interface SnakePit extends Position {
   snakeIds: string[]; // IDs of snakes that belong to this pit
   lastEmergenceTime: number; // When a snake last emerged
   emergenceInterval: number; // Time between emergences (3000ms = 3 seconds)
+  // Rotation system properties
+  currentSnakeIndex: number; // Which snake in the list should emerge next (0-based index)
+  nextEmergenceTime: number; // When the next snake should emerge
+  isSnakePatrolling: boolean; // Is a snake from this pit currently patrolling
   // Light detection properties
   isLightHit?: boolean; // Whether light beam is currently hitting this pit
   lightEmergenceTime?: number; // When snakes emerged due to light hit
   isLightEmergence?: boolean; // Whether current emergence is due to light
+  lightEmergedSnakesReturning?: number; // Count of snakes returning from light emergence
 }
 
 export interface Switch extends Rectangle {
@@ -360,6 +376,7 @@ export interface Boulder extends Rectangle {
   isDestroyed: boolean; // Whether the boulder has been destroyed
   destructionTime?: number; // When the boulder was destroyed (timestamp)
   hasSpawnedScreensaver?: boolean; // Whether this boulder has already spawned a screensaver snake
+  lastHitTime?: number; // Last time this boulder was hit (for debouncing multiple hits)
 }
 
 export interface MiniBoulder {

@@ -1,0 +1,33 @@
+PHASE 3 [Frame 13008]: Valerie entering projectileBarrage state at center position (400, 300)
+Console.js:61 💥 PROJECTILE FIRE [Frame 13009]: Firing round 1/4 with 0° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 0, roundAngleShift: 0
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=0, roundAngleShift=0
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 0
+Console.js:61 💥 PROJECTILE ADD: Adding 24 projectiles to game state. Total projectiles now: 24
+Console.js:61 💥 PROJECTILE FIRE [Frame 13038]: Firing round 2/4 with 3° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 1, roundAngleShift: 3
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=1, roundAngleShift=3
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 1
+Console.js:61 💥 PROJECTILE ADD: Adding 24 projectiles to game state. Total projectiles now: 24
+Console.js:61 💥 PROJECTILE FIRE [Frame 13069]: Firing round 3/4 with 6° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 2, roundAngleShift: 6
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=2, roundAngleShift=6
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 2
+Console.js:61 💥 PROJECTILE ADD: Adding 24 projectiles to game state. Total projectiles now: 24
+Console.js:61 💥 PROJECTILE FIRE [Frame 13098]: Firing round 4/4 with 9° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 3, roundAngleShift: 9
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=3, roundAngleShift=9
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 3
+Console.js:61 💥 PROJECTILE ADD: Adding 24 projectiles to game state. Total projectiles now: 24

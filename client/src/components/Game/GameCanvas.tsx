@@ -1148,49 +1148,6 @@ const GameCanvas: React.FC = () => {
         });
       }
 
-      // Draw snake pits (holes in the ground)
-      snakePits.forEach((pit) => {
-        // Check if pit is being hit by light (change color to dark yellow)
-        const isLightHit = pit.isLightHit || false;
-
-        // Draw the pit as a dark circular hole
-        ctx.fillStyle = isLightHit ? "#1a1a00" : "#0a0a0a"; // Dark yellow if hit, black otherwise
-        ctx.beginPath();
-        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
-        ctx.fill();
-
-        // Add a gradient effect for depth
-        const gradient = ctx.createRadialGradient(
-          pit.x,
-          pit.y,
-          0,
-          pit.x,
-          pit.y,
-          pit.radius,
-        );
-        if (isLightHit) {
-          // Dark yellow gradient when light hits
-          gradient.addColorStop(0, "#2a2a00"); // Darker yellow center
-          gradient.addColorStop(0.7, "#1a1a00"); // Dark yellow
-          gradient.addColorStop(1, "#333300"); // Yellowish edge
-        } else {
-          // Normal black gradient
-          gradient.addColorStop(0, "#000000"); // Black center
-          gradient.addColorStop(0.7, "#1a1a1a"); // Dark gray
-          gradient.addColorStop(1, "#333333"); // Lighter edge
-        }
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
-        ctx.fill();
-
-        // Add subtle border to make it more visible
-        ctx.strokeStyle = isLightHit ? "#555500" : "#444444"; // Yellowish border if hit
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
-        ctx.stroke();
-      });
 
       // Draw boulders (Level 6 only)
       if (currentLevelKey === "boss_valerie") {
@@ -1259,12 +1216,8 @@ const GameCanvas: React.FC = () => {
       // Draw snakes with different visuals for each type
       // On Level 3, skip snakes here so they render on top of mirrors
       snakes.forEach((snake) => {
-        // Skip drawing rattlesnakes that are in the pit
-        if (snake.type === "rattlesnake" && snake.isInPit) {
-          return;
-        }
         // Skip drawing snakes on Level 3 - they'll be drawn after mirrors
-        if (currentLevelKey === "grid_puzzle") {
+        if (currentLevelKey === "light_reflection") {
           return;
         }
         // Skip rendering phase-restricted snakes that aren't in their active phase
@@ -1683,6 +1636,50 @@ const GameCanvas: React.FC = () => {
         }
       });
 
+      // Draw snake pits (holes in the ground) - drawn after snakes so they appear "inside" the pits
+      snakePits.forEach((pit) => {
+        // Check if pit is being hit by light (change color to dark yellow)
+        const isLightHit = pit.isLightHit || false;
+
+        // Draw the pit as a dark circular hole
+        ctx.fillStyle = isLightHit ? "#1a1a00" : "#0a0a0a"; // Dark yellow if hit, black otherwise
+        ctx.beginPath();
+        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Add a gradient effect for depth
+        const gradient = ctx.createRadialGradient(
+          pit.x,
+          pit.y,
+          0,
+          pit.x,
+          pit.y,
+          pit.radius,
+        );
+        if (isLightHit) {
+          // Dark yellow gradient when light hits
+          gradient.addColorStop(0, "#2a2a00"); // Darker yellow center
+          gradient.addColorStop(0.7, "#1a1a00"); // Dark yellow
+          gradient.addColorStop(1, "#333300"); // Yellowish edge
+        } else {
+          // Normal black gradient
+          gradient.addColorStop(0, "#000000"); // Black center
+          gradient.addColorStop(0.7, "#1a1a1a"); // Dark gray
+          gradient.addColorStop(1, "#333333"); // Lighter edge
+        }
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Add subtle border to make it more visible
+        ctx.strokeStyle = isLightHit ? "#555500" : "#444444"; // Yellowish border if hit
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+        ctx.stroke();
+      });
+
       // Draw light reflection elements (mirrors, crystal, light beam)
 
       // Note: For Level 5, the lighting effect is now handled by the background quadrant system above
@@ -1802,28 +1799,31 @@ const GameCanvas: React.FC = () => {
           );
         }
       }
-
-      // Draw projectiles
+      
       projectiles.forEach((projectile) => {
-        ctx.fillStyle = projectile.color;
-        ctx.fillRect(
-          projectile.position.x,
-          projectile.position.y,
-          projectile.size.width,
-          projectile.size.height,
-        );
+        
+        // Handle both nested and flat schemas for robust rendering
+        const x = projectile.position?.x ?? projectile.x ?? 0;
+        const y = projectile.position?.y ?? projectile.y ?? 0;
+        const width = projectile.size?.width ?? projectile.width ?? 6;
+        const height = projectile.size?.height ?? projectile.height ?? 6;
+        
+        ctx.fillStyle = projectile.color || "#ff0000"; // Default to red if no color
+        ctx.fillRect(x, y, width, height);
 
         // Add a small glow effect for neon green projectiles
         if (projectile.color === "#00ff41") {
           ctx.shadowBlur = 5;
           ctx.shadowColor = projectile.color;
-          ctx.fillRect(
-            projectile.position.x,
-            projectile.position.y,
-            projectile.size.width,
-            projectile.size.height,
-          );
+          ctx.fillRect(x, y, width, height);
           ctx.shadowBlur = 0; // Reset shadow
+        }
+        
+        // Add bright border for boss projectiles to make them more visible
+        if (projectile.color === "#ff4444") {
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x, y, width, height);
         }
       });
 
@@ -1880,12 +1880,8 @@ const GameCanvas: React.FC = () => {
       });
 
       // Draw snakes on Level 3 after mirrors (so they appear on top)
-      if (currentLevelKey === "grid_puzzle") {
+      if (currentLevelKey === "light_reflection") {
         snakes.forEach((snake) => {
-          // Skip drawing rattlesnakes that are in the pit
-          if (snake.type === "rattlesnake" && snake.isInPit) {
-            return;
-          }
 
           let baseColor = "#2d3748";
           let accentColor = "#ff6b6b";
@@ -2917,25 +2913,26 @@ const GameCanvas: React.FC = () => {
 
           // Redraw projectiles on top of darkness overlay (Level 6 only)
           projectiles.forEach((projectile) => {
-            ctx.fillStyle = projectile.color;
-            ctx.fillRect(
-              projectile.position.x,
-              projectile.position.y,
-              projectile.size.width,
-              projectile.size.height,
-            );
+            // Handle both nested and flat schemas for robust rendering
+            const x = projectile.position?.x ?? projectile.x ?? 0;
+            const y = projectile.position?.y ?? projectile.y ?? 0;
+            const width = projectile.size?.width ?? projectile.width ?? 6;
+            const height = projectile.size?.height ?? projectile.height ?? 6;
+            
+            ctx.fillStyle = projectile.color || "#ff0000"; // Default to red if no color
+            ctx.fillRect(x, y, width, height);
 
-            // Add a small glow effect for neon green projectiles
-            if (projectile.color === "#00ff41") {
-              ctx.shadowBlur = 5;
-              ctx.shadowColor = projectile.color;
-              ctx.fillRect(
-                projectile.position.x,
-                projectile.position.y,
-                projectile.size.width,
-                projectile.size.height,
-              );
-              ctx.shadowBlur = 0; // Reset shadow
+            // Add enhanced glow effect for all projectiles in darkness
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = projectile.color || "#ffffff";
+            ctx.fillRect(x, y, width, height);
+            ctx.shadowBlur = 0; // Reset shadow
+            
+            // Add bright border for boss projectiles to make them more visible in darkness
+            if (projectile.color === "#ff4444") {
+              ctx.strokeStyle = "#ffffff";
+              ctx.lineWidth = 3;
+              ctx.strokeRect(x, y, width, height);
             }
           });
         }
@@ -3007,21 +3004,20 @@ const GameCanvas: React.FC = () => {
         draw(ctx);
       }
 
-      if (gameState === "playing") {
-        const deltaTime = currentTime - lastTimeRef.current; // Keep in milliseconds
-        lastTimeRef.current = currentTime;
+      // Always calculate deltaTime and call updateGame (let updateGame handle its own gating)
+      const deltaTime = currentTime - lastTimeRef.current; // Keep in milliseconds
+      lastTimeRef.current = currentTime;
 
-        // Fixed timestep for smooth 60fps animation
-        const targetFrameTime = 1000 / 60; // 16.67ms for 60fps
-        const clampedDeltaTime = Math.min(deltaTime, targetFrameTime * 2); // Cap at 2 frames max
+      // Fixed timestep for smooth 60fps animation
+      const targetFrameTime = 1000 / 60; // 16.67ms for 60fps
+      const clampedDeltaTime = Math.min(deltaTime, targetFrameTime * 2); // Cap at 2 frames max
 
-        if (clampedDeltaTime > 0) {
-          updateGame(clampedDeltaTime);
+      if (clampedDeltaTime > 0) {
+        updateGame(clampedDeltaTime);
+        if (gameState === "playing") {
           updateFlow(clampedDeltaTime);
           updateHint(clampedDeltaTime);
         }
-      } else {
-        lastTimeRef.current = currentTime;
       }
 
       animationFrameRef.current = requestAnimationFrame(gameLoop);

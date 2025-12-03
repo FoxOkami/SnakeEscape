@@ -144,15 +144,15 @@ function getRandomizedLevel2PressurePlatePositions(): Array<{
 
 // Helper functions for level key management
 export function getLevelByKey(levelKey: string): Level | undefined {
-  return LEVELS.find(level => level.levelKey === levelKey);
+  return LEVELS.find((level) => level.levelKey === levelKey);
 }
 
 export function getLevelIndexByKey(levelKey: string): number {
-  return LEVELS.findIndex(level => level.levelKey === levelKey);
+  return LEVELS.findIndex((level) => level.levelKey === levelKey);
 }
 
 export function getLevelKeyByIndex(levelIndex: number): string {
-  return LEVELS[levelIndex]?.levelKey || 'hub';
+  return LEVELS[levelIndex]?.levelKey || "hub";
 }
 
 export const LEVELS: Level[] = [
@@ -184,8 +184,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
-      }
+      },
     ],
     door: { x: 0, y: 0, width: 30, height: 40, isOpen: false },
     key: { x: 0, y: 0, width: 20, height: 20, collected: false },
@@ -239,6 +240,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
       {
@@ -253,6 +255,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
       {
@@ -272,7 +275,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 85,
         sightRange: 0, // Stalkers are blind
+        baseSightRange: 0,
         hearingRange: 150,
+        baseHearingRange: 150,
         isChasing: false,
         soundCooldown: 0,
       },
@@ -293,7 +298,7 @@ export const LEVELS: Level[] = [
         hasBeenActivated: false,
       },
       {
-        id: "tile2", 
+        id: "tile2",
         x: 250,
         y: 80,
         width: 40,
@@ -419,7 +424,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 120,
         sightRange: 0, // Stalkers are blind
+        baseSightRange: 0,
         hearingRange: 200,
+        baseHearingRange: 200,
         isChasing: false,
         soundCooldown: 0,
       },
@@ -440,7 +447,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 120,
         sightRange: 0, // Stalkers are blind
+        baseSightRange: 0,
         hearingRange: 200,
+        baseHearingRange: 200,
         isChasing: false,
         soundCooldown: 0,
       },
@@ -461,6 +470,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 90,
         sightRange: 200,
+        baseSightRange: 200,
         isChasing: false,
         dashSpeed: 200,
         isDashing: false,
@@ -479,6 +489,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0, // Never chases
         sightRange: 0, // Doesn't care about player
+        baseSightRange: 0,
         isChasing: false,
       },
     ],
@@ -576,6 +587,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
       {
@@ -596,6 +608,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 120,
         sightRange: 150,
+        baseSightRange: 150,
         isChasing: false,
         lostSightCooldown: 0,
       },
@@ -617,11 +630,14 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 110,
         sightRange: 120,
+        baseSightRange: 120,
         hearingRange: 180,
+        baseHearingRange: 180,
         isChasing: false,
         pitId: "pit1",
         isInPit: true,
-        patrolDuration: 8000, // 4 seconds patrol
+        patrolDuration: 8000, // 8 seconds patrol
+        patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
       {
@@ -641,11 +657,14 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 115,
         sightRange: 130,
+        baseSightRange: 130,
         hearingRange: 170,
+        baseHearingRange: 170,
         isChasing: false,
         pitId: "pit1",
         isInPit: true,
         patrolDuration: 3500, // 3.5 seconds patrol
+        patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
       {
@@ -665,11 +684,14 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 105,
         sightRange: 110,
+        baseSightRange: 110,
         hearingRange: 160,
+        baseHearingRange: 160,
         isChasing: false,
         pitId: "pit1",
         isInPit: true,
         patrolDuration: 4500, // 4.5 seconds patrol
+        patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
       {
@@ -689,11 +711,14 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 105,
         sightRange: 110,
+        baseSightRange: 110,
         hearingRange: 160,
+        baseHearingRange: 160,
         isChasing: false,
         pitId: "pit2",
         isInPit: true,
         patrolDuration: 4500, // 4.5 seconds patrol
+        patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
       {
@@ -713,11 +738,14 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 105,
         sightRange: 110,
+        baseSightRange: 110,
         hearingRange: 160,
+        baseHearingRange: 160,
         isChasing: false,
         pitId: "pit2",
         isInPit: true,
         patrolDuration: 4500, // 4.5 seconds patrol
+        patrolStartTime: 0, // Initialize patrol timing
         lostSightCooldown: 0,
       },
     ],
@@ -730,8 +758,12 @@ export const LEVELS: Level[] = [
         y: 450,
         radius: 25,
         snakeIds: ["rattlesnake1", "rattlesnake2", "rattlesnake3"],
-        lastEmergenceTime: 0,
-        emergenceInterval: 3000, // 3 seconds between emergences
+        currentSnakeIndex: 0, // Which snake in the list should emerge next
+        nextEmergenceTime: 3000, // When the next snake should emerge (3s initial delay)
+        lastEmergenceTime: 0, // When a snake last emerged
+        emergenceInterval: 1000, // Time between snake emergences (1s delay)
+        isSnakePatrolling: false, // Is a snake from this pit currently patrolling
+        lightEmergedSnakesReturning: 0, // Count of snakes returning from light emergence
       },
       {
         id: "pit2",
@@ -739,8 +771,12 @@ export const LEVELS: Level[] = [
         y: 150,
         radius: 25,
         snakeIds: ["rattlesnake4", "rattlesnake5"],
-        lastEmergenceTime: 0,
-        emergenceInterval: 3000, // 3 seconds between emergences
+        currentSnakeIndex: 0, // Which snake in the list should emerge next
+        nextEmergenceTime: 3000, // When the next snake should emerge (3s initial delay)
+        lastEmergenceTime: 0, // When a snake last emerged
+        emergenceInterval: 1000, // Time between snake emergences (1s delay)
+        isSnakePatrolling: false, // Is a snake from this pit currently patrolling
+        lightEmergedSnakesReturning: 0, // Count of snakes returning from light emergence
       },
     ],
     lightSource: {
@@ -859,6 +895,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
             },
             {
@@ -873,6 +910,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
@@ -892,6 +930,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
@@ -911,6 +950,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
@@ -930,6 +970,7 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
               currentTileId: undefined,
               entryDirection: undefined,
@@ -956,8 +997,9 @@ export const LEVELS: Level[] = [
               patrolDirection: 1,
               chaseSpeed: 0,
               sightRange: 0,
+              baseSightRange: 0,
               isChasing: false,
-              lastFireTime: Date.now(),
+              lastFireTime: 0, // Start with no recent fire time
               fireInterval: 3000, // 3 seconds
               shotCount: 0, // Start at 0 shots
             },
@@ -1081,6 +1123,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
       {
@@ -1098,7 +1141,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 125,
         sightRange: 0, // Stalkers are blind
+        baseSightRange: 0,
         hearingRange: 300,
+        baseHearingRange: 300,
         isChasing: false,
         soundCooldown: 0,
       },
@@ -1114,6 +1159,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       },
       {
@@ -1135,6 +1181,7 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 150,
         sightRange: 100,
+        baseSightRange: 100,
         isChasing: false,
         lostSightCooldown: 0,
       },
@@ -1155,7 +1202,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 250, // Very fast when berserk
         sightRange: 150, // Good sight range when berserk
+        baseSightRange: 150,
         hearingRange: 200, // Can hear player when in darkness
+        baseHearingRange: 200,
         isChasing: false,
         isInDarkness: true, // Start in darkness state
         isBerserk: false,
@@ -1179,7 +1228,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 250, // Very fast when berserk
         sightRange: 150, // Good sight range when berserk
+        baseSightRange: 150,
         hearingRange: 200, // Can hear player when in darkness
+        baseHearingRange: 200,
         isChasing: false,
         isInDarkness: true, // Start in darkness state
         isBerserk: false,
@@ -1203,7 +1254,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 250, // Very fast when berserk
         sightRange: 150, // Good sight range when berserk
+        baseSightRange: 150,
         hearingRange: 200, // Can hear player when in darkness
+        baseHearingRange: 200,
         isChasing: false,
         isInDarkness: true, // Start in darkness state
         isBerserk: false,
@@ -1416,7 +1469,9 @@ export const LEVELS: Level[] = [
         patrolDirection: 1,
         chaseSpeed: 150,
         sightRange: 800, // Entire level width
+        baseSightRange: 800,
         hearingRange: 600, // Entire level height
+        baseHearingRange: 600,
         isChasing: false,
       },
     ],

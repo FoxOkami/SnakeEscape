@@ -1,0 +1,166 @@
+Console.js:61 🎯 BOULDER HIT [Frame 6751]: boulder_top_right - hitCount before: 0, maxHits: 2
+Console.js:61 🎯 BOULDER HIT [Frame 6751]: boulder_top_right - hitCount after: 1, will destroy: false
+Console.js:61 🐍 SCREENSAVER CHECK [Frame 6751]: boulder=boulder_top_right, hasSpawned=undefined, hitCount=1, totalHit=1
+Console.js:61 🐍 SCREENSAVER SPAWN [Frame 6751]: Spawning screensaver snake for boulder_top_right
+Console.js:61 🔄 BOULDER RECOIL [Frame 6751]: Starting recoil for boulder_top_right, distance: 93.13
+Console.js:61 🐍 GAME LOOP: Processing spawnScreensaverSnake for snake valerie
+Console.js:61 🐍 GAME LOOP: Created screensaver snake screensaver_snake_1757820755719 at position (583.0396713938192, 115.75547037067071)
+Console.js:61 🐍 GAME LOOP: Added to newSnakes array, total newSnakes: 2
+Console.js:61 🎯 RECOIL COMPLETE [Frame 6811]: Transitioning to movingToCenter after boulder collision
+Console.js:61 🎯 BOULDER HIT [Frame 7050]: boulder_top_right - hitCount before: 1, maxHits: 2
+Console.js:61 🎯 BOULDER HIT [Frame 7050]: boulder_top_right - hitCount after: 2, will destroy: true
+Console.js:61 🔄 BOULDER RECOIL [Frame 7050]: Starting recoil for boulder_top_right, distance: 65.00
+Console.js:61 🎯 RECOIL COMPLETE [Frame 7090]: Transitioning to movingToCenter after boulder collision
+Console.js:61 👻 PHASE 2 [Frame 7199]: Valerie entering waitingForPhantom state at wall position (20, 235)
+Console.js:61 👻 PHANTOM SPAWN [Frame 7200]: Spawning phantom 1/8 with ID phantom_1757820763465_0
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820763465_0 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 4
+Console.js:61 👻 PHANTOM SPAWN [Frame 7235]: Spawning phantom 2/8 with ID phantom_1757820764049_1
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820764049_1 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 5
+Console.js:61 👻 PHANTOM SPAWN [Frame 7271]: Spawning phantom 3/8 with ID phantom_1757820764648_2
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820764648_2 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 6
+Console.js:61 👻 PHANTOM SPAWN [Frame 7307]: Spawning phantom 4/8 with ID phantom_1757820765248_3
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820765248_3 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 7
+Console.js:61 👻 PHANTOM SPAWN [Frame 7343]: Spawning phantom 5/8 with ID phantom_1757820765848_4
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820765848_4 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 8
+Console.js:61 👻 PHANTOM SPAWN [Frame 7379]: Spawning phantom 6/8 with ID phantom_1757820766448_5
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820766448_5 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 9
+Console.js:61 👻 PHANTOM SPAWN [Frame 7415]: Spawning phantom 7/8 with ID phantom_1757820767048_6
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820767048_6 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 10
+Console.js:61 👻 PHANTOM SPAWN [Frame 7451]: Spawning phantom 8/8 with ID phantom_1757820767649_7
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820767649_7 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 11
+Console.js:61 🎯 BOULDER HIT [Frame 7811]: boulder_bottom_left - hitCount before: 0, maxHits: 2
+Console.js:61 🎯 BOULDER HIT [Frame 7811]: boulder_bottom_left - hitCount after: 1, will destroy: false
+Console.js:61 🐍 SCREENSAVER CHECK [Frame 7811]: boulder=boulder_bottom_left, hasSpawned=undefined, hitCount=1, totalHit=2
+Console.js:61 🐍 SCREENSAVER SPAWN [Frame 7811]: Spawning screensaver snake for boulder_bottom_left
+Console.js:61 🔄 BOULDER RECOIL [Frame 7811]: Starting recoil for boulder_bottom_left, distance: 65.00
+Console.js:61 🐍 GAME LOOP: Processing spawnScreensaverSnake for snake valerie
+Console.js:61 🐍 GAME LOOP: Created screensaver snake screensaver_snake_1757820773652 at position (91.43903377481698, 381.73661457637934)
+Console.js:61 🐍 GAME LOOP: Added to newSnakes array, total newSnakes: 4
+Console.js:61 👻 PHASE 2 [Frame 7952]: Valerie entering waitingForPhantom state at wall position (20, 235)
+Console.js:61 👻 PHANTOM SPAWN [Frame 7953]: Spawning phantom 1/8 with ID phantom_1757820776131_0
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820776131_0 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 5
+Console.js:61 👻 PHANTOM SPAWN [Frame 7988]: Spawning phantom 2/8 with ID phantom_1757820776715_1
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820776715_1 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 6
+Console.js:61 👻 PHANTOM SPAWN [Frame 8024]: Spawning phantom 3/8 with ID phantom_1757820777315_2
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820777315_2 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 7
+Console.js:61 👻 PHANTOM SPAWN [Frame 8060]: Spawning phantom 4/8 with ID phantom_1757820777915_3
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820777915_3 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 8
+Console.js:61 👻 PHANTOM SPAWN [Frame 8096]: Spawning phantom 5/8 with ID phantom_1757820778515_4
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820778515_4 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 9
+Console.js:61 👻 PHANTOM SPAWN [Frame 8130]: Spawning phantom 6/8 with ID phantom_1757820779115_5
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820779115_5 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 10
+Console.js:61 👻 PHANTOM SPAWN [Frame 8165]: Spawning phantom 7/8 with ID phantom_1757820779752_6
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820779752_6 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 11
+Console.js:61 👻 PHANTOM SPAWN [Frame 8198]: Spawning phantom 8/8 with ID phantom_1757820780315_7
+Console.js:61 👻 GAME LOOP: Processing spawnPhantom for snake valerie
+Console.js:61 👻 GAME LOOP: Created phantom snake phantom_1757820780315_7 at position (20, 235)
+Console.js:61 👻 GAME LOOP: Added phantom to newSnakes array, total newSnakes: 12
+Console.js:61 🎯 BOULDER HIT [Frame 8770]: boulder_bottom_right - hitCount before: 0, maxHits: 2
+Console.js:61 🎯 BOULDER HIT [Frame 8770]: boulder_bottom_right - hitCount after: 1, will destroy: false
+Console.js:61 🐍 SCREENSAVER CHECK [Frame 8770]: boulder=boulder_bottom_right, hasSpawned=undefined, hitCount=1, totalHit=3
+Console.js:61 🔄 BOULDER RECOIL [Frame 8770]: Starting recoil for boulder_bottom_right, distance: 65.00
+Console.js:61 🎯 RECOIL COMPLETE [Frame 8818]: Transitioning to movingToCenter after boulder collision
+Console.js:61 💥 PHASE 3 [Frame 9031]: Valerie entering projectileBarrage state at center position (400, 300)
+Console.js:61 💥 PROJECTILE FIRE [Frame 9032]: Firing round 1/4 with 0° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 0, roundAngleShift: 0
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=0, roundAngleShift=0
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 0
+Console.js:61 🎯 FIREPROJECTILES: Adding 24 projectiles to state (currently has 0)
+Console.js:61 💥 PROJECTILE FIRE [Frame 9061]: Firing round 2/4 with 3° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 1, roundAngleShift: 3
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=1, roundAngleShift=3
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 1
+Console.js:61 🎯 FIREPROJECTILES: Adding 24 projectiles to state (currently has 0)
+Console.js:61 💥 PROJECTILE FIRE [Frame 9090]: Firing round 3/4 with 6° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 2, roundAngleShift: 6
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=2, roundAngleShift=6
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 2
+Console.js:61 🎯 FIREPROJECTILES: Adding 24 projectiles to state (currently has 0)
+Console.js:61 💥 PROJECTILE FIRE [Frame 9119]: Firing round 4/4 with 9° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 3, roundAngleShift: 9
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=3, roundAngleShift=9
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 3
+Console.js:61 🎯 FIREPROJECTILES: Adding 24 projectiles to state (currently has 0)
+Console.js:61 🎯 BOULDER HIT [Frame 9230]: boulder_top_left - hitCount before: 0, maxHits: 2
+Console.js:61 🎯 BOULDER HIT [Frame 9230]: boulder_top_left - hitCount after: 1, will destroy: false
+Console.js:61 🐍 SCREENSAVER CHECK [Frame 9230]: boulder=boulder_top_left, hasSpawned=undefined, hitCount=1, totalHit=4
+Console.js:61 🔄 BOULDER RECOIL [Frame 9230]: Starting recoil for boulder_top_left, distance: 79.29
+Console.js:61 🎯 RECOIL COMPLETE [Frame 9279]: Transitioning to movingToCenter after boulder collision
+Console.js:61 💥 PHASE 3 [Frame 9482]: Valerie entering projectileBarrage state at center position (400, 300)
+Console.js:61 💥 PROJECTILE FIRE [Frame 9483]: Firing round 1/4 with 0° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 0, roundAngleShift: 0
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=0, roundAngleShift=0
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 0
+Console.js:61 🎯 FIREPROJECTILES: Adding 24 projectiles to state (currently has 0)
+Console.js:61 💥 PROJECTILE FIRE [Frame 9512]: Firing round 2/4 with 3° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 1, roundAngleShift: 3
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=1, roundAngleShift=3
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 1
+Console.js:61 🎯 FIREPROJECTILES: Adding 24 projectiles to state (currently has 0)
+Console.js:61 💥 PROJECTILE FIRE [Frame 9542]: Firing round 3/4 with 6° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 2, roundAngleShift: 6
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=2, roundAngleShift=6
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 2
+Console.js:61 🎯 FIREPROJECTILES: Adding 24 projectiles to state (currently has 0)
+Console.js:61 💥 PROJECTILE FIRE [Frame 9572]: Firing round 4/4 with 9° shift
+Console.js:61 💥 GAME LOOP: Processing fireProjectiles for snake valerie
+Console.js:61 💥 FIRE DEBUG: Snake valerie, type: boss, bossPhase: 3, burstRound: 3, roundAngleShift: 9
+Console.js:61 💥 FIRE DEBUG: isBossProjectiles = true
+Console.js:61 💥 CONDITION CHECK: isBossProjectiles=true, burstRound=3, roundAngleShift=9
+Console.js:61 💥 ENTERING BOSS PROJECTILE CREATION
+Console.js:61 💥 PROJECTILE CREATE: Created 24 boss projectiles for round 3
+Console.js:61 🎯 FIREPROJECTILES: Adding 24 projectiles to state (currently has 0)
+Console.js:61 🎯 BOULDER HIT [Frame 9686]: boulder_top_left - hitCount before: 1, maxHits: 2
+Console.js:61 🎯 BOULDER HIT [Frame 9686]: boulder_top_left - hitCount after: 2, will destroy: true
+Console.js:61 🔄 BOULDER RECOIL [Frame 9686]: Starting recoil for boulder_top_left, distance: 80.80
