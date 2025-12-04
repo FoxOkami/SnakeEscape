@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useHubStore } from "../../lib/stores/useHubStore";
 import { useSnakeGame } from "../../lib/stores/useSnakeGame";
+import { useTicketStore } from "../../lib/stores/useTicketStore";
 import {
   useKeyBindings,
   type KeyBindings,
@@ -37,6 +38,8 @@ const HubRoom: React.FC = () => {
     endInteraction,
     closeSettingsModal,
   } = useHubStore();
+
+  const tickets = useTicketStore((state) => state.tickets);
 
   const {
     startLevel,
@@ -322,6 +325,18 @@ const HubRoom: React.FC = () => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
     } else if (
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "secretospuntos"
+    ) {
+      // Award 1000 tickets
+      const { addTickets } = useTicketStore.getState();
+      addTickets(1000);
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
+    } else if (
       /*------------*/
       /* Everything */
       /*------------*/
@@ -353,9 +368,8 @@ const HubRoom: React.FC = () => {
         {Array.from({ length: gamePlayer.maxHealth }, (_, index) => (
           <div
             key={index}
-            className={`w-8 h-8 text-2xl font-bold flex items-center justify-center ${
-              index < gamePlayer.health ? "text-yellow-400" : "text-gray-600"
-            } ${gamePlayer.isInvincible ? "animate-pulse" : ""}`}
+            className={`w-8 h-8 text-2xl font-bold flex items-center justify-center ${index < gamePlayer.health ? "text-yellow-400" : "text-gray-600"
+              } ${gamePlayer.isInvincible ? "animate-pulse" : ""}`}
             style={{
               filter: gamePlayer.isInvincible ? "brightness(1.5)" : "none",
               textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
@@ -609,7 +623,7 @@ const HubRoom: React.FC = () => {
         // Draw interaction prompt if player is near
         const distance = Math.sqrt(
           Math.pow(player.position.x - npc.position.x, 2) +
-            Math.pow(player.position.y - npc.position.y, 2),
+          Math.pow(player.position.y - npc.position.y, 2),
         );
 
         if (distance < 80 && interactionState === "idle") {
@@ -675,7 +689,7 @@ const HubRoom: React.FC = () => {
       // Draw door interaction prompt
       const doorDistance = Math.sqrt(
         Math.pow(player.position.x - door.position.x, 2) +
-          Math.pow(player.position.y - door.position.y, 2),
+        Math.pow(player.position.y - door.position.y, 2),
       );
 
       if (doorDistance < 50 && interactionState === "idle" && !hasKey) {
@@ -861,11 +875,10 @@ const HubRoom: React.FC = () => {
                     <span className="text-sm text-gray-700">Move Up</span>
                     <button
                       onClick={() => setEditingKeyBinding("up")}
-                      className={`px-3 py-1 text-xs rounded transition-colors ${
-                        editingKeyBinding === "up"
-                          ? "bg-white border-2 border-red-500 text-transparent"
-                          : "bg-gray-100 border hover:bg-gray-200"
-                      }`}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${editingKeyBinding === "up"
+                        ? "bg-white border-2 border-red-500 text-transparent"
+                        : "bg-gray-100 border hover:bg-gray-200"
+                        }`}
                     >
                       {editingKeyBinding === "up"
                         ? ""
@@ -877,11 +890,10 @@ const HubRoom: React.FC = () => {
                     <span className="text-sm text-gray-700">Move Down</span>
                     <button
                       onClick={() => setEditingKeyBinding("down")}
-                      className={`px-3 py-1 text-xs rounded transition-colors ${
-                        editingKeyBinding === "down"
-                          ? "bg-white border-2 border-red-500 text-transparent"
-                          : "bg-gray-100 border hover:bg-gray-200"
-                      }`}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${editingKeyBinding === "down"
+                        ? "bg-white border-2 border-red-500 text-transparent"
+                        : "bg-gray-100 border hover:bg-gray-200"
+                        }`}
                     >
                       {editingKeyBinding === "down"
                         ? ""
@@ -893,11 +905,10 @@ const HubRoom: React.FC = () => {
                     <span className="text-sm text-gray-700">Move Left</span>
                     <button
                       onClick={() => setEditingKeyBinding("left")}
-                      className={`px-3 py-1 text-xs rounded transition-colors ${
-                        editingKeyBinding === "left"
-                          ? "bg-white border-2 border-red-500 text-transparent"
-                          : "bg-gray-100 border hover:bg-gray-200"
-                      }`}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${editingKeyBinding === "left"
+                        ? "bg-white border-2 border-red-500 text-transparent"
+                        : "bg-gray-100 border hover:bg-gray-200"
+                        }`}
                     >
                       {editingKeyBinding === "left"
                         ? ""
@@ -909,11 +920,10 @@ const HubRoom: React.FC = () => {
                     <span className="text-sm text-gray-700">Move Right</span>
                     <button
                       onClick={() => setEditingKeyBinding("right")}
-                      className={`px-3 py-1 text-xs rounded transition-colors ${
-                        editingKeyBinding === "right"
-                          ? "bg-white border-2 border-red-500 text-transparent"
-                          : "bg-gray-100 border hover:bg-gray-200"
-                      }`}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${editingKeyBinding === "right"
+                        ? "bg-white border-2 border-red-500 text-transparent"
+                        : "bg-gray-100 border hover:bg-gray-200"
+                        }`}
                     >
                       {editingKeyBinding === "right"
                         ? ""
@@ -925,11 +935,10 @@ const HubRoom: React.FC = () => {
                     <span className="text-sm text-gray-700">Interact</span>
                     <button
                       onClick={() => setEditingKeyBinding("interact")}
-                      className={`px-3 py-1 text-xs rounded transition-colors ${
-                        editingKeyBinding === "interact"
-                          ? "bg-white border-2 border-red-500 text-transparent"
-                          : "bg-gray-100 border hover:bg-gray-200"
-                      }`}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${editingKeyBinding === "interact"
+                        ? "bg-white border-2 border-red-500 text-transparent"
+                        : "bg-gray-100 border hover:bg-gray-200"
+                        }`}
                     >
                       {editingKeyBinding === "interact"
                         ? ""
@@ -943,11 +952,10 @@ const HubRoom: React.FC = () => {
                     </span>
                     <button
                       onClick={() => setEditingKeyBinding("secondaryInteract")}
-                      className={`px-3 py-1 text-xs rounded transition-colors ${
-                        editingKeyBinding === "secondaryInteract"
-                          ? "bg-white border-2 border-red-500 text-transparent"
-                          : "bg-gray-100 border hover:bg-gray-200"
-                      }`}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${editingKeyBinding === "secondaryInteract"
+                        ? "bg-white border-2 border-red-500 text-transparent"
+                        : "bg-gray-100 border hover:bg-gray-200"
+                        }`}
                     >
                       {editingKeyBinding === "secondaryInteract"
                         ? ""
@@ -959,11 +967,10 @@ const HubRoom: React.FC = () => {
                     <span className="text-sm text-gray-700">Walk (Hold)</span>
                     <button
                       onClick={() => setEditingKeyBinding("walking")}
-                      className={`px-3 py-1 text-xs rounded transition-colors ${
-                        editingKeyBinding === "walking"
-                          ? "bg-white border-2 border-red-500 text-transparent"
-                          : "bg-gray-100 border hover:bg-gray-200"
-                      }`}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${editingKeyBinding === "walking"
+                        ? "bg-white border-2 border-red-500 text-transparent"
+                        : "bg-gray-100 border hover:bg-gray-200"
+                        }`}
                     >
                       {editingKeyBinding === "walking"
                         ? ""
@@ -975,11 +982,10 @@ const HubRoom: React.FC = () => {
                     <span className="text-sm text-gray-700">Dash</span>
                     <button
                       onClick={() => setEditingKeyBinding("dash")}
-                      className={`px-3 py-1 text-xs rounded transition-colors ${
-                        editingKeyBinding === "dash"
-                          ? "bg-white border-2 border-red-500 text-transparent"
-                          : "bg-gray-100 border hover:bg-gray-200"
-                      }`}
+                      className={`px-3 py-1 text-xs rounded transition-colors ${editingKeyBinding === "dash"
+                        ? "bg-white border-2 border-red-500 text-transparent"
+                        : "bg-gray-100 border hover:bg-gray-200"
+                        }`}
                     >
                       {editingKeyBinding === "dash"
                         ? ""
@@ -992,22 +998,21 @@ const HubRoom: React.FC = () => {
                   <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
                     <p className="text-sm text-red-700">
                       {keyBindingError ||
-                        `Press any key to bind to "${
-                          editingKeyBinding === "up"
-                            ? "Move Up"
-                            : editingKeyBinding === "down"
-                              ? "Move Down"
-                              : editingKeyBinding === "left"
-                                ? "Move Left"
-                                : editingKeyBinding === "right"
-                                  ? "Move Right"
-                                  : editingKeyBinding === "interact"
-                                    ? "Interact"
-                                    : editingKeyBinding === "secondaryInteract"
-                                      ? "Secondary Item Interaction"
-                                      : editingKeyBinding === "walking"
-                                        ? "Walk (Hold)"
-                                        : "Dash"
+                        `Press any key to bind to "${editingKeyBinding === "up"
+                          ? "Move Up"
+                          : editingKeyBinding === "down"
+                            ? "Move Down"
+                            : editingKeyBinding === "left"
+                              ? "Move Left"
+                              : editingKeyBinding === "right"
+                                ? "Move Right"
+                                : editingKeyBinding === "interact"
+                                  ? "Interact"
+                                  : editingKeyBinding === "secondaryInteract"
+                                    ? "Secondary Item Interaction"
+                                    : editingKeyBinding === "walking"
+                                      ? "Walk (Hold)"
+                                      : "Dash"
                         }"`}
                     </p>
                   </div>
@@ -1017,9 +1022,8 @@ const HubRoom: React.FC = () => {
               {/* Enter Cheat Codes Section */}
               <div className="space-y-4">
                 <h3
-                  className={`text-lg font-semibold transition-colors duration-200 ${
-                    cheatCodeSuccess ? "text-green-600" : "text-gray-800"
-                  }`}
+                  className={`text-lg font-semibold transition-colors duration-200 ${cheatCodeSuccess ? "text-green-600" : "text-gray-800"
+                    }`}
                 >
                   Enter Cheat Codes
                 </h3>
@@ -1045,12 +1049,18 @@ const HubRoom: React.FC = () => {
       {renderHealthDisplay()}
 
       {/* Level name badge and dash indicator (same style as game levels) */}
-      <div className="absolute top-4 left-20 z-5 flex gap-2">
+      <div className="absolute top-4 left-20 z-50 flex gap-2">
         <Badge
           variant="secondary"
           className="bg-gray-800 text-white border-gray-600"
         >
           Snake Room
+        </Badge>
+        <Badge
+          variant="secondary"
+          className="bg-yellow-600 text-white border-yellow-500"
+        >
+          🎟️ Tickets: {tickets}
         </Badge>
         {(() => {
           const gameState = useSnakeGame.getState();

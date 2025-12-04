@@ -22,6 +22,7 @@ import {
   Boulder,
   MiniBoulder,
 } from "../game/types";
+import { useTicketStore } from "./useTicketStore";
 
 // Inventory item interface
 export interface InventoryItem {
@@ -91,6 +92,7 @@ interface SnakeGameState extends GameData {
   updateGame: (deltaTime: number) => void;
   nextLevel: () => void;
   returnToMenu: () => void;
+  handlePlayerDeath: () => void;
 
   // Input state
   keysPressed: Set<string>;
@@ -209,6 +211,9 @@ interface SnakeGameState extends GameData {
 
   // Phantom removal control
   phantomRemovalInProgress?: boolean;
+
+  // Transition state to prevent double actions
+  isTransitioning?: boolean;
 }
 
 const BASE_PLAYER_SPEED = 150; // base pixels per second
@@ -403,6 +408,15 @@ function lineIntersectsRect(
   return tMin <= tMax;
 }
 
+function factorial(n: number): number {
+  if (n === 0 || n === 1) return 1;
+  let result = 1;
+  for (let i = 2; i <= n; i++) {
+    result *= i;
+  }
+  return result;
+}
+
 export const useSnakeGame = create<SnakeGameState>()(
   subscribeWithSelector((set, get) => ({
     // Initial state
@@ -422,6 +436,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       isInvincible: false,
       invincibilityEndTime: 0,
     },
+    isTransitioning: false,
     snakes: [],
     walls: [],
     door: { x: 0, y: 0, width: 30, height: 40, isOpen: false },
@@ -725,6 +740,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         currentLevel: levelIndex,
         currentLevelKey: getLevelKeyByIndex(levelIndex),
         gameState: "playing",
+        isTransitioning: false,
         player: {
           position: { ...level.player },
           size: { width: 32, height: 32 },
@@ -908,6 +924,19 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     nextLevel: () => {
       const state = get();
+      if (state.isTransitioning) return; // Prevent double calls
+      set({ isTransitioning: true });
+
+      // The level that was just COMPLETED
+      // NOTE: state.currentLevel appears to already be 1-indexed (Level 1 = 1, not 0)
+      const completedLevelNum = state.currentLevel; // Use as-is, don't add 1
+
+      // Calculate tickets earned: (lives * level) + level!
+      const lives = state.player.health;
+      const ticketsEarned = (lives * completedLevelNum) + factorial(completedLevelNum);
+
+      useTicketStore.getState().addTickets(ticketsEarned);
+
       const nextLevelIndex = state.currentLevel + 1;
 
       if (nextLevelIndex >= LEVELS.length) {
@@ -955,7 +984,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Preserve current shield health, but cap it at the new maximum
       const preservedShieldHealth = Math.min(
         state.player.shieldHealth,
-        totalBiteProtection,
+        totalBiteProtection
       );
 
       set({
@@ -1208,6 +1237,20 @@ export const useSnakeGame = create<SnakeGameState>()(
       });
     },
 
+    handlePlayerDeath: () => {
+      const state = get();
+      if (state.gameState === "gameOver") return; // Already dead
+
+      // Award tickets for the level where player died
+      // NOTE: state.currentLevel appears to already be 1-indexed (Level 1 = 1, not 0)
+      const diedOnLevelNum = state.currentLevel; // Use as-is, don't add 1
+      const ticketsEarned = factorial(diedOnLevelNum);
+
+      useTicketStore.getState().addTickets(ticketsEarned);
+
+      set({ gameState: "gameOver", isTransitioning: false });
+    },
+
     updateGame: (deltaTime: number) => {
       const state = get();
       if (state.gameState !== "playing" || state.showInventory) return;
@@ -1447,7 +1490,7 @@ export const useSnakeGame = create<SnakeGameState>()(
                 // Check if reached pit location
                 const distanceToPit = Math.sqrt(
                   Math.pow(snake.position.x - pitPosition.x, 2) +
-                    Math.pow(snake.position.y - pitPosition.y, 2),
+                  Math.pow(snake.position.y - pitPosition.y, 2),
                 );
 
                 if (distanceToPit < 20) {
@@ -1968,8 +2011,8 @@ export const useSnakeGame = create<SnakeGameState>()(
 
         // Check if player dies (only when both health and shield are depleted)
         if (updatedPlayer.health <= 0 && updatedPlayer.shieldHealth <= 0) {
-          // Player is dead - game over
-          set({ gameState: "gameOver", player: updatedPlayer });
+          set({ player: updatedPlayer });
+          get().handlePlayerDeath();
           return;
         } else {
           // Player takes damage but survives - start invincibility period
@@ -2463,7 +2506,8 @@ export const useSnakeGame = create<SnakeGameState>()(
         updatedPlayer.invincibilityEndTime = performance.now() + 1000;
 
         if (updatedPlayer.health <= 0) {
-          set({ gameState: "gameOver", player: updatedPlayer });
+          set({ player: updatedPlayer });
+          get().handlePlayerDeath();
           return;
         }
       }
@@ -2542,7 +2586,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             }
           });
 
-          phantomsThatReturned.forEach((phantom) => {});
+          phantomsThatReturned.forEach((phantom) => { });
 
           // Remove all phantoms that have returned to spawn
           finalSnakes = finalSnakes.filter(
@@ -2654,11 +2698,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           throwableItems: state.throwableItems.map((item, index) =>
             index === itemIndex
               ? {
-                  ...item,
-                  isPickedUp: false,
-                  x: state.player.position.x,
-                  y: state.player.position.y,
-                }
+                ...item,
+                isPickedUp: false,
+                x: state.player.position.x,
+                y: state.player.position.y,
+              }
               : item,
           ),
           carriedItem: null,
@@ -2681,13 +2725,13 @@ export const useSnakeGame = create<SnakeGameState>()(
         throwableItems: state.throwableItems.map((item, index) =>
           index === itemIndex
             ? {
-                ...item,
-                isThrown: true,
-                throwStartTime: currentTime,
-                throwDuration: throwDuration,
-                throwStartPos: { ...state.player.position },
-                throwTargetPos: { ...targetPosition },
-              }
+              ...item,
+              isThrown: true,
+              throwStartTime: currentTime,
+              throwDuration: throwDuration,
+              throwStartPos: { ...state.player.position },
+              throwTargetPos: { ...targetPosition },
+            }
             : item,
         ),
         carriedItem: null,
@@ -2707,11 +2751,11 @@ export const useSnakeGame = create<SnakeGameState>()(
         throwableItems: state.throwableItems.map((item, index) =>
           index === itemIndex
             ? {
-                ...item,
-                isPickedUp: false,
-                x: state.player.position.x,
-                y: state.player.position.y,
-              }
+              ...item,
+              isPickedUp: false,
+              x: state.player.position.x,
+              y: state.player.position.y,
+            }
             : item,
         ),
         carriedItem: null,
@@ -2735,7 +2779,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
         const distance = Math.sqrt(
           Math.pow(state.player.position.x - item.x, 2) +
-            Math.pow(state.player.position.y - item.y, 2),
+          Math.pow(state.player.position.y - item.y, 2),
         );
         return distance < 50; // Pickup range
       });
@@ -2746,11 +2790,11 @@ export const useSnakeGame = create<SnakeGameState>()(
       const closestItem = nearbyItems.reduce((closest, item) => {
         const closestDistance = Math.sqrt(
           Math.pow(state.player.position.x - closest.x, 2) +
-            Math.pow(state.player.position.y - closest.y, 2),
+          Math.pow(state.player.position.y - closest.y, 2),
         );
         const itemDistance = Math.sqrt(
           Math.pow(state.player.position.x - item.x, 2) +
-            Math.pow(state.player.position.y - item.y, 2),
+          Math.pow(state.player.position.y - item.y, 2),
         );
         return itemDistance < closestDistance ? item : closest;
       });
@@ -2772,16 +2816,16 @@ export const useSnakeGame = create<SnakeGameState>()(
         const distance = Math.sqrt(
           Math.pow(
             state.player.position.x +
-              state.player.size.width / 2 -
-              (mirror.x + mirror.width / 2),
+            state.player.size.width / 2 -
+            (mirror.x + mirror.width / 2),
             2,
           ) +
-            Math.pow(
-              state.player.position.y +
-                state.player.size.height / 2 -
-                (mirror.y + mirror.height / 2),
-              2,
-            ),
+          Math.pow(
+            state.player.position.y +
+            state.player.size.height / 2 -
+            (mirror.y + mirror.height / 2),
+            2,
+          ),
         );
         return distance < 60; // Interaction range
       });
@@ -2796,9 +2840,9 @@ export const useSnakeGame = create<SnakeGameState>()(
         mirrors: state.mirrors.map((mirror) =>
           mirror.id === nearbyMirror.id
             ? {
-                ...mirror,
-                rotation: (mirror.rotation + rotationChange + 360) % 360,
-              }
+              ...mirror,
+              rotation: (mirror.rotation + rotationChange + 360) % 360,
+            }
             : mirror,
         ),
       });
@@ -2821,10 +2865,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           state.player.position.x + state.player.size.width / 2 - centerX,
           2,
         ) +
-          Math.pow(
-            state.player.position.y + state.player.size.height / 2 - centerY,
-            2,
-          ),
+        Math.pow(
+          state.player.position.y + state.player.size.height / 2 - centerY,
+          2,
+        ),
       );
 
       if (distance > 60) return; // Must be within interaction range
@@ -3130,9 +3174,9 @@ export const useSnakeGame = create<SnakeGameState>()(
                 // Show blocked indicator on the tile we couldn't reach
                 const blockedPosition = nextTile
                   ? {
-                      x: nextTile.x + nextTile.width / 2,
-                      y: nextTile.y + nextTile.height / 2,
-                    }
+                    x: nextTile.x + nextTile.width / 2,
+                    y: nextTile.y + nextTile.height / 2,
+                  }
                   : undefined;
 
                 // Spawn spitter snake at blocked position
@@ -3595,7 +3639,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       ) {
         return { hitCount: 0 };
       }
-      
+
       const player = currentPlayer || state.player; // Use provided player state or fall back to state
       const currentTime = Date.now();
       let hitCount = 0;
@@ -4238,11 +4282,11 @@ export const useSnakeGame = create<SnakeGameState>()(
                     teleporters: updatedTeleporters.map((t, idx) =>
                       idx === index
                         ? {
-                            ...t,
-                            isActive: false,
-                            activationStartTime: undefined,
-                            lastTeleportTime: teleportCooldownTime,
-                          }
+                          ...t,
+                          isActive: false,
+                          activationStartTime: undefined,
+                          lastTeleportTime: teleportCooldownTime,
+                        }
                         : t,
                     ),
                   };
@@ -4345,8 +4389,8 @@ export const useSnakeGame = create<SnakeGameState>()(
       // This prevents expensive calculations from running every frame
       const lightBeamHash =
         state.lightBeam &&
-        state.lightBeam.segments &&
-        state.lightBeam.segments.length > 0
+          state.lightBeam.segments &&
+          state.lightBeam.segments.length > 0
           ? `${state.lightBeam.segments.length}-${Math.round(state.lightBeam.segments[0]?.x || 0)}-${Math.round(state.lightBeam.segments[0]?.y || 0)}-${Math.round(state.lightBeam.segments[state.lightBeam.segments.length - 1]?.x || 0)}-${Math.round(state.lightBeam.segments[state.lightBeam.segments.length - 1]?.y || 0)}`
           : "no-beam";
 
@@ -4495,9 +4539,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (nearbyLeverSwitch.id === "light_switch") {
         updatedLightSource = state.lightSource
           ? {
-              ...state.lightSource,
-              isOn: !state.lightSource.isOn,
-            }
+            ...state.lightSource,
+            isOn: !state.lightSource.isOn,
+          }
           : null;
       }
 
