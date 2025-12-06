@@ -927,152 +927,158 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (state.isTransitioning) return; // Prevent double calls
       set({ isTransitioning: true });
 
-      // The level that was just COMPLETED
-      // NOTE: state.currentLevel appears to already be 1-indexed (Level 1 = 1, not 0)
-      const completedLevelNum = state.currentLevel; // Use as-is, don't add 1
+      try {
+        // The level that was just COMPLETED
+        // NOTE: state.currentLevel appears to already be 1-indexed (Level 1 = 1, not 0)
+        const completedLevelNum = state.currentLevel; // Use as-is, don't add 1
 
-      // Calculate tickets earned: (lives * level) + level!
-      const lives = state.player.health;
-      const ticketsEarned = (lives * completedLevelNum) + factorial(completedLevelNum);
+        // Calculate tickets earned: (lives * level) + level!
+        const lives = state.player.health;
+        const ticketsEarned = (lives * completedLevelNum) + factorial(completedLevelNum);
 
-      useTicketStore.getState().addTickets(ticketsEarned);
+        useTicketStore.getState().addTickets(ticketsEarned);
 
-      const nextLevelIndex = state.currentLevel + 1;
+        const nextLevelIndex = state.currentLevel + 1;
 
-      if (nextLevelIndex >= LEVELS.length) {
-        // All levels completed, return to hub
-        get().resetForHub();
-        return;
-      }
-
-      const level = LEVELS[nextLevelIndex];
-
-      // Handle Level 2 randomization for nextLevel progression
-      let levelSwitches = level.switches
-        ? level.switches.map((s) => ({ ...s }))
-        : [];
-      let levelThrowableItems = level.throwableItems
-        ? level.throwableItems.map((item) => ({ ...item }))
-        : [];
-
-      if (nextLevelIndex === 2) {
-        // Use pre-stored randomization from startGame if available
-        if (
-          state.level2RandomizedSwitches &&
-          state.level2RandomizedThrowableItems
-        ) {
-          levelSwitches = state.level2RandomizedSwitches.map((s) => ({ ...s }));
-          levelThrowableItems = state.level2RandomizedThrowableItems.map(
-            (item) => ({ ...item }),
-          );
-        } else {
-          // Fallback: generate new randomization
-          const randomization = randomizeLevel2();
-          levelSwitches = randomization.randomizedSwitches;
-          levelThrowableItems = randomization.randomizedThrowableItems;
+        if (nextLevelIndex >= LEVELS.length) {
+          // All levels completed, return to hub
+          get().resetForHub();
+          return;
         }
-      }
 
-      // Calculate shield health from all active items (both permanent and temporary)
-      let totalBiteProtection = 0;
-      state.inventoryItems.forEach((item) => {
-        if (item.isActive && item.modifiers.biteProtection) {
-          totalBiteProtection += item.modifiers.biteProtection;
+        const level = LEVELS[nextLevelIndex];
+
+        // Handle Level 2 randomization for nextLevel progression
+        let levelSwitches = level.switches
+          ? level.switches.map((s) => ({ ...s }))
+          : [];
+        let levelThrowableItems = level.throwableItems
+          ? level.throwableItems.map((item) => ({ ...item }))
+          : [];
+
+        if (nextLevelIndex === 2) {
+          // Use pre-stored randomization from startGame if available
+          if (
+            state.level2RandomizedSwitches &&
+            state.level2RandomizedThrowableItems
+          ) {
+            levelSwitches = state.level2RandomizedSwitches.map((s) => ({ ...s }));
+            levelThrowableItems = state.level2RandomizedThrowableItems.map(
+              (item) => ({ ...item }),
+            );
+          } else {
+            // Fallback: generate new randomization
+            const randomization = randomizeLevel2();
+            levelSwitches = randomization.randomizedSwitches;
+            levelThrowableItems = randomization.randomizedThrowableItems;
+          }
         }
-      });
 
-      // Preserve current shield health, but cap it at the new maximum
-      const preservedShieldHealth = Math.min(
-        state.player.shieldHealth,
-        totalBiteProtection
-      );
+        // Calculate shield health from all active items (both permanent and temporary)
+        let totalBiteProtection = 0;
+        state.inventoryItems.forEach((item) => {
+          if (item.isActive && item.modifiers.biteProtection) {
+            totalBiteProtection += item.modifiers.biteProtection;
+          }
+        });
 
-      set({
-        currentLevel: nextLevelIndex,
-        currentLevelKey: getLevelKeyByIndex(nextLevelIndex),
-        gameState: "playing",
-        player: {
-          position: { ...level.player },
-          size: { width: 32, height: 32 },
-          speed: BASE_PLAYER_SPEED,
-          hasKey: false,
-          health: state.player.health, // Preserve current health
-          maxHealth: 9,
-          shieldHealth: preservedShieldHealth, // Preserve current shield health
-          maxShieldHealth: totalBiteProtection,
-          isInvincible: false,
-          invincibilityEndTime: 0,
-        },
-        snakes: level.snakes.map((snake) => ({ ...snake })),
-        walls: level.walls.map((wall) => ({ ...wall })),
-        door: { ...level.door },
-        key: { ...level.key },
-        switches: levelSwitches,
-        throwableItems: levelThrowableItems,
-        // Clear pre-stored Level 2 data after using it
-        level2RandomizedSwitches: undefined,
-        level2RandomizedThrowableItems: undefined,
-        patternTiles: level.patternTiles
-          ? level.patternTiles.map((tile) => ({ ...tile }))
-          : [],
-        patternSequence: level.patternSequence
-          ? [...level.patternSequence]
-          : [],
-        currentPatternStep: 0,
-        carriedItem: null,
-        levelSize: { ...level.size },
-        mirrors: level.mirrors
-          ? level.mirrors.map((mirror) => ({ ...mirror }))
-          : [],
-        crystal: level.crystal ? { ...level.crystal } : null,
-        lightSource: level.lightSource ? { ...level.lightSource } : null,
-        lightBeam: null,
-        teleporters: level.teleporters
-          ? level.teleporters.map((teleporter) => ({ ...teleporter }))
-          : [],
-        snakePits: level.snakePits
-          ? level.snakePits.map((pit) => ({ ...pit }))
-          : [],
-        projectiles: [],
-        // Phase system initialization
-        currentPhase: level.currentPhase || "A",
-        phaseTimer: 0,
-        phaseDuration: level.phaseDuration || 10000,
-        puzzleShards: level.puzzleShards
-          ? level.puzzleShards.map((shard) => ({ ...shard }))
-          : [],
-        puzzlePedestal: level.puzzlePedestal
-          ? { ...level.puzzlePedestal }
-          : null,
-        phaseWalls: level.phaseWalls
-          ? level.phaseWalls.map((wall) => ({ ...wall }))
-          : [],
-        boulders: level.boulders
-          ? level.boulders.map((boulder) => ({ ...boulder }))
-          : [],
-        currentVelocity: { x: 0, y: 0 },
-        miniBoulders: [],
-        targetVelocity: { x: 0, y: 0 },
-        keysPressed: new Set(),
-        isWalking: false,
-        isDashing: false,
-        dashState: {
-          isActive: false,
-          startTime: 0,
-          startPosition: { x: 0, y: 0 },
-          direction: { x: 0, y: 0 },
-          progress: 0,
-          isInvulnerable: false,
-          lastDashTime: 0,
-          cooldownDuration: 1500, // 1.5 seconds in milliseconds
-        },
+        // Preserve current shield health, but cap it at the new maximum
+        const preservedShieldHealth = Math.min(
+          state.player.shieldHealth,
+          totalBiteProtection
+        );
 
-        // Reset PlayerController to ensure it doesn't have old position
-        playerController: null,
-      });
+        set({
+          currentLevel: nextLevelIndex,
+          currentLevelKey: getLevelKeyByIndex(nextLevelIndex),
+          gameState: "playing",
+          isTransitioning: false, // FIX: Reset transitioning flag
+          player: {
+            position: { ...level.player },
+            size: { width: 32, height: 32 },
+            speed: BASE_PLAYER_SPEED,
+            hasKey: false,
+            health: state.player.health, // Preserve current health
+            maxHealth: 9,
+            shieldHealth: preservedShieldHealth, // Preserve current shield health
+            maxShieldHealth: totalBiteProtection,
+            isInvincible: false,
+            invincibilityEndTime: 0,
+          },
+          snakes: level.snakes.map((snake) => ({ ...snake })),
+          walls: level.walls.map((wall) => ({ ...wall })),
+          door: { ...level.door },
+          key: { ...level.key },
+          switches: levelSwitches,
+          throwableItems: levelThrowableItems,
+          // Clear pre-stored Level 2 data after using it
+          level2RandomizedSwitches: undefined,
+          level2RandomizedThrowableItems: undefined,
+          patternTiles: level.patternTiles
+            ? level.patternTiles.map((tile) => ({ ...tile }))
+            : [],
+          patternSequence: level.patternSequence
+            ? [...level.patternSequence]
+            : [],
+          currentPatternStep: 0,
+          carriedItem: null,
+          levelSize: { ...level.size },
+          mirrors: level.mirrors
+            ? level.mirrors.map((mirror) => ({ ...mirror }))
+            : [],
+          crystal: level.crystal ? { ...level.crystal } : null,
+          lightSource: level.lightSource ? { ...level.lightSource } : null,
+          lightBeam: null,
+          teleporters: level.teleporters
+            ? level.teleporters.map((teleporter) => ({ ...teleporter }))
+            : [],
+          snakePits: level.snakePits
+            ? level.snakePits.map((pit) => ({ ...pit }))
+            : [],
+          projectiles: [],
+          // Phase system initialization
+          currentPhase: level.currentPhase || "A",
+          phaseTimer: 0,
+          phaseDuration: level.phaseDuration || 10000,
+          puzzleShards: level.puzzleShards
+            ? level.puzzleShards.map((shard) => ({ ...shard }))
+            : [],
+          puzzlePedestal: level.puzzlePedestal
+            ? { ...level.puzzlePedestal }
+            : null,
+          phaseWalls: level.phaseWalls
+            ? level.phaseWalls.map((wall) => ({ ...wall }))
+            : [],
+          boulders: level.boulders
+            ? level.boulders.map((boulder) => ({ ...boulder }))
+            : [],
+          currentVelocity: { x: 0, y: 0 },
+          miniBoulders: [],
+          targetVelocity: { x: 0, y: 0 },
+          keysPressed: new Set(),
+          isWalking: false,
+          isDashing: false,
+          dashState: {
+            isActive: false,
+            startTime: 0,
+            startPosition: { x: 0, y: 0 },
+            direction: { x: 0, y: 0 },
+            progress: 0,
+            isInvulnerable: false,
+            lastDashTime: 0,
+            cooldownDuration: 1500, // 1.5 seconds in milliseconds
+          },
 
-      // Force reconfigure PlayerController with new spawn position
-      get().configurePlayerController();
+          // Reset PlayerController to ensure it doesn't have old position
+          playerController: null,
+        });
+
+        // Force reconfigure PlayerController with new spawn position
+        get().configurePlayerController();
+      } catch (error) {
+        console.error("Error in nextLevel transition:", error);
+        set({ isTransitioning: false }); // Ensure flag is reset on error
+      }
     },
 
     returnToMenu: () => {
