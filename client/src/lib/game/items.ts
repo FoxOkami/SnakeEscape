@@ -13,7 +13,8 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       snakeChaseMultiplier: 0, // sets all snake chase values to 0
     },
-    isActive: true, // Permanent items should be active by default
+    isActive: true,
+    ticketCost: -1, // set to negative because it's not meant to be purchased
   }),
 
   /*------------------------*/
@@ -30,6 +31,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       walkSpeed: 2.0, // doubles walk speed
     },
     isActive: true,
+    ticketCost: 588,
   }),
 
   cinnamonRoll2005: () => ({
@@ -39,9 +41,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🍥",
     duration: "permanent" as const,
     modifiers: {
-      biteProtection: 7,
+      biteProtection: 6,
     },
     isActive: false,
+    ticketCost: 396,
   }),
 
   hypnodisc: () => ({
@@ -53,9 +56,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       dashCooldown: 0.9, // 10% less dash cooldown
       dashSpeed: 1.1, // 10% increase in dash speed
-      dashDuration: 1, // keeping duration at 1 means the distance is increased too
+      dashDuration: 1.1, // increase of .1 is actually closer to .2 because of other modifiers above
     },
-    isActive: true, // Permanent items should be active by default
+    isActive: true,
+    ticketCost: 322,
   }),
 
   lootGertysSausage: () => ({
@@ -69,6 +73,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       snakeHearingMultiplier: 0.97, // 3% reduction in snake hearing detection radius
     },
     isActive: false,
+    ticketCost: 262,
   }),
 
   natures2ndCarrot: () => ({
@@ -78,9 +83,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🕶️",
     duration: "permanent" as const,
     modifiers: {
-      biteProtection: 3,
+      biteProtection: 5,
     },
     isActive: true,
+    ticketCost: 213,
   }),
 
   caramelizedSalmonSticks: () => ({
@@ -93,6 +99,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       walkSpeed: 1.35, // 35% increase in walk speed
     },
     isActive: false,
+    ticketCost: 174,
   }),
 
   rangeFinder: () => ({
@@ -102,9 +109,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🎯",
     duration: "permanent" as const,
     modifiers: {
-      snakeSightMultiplier: 0.98,
+      snakeSightMultiplier: 0.96,
     },
     isActive: true,
+    ticketCost: 141,
   }),
 
   porkCone: () => ({
@@ -114,9 +122,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🍦",
     duration: "permanent" as const,
     modifiers: {
-      snakeHearingMultiplier: 0.97, // 3% reduction in snake hearing detection radius
+      snakeHearingMultiplier: 0.96, // 4% reduction in snake hearing detection radius
     },
     isActive: false,
+    ticketCost: 115,
   }),
 
   copperLinedGloves: () => ({
@@ -126,9 +135,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🧤",
     duration: "permanent" as const,
     modifiers: {
-      playerSpeed: 1.1,
+      playerSpeed: 1.2,
     },
     isActive: true,
+    ticketCost: 94,
   }),
 
   burgerDog: () => ({
@@ -143,6 +153,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       dashDuration: 0.91, // ~9% decrease in duration (1/1.1) to maintain similar distance as base
     },
     isActive: false,
+    ticketCost: 76,
   }),
 
   flute: () => ({
@@ -152,9 +163,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🪈",
     duration: "permanent" as const,
     modifiers: {
-      snakeChaseMultiplier: 0.95,
+      snakeChaseMultiplier: 0.9,
     },
     isActive: true,
+    ticketCost: 62,
   }),
 
   bbbgSandwich: () => ({
@@ -164,9 +176,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🥓",
     duration: "permanent" as const,
     modifiers: {
-      biteProtection: 5,
+      biteProtection: 4,
     },
     isActive: false,
+    ticketCost: 50,
   }),
 
   fullFlavoredCigarette: () => ({
@@ -179,6 +192,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       snakeSightMultiplier: 0.97, // 3% reduction in snake sight detection radius
     },
     isActive: false,
+    ticketCost: 41,
   }),
 
   butterJoggers: () => ({
@@ -188,9 +202,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "👖",
     duration: "permanent" as const,
     modifiers: {
-      snakeHearingMultiplier: 0.98, // 2% reduction in snake hearing detection radius
+      snakeHearingMultiplier: 0.97, // 3% reduction in snake hearing detection radius
     },
     isActive: true,
+    ticketCost: 33,
   }),
 
   meatPastry: () => ({
@@ -203,6 +218,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       playerSpeed: 1.15,
     },
     isActive: false,
+    ticketCost: 27,
   }),
 
   grippySocks: () => ({
@@ -215,6 +231,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       dashDuration: 1.2, // 20% increase in dash distance
     },
     isActive: true,
+    ticketCost: 22,
   }),
 
   drinkableGreens: () => ({
@@ -224,9 +241,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🌱",
     duration: "permanent" as const,
     modifiers: {
-      snakeChaseMultiplier: 0.92,
+      snakeChaseMultiplier: 0.95,
     },
     isActive: false,
+    ticketCost: 18,
   }),
 
   xxlButtonUpT: () => ({
@@ -236,9 +254,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "👕",
     duration: "permanent" as const,
     modifiers: {
-      biteProtection: 2,
+      biteProtection: 3,
     },
     isActive: true,
+    ticketCost: 15,
   }),
 
   redFlatCap: () => ({
@@ -248,9 +267,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "⛑️",
     duration: "permanent" as const,
     modifiers: {
-      snakeSightMultiplier: 0.99,
+      snakeSightMultiplier: 0.98,
     },
     isActive: true,
+    ticketCost: 12,
   }),
 
   craigersSnakeWater: () => ({
@@ -263,6 +283,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       snakeHearingMultiplier: 0.98,
     },
     isActive: false,
+    ticketCost: 10,
   }),
 
   creepyStuffedOwl: () => ({
@@ -272,9 +293,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🦉",
     duration: "permanent" as const,
     modifiers: {
-      playerSpeed: 1.05, // 5% increase in run speed
+      playerSpeed: 1.1, // 10% increase in run speed
     },
     isActive: true,
+    ticketCost: 8,
   }),
 
   coolMix: () => ({
@@ -287,6 +309,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       dashCooldown: 0.9,
     },
     isActive: false,
+    ticketCost: 6,
   }),
 
   joysFeet: () => ({
@@ -296,9 +319,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "👠",
     duration: "permanent" as const,
     modifiers: {
-      walkSpeed: 1.05, // 5% increase in walk speed
+      walkSpeed: 1.10, // 10% increase in walk speed
     },
     isActive: true,
+    ticketCost: 5,
   }),
 
   coldCrustlessPbj: () => ({
@@ -308,9 +332,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🥪",
     duration: "permanent" as const,
     modifiers: {
-      biteProtection: 3,
+      biteProtection: 2,
     },
     isActive: false,
+    ticketCost: 4,
   }),
 
   snakeOil: () => ({
@@ -320,9 +345,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🛢️",
     duration: "permanent" as const,
     modifiers: {
-      snakeSightMultiplier: 0.98, // 2% reduction in snake sight detection radius
+      snakeSightMultiplier: 0.99, // 1% reduction in snake sight detection radius
     },
     isActive: false,
+    ticketCost: 3,
   }),
 
   yoyo: () => ({
@@ -335,6 +361,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       snakeHearingMultiplier: 0.99, // 1% reduction in snake hearing detection radius
     },
     isActive: true,
+    ticketCost: 3,
   }),
 
   chocolateTaffyRoll: () => ({
@@ -344,9 +371,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🟤", // Brown circle emoji
     duration: "permanent" as const,
     modifiers: {
-      playerSpeed: 1.1, // increase run speed by 10%
+      playerSpeed: 1.05, // increase run speed by 5%
     },
     isActive: false,
+    ticketCost: 2,
   }),
 
   fingerTrap: () => ({
@@ -360,7 +388,8 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       dashSpeed: 1.05, // 5% increase in dash speed
       dashDuration: 0.95, // ~5% decrease in duration (1/1.05) to maintain similar distance as base
     },
-    isActive: true, // Permanent items should be active by default
+    isActive: true,
+    ticketCost: 2,
   }),
 
   starBlastCandy: () => ({
@@ -370,9 +399,10 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     image: "🟥", // Red square emoji
     duration: "permanent" as const,
     modifiers: {
-      walkSpeed: 1.1, // increases walk speed by 10%
+      walkSpeed: 1.05, // increases walk speed by 5%
     },
     isActive: false,
+    ticketCost: 2,
   }),
 
   shinyObject: () => ({
@@ -384,6 +414,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       biteProtection: 1, // allows 1 additional bites before death
     },
-    isActive: true, // Permanent items should be active by default
+    isActive: true,
+    ticketCost: 1,
   }),
 };

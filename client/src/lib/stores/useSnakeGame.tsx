@@ -46,6 +46,7 @@ export interface InventoryItem {
   isActive?: boolean; // for temporary items
   activatedAt?: number; // timestamp when activated
   expiresAt?: number; // timestamp when expires (for temporary items)
+  ticketCost?: number; // Cost in tickets to purchase this item
 }
 import {
   LEVELS,
