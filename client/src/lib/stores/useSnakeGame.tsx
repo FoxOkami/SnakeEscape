@@ -4602,19 +4602,45 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
       });
 
-      // Reset player health to full and apply shield protection
+      // Reset player health to full and apply shield protection, and clear all level data
       set({
         gameState: "hub",
         currentLevel: 0,
         currentLevelKey: "hub",
         player: {
           ...state.player,
+          position: { x: 400, y: 300 }, // Default hub position (will be overridden by useHubStore)
           health: state.player.maxHealth, // Reset to full health
           shieldHealth: totalBiteProtection, // Apply shield from permanent items
           maxShieldHealth: totalBiteProtection,
           isInvincible: false,
           invincibilityEndTime: 0,
         },
+        // Clear all level-specific data
+        snakes: [],
+        walls: [],
+        switches: [],
+        throwableItems: [],
+        patternTiles: [],
+        patternSequence: [],
+        currentPatternStep: 0,
+        carriedItem: null,
+        levelSize: { width: 800, height: 600 },
+        mirrors: [],
+        crystal: null,
+        lightSource: null,
+        lightBeam: null,
+        flowState: null,
+        projectiles: [],
+        teleporters: [],
+        snakePits: [],
+        boulders: [],
+        miniBoulders: [],
+        puzzleShards: [],
+        puzzlePedestal: null,
+        phaseWalls: [],
+        door: { x: 0, y: 0, width: 30, height: 40, isOpen: false },
+        key: { x: 0, y: 0, width: 20, height: 20, collected: false },
       });
     },
 
