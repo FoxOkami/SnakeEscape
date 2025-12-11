@@ -25,6 +25,7 @@ interface InventoryModalProps {
   items?: InventoryItem[];
   onUseItem?: (itemId: string) => void;
   onTogglePermanentItem?: (itemId: string) => void;
+  allowToggling?: boolean;
 }
 
 export const InventoryModal: React.FC<InventoryModalProps> = ({
@@ -32,7 +33,8 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
   onClose,
   items = [],
   onUseItem,
-  onTogglePermanentItem
+  onTogglePermanentItem,
+  allowToggling = true
 }) => {
   // Handle ESC key to close modal
   React.useEffect(() => {
@@ -69,7 +71,7 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
             ×
           </button>
         </div>
-        
+
         <div className="space-y-6">
           <div className="space-y-4">
             {permanentItems.length > 0 ? (
@@ -77,11 +79,10 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                 {permanentItems.map((item) => (
                   <div
                     key={item.id}
-                    className={`p-3 border rounded-lg transition-colors ${
-                      item.isActive 
-                        ? 'bg-green-100 border-green-300 hover:bg-green-200' 
+                    className={`p-3 border rounded-lg transition-colors ${item.isActive
+                        ? 'bg-green-100 border-green-300 hover:bg-green-200'
                         : 'bg-gray-100 border-gray-300 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <div className="flex items-center gap-2">
@@ -89,16 +90,22 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                         <span className="font-medium text-sm text-gray-800">{item.name}</span>
                       </div>
                       {onTogglePermanentItem && (
-                        <button
-                          onClick={() => onTogglePermanentItem(item.id)}
-                          className={`px-2 py-1 text-white text-xs rounded transition-colors ${
-                            item.isActive 
-                              ? 'bg-red-600 hover:bg-red-700' 
-                              : 'bg-blue-600 hover:bg-blue-700'
-                          }`}
-                        >
-                          {item.isActive ? 'Deactivate' : 'Activate'}
-                        </button>
+                        allowToggling ? (
+                          <button
+                            onClick={() => onTogglePermanentItem(item.id)}
+                            className={`px-2 py-1 text-white text-xs rounded transition-colors ${item.isActive
+                                ? 'bg-red-600 hover:bg-red-700'
+                                : 'bg-blue-600 hover:bg-blue-700'
+                              }`}
+                          >
+                            {item.isActive ? 'Deactivate' : 'Activate'}
+                          </button>
+                        ) : (
+                          <span className={`px-2 py-1 text-white text-xs rounded ${item.isActive ? 'bg-green-600' : 'bg-gray-500'
+                            }`}>
+                            {item.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        )
                       )}
                     </div>
                     <p className="text-xs text-gray-600 ml-7">{item.description}</p>

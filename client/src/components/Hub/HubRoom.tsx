@@ -12,6 +12,7 @@ import {
 } from "../../lib/utils/tooltips";
 import { GAME_ITEMS } from "../../lib/game/items";
 import { InventoryModal } from "../ui/inventory";
+import { ShopModal } from "./ShopModal";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 
@@ -545,7 +546,7 @@ const HubRoom: React.FC = () => {
       lastTime = currentTime;
 
       // Update game state - don't update when settings modal or inventory is open
-      if (interactionState === "idle" && !showSettingsModal && !showInventory) {
+      if (interactionState === "idle" && !showSettingsModal && !showInventory && !useHubStore.getState().showShopModal) {
         updateHub(deltaTime, keys, keyBindings);
       }
 
@@ -782,10 +783,6 @@ const HubRoom: React.FC = () => {
         className="border border-gray-600 bg-gray-800"
         style={{ imageRendering: "pixelated" }}
       />
-      <div className="mt-4 text-white text-center">
-        <p>Use arrow keys to move</p>
-        <p>Press E near NPCs to interact</p>
-      </div>
 
       {/* Inventory Button */}
       <div className="absolute top-4 right-4">
@@ -1094,11 +1091,21 @@ const HubRoom: React.FC = () => {
       {/* Inventory Modal */}
       <InventoryModal
         isOpen={showInventory}
-        onClose={closeInventory}
+        onClose={() => {
+          closeInventory();
+          // Remove focus from the button that opened the modal
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+          }
+        }}
         items={inventoryItems}
         onUseItem={useInventoryItem}
         onTogglePermanentItem={togglePermanentItem}
+        allowToggling={true}
       />
+
+      {/* Shop Modal */}
+      <ShopModal />
     </div>
   );
 };
