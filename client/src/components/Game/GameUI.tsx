@@ -30,9 +30,9 @@ const GameUI: React.FC = () => {
     togglePermanentItem,
     dashState
   } = useSnakeGame();
-  
+
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
-  
+
   const [showLevelSelect, setShowLevelSelect] = React.useState(false);
 
 
@@ -41,7 +41,7 @@ const GameUI: React.FC = () => {
   React.useEffect(() => {
     if (gameState === 'playing' && backgroundMusic) {
       if (!isMuted) {
-        backgroundMusic.play().catch(() => {});
+        backgroundMusic.play().catch(() => { });
       }
     } else if (backgroundMusic) {
       backgroundMusic.pause();
@@ -66,69 +66,69 @@ const GameUI: React.FC = () => {
     return (
       <div className="absolute inset-0 bg-black bg-opacity-90 flex justify-center pt-8 z-[100] p-4 min-h-screen">
         <Card className="w-[600px] max-h-[80vh] h-fit overflow-y-auto bg-gray-800 text-white border-gray-600 shadow-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-green-400">Level Select</CardTitle>
-          <CardDescription className="text-gray-300">
-            Choose which level to start from
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="text-xs text-gray-400 mb-3 flex items-center justify-center gap-4">
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-              <span>Easy</span>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-green-400">Level Select</CardTitle>
+            <CardDescription className="text-gray-300">
+              Choose which level to start from
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-xs text-gray-400 mb-3 flex items-center justify-center gap-4">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                <span>Easy</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
+                <span>Medium</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                <span>Hard</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
-              <span>Medium</span>
+            <div className="grid grid-cols-2 gap-3">
+              {LEVELS.map((level, index) => {
+                // Count different elements to give difficulty indication
+                const snakeCount = level.snakes.length;
+                const hasSpecialFeatures = level.switches || level.throwableItems || level.mirrors;
+
+                let difficultyColor = "bg-green-600"; // Easy
+                if (snakeCount > 2 || hasSpecialFeatures) difficultyColor = "bg-yellow-600"; // Medium
+                if (snakeCount > 3 || (hasSpecialFeatures && snakeCount > 1)) difficultyColor = "bg-red-600"; // Hard
+
+                return (
+                  <Button
+                    key={level.id}
+                    onClick={() => {
+                      startLevelByName(level.levelKey);
+                      setShowLevelSelect(false);
+                    }}
+                    className="h-20 flex flex-col items-center justify-center bg-gray-700 hover:bg-gray-600 text-white border border-gray-600 relative"
+                  >
+                    <div className="text-sm font-semibold">Level {index + 1}</div>
+                    <div className="text-xs text-gray-300 text-center">{level.name}</div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {snakeCount} snake{snakeCount !== 1 ? 's' : ''}
+                      {hasSpecialFeatures && ' + puzzles'}
+                    </div>
+                    <div className={`absolute top-1 right-1 w-2 h-2 rounded-full ${difficultyColor}`} title="Difficulty indicator"></div>
+                  </Button>
+                );
+              })}
             </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-              <span>Hard</span>
+            <div className="flex justify-center pt-4">
+              <Button
+                onClick={() => setShowLevelSelect(false)}
+                variant="outline"
+                className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+              >
+                Back to Menu
+              </Button>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {LEVELS.map((level, index) => {
-              // Count different elements to give difficulty indication
-              const snakeCount = level.snakes.length;
-              const hasSpecialFeatures = level.switches || level.throwableItems || level.mirrors;
-              
-              let difficultyColor = "bg-green-600"; // Easy
-              if (snakeCount > 2 || hasSpecialFeatures) difficultyColor = "bg-yellow-600"; // Medium
-              if (snakeCount > 3 || (hasSpecialFeatures && snakeCount > 1)) difficultyColor = "bg-red-600"; // Hard
-              
-              return (
-                <Button
-                  key={level.id}
-                  onClick={() => {
-                    startLevelByName(level.levelKey);
-                    setShowLevelSelect(false);
-                  }}
-                  className="h-20 flex flex-col items-center justify-center bg-gray-700 hover:bg-gray-600 text-white border border-gray-600 relative"
-                >
-                  <div className="text-sm font-semibold">Level {index + 1}</div>
-                  <div className="text-xs text-gray-300 text-center">{level.name}</div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    {snakeCount} snake{snakeCount !== 1 ? 's' : ''}
-                    {hasSpecialFeatures && ' + puzzles'}
-                  </div>
-                  <div className={`absolute top-1 right-1 w-2 h-2 rounded-full ${difficultyColor}`} title="Difficulty indicator"></div>
-                </Button>
-              );
-            })}
-          </div>
-          <div className="flex justify-center pt-4">
-            <Button 
-              onClick={() => setShowLevelSelect(false)} 
-              variant="outline" 
-              className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
-            >
-              Back to Menu
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   };
 
@@ -148,7 +148,7 @@ const GameUI: React.FC = () => {
             <p><strong>Light & Mirrors:</strong> Q/E: Rotate light source and mirrors (Level 3 only)</p>
             <p><strong>Pipe Puzzle:</strong> Q/E: Rotate tiles, E on start tile: Check connection (Level 4)</p>
             <p><strong>Goal:</strong> Collect the key, activate switches, and escape!</p>
-            
+
             <div className="mt-3 pt-2 border-t border-gray-600">
               <p className="text-white font-semibold mb-2">Snake Types:</p>
               <p className="text-purple-400 text-xs">🟣 Stalkers: Blind, but follow sounds</p>
@@ -250,9 +250,8 @@ const GameUI: React.FC = () => {
         {Array.from({ length: player.maxHealth }, (_, index) => (
           <div
             key={index}
-            className={`w-8 h-8 text-2xl font-bold flex items-center justify-center ${
-              index < player.health ? 'text-yellow-400' : 'text-gray-600'
-            } ${player.isInvincible ? 'animate-pulse' : ''}`}
+            className={`w-8 h-8 text-2xl font-bold flex items-center justify-center ${index < player.health ? 'text-yellow-400' : 'text-gray-600'
+              } ${player.isInvincible ? 'animate-pulse' : ''}`}
             style={{
               filter: player.isInvincible ? 'brightness(1.5)' : 'none',
               textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
@@ -296,7 +295,7 @@ const GameUI: React.FC = () => {
           const currentTime = performance.now();
           const timeSinceLastDash = currentTime - dashState.lastDashTime;
           const canDash = timeSinceLastDash >= dashState.cooldownDuration;
-          
+
           return (
             <Badge className={`${canDash ? 'bg-blue-600' : 'bg-gray-600'} text-white`}>
               ⚡ Dash {canDash ? 'Ready' : 'Cooldown'}
@@ -314,7 +313,7 @@ const GameUI: React.FC = () => {
           </Badge>
         )}
       </div>
-      
+
       <div className="flex gap-2">
         <Button
           onClick={openInventory}
@@ -345,14 +344,21 @@ const GameUI: React.FC = () => {
       {gameState === 'victory' && renderVictory()}
       {gameState === 'playing' && renderGameHUD()}
       {gameState === 'playing' && renderHealthDisplay()}
-      
+
       {/* Inventory Modal */}
       <InventoryModal
         isOpen={showInventory}
-        onClose={closeInventory}
+        onClose={() => {
+          closeInventory();
+          // Remove focus from the button that opened the modal
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+          }
+        }}
         items={inventoryItems}
         onUseItem={useInventoryItem}
         onTogglePermanentItem={togglePermanentItem}
+        allowToggling={false}
       />
     </>
   );

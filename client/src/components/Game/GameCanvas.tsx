@@ -208,10 +208,10 @@ const GameCanvas: React.FC = () => {
 
       // Draw walls (use dynamic walls for Level 5)
       const currentWalls = getCurrentWalls();
-      
+
       // Debug: Log walls for Level 1 to help identify extra walls
 
-      
+
       ctx.fillStyle = "#4a5568";
       currentWalls.forEach((wall) => {
         ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
@@ -427,7 +427,7 @@ const GameCanvas: React.FC = () => {
             // Highlight start tile in red when flow cannot be started
             const currentFlowState = flowState;
             const canStartFlow = !currentFlowState || (!currentFlowState.isActive && !currentFlowState.isEmptying);
-            
+
             if (!canStartFlow) {
               // Red overlay for start tile when it cannot be interacted with
               ctx.fillStyle = "rgba(255, 99, 99, 0.3)"; // Light red with 30% opacity
@@ -1472,24 +1472,24 @@ const GameCanvas: React.FC = () => {
         } else if (snake.type === "rainsnake") {
           // Water droplet pattern for rain snakes (falling rain effect)
           const centerX = snake.position.x + snake.size.width / 2;
-          
+
           // Vertical droplet pattern to represent falling rain
           ctx.fillRect(centerX - 2, snake.position.y + 2, 4, 6);
           ctx.fillRect(centerX - 1, snake.position.y + 10, 2, 8);
           ctx.fillRect(centerX - 3, snake.position.y + 20, 6, 4);
-          
+
           // Small droplet at top
           ctx.fillRect(centerX - 1, snake.position.y + 30, 2, 4);
         } else if (snake.type === "friendly") {
           // Crown pattern for Game Master (friendly NPC)
           const centerX = snake.position.x + snake.size.width / 2;
-          
+
           // Crown points
           ctx.fillRect(centerX - 8, snake.position.y + 2, 4, 8);
           ctx.fillRect(centerX - 4, snake.position.y + 2, 4, 12);
           ctx.fillRect(centerX, snake.position.y + 2, 4, 8);
           ctx.fillRect(centerX + 4, snake.position.y + 2, 4, 12);
-          
+
           // Crown base
           ctx.fillRect(centerX - 10, snake.position.y + 10, 20, 4);
         }
@@ -1576,12 +1576,12 @@ const GameCanvas: React.FC = () => {
           ctx.stroke();
           ctx.setLineDash([]); // Reset line dash
         }
-        
+
         // Display phase number above boss snake (Valerie)
         if (snake.type === "boss" && snake.bossPhase) {
           ctx.font = "bold 18px Arial";
           ctx.textAlign = "center";
-          
+
           // Draw text outline (black)
           ctx.strokeStyle = "#000000";
           ctx.lineWidth = 3;
@@ -1590,7 +1590,7 @@ const GameCanvas: React.FC = () => {
             snake.position.x + snake.size.width / 2,
             snake.position.y - 10
           );
-          
+
           // Draw text fill (white)
           ctx.fillStyle = "#ffffff";
           ctx.fillText(
@@ -1598,7 +1598,7 @@ const GameCanvas: React.FC = () => {
             snake.position.x + snake.size.width / 2,
             snake.position.y - 10
           );
-          
+
           ctx.textAlign = "left"; // Reset text alignment
         }
 
@@ -1608,7 +1608,7 @@ const GameCanvas: React.FC = () => {
             Math.pow(player.position.x - snake.position.x, 2) +
             Math.pow(player.position.y - snake.position.y, 2)
           );
-          
+
           if (distance < 80) {
             // Draw "Game Master" name above player
             drawStandardTooltip(
@@ -1618,7 +1618,7 @@ const GameCanvas: React.FC = () => {
               player.position.y,
               player.size.width
             );
-            
+
             // Draw interaction prompt slightly below the name
             drawInteractionTooltip(
               "to start adventure",
@@ -1779,7 +1779,7 @@ const GameCanvas: React.FC = () => {
           // Only show "E to start" if flow can actually be started
           const currentFlowState = flowState;
           const canStartFlow = !currentFlowState || (!currentFlowState.isActive && !currentFlowState.isEmptying);
-          
+
           if (canStartFlow) {
             drawInteractionTooltip(
               "to start",
@@ -1799,15 +1799,15 @@ const GameCanvas: React.FC = () => {
           );
         }
       }
-      
+
       projectiles.forEach((projectile) => {
-        
+
         // Handle both nested and flat schemas for robust rendering
         const x = projectile.position?.x ?? projectile.x ?? 0;
         const y = projectile.position?.y ?? projectile.y ?? 0;
         const width = projectile.size?.width ?? projectile.width ?? 6;
         const height = projectile.size?.height ?? projectile.height ?? 6;
-        
+
         ctx.fillStyle = projectile.color || "#ff0000"; // Default to red if no color
         ctx.fillRect(x, y, width, height);
 
@@ -1818,7 +1818,7 @@ const GameCanvas: React.FC = () => {
           ctx.fillRect(x, y, width, height);
           ctx.shadowBlur = 0; // Reset shadow
         }
-        
+
         // Add bright border for boss projectiles to make them more visible
         if (projectile.color === "#ff4444") {
           ctx.strokeStyle = "#ffffff";
@@ -1866,7 +1866,7 @@ const GameCanvas: React.FC = () => {
         // Show interaction hint if player is nearby
         const distance = Math.sqrt(
           Math.pow(player.position.x + player.size.width / 2 - (mirror.x + mirror.width / 2), 2) +
-            Math.pow(player.position.y + player.size.height / 2 - (mirror.y + mirror.height / 2), 2),
+          Math.pow(player.position.y + player.size.height / 2 - (mirror.y + mirror.height / 2), 2),
         );
 
         if (distance < 60) {
@@ -2118,12 +2118,12 @@ const GameCanvas: React.FC = () => {
           } else if (snake.type === "rainsnake") {
             // Water droplet pattern for rain snakes (falling rain effect)
             const centerX = snake.position.x + snake.size.width / 2;
-            
+
             // Vertical droplet pattern to represent falling rain
             ctx.fillRect(centerX - 2, snake.position.y + 2, 4, 6);
             ctx.fillRect(centerX - 1, snake.position.y + 10, 2, 8);
             ctx.fillRect(centerX - 3, snake.position.y + 20, 6, 4);
-            
+
             // Small droplet at top
             ctx.fillRect(centerX - 1, snake.position.y + 30, 2, 4);
           }
@@ -2319,7 +2319,7 @@ const GameCanvas: React.FC = () => {
         // Show helper text when player is nearby
         const distance = Math.sqrt(
           Math.pow(player.position.x + player.size.width / 2 - centerX, 2) +
-            Math.pow(player.position.y + player.size.height / 2 - centerY, 2),
+          Math.pow(player.position.y + player.size.height / 2 - centerY, 2),
         );
 
         if (distance < 60) {
@@ -2850,15 +2850,15 @@ const GameCanvas: React.FC = () => {
         // Level 6 (0-indexed as 5)
         const destroyedBoulders = boulders.filter(boulder => boulder.isDestroyed);
         const destroyedCount = destroyedBoulders.length;
-        
+
         // ON → OFF (1st) → ON (2nd) → OFF (3rd) → ON (4th)
         const shouldBeDark = destroyedCount === 1 || destroyedCount === 3;
-        
+
         if (shouldBeDark) {
           // Draw darkness overlay over entire map
           ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; // Semi-transparent black overlay
           ctx.fillRect(0, 0, levelSize.width, levelSize.height);
-          
+
           // Redraw snake eyes on top of darkness overlay (Level 6 only)
           snakes.forEach((snake) => {
             // Draw bright yellow eyes for all snakes in dark areas (except stalkers)
@@ -2918,7 +2918,7 @@ const GameCanvas: React.FC = () => {
             const y = projectile.position?.y ?? projectile.y ?? 0;
             const width = projectile.size?.width ?? projectile.width ?? 6;
             const height = projectile.size?.height ?? projectile.height ?? 6;
-            
+
             ctx.fillStyle = projectile.color || "#ff0000"; // Default to red if no color
             ctx.fillRect(x, y, width, height);
 
@@ -2927,7 +2927,7 @@ const GameCanvas: React.FC = () => {
             ctx.shadowColor = projectile.color || "#ffffff";
             ctx.fillRect(x, y, width, height);
             ctx.shadowBlur = 0; // Reset shadow
-            
+
             // Add bright border for boss projectiles to make them more visible in darkness
             if (projectile.color === "#ff4444") {
               ctx.strokeStyle = "#ffffff";
@@ -3085,7 +3085,6 @@ const GameCanvas: React.FC = () => {
     <div className="flex items-center justify-center w-full h-full">
       <canvas
         ref={canvasRef}
-        className="border-4 border-red-500"
         width={levelSize.width}
         height={levelSize.height}
         style={{
