@@ -88,6 +88,9 @@ const GameCanvas: React.FC = () => {
   const frameTimesRef = useRef<number[]>([]);
   const lastFpsUpdateRef = useRef<number>(0);
   const playerImageRef = useRef<HTMLImageElement | null>(null);
+  const frameRef = useRef<number>(0);
+  const frameTimerRef = useRef<number>(0);
+  const lastDirectionRef = useRef<"south" | "north" | "east" | "west">("south");
   const [imageLoaded, setImageLoaded] = React.useState(false);
 
   const enemyImageRef = useRef<HTMLImageElement | null>(null);
@@ -150,7 +153,7 @@ const GameCanvas: React.FC = () => {
       setImageLoaded(false);
     };
     // Add cache busting parameter to ensure fresh load
-    img.src = "/player-character.png?" + Date.now();
+    img.src = "/player-sheet.png?" + Date.now();
   }, []);
 
   // Load enemy image
@@ -298,7 +301,7 @@ const GameCanvas: React.FC = () => {
   };
 
   const draw = useCallback(
-    (ctx: CanvasRenderingContext2D) => {
+    (ctx: CanvasRenderingContext2D, deltaTime: number) => {
       // Clear canvas with default background
       const backgroundColor = "#1a1a2e";
       ctx.fillStyle = backgroundColor;
@@ -1501,6 +1504,43 @@ const GameCanvas: React.FC = () => {
       // Note: For Level 5, the lighting effect is now handled by the background quadrant system above
       // No physical light source object is rendered - the lighting is environmental
 
+      // Global Animation Logic (Run for all levels)
+      let direction = lastDirectionRef.current;
+      if (currentVelocity.y > 0) direction = "south";
+      else if (currentVelocity.y < 0) direction = "north";
+      else if (currentVelocity.x > 0) direction = "east";
+      else if (currentVelocity.x < 0) direction = "west";
+
+      const isMoving = currentVelocity.x !== 0 || currentVelocity.y !== 0;
+      if (isMoving) {
+        lastDirectionRef.current = direction;
+      } else {
+        direction = lastDirectionRef.current;
+      }
+
+      let speedFps = 12; // Default running speed
+      if (!isMoving) {
+        speedFps = 4; // Always 4 FPS when idle
+      } else if (isWalking) {
+        speedFps = 6; // 6 FPS when walking
+      }
+
+      const frameDuration = 1000 / speedFps;
+      frameTimerRef.current += deltaTime;
+      if (frameTimerRef.current >= frameDuration) {
+        frameRef.current = (frameRef.current + 1) % 6;
+        frameTimerRef.current -= frameDuration;
+      }
+
+      // Calculate row for drawing
+      let row = 0;
+      switch (direction) {
+        case "south": row = isMoving ? 1 : 0; break;
+        case "north": row = isMoving ? 3 : 2; break;
+        case "east": row = isMoving ? 5 : 4; break;
+        case "west": row = isMoving ? 7 : 6; break;
+      }
+
       // Draw player (different color when walking) - except on level 3 where it's drawn after light beam
       if (currentLevelKey !== "light_reflection") {
         // Not level 3
@@ -1510,17 +1550,23 @@ const GameCanvas: React.FC = () => {
         if (!shouldFlash) {
           if (imageLoaded && playerImageRef.current) {
             // Draw custom player image
+
+
+            // Draw Frame
             ctx.drawImage(
               playerImageRef.current,
+              frameRef.current * 32, // sx
+              row * 32,              // sy
+              32,                    // sw
+              32,                    // sh
               player.position.x,
               player.position.y,
               player.size.width,
-              player.size.height,
+              player.size.height
             );
 
-            // Apply color tint for walking state if needed
-            if (isWalking) {
-              ctx.globalCompositeOperation = "multiply";
+            if (false) { // Walking overlay disabled
+              // ctx.globalCompositeOperation = "multiply";
               ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
               ctx.fillRect(
                 player.position.x,
@@ -1532,7 +1578,7 @@ const GameCanvas: React.FC = () => {
             }
           } else {
             // Fallback to original rectangle drawing
-            ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
+            ctx.fillStyle = "#4299e1"; // Green when walking, blue when running
             ctx.fillRect(
               player.position.x,
               player.position.y,
@@ -1541,21 +1587,13 @@ const GameCanvas: React.FC = () => {
             );
 
             // Add player details
-            ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
+            ctx.fillStyle = "#2b6cb0"; // Darker green/blue for details
             ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
 
             // Player eyes
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
             ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-          }
-
-          // Walking indicator - small stealth icon
-          if (isWalking) {
-            ctx.fillStyle = "#68d391";
-            ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-            ctx.fillStyle = "#38a169";
-            ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
           }
 
           // Show key indicator if player has key
@@ -1877,17 +1915,22 @@ const GameCanvas: React.FC = () => {
         if (!shouldFlash) {
           if (imageLoaded && playerImageRef.current) {
             // Draw custom player image on top of light beam
+            // Animation Logic reusing existing state
+            // Use globally calculated row
             ctx.drawImage(
               playerImageRef.current,
+              frameRef.current * 32,
+              row * 32,
+              32,
+              32,
               player.position.x,
               player.position.y,
               player.size.width,
               player.size.height,
             );
 
-            // Apply color tint for walking state if needed
-            if (isWalking) {
-              ctx.globalCompositeOperation = "multiply";
+            if (false) { // Walking overlay disabled
+              // ctx.globalCompositeOperation = "multiply";
               ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
               ctx.fillRect(
                 player.position.x,
@@ -1899,7 +1942,7 @@ const GameCanvas: React.FC = () => {
             }
           } else {
             // Fallback to original rectangle drawing
-            ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
+            ctx.fillStyle = "#4299e1"; // Green when walking, blue when running
             ctx.fillRect(
               player.position.x,
               player.position.y,
@@ -1908,21 +1951,13 @@ const GameCanvas: React.FC = () => {
             );
 
             // Add player details
-            ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
+            ctx.fillStyle = "#2b6cb0"; // Darker green/blue for details
             ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
 
             // Player eyes
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
             ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-          }
-
-          // Walking indicator - small stealth icon
-          if (isWalking) {
-            ctx.fillStyle = "#68d391";
-            ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-            ctx.fillStyle = "#38a169";
-            ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
           }
 
           // Show key indicator if player has key
@@ -2187,17 +2222,22 @@ const GameCanvas: React.FC = () => {
         if (!shouldFlash) {
           if (imageLoaded && playerImageRef.current) {
             // Draw custom player image on top
+            // Animation Logic reusing existing state
+            // Use globally calculated row
             ctx.drawImage(
               playerImageRef.current,
+              frameRef.current * 32,
+              row * 32,
+              32,
+              32,
               player.position.x,
               player.position.y,
               player.size.width,
               player.size.height,
             );
 
-            // Apply color tint for walking state if needed
-            if (isWalking) {
-              ctx.globalCompositeOperation = "multiply";
+            if (false) { // Walking overlay disabled
+              // ctx.globalCompositeOperation = "multiply";
               ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
               ctx.fillRect(
                 player.position.x,
@@ -2209,7 +2249,7 @@ const GameCanvas: React.FC = () => {
             }
           } else {
             // Fallback to original rectangle drawing
-            ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
+            ctx.fillStyle = "#4299e1"; // Green when walking, blue when running
             ctx.fillRect(
               player.position.x,
               player.position.y,
@@ -2218,21 +2258,13 @@ const GameCanvas: React.FC = () => {
             );
 
             // Add player details on top
-            ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
+            ctx.fillStyle = "#2b6cb0"; // Darker green/blue for details
             ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
 
             // Player eyes on top
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
             ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-          }
-
-          // Walking indicator - small stealth icon on top
-          if (isWalking) {
-            ctx.fillStyle = "#68d391";
-            ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-            ctx.fillStyle = "#38a169";
-            ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
           }
 
           // Show key indicator if player has key on top
@@ -2387,35 +2419,31 @@ const GameCanvas: React.FC = () => {
           const shouldFlash = player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
           if (!shouldFlash) {
             if (playerImageRef.current && imageLoaded) {
+              // Use calculated frame and row from main draw logic (re-calculate row locally as it's not persisted)
+              let direction = lastDirectionRef.current;
+              // No Need to update lastDirectionRef here as it was updated in main block or will remain same
+              const isMoving = currentVelocity.x !== 0 || currentVelocity.y !== 0;
+
+              let row = 0;
+              switch (direction) {
+                case "south": row = isMoving ? 1 : 0; break;
+                case "north": row = isMoving ? 3 : 2; break;
+                case "east": row = isMoving ? 5 : 4; break;
+                case "west": row = isMoving ? 7 : 6; break;
+              }
+
               ctx.drawImage(
                 playerImageRef.current,
+                frameRef.current * 32,
+                row * 32,
+                32,
+                32,
                 player.position.x,
                 player.position.y,
                 player.size.width,
                 player.size.height,
               );
-
-              // Apply color tint for walking state if needed
-              if (isWalking) {
-                ctx.globalCompositeOperation = "multiply";
-                ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
-                ctx.fillRect(
-                  player.position.x,
-                  player.position.y,
-                  player.size.width,
-                  player.size.height,
-                );
-                ctx.globalCompositeOperation = "source-over";
-              }
             }
-          }
-
-          // Walking indicator - small stealth icon on top
-          if (isWalking) {
-            ctx.fillStyle = "#68d391";
-            ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-            ctx.fillStyle = "#38a169";
-            ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
           }
 
           // Show key indicator if player has key on top
@@ -2513,13 +2541,13 @@ const GameCanvas: React.FC = () => {
         }
       }
 
-      if (ctx) {
-        draw(ctx);
-      }
-
-      // Always calculate deltaTime and call updateGame (let updateGame handle its own gating)
+      // Calculate deltaTime first for animation
       const deltaTime = currentTime - lastTimeRef.current; // Keep in milliseconds
       lastTimeRef.current = currentTime;
+
+      if (ctx) {
+        draw(ctx, deltaTime);
+      }
 
       // Fixed timestep for smooth 60fps animation
       const targetFrameTime = 1000 / 60; // 16.67ms for 60fps
@@ -2590,7 +2618,7 @@ const GameCanvas: React.FC = () => {
     const ctx = canvas?.getContext("2d");
 
     if (ctx) {
-      draw(ctx);
+      draw(ctx, 0);
     }
   }, [draw]);
 

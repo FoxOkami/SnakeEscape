@@ -89,10 +89,10 @@ export class PlayerController {
   update(input: InputState, deltaTime: number): Position {
     this.handleDashInput(input);
     this.updateDash(deltaTime);
-    
+
     if (!this.dashState.isDashing) {
       this.calculateTargetVelocity(input);
-      
+
       if (this.config.useAcceleration) {
         this.updateVelocityWithAcceleration(deltaTime);
       } else {
@@ -102,12 +102,12 @@ export class PlayerController {
     } else {
       // Allow direction changes during dash by updating dash direction based on input
       let newDashDirection = { x: 0, y: 0 };
-      
+
       if (input.up) newDashDirection.y -= 1;
       if (input.down) newDashDirection.y += 1;
       if (input.left) newDashDirection.x -= 1;
       if (input.right) newDashDirection.x += 1;
-      
+
       // If there's new directional input, update dash direction
       if (newDashDirection.x !== 0 || newDashDirection.y !== 0) {
         const magnitude = Math.sqrt(newDashDirection.x ** 2 + newDashDirection.y ** 2);
@@ -126,11 +126,11 @@ export class PlayerController {
 
   private calculateTargetVelocity(input: InputState): void {
     const moveSpeed = input.walking ? this.config.walkingSpeed : this.config.normalSpeed;
-    
-    
+
+
     // Calculate target velocity based on input
     this.targetVelocity = { x: 0, y: 0 };
-    
+
     if (input.up) this.targetVelocity.y -= moveSpeed;
     if (input.down) this.targetVelocity.y += moveSpeed;
     if (input.left) this.targetVelocity.x -= moveSpeed;
@@ -142,7 +142,7 @@ export class PlayerController {
       this.targetVelocity.x *= factor;
       this.targetVelocity.y *= factor;
     }
-    
+
   }
 
   private updateVelocityWithAcceleration(deltaTime: number): void {
@@ -170,11 +170,11 @@ export class PlayerController {
 
   private updatePosition(deltaTime: number): void {
     const dt = deltaTime / 1000;
-    
+
     const oldPosition = { ...this.position };
     const velocityMagnitude = Math.sqrt(this.currentVelocity.x * this.currentVelocity.x + this.currentVelocity.y * this.currentVelocity.y);
-    
-    
+
+
     // Apply movement
     this.position.x += this.currentVelocity.x * dt;
     this.position.y += this.currentVelocity.y * dt;
@@ -196,7 +196,7 @@ export class PlayerController {
     const currentTime = performance.now();
     const timeSinceLastDash = currentTime - this.dashState.lastDashTime;
     const canDash = timeSinceLastDash >= this.dashState.cooldownDuration;
-    
+
     if (input.dash && !this.lastDashInput && !this.dashState.isDashing && canDash) {
       // Only dash if there's directional input
       if (input.up || input.down || input.left || input.right) {
@@ -209,19 +209,19 @@ export class PlayerController {
   private startDash(input: InputState, currentTime: number): void {
     // Calculate dash direction based on current input
     let dashDirection = { x: 0, y: 0 };
-    
+
     if (input.up) dashDirection.y -= 1;
     if (input.down) dashDirection.y += 1;
     if (input.left) dashDirection.x -= 1;
     if (input.right) dashDirection.x += 1;
-    
+
     // Normalize diagonal movement
     const magnitude = Math.sqrt(dashDirection.x ** 2 + dashDirection.y ** 2);
     if (magnitude > 0) {
       dashDirection.x /= magnitude;
       dashDirection.y /= magnitude;
     }
-    
+
     this.dashState = {
       ...this.dashState,
       isDashing: true,
@@ -235,14 +235,14 @@ export class PlayerController {
 
   private updateDash(deltaTime: number): void {
     if (!this.dashState.isDashing) return;
-    
+
     // Simple time-based dash: configurable duration at configurable speed
     const currentTime = performance.now();
     const dashDuration = this.config.dashDuration; // Use config dash duration (affected by inventory modifiers)
     const dashSpeed = this.config.dashSpeed; // Use config dash speed (affected by inventory modifiers)
-    
+
     const timeSinceDashStart = currentTime - (this.dashState.lastDashTime || currentTime);
-    
+
     if (timeSinceDashStart >= dashDuration) {
       // End dash
       this.dashState.isDashing = false;
@@ -253,7 +253,7 @@ export class PlayerController {
       // Continue dash movement
       this.dashState.dashProgress = timeSinceDashStart / dashDuration;
       this.dashState.isInvulnerable = true; // Invulnerable for entire dash duration
-      
+
       // Set velocity for dash movement at high speed
       this.currentVelocity = {
         x: this.dashState.dashDirection.x * dashSpeed,
@@ -344,13 +344,13 @@ export function keysToInputState(keys: Set<string>, customBindings?: CustomKeyBi
     walking: 'ControlLeft',
     dash: 'Space'
   };
-  
+
   return {
     up: keys.has(bindings.up),
     down: keys.has(bindings.down),
     left: keys.has(bindings.left),
     right: keys.has(bindings.right),
-    walking: keys.has(bindings.walking) || keys.has('ControlRight'), // Keep ControlRight as backup
+    walking: keys.has(bindings.walking),
     dash: keys.has(bindings.dash)
   };
 }
