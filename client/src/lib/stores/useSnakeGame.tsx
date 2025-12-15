@@ -21,6 +21,9 @@ import {
   SnakePit,
   Boulder,
   MiniBoulder,
+  PhaseWall,
+  PuzzleShard,
+  PuzzlePedestal,
 } from "../game/types";
 import { useTicketStore } from "./useTicketStore";
 
@@ -54,7 +57,14 @@ import {
   getLevelKeyByIndex,
   getLevelIndexByKey,
 } from "../game/levels";
-import { checkAABBCollision, slideAlongWall } from "../game/collision";
+import {
+  checkAABBCollision,
+  checkCircleCollision,
+  checkCircleRectCollision,
+  resolveCircleRectCollision,
+  checkPointInRect,
+  slideAlongWall,
+} from "../game/collision";
 import { updateSnake } from "../game/entities";
 import { updateBossSnake } from "../game/bossSnake";
 import { calculateLightBeam } from "../game/lightBeam";
@@ -81,6 +91,12 @@ interface SnakeGameState extends GameData {
   // Performance optimization
   lastLightCheckTime?: number;
   lastLightBeamHash?: string;
+
+
+
+
+
+
 
   // Actions
   startGame: () => void;
@@ -159,7 +175,7 @@ interface SnakeGameState extends GameData {
   removeKeyWalls: () => void;
 
   // Projectile system actions
-  updateProjectiles: (deltaTime: number) => {
+  updateProjectiles: (deltaTime: number, currentPlayer?: Player) => {
     hitCount: number;
     playerKilled: boolean;
   };
@@ -180,7 +196,10 @@ interface SnakeGameState extends GameData {
 
   // Teleporter system actions
   updateTeleporters: (deltaTime: number) => void;
-  checkTeleporterCollision: () => void;
+  checkTeleporterCollision: () => {
+    targetPosition: Position;
+    teleporters: Teleporter[];
+  } | null;
 
   // Snake pit system actions
   updateSnakePits: (deltaTime: number) => void;
@@ -215,6 +234,22 @@ interface SnakeGameState extends GameData {
 
   // Transition state to prevent double actions
   isTransitioning?: boolean;
+  showDebugNotes: boolean;
+  toggleDebugNotes: () => void;
+
+  // Level 5 Logic Puzzle & Phase State
+  currentPhase?: "A" | "B" | "C";
+  phaseTimer?: number;
+  phaseDuration?: number;
+  evaluateLogicPuzzle: (switches: Switch[]) => void;
+
+  // Dynamic Spawning Actions
+  spawnScreensaverSnake: (centerPosition: Position, levelSize: { width: number; height: number }) => Snake;
+  spawnPhotophobicSnake: (centerPosition: Position, levelSize: { width: number; height: number }) => Snake;
+  spawnPhantom: (spawnPosition: Position, phantomId: string, levelBounds?: { width: number; height: number }) => Snake;
+  spawnRainSnake: (spawnPosition: Position, rainSnakeId: string, movementPattern?: string, angle?: number, amplitude?: number, frequency?: number) => Snake;
+  spawnMiniBoulders: (centerPosition: Position, levelSize: { width: number; height: number }) => MiniBoulder[];
+  updateMiniBoulders: (deltaTime: number) => void;
 }
 
 const BASE_PLAYER_SPEED = 150; // base pixels per second
@@ -436,7 +471,15 @@ export const useSnakeGame = create<SnakeGameState>()(
       maxShieldHealth: 0,
       isInvincible: false,
       invincibilityEndTime: 0,
+      collisionRadius: 14,
+      hurtboxRadius: 10,
     },
+    // Missing properties from SnakeGameState interface
+    updatePhase: (deltaTime: number) => { },
+    updateTeleporters: (deltaTime: number) => { },
+    emergeSnakeFromPit: (pitId: string) => { },
+    showDebugNotes: false,
+
     isTransitioning: false,
     snakes: [],
     walls: [],
@@ -504,12 +547,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         }
 
         // Clean up old key states to prevent memory leaks
-        for (const [k, timestamp] of newKeyStates.entries()) {
+        Array.from(newKeyStates.entries()).forEach(([k, timestamp]) => {
           if (currentTime - timestamp > 1000) {
             // Remove keys older than 1 second
             newKeyStates.delete(k);
           }
-        }
+        });
 
         // Enhanced key detection for problematic combinations
         // Check for recent key presses to handle missed key events
@@ -594,14 +637,17 @@ export const useSnakeGame = create<SnakeGameState>()(
           maxShieldHealth: 0,
           isInvincible: false,
           invincibilityEndTime: 0,
+          collisionRadius: 14,
+          hurtboxRadius: 10,
         },
-        snakes: level.snakes.map((snake) => ({ ...snake })),
-        walls: level.walls.map((wall) => ({ ...wall })),
-        door: { ...level.door },
-        key: { ...level.key },
-        switches: level.switches ? level.switches.map((s) => ({ ...s })) : [],
+        // showDebugNotes: false, // Preserved from current state
+        snakes: level.snakes ? level.snakes.map((snake: any) => ({ ...snake })) : [],
+        walls: level.walls.map((wall: any) => ({ ...wall })),
+        door: level.door ? { ...level.door! } : { x: 0, y: 0, width: 0, height: 0, isOpen: false },
+        key: level.key ? { ...level.key! } : { x: 0, y: 0, width: 0, height: 0, collected: false },
+        switches: level.switches ? level.switches.map((s: any) => ({ ...s })) : [],
         throwableItems: level.throwableItems
-          ? level.throwableItems.map((item) => ({ ...item }))
+          ? level.throwableItems.map((item: any) => ({ ...item }))
           : [],
         patternTiles: level1Randomization.newPatternTiles,
         patternSequence: level1Randomization.newPatternSequence,
@@ -609,30 +655,30 @@ export const useSnakeGame = create<SnakeGameState>()(
         carriedItem: null,
         levelSize: { ...level.size },
         mirrors: level.mirrors
-          ? level.mirrors.map((mirror) => ({ ...mirror }))
+          ? level.mirrors.map((mirror: any) => ({ ...mirror }))
           : [],
         crystal: level.crystal ? { ...level.crystal } : null,
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
         projectiles: [],
         teleporters: level.teleporters
-          ? level.teleporters.map((teleporter) => ({ ...teleporter }))
+          ? level.teleporters.map((teleporter: any) => ({ ...teleporter }))
           : [],
         snakePits: level.snakePits
-          ? level.snakePits.map((pit) => ({ ...pit }))
+          ? level.snakePits.map((pit: any) => ({ ...pit }))
           : [],
         // Phase system initialization
-        currentPhase: level.currentPhase || "A",
+        currentPhase: (level.currentPhase as "A" | "B" | "C") || "A",
         phaseTimer: 0,
         phaseDuration: level.phaseDuration || 10000,
         puzzleShards: level.puzzleShards
-          ? level.puzzleShards.map((shard) => ({ ...shard }))
+          ? level.puzzleShards.map((shard: any) => ({ ...shard }))
           : [],
         puzzlePedestal: level.puzzlePedestal
           ? { ...level.puzzlePedestal }
           : null,
         phaseWalls: level.phaseWalls
-          ? level.phaseWalls.map((wall) => ({ ...wall }))
+          ? level.phaseWalls.map((wall: any) => ({ ...wall }))
           : [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
@@ -683,15 +729,15 @@ export const useSnakeGame = create<SnakeGameState>()(
         : [];
       let randomizedSymbols = null;
       let newPatternTiles = level.patternTiles
-        ? level.patternTiles.map((tile) => ({ ...tile }))
+        ? level.patternTiles.map((tile: any) => ({ ...tile }))
         : [];
 
       // Handle Level 2 randomization
       let levelSwitches = level.switches
-        ? level.switches.map((s) => ({ ...s }))
+        ? level.switches.map((s: any) => ({ ...s }))
         : [];
       let levelThrowableItems = level.throwableItems
-        ? level.throwableItems.map((item) => ({ ...item }))
+        ? level.throwableItems.map((item: any) => ({ ...item }))
         : [];
 
       if (levelIndex === 1) {
@@ -752,8 +798,11 @@ export const useSnakeGame = create<SnakeGameState>()(
           maxShieldHealth: totalBiteProtection,
           isInvincible: false,
           invincibilityEndTime: 0,
+          collisionRadius: 14,
+          hurtboxRadius: 10,
         },
-        snakes: level.snakes.map((snake) => ({ ...snake })),
+        // showDebugNotes: false, // Preserved from current state
+        snakes: level.snakes.map((snake: any) => ({ ...snake })),
         walls: level.walls,
         door: { ...level.door },
         key: { ...level.key },
@@ -765,30 +814,30 @@ export const useSnakeGame = create<SnakeGameState>()(
         carriedItem: null,
         levelSize: { ...level.size },
         mirrors: level.mirrors
-          ? level.mirrors.map((mirror) => ({ ...mirror }))
+          ? level.mirrors.map((mirror: any) => ({ ...mirror }))
           : [],
         crystal: level.crystal ? { ...level.crystal } : null,
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
         projectiles: [],
         teleporters: level.teleporters
-          ? level.teleporters.map((teleporter) => ({ ...teleporter }))
+          ? level.teleporters.map((teleporter: any) => ({ ...teleporter }))
           : [],
         snakePits: level.snakePits
-          ? level.snakePits.map((pit) => ({ ...pit }))
+          ? level.snakePits.map((pit: any) => ({ ...pit }))
           : [],
         // Phase system initialization
-        currentPhase: level.currentPhase || "A",
+        currentPhase: (level.currentPhase as "A" | "B" | "C") || "A",
         phaseTimer: 0,
         phaseDuration: level.phaseDuration || 10000,
         puzzleShards: level.puzzleShards
-          ? level.puzzleShards.map((shard) => ({ ...shard }))
+          ? level.puzzleShards.map((shard: any) => ({ ...shard }))
           : [],
         puzzlePedestal: level.puzzlePedestal
           ? { ...level.puzzlePedestal }
           : null,
         phaseWalls: level.phaseWalls
-          ? level.phaseWalls.map((wall) => ({ ...wall }))
+          ? level.phaseWalls.map((wall: any) => ({ ...wall }))
           : [],
         currentVelocity: { x: 0, y: 0 },
         targetVelocity: { x: 0, y: 0 },
@@ -806,7 +855,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           cooldownDuration: 1500, // 1.5 seconds in milliseconds
         },
         boulders: level.boulders
-          ? level.boulders.map((boulder) => ({ ...boulder }))
+          ? level.boulders.map((boulder: any) => ({ ...boulder }))
           : [],
         hintState: null, // Initialize hint state
         miniBoulders: [],
@@ -863,45 +912,48 @@ export const useSnakeGame = create<SnakeGameState>()(
           maxShieldHealth: totalBiteProtection,
           isInvincible: false,
           invincibilityEndTime: 0,
+          collisionRadius: 14,
+          hurtboxRadius: 10,
         },
-        snakes: level.snakes.map((snake) => ({ ...snake })),
+        // showDebugNotes: false, // Preserved from current state
+        snakes: level.snakes ? level.snakes.map((snake: any) => ({ ...snake })) : [],
         walls: level.walls.map((wall) => ({ ...wall })),
-        door: { ...level.door },
-        key: { ...level.key },
-        switches: level.switches ? level.switches.map((s) => ({ ...s })) : [],
+        door: level.door ? { ...level.door! } : { x: 0, y: 0, width: 0, height: 0, isOpen: false },
+        key: level.key ? { ...level.key! } : { x: 0, y: 0, width: 0, height: 0, collected: false },
+        switches: level.switches ? level.switches.map((s: any) => ({ ...s })) : [],
         throwableItems: level.throwableItems
-          ? level.throwableItems.map((item) => ({ ...item }))
+          ? level.throwableItems.map((item: any) => ({ ...item }))
           : [],
         carriedItem: null,
         levelSize: { ...level.size },
         mirrors: level.mirrors
-          ? level.mirrors.map((mirror) => ({ ...mirror }))
+          ? level.mirrors.map((mirror: any) => ({ ...mirror }))
           : [],
         crystal: level.crystal ? { ...level.crystal } : null,
         lightSource: level.lightSource ? { ...level.lightSource } : null,
         lightBeam: null,
         projectiles: [],
         teleporters: level.teleporters
-          ? level.teleporters.map((teleporter) => ({ ...teleporter }))
+          ? level.teleporters.map((teleporter: any) => ({ ...teleporter }))
           : [],
         snakePits: level.snakePits
-          ? level.snakePits.map((pit) => ({ ...pit }))
+          ? level.snakePits.map((pit: any) => ({ ...pit }))
           : [],
         // Phase system reset
-        currentPhase: level.currentPhase || "A",
+        currentPhase: (level.currentPhase as "A" | "B" | "C") || "A",
         phaseTimer: 0,
         phaseDuration: level.phaseDuration || 10000,
         puzzleShards: level.puzzleShards
-          ? level.puzzleShards.map((shard) => ({ ...shard }))
+          ? level.puzzleShards.map((shard: any) => ({ ...shard }))
           : [],
         puzzlePedestal: level.puzzlePedestal
           ? { ...level.puzzlePedestal }
           : null,
         phaseWalls: level.phaseWalls
-          ? level.phaseWalls.map((wall) => ({ ...wall }))
+          ? level.phaseWalls.map((wall: any) => ({ ...wall }))
           : [],
         boulders: level.boulders
-          ? level.boulders.map((boulder) => ({ ...boulder }))
+          ? level.boulders.map((boulder: any) => ({ ...boulder }))
           : [],
         miniBoulders: [],
         currentVelocity: { x: 0, y: 0 },
@@ -1004,11 +1056,13 @@ export const useSnakeGame = create<SnakeGameState>()(
             maxShieldHealth: totalBiteProtection,
             isInvincible: false,
             invincibilityEndTime: 0,
+            collisionRadius: 14,
+            hurtboxRadius: 10,
           },
-          snakes: level.snakes.map((snake) => ({ ...snake })),
+          snakes: level.snakes ? level.snakes.map((snake: any) => ({ ...snake })) : [],
           walls: level.walls.map((wall) => ({ ...wall })),
-          door: { ...level.door },
-          key: { ...level.key },
+          door: level.door ? { ...level.door! } : { x: 0, y: 0, width: 0, height: 0, isOpen: false },
+          key: level.key ? { ...level.key! } : { x: 0, y: 0, width: 0, height: 0, collected: false },
           switches: levelSwitches,
           throwableItems: levelThrowableItems,
           // Clear pre-stored Level 2 data after using it
@@ -1037,7 +1091,7 @@ export const useSnakeGame = create<SnakeGameState>()(
             : [],
           projectiles: [],
           // Phase system initialization
-          currentPhase: level.currentPhase || "A",
+          currentPhase: (level.currentPhase as "A" | "B" | "C") || "A",
           phaseTimer: 0,
           phaseDuration: level.phaseDuration || 10000,
           puzzleShards: level.puzzleShards
@@ -1219,20 +1273,48 @@ export const useSnakeGame = create<SnakeGameState>()(
         return;
       }
 
-      // Check wall collisions
-      const playerRect = {
-        x: newPosition.x,
-        y: newPosition.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
+      // Check wall collisions (Circular)
+      const radius = state.player.collisionRadius || 14;
+      const currentWalls = get().getCurrentWalls();
+
+      // Calculate the center of the player's circle
+      const circleCenter = {
+        x: newPosition.x + state.player.size.width / 2,
+        y: newPosition.y + state.player.size.height / 2,
+        radius: radius,
       };
 
-      const currentWalls = get().getCurrentWalls();
-      const hasWallCollision = currentWalls.some((wall) =>
-        checkAABBCollision(playerRect, wall),
-      );
+      // Resolve collisions iteratively to handle corners and sliding
+      // 3 passes is usually sufficient for simple 2D geometry
+      for (let i = 0; i < 3; i++) {
+        let collisionFound = false;
 
-      if (hasWallCollision) return;
+        for (const wall of currentWalls) {
+          // Resolve collision returns a vector to push the circle OUT of the rectangle
+          const push = resolveCircleRectCollision(circleCenter, wall);
+
+          if (push.x !== 0 || push.y !== 0) {
+            // Apply push vector immediately
+            circleCenter.x += push.x;
+            circleCenter.y += push.y;
+            collisionFound = true;
+          }
+        }
+
+        // Also check if we've been pushed out of bounds
+        // (Optional: Implement strict bounds keeping)
+
+        if (!collisionFound) break;
+      }
+
+      // Re-calculate the top-left position from the resolved center
+      newPosition.x = circleCenter.x - state.player.size.width / 2;
+      newPosition.y = circleCenter.y - state.player.size.height / 2;
+
+      // Final bounds check to ensure we didn't get pushed out of the world
+      // (Clamp instead of simple return to prevent getting "stuck" on edges)
+      newPosition.x = Math.max(0, Math.min(newPosition.x, state.levelSize.width - state.player.size.width));
+      newPosition.y = Math.max(0, Math.min(newPosition.y, state.levelSize.height - state.player.size.height));
 
       // Update player position
       set({
@@ -1986,13 +2068,25 @@ export const useSnakeGame = create<SnakeGameState>()(
         !updatedPlayer.isInvincible &&
         !updatedDashState.isInvulnerable &&
         updatedSnakes.some((snake) => {
-          const snakeRect = {
-            x: snake.position.x,
-            y: snake.position.y,
-            width: snake.size.width,
-            height: snake.size.height,
+          // Player hurtbox circle
+          const hurtboxCircle = {
+            x: updatedPlayer.position.x + updatedPlayer.size.width / 2,
+            y: updatedPlayer.position.y + updatedPlayer.size.height / 2,
+            radius: updatedPlayer.hurtboxRadius || 10
           };
-          return checkAABBCollision(playerRect, snakeRect);
+
+          // Snake collision circle
+          const snakeRadius = snake.size.width / 2;
+          const snakeCircle = {
+            x: snake.position.x + snake.size.width / 2,
+            y: snake.position.y + snake.size.height / 2,
+            radius: snakeRadius
+          };
+
+          return (
+            snake.type !== "friendly" &&
+            checkCircleCollision(hurtboxCircle, snakeCircle)
+          );
         });
 
       if (hitBySnake) {
@@ -2071,17 +2165,24 @@ export const useSnakeGame = create<SnakeGameState>()(
       // --- ITEM INTERACTIONS ---
       // Check key collection
       let updatedKey = state.key;
-      if (!state.key.collected && checkAABBCollision(playerRect, state.key)) {
+      const collisionCircle = {
+        x: updatedPlayer.position.x + updatedPlayer.size.width / 2,
+        y: updatedPlayer.position.y + updatedPlayer.size.height / 2,
+        radius: updatedPlayer.collisionRadius || 14
+      };
+
+      if (!state.key.collected && checkCircleRectCollision(collisionCircle, state.key)) {
         updatedKey = { ...state.key, collected: true };
         updatedPlayer = { ...updatedPlayer, hasKey: true };
       }
 
       // Check puzzle shard collection (Level 5)
+      // Check puzzle shard collection (Level 5)
       state.puzzleShards.forEach((shard) => {
         if (
           !shard.collected &&
           shard.phase === state.currentPhase &&
-          checkAABBCollision(playerRect, shard)
+          checkCircleRectCollision(collisionCircle, shard)
         ) {
           get().collectPuzzleShard(shard.id);
         }
@@ -2384,7 +2485,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           const crystalHit = updatedLightBeam.segments.some(
             (segment, index) => {
               if (index === 0) return false; // Skip first segment (light source)
-              const prevSegment = updatedLightBeam.segments[index - 1];
+              const prevSegment = updatedLightBeam!.segments[index - 1];
               return lineIntersectsRect(prevSegment, segment, state.crystal!);
             },
           );
@@ -2453,7 +2554,13 @@ export const useSnakeGame = create<SnakeGameState>()(
       }
 
       // Check exit
-      if (updatedDoor.isOpen && checkAABBCollision(playerRect, updatedDoor)) {
+      const exitCollisionCircle = {
+        x: updatedPlayer.position.x + updatedPlayer.size.width / 2,
+        y: updatedPlayer.position.y + updatedPlayer.size.height / 2,
+        radius: updatedPlayer.collisionRadius || 14
+      };
+
+      if (updatedDoor.isOpen && checkCircleRectCollision(exitCollisionCircle, updatedDoor)) {
         set({ gameState: "levelComplete" });
         return;
       }
@@ -2645,15 +2752,14 @@ export const useSnakeGame = create<SnakeGameState>()(
       );
       if (!item) return;
 
-      const playerRect = {
-        x: state.player.position.x,
-        y: state.player.position.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
+      const collisionCircle = {
+        x: state.player.position.x + state.player.size.width / 2,
+        y: state.player.position.y + state.player.size.height / 2,
+        radius: state.player.collisionRadius || 14
       };
 
       // Check if player is close enough to pick up the item
-      if (checkAABBCollision(playerRect, item)) {
+      if (checkCircleRectCollision(collisionCircle, item)) {
         set({
           throwableItems: state.throwableItems.map((i) =>
             i.id === itemId ? { ...i, isPickedUp: true } : i,
@@ -2762,22 +2868,23 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.carriedItem) return; // Already carrying something
 
-      const playerRect = {
-        x: state.player.position.x,
-        y: state.player.position.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
+      // Use player center for distance check
+      const playerCenter = {
+        x: state.player.position.x + state.player.size.width / 2,
+        y: state.player.position.y + state.player.size.height / 2,
       };
 
-      // Find all items within pickup range
+      // Find all items within pickup range using simple distance check
       const nearbyItems = state.throwableItems.filter((item) => {
         if (item.isPickedUp) return false;
 
+        // Assuming item.x/y is also center or we treat it as point
         const distance = Math.sqrt(
-          Math.pow(state.player.position.x - item.x, 2) +
-          Math.pow(state.player.position.y - item.y, 2),
+          Math.pow(playerCenter.x - item.x, 2) +
+          Math.pow(playerCenter.y - item.y, 2),
         );
-        return distance < 50; // Pickup range
+        // Pickup range: default to 50, effectively radius + reach
+        return distance < 50;
       });
 
       if (nearbyItems.length === 0) return;
@@ -2785,12 +2892,12 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Find the closest item
       const closestItem = nearbyItems.reduce((closest, item) => {
         const closestDistance = Math.sqrt(
-          Math.pow(state.player.position.x - closest.x, 2) +
-          Math.pow(state.player.position.y - closest.y, 2),
+          Math.pow(playerCenter.x - closest.x, 2) +
+          Math.pow(playerCenter.y - closest.y, 2),
         );
         const itemDistance = Math.sqrt(
-          Math.pow(state.player.position.x - item.x, 2) +
-          Math.pow(state.player.position.y - item.y, 2),
+          Math.pow(playerCenter.x - item.x, 2) +
+          Math.pow(playerCenter.y - item.y, 2),
         );
         return itemDistance < closestDistance ? item : closest;
       });
@@ -2941,25 +3048,29 @@ export const useSnakeGame = create<SnakeGameState>()(
               phaseStartTime: currentTime,
             },
           });
-        } else if (state.flowState.currentPhase === "center-to-exit") {
+        } else if (
+          state.flowState &&
+          state.flowState.currentPhase === "center-to-exit"
+        ) {
+          const flowState = state.flowState;
           // Handle emptying mode or regular flow
-          if (state.flowState.isEmptying) {
+          if (flowState.isEmptying) {
             // Emptying mode: remove the current tile from locked tiles and completed paths
-            const newLockedTiles = state.flowState.lockedTiles.filter(
-              (tileId) => tileId !== state.flowState.currentTile,
+            const newLockedTiles = flowState.lockedTiles.filter(
+              (tileId) => tileId !== flowState.currentTile,
             );
-            const newCompletedPaths = state.flowState.completedPaths.filter(
-              (path) => path.tileId !== state.flowState.currentTile,
+            const newCompletedPaths = flowState.completedPaths.filter(
+              (path) => path.tileId !== flowState.currentTile,
             );
 
             // Remove the current tile from emptying paths to prevent infinite loops
-            const newEmptyingPaths = state.flowState.emptyingPaths.filter(
-              (path) => path.tileId !== state.flowState.currentTile,
+            const newEmptyingPaths = flowState.emptyingPaths.filter(
+              (path) => path.tileId !== flowState.currentTile,
             );
 
             // Find next tile in remaining emptying paths
-            const currentPath = state.flowState.emptyingPaths.find(
-              (path) => path.tileId === state.flowState.currentTile,
+            const currentPath = flowState.emptyingPaths.find(
+              (path) => path.tileId === flowState.currentTile,
             );
             if (
               currentPath &&
@@ -3242,11 +3353,15 @@ export const useSnakeGame = create<SnakeGameState>()(
 
               // Calculate where the blocked tile would be based on exit direction
               const currentTileObj = state.patternTiles.find(
-                (tile) => tile.id === state.flowState.currentTile,
+                (tile) => tile.id === state.flowState?.currentTile,
               );
               let blockedPosition;
 
-              if (currentTileObj && state.flowState.exitDirection) {
+              if (
+                currentTileObj &&
+                state.flowState &&
+                state.flowState.exitDirection
+              ) {
                 const tileSize = 60; // Based on Level 4 tile size
                 let offsetX = 0,
                   offsetY = 0;
@@ -3471,19 +3586,18 @@ export const useSnakeGame = create<SnakeGameState>()(
       if (state.currentLevelKey !== "grid_puzzle") return; // Only on level 4 (0-indexed)
 
       // Find the tile the player is standing on
-      const playerRect = {
-        x: state.player.position.x,
-        y: state.player.position.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
+      // Find the tile the player is standing on
+      const playerCenter = {
+        x: state.player.position.x + state.player.size.width / 2,
+        y: state.player.position.y + state.player.size.height / 2,
       };
 
       const currentTile = state.patternTiles.find((tile) => {
         return (
-          playerRect.x < tile.x + tile.width &&
-          playerRect.x + playerRect.width > tile.x &&
-          playerRect.y < tile.y + tile.height &&
-          playerRect.y + playerRect.height > tile.y
+          playerCenter.x >= tile.x &&
+          playerCenter.x <= tile.x + tile.width &&
+          playerCenter.y >= tile.y &&
+          playerCenter.y <= tile.y + tile.height
         );
       });
 
@@ -3633,7 +3747,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         state.currentLevelKey !== "boss_valerie" &&
         state.currentLevelKey !== "grid_puzzle"
       ) {
-        return { hitCount: 0 };
+        return { hitCount: 0, playerKilled: false };
       }
 
       const player = currentPlayer || state.player; // Use provided player state or fall back to state
@@ -3658,8 +3772,14 @@ export const useSnakeGame = create<SnakeGameState>()(
 
           // Check collision with player
           const projectileRect = { ...projectile.position, ...projectile.size };
-          const playerRect = { ...player.position, ...player.size };
-          const collision = checkAABBCollision(projectileRect, playerRect);
+
+          const playerHurtbox = {
+            x: player.position.x + player.size.width / 2,
+            y: player.position.y + player.size.height / 2,
+            radius: player.hurtboxRadius || 10
+          };
+
+          const collision = checkCircleRectCollision(playerHurtbox, projectileRect);
 
           // Player is invincible either from before this frame, from a hit earlier in this frame, or during dash
           const isInvincible =
@@ -3685,10 +3805,10 @@ export const useSnakeGame = create<SnakeGameState>()(
           if (!allowWallPenetration) {
             for (const wall of state.walls) {
               const projectileRect = {
-                x: projectile.position?.x ?? projectile.x ?? 0,
-                y: projectile.position?.y ?? projectile.y ?? 0,
-                width: projectile.size?.width ?? projectile.width ?? 6,
-                height: projectile.size?.height ?? projectile.height ?? 6,
+                x: projectile.position.x,
+                y: projectile.position.y,
+                width: projectile.size.width,
+                height: projectile.size.height,
               };
 
               if (checkAABBCollision(projectileRect, wall)) {
@@ -3708,7 +3828,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Spitter firing logic will be handled in the main snake update loop below
       // This prevents the duplicate update issue
 
-      return { hitCount };
+      return { hitCount, playerKilled: false }; // playerKilled managed by main loop mostly, keeping it false here for now or implement logic
     },
 
     // Environmental effects for boss boulder collisions
@@ -3783,6 +3903,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         patrolDirection: 1,
         chaseSpeed: 0, // Screensaver snakes don't chase
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
       };
     },
@@ -3897,6 +4018,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         patrolDirection: 1,
         chaseSpeed: Math.round(baseChaseSpeed * speedMultiplier), // 188 for first, 250 for second
         sightRange: 800, // Entire map width for Level 6
+        baseSightRange: 800,
         hearingRange: 800, // Entire map height for Level 6
         isChasing: false,
         isInDarkness: isDark, // Set based on actual lighting conditions
@@ -3950,6 +4072,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         patrolDirection: 1,
         chaseSpeed: 0,
         sightRange: 0,
+        baseSightRange: 0,
         isChasing: false,
         isPhantom: true,
         originalSpawnPosition: { x: spawnPosition.x, y: spawnPosition.y },
@@ -3991,6 +4114,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         patrolDirection: 1,
         chaseSpeed: 0, // Rain snakes don't chase, they just fall
         sightRange: 0, // No sight range needed
+        baseSightRange: 0,
         isChasing: false,
         isRainSnake: true,
         rainSpeed: randomSpeed,
@@ -4026,19 +4150,24 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       const spitterSnake: Snake = {
         id: spitterId,
-        type: "spitter",
-        position: { x: position.x - 12.5, y: position.y - 12.5 }, // Center the 25x25 snake
-        size: { width: 32, height: 32 },
-        speed: 50, // Moving snake
-        direction: { x: 0, y: 0 }, // Will be set by movement logic
+        type: "spitter" as const,
+        position,
+        size: { width: 30, height: 30 },
+        speed: 0, // Spitter doesn't move
+        direction: { x: 0, y: 0 },
         patrolPoints: [],
         currentPatrolIndex: 0,
         patrolDirection: 1,
         chaseSpeed: 0,
-        sightRange: 0,
-        isChasing: false,
+        sightRange: 1000, // Global vision
+        baseSightRange: 1000,
+        isChasing: true, // Always chasing
+        chaseTarget: state.player.position,
+        hasSpawned: false,
+        spawnTimer: 0,
+        hasReturnedToSpawn: false,
         lastFireTime: Date.now(),
-        fireInterval: 3000, // 3 seconds
+        fireInterval: 3000,
         movementAxis: undefined, // Will be randomly assigned on first update
         shotCount: 0, // Start at 0 shots
       };
@@ -4066,7 +4195,7 @@ export const useSnakeGame = create<SnakeGameState>()(
       const projectileSize = { width: 8, height: 8 };
       const lifespan = 6000; // 6 seconds for boss projectiles
 
-      let directions: { x: number; y: number }[];
+      let directions: { x: number; y: number }[] = [];
 
       if (
         isBossProjectiles &&
@@ -4077,7 +4206,6 @@ export const useSnakeGame = create<SnakeGameState>()(
         const totalProjectiles = 24;
         const angleStep = 360 / totalProjectiles; // 15 degrees per projectile
 
-        directions = [];
         try {
           for (let i = 0; i < totalProjectiles; i++) {
             // Calculate angle for this projectile with round shift applied
@@ -4105,6 +4233,14 @@ export const useSnakeGame = create<SnakeGameState>()(
           console.error("projectile fire error", error);
           return; // Exit early on error
         }
+      } else {
+        // Standard cardinal directions for regular spitters or other boss patterns
+        directions = [
+          { x: 0, y: -1 }, // North
+          { x: 1, y: 0 },  // East
+          { x: 0, y: 1 },  // South
+          { x: -1, y: 0 }, // West
+        ];
       }
 
       const projectileColor = isBossProjectiles ? "#ff4444" : "#00ff41"; // Red for boss, green for spitters
@@ -4189,7 +4325,9 @@ export const useSnakeGame = create<SnakeGameState>()(
       // Level 5 (currentLevelKey === "grid_puzzle"): Add phase-specific walls
       if (state.currentLevelKey === "grid_puzzle") {
         const activePhaseWalls = state.phaseWalls
-          .filter((wall) => wall.activePhases.includes(state.currentPhase))
+          .filter((wall) =>
+            (wall.activePhases as string[]).includes(state.currentPhase || "A"),
+          )
           .map((wall) => ({
             x: wall.x,
             y: wall.y,
@@ -4215,6 +4353,17 @@ export const useSnakeGame = create<SnakeGameState>()(
         walls = [...walls, ...boulderWalls];
       }
 
+      // Add friendly snakes (Game Master) as physical walls
+      const friendlySnakes = state.snakes
+        .filter((snake) => snake.type === "friendly")
+        .map((snake) => ({
+          x: snake.position.x,
+          y: snake.position.y,
+          width: snake.size.width,
+          height: snake.size.height,
+        }));
+      walls = [...walls, ...friendlySnakes];
+
       return walls;
     },
 
@@ -4222,11 +4371,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       const state = get();
       if (state.teleporters.length === 0) return null;
 
-      const playerRect = {
-        x: state.player.position.x,
-        y: state.player.position.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
+      const collisionCircle = {
+        x: state.player.position.x + state.player.size.width / 2,
+        y: state.player.position.y + state.player.size.height / 2,
+        radius: state.player.collisionRadius || 14
       };
 
       const currentTime = Date.now();
@@ -4235,7 +4383,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       state.teleporters.forEach((teleporter, index) => {
         if (teleporter.type === "sender") {
-          const isPlayerOnPad = checkAABBCollision(playerRect, teleporter);
+          const isPlayerOnPad = checkCircleRectCollision(collisionCircle, teleporter);
 
           // Check if teleporter is in cooldown period
           const isInCooldown =
@@ -4500,16 +4648,16 @@ export const useSnakeGame = create<SnakeGameState>()(
 
     toggleLightSwitch: () => {
       const state = get();
-      const playerRect = {
-        x: state.player.position.x,
-        y: state.player.position.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
+
+      const collisionCircle = {
+        x: state.player.position.x + state.player.size.width / 2,
+        y: state.player.position.y + state.player.size.height / 2,
+        radius: state.player.collisionRadius || 14
       };
 
       // Find any lever switch that the player is touching
       const nearbyLeverSwitch = state.switches.find(
-        (s) => s.switchType === "lever" && checkAABBCollision(playerRect, s),
+        (s) => s.switchType === "lever" && checkCircleRectCollision(collisionCircle, s),
       );
 
       if (!nearbyLeverSwitch) return;
@@ -4658,34 +4806,57 @@ export const useSnakeGame = create<SnakeGameState>()(
         deltaTime,
       );
 
-      // Check wall collisions using existing collision system
-      const playerRect = {
-        x: intendedPosition.x,
-        y: intendedPosition.y,
-        width: state.player.size.width,
-        height: state.player.size.height,
+      // Check wall collisions using circular collision system
+      // We define the player's collision circle based on intended position
+      let finalPosition = { ...intendedPosition };
+      const collisionCircle = {
+        x: finalPosition.x + state.player.size.width / 2,
+        y: finalPosition.y + state.player.size.height / 2,
+        radius: state.player.collisionRadius || 14, // Use state radius or default
       };
 
       const currentWalls = get().getCurrentWalls();
-      const hasWallCollision = currentWalls.some((wall) =>
-        checkAABBCollision(playerRect, wall),
-      );
 
-      let finalPosition = intendedPosition;
+      // Iterative collision resolution for smoothness (handle multiple walls/corners)
+      // 3 iterations is usually enough for simple 2D top-down
+      for (let i = 0; i < 3; i++) {
+        let hasCollision = false;
 
-      // If there's a wall collision, use slideAlongWall to maintain smooth movement
-      if (hasWallCollision) {
-        finalPosition = slideAlongWall(
-          state.player.position,
-          intendedPosition,
-          currentWalls,
-          state.player.size,
-        );
+        // Check all walls
+        for (const wall of currentWalls) {
+          // Optimization: Simple AABB broadphase first
+          const broadphaseRect = {
+            x: collisionCircle.x - collisionCircle.radius,
+            y: collisionCircle.y - collisionCircle.radius,
+            width: collisionCircle.radius * 2,
+            height: collisionCircle.radius * 2
+          };
 
-        // Update the PlayerController's internal position to match the actual final position
-        // This prevents position accumulation when blocked by walls
-        state.playerController.setPosition(finalPosition);
+          if (checkAABBCollision(broadphaseRect, wall)) {
+            // Precise circle check
+            if (checkCircleRectCollision(collisionCircle, wall)) {
+              const resolution = resolveCircleRectCollision(collisionCircle, wall);
+
+              // Apply resolution
+              if (resolution.x !== 0 || resolution.y !== 0) {
+                finalPosition.x += resolution.x;
+                finalPosition.y += resolution.y;
+
+                // Update circle for next check
+                collisionCircle.x = finalPosition.x + state.player.size.width / 2;
+                collisionCircle.y = finalPosition.y + state.player.size.height / 2;
+
+                hasCollision = true;
+              }
+            }
+          }
+        }
+
+        if (!hasCollision) break;
       }
+
+      // Update the PlayerController's internal position to match the actual final position
+      state.playerController.setPosition(finalPosition);
 
       // Note: Don't call setPosition during gameplay as it interferes with dash state
       // The PlayerController will sync naturally on the next frame
@@ -4782,6 +4953,10 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Update position and size
       state.playerController.setPosition(state.player.position);
+    },
+
+    toggleDebugNotes: () => {
+      set((state) => ({ showDebugNotes: !state.showDebugNotes }));
     },
   })),
 );

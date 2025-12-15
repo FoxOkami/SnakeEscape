@@ -68,7 +68,7 @@ const getSnakeSpriteRect = (snake: Snake, dir: 'east' | 'west', isMoving: boolea
   }
 
   // Moving animations (or idle for screensaver/boss which use directional)
-  if (snake.type === 'photophobic' || snake.type === 'rainsnake') {
+  if (snake.type === 'photophobic') {
     sx = 128;
     sy = dir === 'west' ? 64 : 96;
   } else {
@@ -140,7 +140,26 @@ const GameCanvas: React.FC = () => {
     updateHint,
     patternSequence,
     randomizedSymbols,
+    showDebugNotes,
+    toggleDebugNotes,
   } = useSnakeGame();
+
+  // Cheat code listener
+  const cheatCodeBufferRef = useRef("");
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      cheatCodeBufferRef.current += e.key;
+      if (cheatCodeBufferRef.current.length > 20) {
+        cheatCodeBufferRef.current = cheatCodeBufferRef.current.slice(-20);
+      }
+      if (cheatCodeBufferRef.current.endsWith("shownotes")) {
+        toggleDebugNotes();
+        cheatCodeBufferRef.current = "";
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [toggleDebugNotes]);
 
   // Load player image
   useEffect(() => {
@@ -409,29 +428,27 @@ const GameCanvas: React.FC = () => {
         }
       }
 
-      // Add test border to see if canvas is drawing
-      ctx.strokeStyle = "#ff0000";
-      ctx.lineWidth = 5;
-      ctx.strokeRect(5, 5, levelSize.width - 10, levelSize.height - 10);
+      // Add test border to see if canvas is drawing (REMOVED)
+      // ctx.strokeStyle = "#ff0000";
+      // ctx.lineWidth = 5;
+      // ctx.strokeRect(5, 5, levelSize.width - 10, levelSize.height - 10);
 
       // Helper function to check if player is on a tile
       const getPlayerCurrentTile = () => {
         if (currentLevelKey !== "grid_puzzle") return null; // Only on Level 4
 
-        const playerRect = {
-          x: player.position.x,
-          y: player.position.y,
-          width: player.size.width,
-          height: player.size.height,
+        const playerCenter = {
+          x: player.position.x + player.size.width / 2,
+          y: player.position.y + player.size.height / 2,
         };
 
         return patternTiles.find((tile) => {
           return (
             tile.id.startsWith("grid_tile_") &&
-            playerRect.x < tile.x + tile.width &&
-            playerRect.x + playerRect.width > tile.x &&
-            playerRect.y < tile.y + tile.height &&
-            playerRect.y + playerRect.height > tile.y
+            playerCenter.x >= tile.x &&
+            playerCenter.x <= tile.x + tile.width &&
+            playerCenter.y >= tile.y &&
+            playerCenter.y <= tile.y + tile.height
           );
         });
       };
@@ -1456,48 +1473,7 @@ const GameCanvas: React.FC = () => {
       });
 
       // Draw snake pits (holes in the ground) - drawn after snakes so they appear "inside" the pits
-      snakePits.forEach((pit) => {
-        // Check if pit is being hit by light (change color to dark yellow)
-        const isLightHit = pit.isLightHit || false;
 
-        // Draw the pit as a dark circular hole
-        ctx.fillStyle = isLightHit ? "#1a1a00" : "#0a0a0a"; // Dark yellow if hit, black otherwise
-        ctx.beginPath();
-        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
-        ctx.fill();
-
-        // Add a gradient effect for depth
-        const gradient = ctx.createRadialGradient(
-          pit.x,
-          pit.y,
-          0,
-          pit.x,
-          pit.y,
-          pit.radius,
-        );
-        if (isLightHit) {
-          // Dark yellow gradient when light hits
-          gradient.addColorStop(0, "#2a2a00"); // Darker yellow center
-          gradient.addColorStop(0.7, "#1a1a00"); // Dark yellow
-          gradient.addColorStop(1, "#333300"); // Yellowish edge
-        } else {
-          // Normal black gradient
-          gradient.addColorStop(0, "#000000"); // Black center
-          gradient.addColorStop(0.7, "#1a1a1a"); // Dark gray
-          gradient.addColorStop(1, "#333333"); // Lighter edge
-        }
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
-        ctx.fill();
-
-        // Add subtle border to make it more visible
-        ctx.strokeStyle = isLightHit ? "#555500" : "#444444"; // Yellowish border if hit
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
-        ctx.stroke();
-      });
 
       // Draw light reflection elements (mirrors, crystal, light beam)
 
@@ -1543,39 +1519,24 @@ const GameCanvas: React.FC = () => {
 
       // Draw player (different color when walking) - except on level 3 where it's drawn after light beam
       if (currentLevelKey !== "light_reflection") {
-        // Not level 3
         // Implement flashing effect when invincible
         const shouldFlash =
           player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
         if (!shouldFlash) {
           if (imageLoaded && playerImageRef.current) {
             // Draw custom player image
-
-
-            // Draw Frame
+            // Use globally calculated row
             ctx.drawImage(
               playerImageRef.current,
-              frameRef.current * 32, // sx
-              row * 32,              // sy
-              32,                    // sw
-              32,                    // sh
+              frameRef.current * 32,
+              row * 32,
+              32,
+              32,
               player.position.x,
               player.position.y,
               player.size.width,
-              player.size.height
+              player.size.height,
             );
-
-            if (false) { // Walking overlay disabled
-              // ctx.globalCompositeOperation = "multiply";
-              ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
-              ctx.fillRect(
-                player.position.x,
-                player.position.y,
-                player.size.width,
-                player.size.height,
-              );
-              ctx.globalCompositeOperation = "source-over";
-            }
           } else {
             // Fallback to original rectangle drawing
             ctx.fillStyle = "#4299e1"; // Green when walking, blue when running
@@ -1601,18 +1562,10 @@ const GameCanvas: React.FC = () => {
             ctx.fillStyle = "#ffd700";
             ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
           }
-
-          // Temporary debug: red border around player collision box
-          ctx.strokeStyle = "red";
-          ctx.lineWidth = 1;
-          ctx.strokeRect(
-            player.position.x,
-            player.position.y,
-            player.size.width,
-            player.size.height
-          );
         }
       }
+
+
 
       // Helper function to draw text with white fill and black outline (replaced by centralized tooltip system)
       const drawTooltipText = (text: string, x: number, y: number) => {
@@ -1653,6 +1606,50 @@ const GameCanvas: React.FC = () => {
           );
         }
       }
+
+      // Draw snake pits (holes in the ground) - moved here to ensure they are drawn after snakes
+      snakePits.forEach((pit) => {
+        // Check if pit is being hit by light (change color to dark yellow)
+        const isLightHit = pit.isLightHit || false;
+
+        // Draw the pit as a dark circular hole
+        ctx.fillStyle = isLightHit ? "#1a1a00" : "#0a0a0a"; // Dark yellow if hit, black otherwise
+        ctx.beginPath();
+        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Add a gradient effect for depth
+        const gradient = ctx.createRadialGradient(
+          pit.x,
+          pit.y,
+          0,
+          pit.x,
+          pit.y,
+          pit.radius,
+        );
+        if (isLightHit) {
+          // Dark yellow gradient when light hits
+          gradient.addColorStop(0, "#2a2a00"); // Darker yellow center
+          gradient.addColorStop(0.7, "#1a1a00"); // Dark yellow
+          gradient.addColorStop(1, "#333300"); // Yellowish edge
+        } else {
+          // Normal black gradient
+          gradient.addColorStop(0, "#000000"); // Black center
+          gradient.addColorStop(0.7, "#1a1a1a"); // Dark gray
+          gradient.addColorStop(1, "#333333"); // Lighter edge
+        }
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Add subtle border to make it more visible
+        ctx.strokeStyle = isLightHit ? "#555500" : "#444444"; // Yellowish border if hit
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(pit.x, pit.y, pit.radius, 0, 2 * Math.PI);
+        ctx.stroke();
+      });
 
       projectiles.forEach((projectile) => {
 
@@ -1966,16 +1963,56 @@ const GameCanvas: React.FC = () => {
             ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
           }
 
-          // Temporary debug: red border around player collision box
-          ctx.strokeStyle = "red";
-          ctx.lineWidth = 1;
-          ctx.strokeRect(
-            player.position.x,
-            player.position.y,
-            player.size.width,
-            player.size.height
-          );
+
         }
+      }
+
+      // Debug rendering
+      if (showDebugNotes) {
+        // Draw player collision circle (Physcial)
+        const collisionRadius = player.collisionRadius || 14; // Default if not set
+        const centerX = player.position.x + player.size.width / 2;
+        const centerY = player.position.y + player.size.height / 2;
+
+        ctx.strokeStyle = "#0000FF"; // Blue for physical
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, collisionRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Draw player hurtbox circle (Damage)
+        const hurtboxRadius = player.hurtboxRadius || 10; // Default if not set
+        ctx.strokeStyle = "#FF0000"; // Red for hurtbox
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, hurtboxRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Draw wall AABBs
+        ctx.strokeStyle = "#0000FF"; // Blue for physical walls
+        ctx.lineWidth = 1;
+        getCurrentWalls().forEach(wall => {
+          ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+        });
+
+        // Draw snake collision circles (Red for danger/hurtbox)
+        ctx.strokeStyle = "#FF0000";
+        ctx.lineWidth = 1;
+        snakes.forEach(snake => {
+          const sRadius = snake.size.width / 2;
+          const sCenterX = snake.position.x + snake.size.width / 2;
+          const sCenterY = snake.position.y + snake.size.height / 2;
+          ctx.beginPath();
+          ctx.arc(sCenterX, sCenterY, sRadius, 0, Math.PI * 2);
+          ctx.stroke();
+        });
+
+        // Draw item AABBs (Yellow for interaction)
+        ctx.strokeStyle = "#FFFF00";
+        ctx.lineWidth = 1;
+        throwableItems.forEach(item => {
+          ctx.strokeRect(item.x, item.y, item.width, item.height);
+        });
       }
 
       // Draw puzzle shards (Level 5)
@@ -2215,64 +2252,7 @@ const GameCanvas: React.FC = () => {
           }
         }
 
-        // Redraw player on top of darkness overlay (Level 5 only)
-        // Implement flashing effect when invincible
-        const shouldFlash =
-          player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
-        if (!shouldFlash) {
-          if (imageLoaded && playerImageRef.current) {
-            // Draw custom player image on top
-            // Animation Logic reusing existing state
-            // Use globally calculated row
-            ctx.drawImage(
-              playerImageRef.current,
-              frameRef.current * 32,
-              row * 32,
-              32,
-              32,
-              player.position.x,
-              player.position.y,
-              player.size.width,
-              player.size.height,
-            );
 
-            if (false) { // Walking overlay disabled
-              // ctx.globalCompositeOperation = "multiply";
-              ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
-              ctx.fillRect(
-                player.position.x,
-                player.position.y,
-                player.size.width,
-                player.size.height,
-              );
-              ctx.globalCompositeOperation = "source-over";
-            }
-          } else {
-            // Fallback to original rectangle drawing
-            ctx.fillStyle = "#4299e1"; // Green when walking, blue when running
-            ctx.fillRect(
-              player.position.x,
-              player.position.y,
-              player.size.width,
-              player.size.height,
-            );
-
-            // Add player details on top
-            ctx.fillStyle = "#2b6cb0"; // Darker green/blue for details
-            ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
-
-            // Player eyes on top
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
-            ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-          }
-
-          // Show key indicator if player has key on top
-          if (player.hasKey) {
-            ctx.fillStyle = "#ffd700";
-            ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
-          }
-        }
 
         // Redraw teleporter sender pads on top of darkness overlay
         teleporters.forEach((teleporter) => {
@@ -2364,6 +2344,43 @@ const GameCanvas: React.FC = () => {
             }
           }
         });
+
+        // Redraw player on top of teleporters (Level 5 only)
+        if (currentLevelKey === "light_switch") {
+          const shouldFlash =
+            player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0;
+          if (!shouldFlash) {
+            if (imageLoaded && playerImageRef.current) {
+              // Draw custom player image
+              // Use globally calculated row
+              ctx.drawImage(
+                playerImageRef.current,
+                frameRef.current * 32,
+                row * 32,
+                32,
+                32,
+                player.position.x,
+                player.position.y,
+                player.size.width,
+                player.size.height,
+              );
+            } else {
+              // Fallback
+              ctx.fillStyle = "#4299e1";
+              ctx.fillRect(
+                player.position.x,
+                player.position.y,
+                player.size.width,
+                player.size.height,
+              );
+            }
+            // Key indicator
+            if (player.hasKey) {
+              ctx.fillStyle = "#ffd700";
+              ctx.fillRect(player.position.x - 5, player.position.y - 5, 8, 8);
+            }
+          }
+        }
 
         // Draw interaction hints for lever switches (on top of darkness overlay)
         switches.forEach((switchObj) => {
@@ -2505,6 +2522,7 @@ const GameCanvas: React.FC = () => {
       teleporters,
       hintState,
       updateHint,
+      showDebugNotes,
     ],
   );
 

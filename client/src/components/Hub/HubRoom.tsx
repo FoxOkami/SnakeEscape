@@ -57,6 +57,8 @@ const HubRoom: React.FC = () => {
     togglePermanentItem,
     setKeyPressed, // Add this for key state synchronization
     player: gamePlayer, // Get player data from main game store for health display
+    toggleDebugNotes,
+    showDebugNotes,
   } = useSnakeGame();
 
   const [keys, setKeys] = useState<Set<string>>(new Set());
@@ -359,6 +361,17 @@ const HubRoom: React.FC = () => {
       setTimeout(() => {
         setCheatCodeSuccess(false);
       }, 1000); // Reset after 1 second
+    } else if (
+      cheatCodeInput.replace(/\s+/g, "").toLowerCase() === "shownotes"
+    ) {
+      // Toggle debug notes
+      toggleDebugNotes();
+
+      // Show success feedback
+      setCheatCodeSuccess(true);
+      setTimeout(() => {
+        setCheatCodeSuccess(false);
+      }, 1000); // Reset after 1 second
     }
 
     // Clear input after any Enter press (valid or invalid cheat code)
@@ -612,48 +625,18 @@ const HubRoom: React.FC = () => {
           frameRef.current = (frameRef.current + 1) % 6;
           frameTimerRef.current -= frameDuration;
         }
-
-        // Draw custom player image
-        ctx.drawImage(
-          playerImageRef.current,
-          frameRef.current * 32,
-          row * 32,
-          32,
-          32,
-          player.position.x,
-          player.position.y,
-          player.size.width,
-          player.size.height,
-        );
-      } else {
-        // Fallback to rectangle (same as main game fallback)
-        ctx.fillStyle = "#4299e1"; // Blue like main game
-        ctx.fillRect(
-          player.position.x,
-          player.position.y,
-          player.size.width,
-          player.size.height,
-        );
-
-        // Add player details (match main game style)
-        ctx.fillStyle = "#2b6cb0"; // Darker blue for details
-        ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
-
-        // Player eyes
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
-        ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
       }
 
-      // Temporary debug: red border around player collision box
-      ctx.strokeStyle = "red";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(
-        player.position.x,
-        player.position.y,
-        player.size.width,
-        player.size.height,
-      );
+
+      // Temporary debug: red border around player collision box (REMOVED)
+      // ctx.strokeStyle = "red";
+      // ctx.lineWidth = 1;
+      // ctx.strokeRect(
+      //   player.position.x,
+      //   player.position.y,
+      //   player.size.width,
+      //   player.size.height,
+      // );
 
       // Draw NPCs
       npcs.forEach((npc) => {
@@ -691,6 +674,59 @@ const HubRoom: React.FC = () => {
           );
         }
       });
+
+      // Draw Player (Moved after NPCs so player is on top)
+      if (imageLoaded && playerImageRef.current) {
+        // Draw custom player image
+        // Re-calculate state for rendering
+        const isUp = keys.has(keyBindings.up);
+        const isDown = keys.has(keyBindings.down);
+        const isLeft = keys.has(keyBindings.left);
+        const isRight = keys.has(keyBindings.right);
+        const isWalking = keys.has(keyBindings.walking); // Used for speed check elsewhere, but here for completeness
+
+        const isMoving = isUp || isDown || isLeft || isRight;
+        const direction = lastDirectionRef.current;
+
+        // Calculate row based on direction and movement
+        let row = 0;
+        switch (direction) {
+          case "south": row = isMoving ? 1 : 0; break;
+          case "north": row = isMoving ? 3 : 2; break;
+          case "east": row = isMoving ? 5 : 4; break;
+          case "west": row = isMoving ? 7 : 6; break;
+        }
+
+        ctx.drawImage(
+          playerImageRef.current,
+          frameRef.current * 32,
+          row * 32,
+          32,
+          32,
+          player.position.x,
+          player.position.y,
+          player.size.width,
+          player.size.height
+        );
+      } else {
+        // Fallback to rectangle (same as main game fallback)
+        ctx.fillStyle = "#4299e1"; // Blue like main game
+        ctx.fillRect(
+          player.position.x,
+          player.position.y,
+          player.size.width,
+          player.size.height,
+        );
+
+        // Add player details (match main game style)
+        ctx.fillStyle = "#2b6cb0"; // Darker blue for details
+        ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
+
+        // Player eyes
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
+        ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
+      }
 
       // Draw door (using same style as main game)
       ctx.fillStyle = hasKey ? "#48bb78" : "#e53e3e";
@@ -816,6 +852,30 @@ const HubRoom: React.FC = () => {
         );
       }
 
+      // Draw debug visualizations if enabled
+      if (showDebugNotes) {
+        // Player physical collision (Blue)
+        ctx.strokeStyle = "#0000FF";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(player.position.x, player.position.y, player.size.width, player.size.height);
+
+        // Player hurtbox (Red)
+        // Hub player doesn't have a separate hurtbox property exposed here usually, 
+        // but we can visualize the center point
+        ctx.fillStyle = "#FF0000";
+        ctx.fillRect(player.position.x + player.size.width / 2 - 2, player.position.y + player.size.height / 2 - 2, 4, 4);
+
+        // NPC collision (Green)
+        ctx.strokeStyle = "#00FF00";
+        npcs.forEach(npc => {
+          ctx.strokeRect(npc.position.x, npc.position.y, npc.size.width, npc.size.height);
+        });
+
+        // Door collision (Yellow)
+        ctx.strokeStyle = "#FFFF00";
+        ctx.strokeRect(door.position.x, door.position.y, door.size.width, door.size.height);
+      }
+
       animationRef.current = requestAnimationFrame(gameLoop);
     };
 
@@ -826,7 +886,7 @@ const HubRoom: React.FC = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [player, npcs, interactionState, selectedOption, keys, updateHub]);
+  }, [player, npcs, interactionState, selectedOption, keys, updateHub, showDebugNotes]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">

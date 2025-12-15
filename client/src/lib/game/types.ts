@@ -8,7 +8,7 @@ export interface Size {
   height: number;
 }
 
-export interface Rectangle extends Position, Size {}
+export interface Rectangle extends Position, Size { }
 
 export interface Player {
   position: Position;
@@ -21,6 +21,8 @@ export interface Player {
   maxShieldHealth: number;
   isInvincible: boolean;
   invincibilityEndTime: number;
+  collisionRadius: number; // For walls and physics
+  hurtboxRadius: number; // For enemy damage
 }
 
 export interface Snake {
@@ -114,7 +116,7 @@ export interface Snake {
   chargeMaxSpeed?: number; // Maximum speed for charge
   isInitialPause?: boolean; // Whether this is the first pause to let player adjust
   hasFiredBarrage?: boolean; // Whether projectile barrage has been fired in current phase 3 state
-  
+
   // Environmental effects triggered when boss hits boulder
   environmentalEffects?: {
     spawnMiniBoulders: boolean;
@@ -140,15 +142,15 @@ export interface Snake {
     sineAmplitude?: number; // Amplitude for sine wave movement
     sineFrequency?: number; // Frequency for sine wave movement
   };
-  
+
   // Phase system for boss battles
   bossPhase?: number; // Current phase (1-4)
   totalBoulderHits?: number; // Total number of boulder hits across all boulders
-  
+
   // Additional boss properties for charge tracking
   chargeDistanceTraveled?: number; // Distance traveled during current charge
   recoilDuration?: number; // Duration of recoil animation
-  
+
   // Phase 2 phantom properties
   phantomId?: string; // ID of spawned phantom (for Valerie to track) - legacy single phantom
   phantomIds?: string[]; // IDs of all spawned phantoms (for multi-phantom tracking)
@@ -163,7 +165,7 @@ export interface Snake {
   debugLogged?: boolean; // Temporary flag for debug logging to prevent spam
   isMarkedForRemoval?: boolean; // Flag to prevent duplicate removal processing
   processedForRemoval?: boolean; // Flag to ensure phantom is only processed once for removal
-  
+
   // Phase 3 projectile barrage properties
   halfwayTargetPosition?: Position; // Halfway position between Valerie and player for Phase 3
   projectileBarrageStartTime?: number; // When projectile barrage began
@@ -172,7 +174,7 @@ export interface Snake {
   burstProjectileStarted?: boolean; // Whether burst firing has been initialized
   projectileClockwise?: boolean; // Direction to fire projectiles (clockwise/counter-clockwise)
   startingAngle?: number; // Starting angle for projectile sequence (0=east, 180=west)
-  
+
   // Phase 4 properties
   exitTargetPosition?: Position; // Target position when exiting north
   snakeRainStartTime?: number; // When snake rain began
@@ -188,14 +190,16 @@ export interface Snake {
   sineAmplitude?: number; // Amplitude for sine wave movement
   sineFrequency?: number; // Frequency for sine wave movement
   initialX?: number; // Initial X position for sine wave calculation
-  
+
   // Reentrancy guard properties
   lastUpdateTime?: number; // Last frame time this snake was updated (prevents multiple updates per frame)
   lastChargeCollisionTime?: number; // Last time a collision occurred during charging (debounce)
   currentChargeId?: number; // Unique ID for each charge cycle (prevents collision interference)
+  hasSpawned?: boolean; // Whether the snake has fully spawned/entered the level
+  spawnTimer?: number; // Timer for spawn delay (e.g. rain snakes)
 }
 
-export interface Wall extends Rectangle {}
+export interface Wall extends Rectangle { }
 
 export interface Door extends Rectangle {
   isOpen: boolean;
@@ -288,9 +292,9 @@ export interface FlowState {
 
 export interface ThrowableItem extends Rectangle {
   id: string;
-  type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat' | 
-        'box_of_golf_balls' | '4_iron' | 'the_prophecy' | 'hammer' | 'box_of_nails' | 
-        'bag_of_concrete' | 'the_blue_album' | 'origami_book' | 'tennis_racket' | 'yoga_block';
+  type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat' |
+  'box_of_golf_balls' | '4_iron' | 'the_prophecy' | 'hammer' | 'box_of_nails' |
+  'bag_of_concrete' | 'the_blue_album' | 'origami_book' | 'tennis_racket' | 'yoga_block';
   isPickedUp: boolean;
   isThrown: boolean;
   velocity?: Position;
@@ -332,10 +336,13 @@ export interface Projectile {
   createdAt: number;
   lifespan: number; // How long projectile lives (ms)
   color: string;
+  canPenetrateWalls?: boolean; // Whether projectile can pass through walls
 }
 
 export interface CarriedItem {
-  type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat';
+  type: 'rock' | 'bottle' | 'can' | 'chubbs_hand' | 'elis_hip' | 'barbra_hat' |
+  'box_of_golf_balls' | '4_iron' | 'the_prophecy' | 'hammer' | 'box_of_nails' |
+  'bag_of_concrete' | 'the_blue_album' | 'origami_book' | 'tennis_racket' | 'yoga_block';
   id: string;
 }
 
@@ -391,26 +398,33 @@ export interface MiniBoulder {
 
 export interface Level {
   id: number;
+  levelKey: string;
   name: string;
-  levelKey: string; // Semantic identifier for code checks
   player: Position;
   walls: Wall[];
-  snakes: Snake[];
   door: Door;
   key: Key;
   switches?: Switch[];
   throwableItems?: ThrowableItem[];
-  patternTiles?: PatternTile[];
-  patternSequence?: number[]; // The correct sequence to step on tiles
-  mirrors?: Mirror[];
-  crystal?: Crystal;
-  lightSource?: LightSource;
-  teleporters?: Teleporter[];
-  snakePits?: SnakePit[];
-  boulders?: Boulder[];
+  snakes?: Snake[]; // Initial snakes configuration
+  patternTiles?: PatternTile[]; // For Level 4
+  patternSequence?: number[]; // For Level 4
+  startTilePos?: { row: number, col: number }; // For Level 4 flow puzzle
+  endTilePos?: { row: number, col: number }; // For Level 4 flow puzzle
+  mirrors?: Mirror[]; // For Level 3
+  crystal?: Crystal; // For Level 3
+  lightSource?: any; // For Level 3
+  teleporters?: Teleporter[]; // For Level 2
+  snakePits?: SnakePit[]; // For Level 2
+  boulders?: Boulder[]; // For Level 6
+  miniBoulders?: MiniBoulder[]; // For Level 6
   size: Size;
-  startTilePos?: { row: number; col: number }; // For Level 4 randomization
-  endTilePos?: { row: number; col: number }; // For Level 4 randomization
+  // Level 5 specific
+  currentPhase?: string;
+  phaseDuration?: number;
+  puzzleShards?: PuzzleShard[];
+  puzzlePedestal?: PuzzlePedestal;
+  phaseWalls?: PhaseWall[];
 }
 
 export type GameState = 'menu' | 'hub' | 'playing' | 'gameOver' | 'victory' | 'levelComplete';

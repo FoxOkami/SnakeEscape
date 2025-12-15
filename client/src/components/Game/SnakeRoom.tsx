@@ -58,13 +58,13 @@ const SnakeRoom: React.FC = () => {
         closeInventory();
         return;
       }
-      
+
       // Only handle game keys when game is playing and inventory is not open
       if (gameState !== "playing" || showInventory) return;
-      
+
       // Get current key bindings
       const keyBindings = useKeyBindings.getState().keyBindings;
-      
+
       // Handle secondary interaction key for counterclockwise rotation (mirrors, light source, and tiles)
       if (event.code === keyBindings.secondaryInteract) {
         event.preventDefault();
@@ -114,26 +114,24 @@ const SnakeRoom: React.FC = () => {
         }
         if (gameState_current.currentLevelKey === "grid_puzzle") {
           // Check if we're on the start tile for connection checking
-          const playerRect = {
-            x: gameState_current.player.position.x,
-            y: gameState_current.player.position.y,
-            width: gameState_current.player.size.width,
-            height: gameState_current.player.size.height,
+          const playerCenter = {
+            x: gameState_current.player.position.x + gameState_current.player.size.width / 2,
+            y: gameState_current.player.position.y + gameState_current.player.size.height / 2,
           };
 
           const currentTile = gameState_current.patternTiles.find((tile) => {
             return (
-              playerRect.x < tile.x + tile.width &&
-              playerRect.x + playerRect.width > tile.x &&
-              playerRect.y < tile.y + tile.height &&
-              playerRect.y + playerRect.height > tile.y
+              playerCenter.x >= tile.x &&
+              playerCenter.x <= tile.x + tile.width &&
+              playerCenter.y >= tile.y &&
+              playerCenter.y <= tile.y + tile.height
             );
           });
 
           // If on start tile, check connection instead of rotating
           const currentLevel =
             useSnakeGame.getState().levels[
-              useSnakeGame.getState().currentLevel
+            useSnakeGame.getState().currentLevel
             ];
           const startTilePos = currentLevel.startTilePos;
           const startTileId = startTilePos
@@ -190,7 +188,7 @@ const SnakeRoom: React.FC = () => {
         currentKeyBindings.secondaryInteract,
         currentKeyBindings.dash // Add dash key
       ];
-      
+
       if (boundMovementKeys.includes(event.code)) {
         event.preventDefault();
         setKeyPressed(event.code, true);
@@ -200,7 +198,7 @@ const SnakeRoom: React.FC = () => {
     const handleKeyUp = (event: KeyboardEvent) => {
       // Only handle game keys when game is playing
       if (gameState !== "playing") return;
-      
+
       // Handle movement keys - get current key bindings dynamically
       const currentKeyBindings = useKeyBindings.getState().keyBindings;
       const boundMovementKeys = [
@@ -215,7 +213,7 @@ const SnakeRoom: React.FC = () => {
         currentKeyBindings.secondaryInteract,
         currentKeyBindings.dash // Add dash key
       ];
-      
+
       if (boundMovementKeys.includes(event.code)) {
         event.preventDefault();
         setKeyPressed(event.code, false);
