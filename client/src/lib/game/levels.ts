@@ -176,7 +176,7 @@ export const LEVELS: Level[] = [
         id: "game_master",
         type: "friendly" as const,
         position: { x: 200, y: 150 },
-        size: { width: 40, height: 40 },
+        size: { width: 32, height: 32 },
         speed: 0, // Stationary
         direction: { x: 0, y: 0 },
         patrolPoints: [],
@@ -232,7 +232,7 @@ export const LEVELS: Level[] = [
         id: "screensaver1",
         type: "screensaver" as const,
         position: { x: 650, y: 80 }, // Top right area
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 125,
         direction: { x: 0, y: 0 }, // Will be randomly set on first update
         patrolPoints: [],
@@ -247,7 +247,7 @@ export const LEVELS: Level[] = [
         id: "screensaver2",
         type: "screensaver" as const,
         position: { x: 350, y: 450 }, // Bottom middle area
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 125,
         direction: { x: 0, y: 0 }, // Will be randomly set on first update
         patrolPoints: [],
@@ -262,7 +262,7 @@ export const LEVELS: Level[] = [
         id: "stalker1",
         type: "stalker" as const,
         position: { x: 450, y: 360 }, // Near the 9th pattern tile (tile9 is at x: 480, y: 380)
-        size: { width: 28, height: 28 },
+        size: { width: 32, height: 32 },
         speed: 45,
         direction: { x: 1, y: 0 },
         patrolPoints: [
@@ -411,7 +411,7 @@ export const LEVELS: Level[] = [
         id: "stalker1",
         type: "stalker" as const,
         position: { x: 257, y: 502 },
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 75,
         direction: { x: 0, y: 1 },
         patrolPoints: [
@@ -434,7 +434,7 @@ export const LEVELS: Level[] = [
         id: "stalker2",
         type: "stalker" as const,
         position: { x: 241, y: 96 },
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 75,
         direction: { x: 0, y: 1 },
         patrolPoints: [
@@ -457,7 +457,7 @@ export const LEVELS: Level[] = [
         id: "burster1",
         type: "burster" as const,
         position: { x: 651, y: 74 },
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 50,
         direction: { x: 1, y: 0 },
         patrolPoints: [
@@ -481,7 +481,7 @@ export const LEVELS: Level[] = [
         id: "screensaver1",
         type: "screensaver" as const,
         position: { x: 300, y: 100 },
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 165,
         direction: { x: 0, y: 0 }, // Will be randomly set on first update
         patrolPoints: [], // Not used for screensaver
@@ -579,7 +579,7 @@ export const LEVELS: Level[] = [
         id: "screensaver1",
         type: "screensaver" as const,
         position: { x: 605, y: 285 },
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 200,
         direction: { x: -1, y: 0 }, // Start moving west
         patrolPoints: [],
@@ -594,7 +594,7 @@ export const LEVELS: Level[] = [
         id: "guard3",
         type: "guard" as const,
         position: { x: 700, y: 500 },
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 80,
         direction: { x: 1, y: 0 },
         patrolPoints: [
@@ -617,7 +617,7 @@ export const LEVELS: Level[] = [
         id: "rattlesnake1",
         type: "rattlesnake" as const,
         position: { x: 550, y: 450 }, // Snake pit location
-        size: { width: 28, height: 28 },
+        size: { width: 32, height: 32 },
         speed: 60,
         direction: { x: 0, y: 0 },
         patrolPoints: [
@@ -644,7 +644,7 @@ export const LEVELS: Level[] = [
         id: "rattlesnake2",
         type: "rattlesnake" as const,
         position: { x: 550, y: 450 }, // Same pit location
-        size: { width: 28, height: 28 },
+        size: { width: 32, height: 32 },
         speed: 65,
         direction: { x: 0, y: 0 },
         patrolPoints: [
@@ -671,7 +671,7 @@ export const LEVELS: Level[] = [
         id: "rattlesnake3",
         type: "rattlesnake" as const,
         position: { x: 550, y: 450 }, // Same pit location
-        size: { width: 28, height: 28 },
+        size: { width: 32, height: 32 },
         speed: 55,
         direction: { x: 0, y: 0 },
         patrolPoints: [
@@ -698,7 +698,7 @@ export const LEVELS: Level[] = [
         id: "rattlesnake4",
         type: "rattlesnake" as const,
         position: { x: 390, y: 150 }, // Second pit location
-        size: { width: 28, height: 28 },
+        size: { width: 32, height: 32 },
         speed: 55,
         direction: { x: 0, y: 0 },
         patrolPoints: [
@@ -725,7 +725,7 @@ export const LEVELS: Level[] = [
         id: "rattlesnake5",
         type: "rattlesnake" as const,
         position: { x: 390, y: 150 }, // Second pit location
-        size: { width: 28, height: 28 },
+        size: { width: 32, height: 32 },
         speed: 55,
         direction: { x: 0, y: 0 },
         patrolPoints: [
@@ -887,7 +887,7 @@ export const LEVELS: Level[] = [
               id: "screensaver1",
               type: "screensaver" as const,
               position: calculateTileCenter(0, 7), // Grid position (0,7)
-              size: { width: 30, height: 30 },
+              size: { width: 32, height: 32 },
               speed: 150, // 1.5x faster than screensaver1
               direction: { x: -1, y: 0 }, // Start moving west
               patrolPoints: [],
@@ -902,7 +902,7 @@ export const LEVELS: Level[] = [
               id: "plumber2",
               type: "plumber" as const,
               position: calculateTileCenter(1, 1), // Grid position (1,1)
-              size: { width: 25, height: 25 },
+              size: { width: 32, height: 32 },
               speed: 80,
               direction: { x: 1, y: 0 }, // Start moving east
               patrolPoints: [],
@@ -922,7 +922,7 @@ export const LEVELS: Level[] = [
               id: "plumber3",
               type: "plumber" as const,
               position: calculateTileCenter(1, 6), // Grid position (1,6)
-              size: { width: 25, height: 25 },
+              size: { width: 32, height: 32 },
               speed: 80,
               direction: { x: 0, y: 1 }, // Start moving south
               patrolPoints: [],
@@ -942,7 +942,7 @@ export const LEVELS: Level[] = [
               id: "plumber4",
               type: "plumber" as const,
               position: calculateTileCenter(6, 1), // Grid position (6,1)
-              size: { width: 25, height: 25 },
+              size: { width: 32, height: 32 },
               speed: 80,
               direction: { x: 0, y: -1 }, // Start moving north
               patrolPoints: [],
@@ -962,7 +962,7 @@ export const LEVELS: Level[] = [
               id: "plumber5",
               type: "plumber" as const,
               position: calculateTileCenter(6, 6), // Grid position (6,6)
-              size: { width: 25, height: 25 },
+              size: { width: 32, height: 32 },
               speed: 80,
               direction: { x: -1, y: 0 }, // Start moving west
               patrolPoints: [],
@@ -982,7 +982,7 @@ export const LEVELS: Level[] = [
               id: "spitter1",
               type: "spitter" as const,
               position: { x: 640, y: 290 },
-              size: { width: 25, height: 25 },
+              size: { width: 32, height: 32 },
               speed: 50,
               direction: { x: 0, y: 1 },
               patrolPoints: [
@@ -1115,7 +1115,7 @@ export const LEVELS: Level[] = [
         id: "screensaver1",
         type: "screensaver" as const,
         position: { x: 350, y: 325 },
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 175,
         direction: { x: 0, y: 1 },
         patrolPoints: [],
@@ -1130,7 +1130,7 @@ export const LEVELS: Level[] = [
         id: "stalker1",
         type: "stalker" as const,
         position: { x: 200, y: 350 },
-        size: { width: 28, height: 28 },
+        size: { width: 32, height: 32 },
         speed: 100,
         direction: { x: 0, y: 1 },
         patrolPoints: [
@@ -1151,7 +1151,7 @@ export const LEVELS: Level[] = [
         id: "screensaver2",
         type: "screensaver" as const,
         position: { x: 200, y: 150 },
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 175,
         direction: { x: -1, y: 1 },
         patrolPoints: [],
@@ -1166,7 +1166,7 @@ export const LEVELS: Level[] = [
         id: "guard1",
         type: "guard" as const,
         position: { x: 425, y: 25 },
-        size: { width: 30, height: 30 },
+        size: { width: 32, height: 32 },
         speed: 100,
         direction: { x: 0, y: 1 },
         patrolPoints: [
@@ -1456,7 +1456,7 @@ export const LEVELS: Level[] = [
         id: "valerie",
         type: "boss" as const,
         position: { x: 100, y: 235 },
-        size: { width: 130, height: 130 },
+        size: { width: 128, height: 128 },
         speed: 100,
         direction: { x: 1, y: 0 },
         patrolPoints: [
