@@ -529,8 +529,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
         // Check if walking using custom key binding, but clear walking if dashing
         const isWalkingKeyPressed =
-          isKeyActiveRecently(keyBindings.walking) ||
-          isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
+          isKeyActiveRecently(keyBindings.walking);
         const isWalking = isWalkingKeyPressed && !isDashing; // Clear walking when dashing
 
         // Get dynamic speeds based on inventory items
@@ -4709,8 +4708,7 @@ export const useSnakeGame = create<SnakeGameState>()(
 
       // Check if walking key is pressed, but clear walking if dashing
       const isWalkingKeyPressed =
-        isKeyActiveRecently(keyBindings.walking) ||
-        isKeyActiveRecently("ControlRight"); // Keep ControlRight as backup
+        isKeyActiveRecently(keyBindings.walking);
       const isWalking = isWalkingKeyPressed && !controllerDashState.isDashing;
 
       // Update store state

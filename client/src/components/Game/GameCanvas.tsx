@@ -1578,7 +1578,7 @@ const GameCanvas: React.FC = () => {
             }
           } else {
             // Fallback to original rectangle drawing
-            ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
+            ctx.fillStyle = "#4299e1"; // Green when walking, blue when running
             ctx.fillRect(
               player.position.x,
               player.position.y,
@@ -1587,21 +1587,13 @@ const GameCanvas: React.FC = () => {
             );
 
             // Add player details
-            ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
+            ctx.fillStyle = "#2b6cb0"; // Darker green/blue for details
             ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
 
             // Player eyes
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
             ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-          }
-
-          // Walking indicator - small stealth icon
-          if (isWalking) {
-            ctx.fillStyle = "#68d391";
-            ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-            ctx.fillStyle = "#38a169";
-            ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
           }
 
           // Show key indicator if player has key
@@ -1950,7 +1942,7 @@ const GameCanvas: React.FC = () => {
             }
           } else {
             // Fallback to original rectangle drawing
-            ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
+            ctx.fillStyle = "#4299e1"; // Green when walking, blue when running
             ctx.fillRect(
               player.position.x,
               player.position.y,
@@ -1959,21 +1951,13 @@ const GameCanvas: React.FC = () => {
             );
 
             // Add player details
-            ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
+            ctx.fillStyle = "#2b6cb0"; // Darker green/blue for details
             ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
 
             // Player eyes
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
             ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-          }
-
-          // Walking indicator - small stealth icon
-          if (isWalking) {
-            ctx.fillStyle = "#68d391";
-            ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-            ctx.fillStyle = "#38a169";
-            ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
           }
 
           // Show key indicator if player has key
@@ -2265,7 +2249,7 @@ const GameCanvas: React.FC = () => {
             }
           } else {
             // Fallback to original rectangle drawing
-            ctx.fillStyle = isWalking ? "#38a169" : "#4299e1"; // Green when walking, blue when running
+            ctx.fillStyle = "#4299e1"; // Green when walking, blue when running
             ctx.fillRect(
               player.position.x,
               player.position.y,
@@ -2274,21 +2258,13 @@ const GameCanvas: React.FC = () => {
             );
 
             // Add player details on top
-            ctx.fillStyle = isWalking ? "#2f855a" : "#2b6cb0"; // Darker green/blue for details
+            ctx.fillStyle = "#2b6cb0"; // Darker green/blue for details
             ctx.fillRect(player.position.x + 5, player.position.y + 5, 15, 15);
 
             // Player eyes on top
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(player.position.x + 7, player.position.y + 7, 3, 3);
             ctx.fillRect(player.position.x + 15, player.position.y + 7, 3, 3);
-          }
-
-          // Walking indicator - small stealth icon on top
-          if (isWalking) {
-            ctx.fillStyle = "#68d391";
-            ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-            ctx.fillStyle = "#38a169";
-            ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
           }
 
           // Show key indicator if player has key on top
@@ -2467,28 +2443,7 @@ const GameCanvas: React.FC = () => {
                 player.size.width,
                 player.size.height,
               );
-
-              // Apply color tint for walking state if needed
-              if (isWalking) {
-                ctx.globalCompositeOperation = "multiply";
-                ctx.fillStyle = "rgba(56, 161, 105, 0.3)"; // Green tint when walking
-                ctx.fillRect(
-                  player.position.x,
-                  player.position.y,
-                  player.size.width,
-                  player.size.height,
-                );
-                ctx.globalCompositeOperation = "source-over";
-              }
             }
-          }
-
-          // Walking indicator - small stealth icon on top
-          if (isWalking) {
-            ctx.fillStyle = "#68d391";
-            ctx.fillRect(player.position.x - 3, player.position.y - 3, 6, 6);
-            ctx.fillStyle = "#38a169";
-            ctx.fillRect(player.position.x - 2, player.position.y - 2, 4, 4);
           }
 
           // Show key indicator if player has key on top

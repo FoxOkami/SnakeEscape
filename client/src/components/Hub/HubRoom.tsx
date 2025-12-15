@@ -571,7 +571,7 @@ const HubRoom: React.FC = () => {
         const isDown = keys.has(keyBindings.down);
         const isLeft = keys.has(keyBindings.left);
         const isRight = keys.has(keyBindings.right);
-        const isWalking = keys.has(keyBindings.walking) || keys.has("ShiftLeft") || keys.has("ShiftRight");
+        const isWalking = keys.has(keyBindings.walking);
 
         // Determine direction and state
         let direction = lastDirectionRef.current;
