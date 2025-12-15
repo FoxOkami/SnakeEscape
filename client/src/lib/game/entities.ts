@@ -5,10 +5,10 @@ import { getSnakeDetectionMultipliers } from "../stores/useSnakeGame";
 
 export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, player?: Player, sounds?: Position[], gameState?: any, levelBounds?: { width: number; height: number }, boulders?: Boulder[], snakePits?: any[]): Snake {
   const currentTime = Date.now();
-  
+
   // Convert deltaTime from milliseconds to seconds for calculations
   const dt = deltaTime / 1000;
-  
+
   // Check if snake is phase-restricted and not in active phase
   if (snake.activePhase && gameState && gameState.currentPhase !== snake.activePhase) {
     // Snake is not active in current phase, return without updating
@@ -61,11 +61,11 @@ export function updateSnake(snake: Snake, walls: Wall[], deltaTime: number, play
 
 function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, sounds?: Position[]): Snake {
   let targetPoint: Position = snake.position;
-  
+
   // Stalkers are blind but follow sounds
   let nearestSound: Position | null = null;
   let nearestSoundDistance = Infinity;
-  
+
   // Check for sounds within hearing range
   if (sounds && snake.hearingRange) {
     for (const sound of sounds) {
@@ -76,27 +76,27 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       }
     }
   }
-  
+
   // Update sound cooldown
   if (snake.soundCooldown && snake.soundCooldown > 0) {
     snake.soundCooldown -= dt;
   }
-  
+
   if (nearestSound && typeof nearestSound.x === 'number' && typeof nearestSound.y === 'number') {
     // Continuously follow current sounds with no cooldown
     snake.lastHeardSound = nearestSound;
     snake.isChasing = true;
     targetPoint = nearestSound;
-    
+
     // Reset sound cooldown since we're actively hearing the player
     snake.soundCooldown = 0;
-  } else if (snake.lastHeardSound && snake.isChasing && 
-             typeof snake.lastHeardSound.x === 'number' && typeof snake.lastHeardSound.y === 'number') {
+  } else if (snake.lastHeardSound && snake.isChasing &&
+    typeof snake.lastHeardSound.x === 'number' && typeof snake.lastHeardSound.y === 'number') {
     // Continue chasing toward last heard sound
     targetPoint = snake.lastHeardSound;
-    
+
     const distanceToSound = getDistance(snake.position, targetPoint);
-    
+
     // If we haven't reached the last known location yet, keep moving toward it
     if (distanceToSound > 25) {
       // Still moving toward the last heard sound
@@ -109,7 +109,7 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
         snake.soundCooldown = 3.0; // 3 seconds to search at this location
       } else {
         snake.soundCooldown -= dt;
-        
+
         // Stop chasing after searching for 3 seconds
         if (snake.soundCooldown <= 0) {
           snake.lastHeardSound = undefined;
@@ -123,13 +123,13 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     snake.isChasing = false;
     targetPoint = getPatrolTarget(snake);
   }
-  
+
   // Move toward target with wall avoidance (use chase speed when chasing sounds)
   const moveSpeed = snake.isChasing && snake.chaseSpeed ? snake.chaseSpeed : snake.speed;
-  
+
   // Move toward target
   const newPosition = moveTowards(snake.position, targetPoint, moveSpeed * dt);
-  
+
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
     snake.position = newPosition;
@@ -138,31 +138,31 @@ function updateStalkerSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
     snake.position = slidePosition;
   }
-  
+
   snake.direction = getDirectionVector(snake.position, targetPoint);
   return snake;
 }
 
 function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Player): Snake {
   let targetPoint: Position = snake.position;
-  
+
   // Check if snake can see the player
   let canSeePlayer = false;
   if (player && snake.sightRange > 0) {
     const distanceToPlayer = getDistance(snake.position, player.position);
-    canSeePlayer = distanceToPlayer <= snake.sightRange && 
-                   hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
+    canSeePlayer = distanceToPlayer <= snake.sightRange &&
+      hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
   }
-  
+
   // Update lost sight cooldown
   if (snake.lostSightCooldown && snake.lostSightCooldown > 0) {
     snake.lostSightCooldown -= dt;
   }
-  
 
 
-  if (canSeePlayer && player && player.position && 
-      typeof player.position.x === 'number' && typeof player.position.y === 'number') {
+
+  if (canSeePlayer && player && player.position &&
+    typeof player.position.x === 'number' && typeof player.position.y === 'number') {
     // Chase the player
     snake.isChasing = true;
     snake.chaseTarget = { ...player.position };
@@ -170,14 +170,14 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
     snake.lostSightCooldown = 3.0; // Keep chasing for 3 seconds after losing sight
     targetPoint = player.position;
   } else if (snake.isChasing && snake.lastSeenPlayer && snake.lostSightCooldown && snake.lostSightCooldown > 0 &&
-             typeof snake.lastSeenPlayer.x === 'number' && typeof snake.lastSeenPlayer.y === 'number') {
+    typeof snake.lastSeenPlayer.x === 'number' && typeof snake.lastSeenPlayer.y === 'number') {
     // Continue chasing last seen position for a while
     targetPoint = snake.lastSeenPlayer;
-  } else if (snake.isChasing && snake.chaseTarget && 
-             typeof snake.chaseTarget.x === 'number' && typeof snake.chaseTarget.y === 'number') {
+  } else if (snake.isChasing && snake.chaseTarget &&
+    typeof snake.chaseTarget.x === 'number' && typeof snake.chaseTarget.y === 'number') {
     // Move to last known position briefly
     targetPoint = snake.chaseTarget;
-    
+
     // Stop chasing if we've reached the last known position
     const distanceToTarget = getDistance(snake.position, targetPoint);
     if (distanceToTarget < 15) {
@@ -193,10 +193,10 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
 
   // Calculate movement speed
   const moveSpeed = snake.isChasing ? snake.chaseSpeed : snake.speed;
-  
+
   // Move toward target
   const newPosition = moveTowards(snake.position, targetPoint, moveSpeed * dt);
-  
+
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
     snake.position = newPosition;
@@ -208,13 +208,13 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
     // Use smart pathfinding for patrol behavior
     const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
     const smartNewPosition = moveTowards(snake.position, smartTarget, moveSpeed * dt);
-    
+
     if (!checkWallCollision(snake, smartNewPosition, walls)) {
       snake.position = smartNewPosition;
     } else {
       // If still blocked during patrol, skip to next patrol point
       snake.currentPatrolIndex += snake.patrolDirection;
-      
+
       // Reverse direction if we've reached the end
       if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
         snake.currentPatrolIndex = snake.patrolPoints.length - 2;
@@ -232,11 +232,11 @@ function updateGuardSnake(snake: Snake, walls: Wall[], dt: number, player?: Play
 
 function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Player, currentTime?: number): Snake {
   let targetPoint: Position = snake.position;
-  
+
   // Check if currently dashing
   if (snake.isDashing && snake.dashStartTime && snake.dashDuration && currentTime) {
     const dashElapsed = (currentTime - snake.dashStartTime) / 1000;
-    
+
     if (dashElapsed >= snake.dashDuration) {
       // End dash
       snake.isDashing = false;
@@ -247,7 +247,7 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       const dashTarget = snake.dashTarget; // Store reference before potential modification
       const dashSpeed = snake.dashSpeed || 200;
       const newPosition = moveTowards(snake.position, dashTarget, dashSpeed * dt);
-      
+
       // Check collision and update position
       if (!checkWallCollision(snake, newPosition, walls)) {
         snake.position = newPosition;
@@ -258,19 +258,19 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
         snake.dashStartTime = undefined;
         snake.dashTarget = undefined;
       }
-      
+
       return snake;
     }
   }
-  
+
   // Check if snake can see the player
   let canSeePlayer = false;
   if (player && snake.sightRange > 0) {
     const distanceToPlayer = getDistance(snake.position, player.position);
-    canSeePlayer = distanceToPlayer <= snake.sightRange && 
-                   hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
+    canSeePlayer = distanceToPlayer <= snake.sightRange &&
+      hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
   }
-  
+
   // Update lost sight cooldown
   if (snake.lostSightCooldown && snake.lostSightCooldown > 0) {
     snake.lostSightCooldown -= dt;
@@ -284,7 +284,7 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       x: player.position.x + playerVelocity.x * predictTime,
       y: player.position.y + playerVelocity.y * predictTime
     };
-    
+
     snake.isDashing = true;
     snake.dashStartTime = currentTime;
     snake.dashTarget = predictedPosition;
@@ -292,13 +292,13 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
     targetPoint = predictedPosition;
   } else if (snake.lostSightCooldown && snake.lostSightCooldown > 0 && snake.lastSeenPlayer) {
     // Move toward last seen position briefly
-    targetPoint = snake.lastSeenPlayer;  
+    targetPoint = snake.lastSeenPlayer;
   } else {
     // Patrol behavior
     snake.lastSeenPlayer = undefined;
     targetPoint = getPatrolTarget(snake);
   }
-  
+
   if (canSeePlayer && player) {
     snake.lastSeenPlayer = { ...player.position };
   }
@@ -306,7 +306,7 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   // If not dashing, move normally
   if (!snake.isDashing) {
     const newPosition = moveTowards(snake.position, targetPoint, snake.speed * dt);
-    
+
     // Check collision and update position
     if (!checkWallCollision(snake, newPosition, walls)) {
       snake.position = newPosition;
@@ -318,13 +318,13 @@ function updateBursterSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       // Use smart pathfinding for patrol behavior
       const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
       const smartNewPosition = moveTowards(snake.position, smartTarget, snake.speed * dt);
-      
+
       if (!checkWallCollision(snake, smartNewPosition, walls)) {
         snake.position = smartNewPosition;
       } else {
         // If still blocked during patrol, skip to next patrol point
         snake.currentPatrolIndex += snake.patrolDirection;
-        
+
         // Reverse direction if we've reached the end
         if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
           snake.currentPatrolIndex = snake.patrolPoints.length - 2;
@@ -353,7 +353,7 @@ function getPatrolTarget(snake: Snake): Position {
         y: Math.max(50, Math.min(550, snake.position.y + Math.sin(angle) * distance))
       };
     }
-    
+
     // Check if we've reached the fallback target (closer threshold for more movement)
     const distanceToFallback = getDistance(snake.position, snake.fallbackTarget);
     if (distanceToFallback < 25) {
@@ -365,27 +365,27 @@ function getPatrolTarget(snake: Snake): Position {
         y: Math.max(50, Math.min(550, snake.position.y + Math.sin(angle) * distance))
       };
     }
-    
+
     return snake.fallbackTarget;
   }
-  
+
   // Ensure currentPatrolIndex is valid
   if (typeof snake.currentPatrolIndex !== 'number' || snake.currentPatrolIndex < 0 || snake.currentPatrolIndex >= snake.patrolPoints.length) {
     snake.currentPatrolIndex = 0;
   }
-  
+
   // Get current patrol target and validate it
   const currentTarget = snake.patrolPoints[snake.currentPatrolIndex];
   if (!currentTarget || typeof currentTarget.x !== 'number' || typeof currentTarget.y !== 'number') {
     return snake.position;
   }
-  
+
   // Check if we've reached the current patrol point
   const distanceToPatrol = getDistance(snake.position, currentTarget);
   if (distanceToPatrol < 15) {
     // Move to next patrol point
     snake.currentPatrolIndex += snake.patrolDirection;
-    
+
     // Reverse direction if we've reached the end
     if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
       snake.currentPatrolIndex = Math.max(0, snake.patrolPoints.length - 2);
@@ -394,7 +394,7 @@ function getPatrolTarget(snake: Snake): Position {
       snake.currentPatrolIndex = Math.min(1, snake.patrolPoints.length - 1);
       snake.patrolDirection = 1;
     }
-    
+
     // Validate the new target
     const newTarget = snake.patrolPoints[snake.currentPatrolIndex];
     if (!newTarget || typeof newTarget.x !== 'number' || typeof newTarget.y !== 'number') {
@@ -410,7 +410,7 @@ function getPatrolTarget(snake: Snake): Position {
       return snake.fallbackTarget;
     }
   }
-  
+
   return snake.patrolPoints[snake.currentPatrolIndex];
 }
 
@@ -427,7 +427,7 @@ function checkWallCollision(snake: Snake, newPosition: Position, walls: Wall[]):
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -438,7 +438,7 @@ function getScreensaverCollisionInfo(snake: Snake, newPosition: Position, walls:
     width: snake.size.width,
     height: snake.size.height
   };
-  
+
   for (const wall of walls) {
     if (checkAABBCollision(snakeRect, wall)) {
       // Calculate which side of the wall was hit to determine normal
@@ -446,18 +446,18 @@ function getScreensaverCollisionInfo(snake: Snake, newPosition: Position, walls:
         x: snakeRect.x + snakeRect.width / 2,
         y: snakeRect.y + snakeRect.height / 2
       };
-      
+
       const wallCenter = {
         x: wall.x + wall.width / 2,
         y: wall.y + wall.height / 2
       };
-      
+
       // Calculate overlap on each axis
       const overlapX = Math.min(snakeRect.x + snakeRect.width - wall.x, wall.x + wall.width - snakeRect.x);
       const overlapY = Math.min(snakeRect.y + snakeRect.height - wall.y, wall.y + wall.height - snakeRect.y);
-      
+
       let normal = { x: 0, y: 0 };
-      
+
       // Determine collision normal based on smallest overlap
       if (overlapX < overlapY) {
         // Horizontal collision (left or right side of wall)
@@ -468,11 +468,11 @@ function getScreensaverCollisionInfo(snake: Snake, newPosition: Position, walls:
         normal.x = 0;
         normal.y = snakeCenter.y < wallCenter.y ? -1 : 1;
       }
-      
+
       return { hit: true, wall, normal };
     }
   }
-  
+
   return { hit: false };
 }
 
@@ -480,10 +480,10 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
   // Only diagonal directions for screensaver snake movement (normalized)
   const sqrt2 = Math.sqrt(2);
   const diagonalDirections = [
-    { x: 1/sqrt2, y: -1/sqrt2 }, // Northeast (normalized)
-    { x: 1/sqrt2, y: 1/sqrt2 },  // Southeast (normalized)
-    { x: -1/sqrt2, y: 1/sqrt2 }, // Southwest (normalized)
-    { x: -1/sqrt2, y: -1/sqrt2 } // Northwest (normalized)
+    { x: 1 / sqrt2, y: -1 / sqrt2 }, // Northeast (normalized)
+    { x: 1 / sqrt2, y: 1 / sqrt2 },  // Southeast (normalized)
+    { x: -1 / sqrt2, y: 1 / sqrt2 }, // Southwest (normalized)
+    { x: -1 / sqrt2, y: -1 / sqrt2 } // Northwest (normalized)
   ];
 
   // Set initial diagonal direction if snake doesn't have one OR convert non-diagonal to diagonal
@@ -494,7 +494,7 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
   } else {
     // Check if current direction is diagonal (both x and y components are non-zero)
     const isDiagonal = Math.abs(snake.direction.x) > 0.001 && Math.abs(snake.direction.y) > 0.001;
-    
+
     if (!isDiagonal) {
       // Snake has a cardinal direction, convert to diagonal
       const randomIndex = Math.floor(Math.random() * diagonalDirections.length);
@@ -502,7 +502,7 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
     }
   }
 
-  
+
   // Calculate new position
   const newPosition = {
     x: snake.position.x + snake.direction.x * snake.speed * dt,
@@ -522,13 +522,13 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
     // Check which wall we hit to determine which side of the snake made contact
     let hitVerticalWall = false;
     let hitHorizontalWall = false;
-    
+
     for (const wall of walls) {
       if (checkAABBCollision(snakeRect, wall)) {
         // Calculate overlap on each axis to determine primary collision direction
         const overlapX = Math.min(snakeRect.x + snakeRect.width - wall.x, wall.x + wall.width - snakeRect.x);
         const overlapY = Math.min(snakeRect.y + snakeRect.height - wall.y, wall.y + wall.height - snakeRect.y);
-        
+
         if (overlapX < overlapY) {
           // Hit left/right wall - flip X direction (west/east side of snake hit)
           hitVerticalWall = true;
@@ -539,7 +539,7 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
         break; // Only handle first collision
       }
     }
-    
+
     // Flip the appropriate axis based on collision
     if (hitVerticalWall) {
       snake.direction.x = -snake.direction.x; // Flip X axis
@@ -547,13 +547,13 @@ function updateScreensaverSnake(snake: Snake, walls: Wall[], dt: number): Snake 
     if (hitHorizontalWall) {
       snake.direction.y = -snake.direction.y; // Flip Y axis
     }
-    
+
     // Move in the new direction for the current frame
     const bouncePosition = {
       x: snake.position.x + snake.direction.x * snake.speed * dt,
       y: snake.position.y + snake.direction.y * snake.speed * dt
     };
-    
+
     // Only move if the new direction doesn't immediately cause another collision
     if (!checkWallCollision(snake, bouncePosition, walls)) {
       snake.position = bouncePosition;
@@ -572,14 +572,14 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
   if (!gameState || !gameState.patternTiles) {
     return snake; // No game state available
   }
-  
+
   // Only move on level 4
   if (gameState.currentLevel !== 4) {
     return snake; // Level 4 is 0-indexed as 3
   }
 
   const currentTime = performance.now() / 1000;
-  
+
   // Check if snake has reached its target
   const hasReachedTarget = snake.chaseTarget && getDistance(
     {
@@ -591,12 +591,12 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
       y: snake.chaseTarget.y + snake.size.height / 2
     }
   ) < 5; // 5 pixel threshold
-  
+
   // Start pause when reaching target
   if (hasReachedTarget && !snake.isPaused) {
     snake.isPaused = true;
     snake.pauseStartTime = currentTime;
-    
+
     // Find the tile the snake is on and mark it for rotation
     const currentTile = gameState.patternTiles.find((tile: any) => {
       const snakeCenter = {
@@ -610,41 +610,41 @@ function updatePlumberSnake(snake: Snake, walls: Wall[], dt: number, player?: Pl
         snakeCenter.y <= tile.y + tile.height
       );
     });
-    
+
     if (currentTile) {
       snake.tileToRotate = currentTile.id;
     }
-    
+
     return snake;
   }
-  
+
   // Check if pause is complete (1 second)
   const pauseComplete = snake.isPaused && snake.pauseStartTime && (currentTime - snake.pauseStartTime >= 1.0);
-  
+
   // Pick new random target when pause is complete or no target set
   if (pauseComplete || !snake.chaseTarget) {
     // Reset pause state
     snake.isPaused = false;
     snake.pauseStartTime = undefined;
-    
+
     // Pick a random tile from the grid
     const randomTileIndex = Math.floor(Math.random() * gameState.patternTiles.length);
     const targetTile = gameState.patternTiles[randomTileIndex];
-    
+
     // Set target to center of the random tile
     snake.chaseTarget = {
       x: targetTile.x + targetTile.width / 2 - snake.size.width / 2,
       y: targetTile.y + targetTile.height / 2 - snake.size.height / 2
     };
   }
-  
+
   // Move toward current target (but not if paused)
   if (snake.chaseTarget && !snake.isPaused) {
     const newPosition = moveTowards(snake.position, snake.chaseTarget, snake.speed * dt);
     snake.position = newPosition;
     snake.direction = getDirectionVector(snake.position, snake.chaseTarget);
   }
-  
+
   return snake;
 }
 
@@ -653,10 +653,10 @@ function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number, currentTime
   if (snake.patrolPoints && snake.patrolPoints.length > 0) {
     // Use patrol behavior like other snakes
     const targetPoint = getPatrolTarget(snake);
-    
+
     // Move toward patrol target
     const newPosition = moveTowards(snake.position, targetPoint, snake.speed * dt);
-    
+
     // Check collision and update position
     if (!checkWallCollision(snake, newPosition, walls)) {
       snake.position = newPosition;
@@ -664,13 +664,13 @@ function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number, currentTime
       // Use smart pathfinding for patrol behavior
       const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
       const smartNewPosition = moveTowards(snake.position, smartTarget, snake.speed * dt);
-      
+
       if (!checkWallCollision(snake, smartNewPosition, walls)) {
         snake.position = smartNewPosition;
       } else {
         // If still blocked during patrol, skip to next patrol point
         snake.currentPatrolIndex += snake.patrolDirection;
-        
+
         // Reverse direction if we've reached the end
         if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
           snake.currentPatrolIndex = Math.max(0, snake.patrolPoints.length - 2);
@@ -681,7 +681,7 @@ function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number, currentTime
         }
       }
     }
-    
+
     // Update direction for visual purposes
     snake.direction = getDirectionVector(snake.position, targetPoint);
   } else {
@@ -690,7 +690,7 @@ function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number, currentTime
     if (!snake.movementAxis) {
       // Randomly choose horizontal or vertical movement
       snake.movementAxis = Math.random() < 0.5 ? 'horizontal' : 'vertical';
-      
+
       // Set initial direction based on movement axis
       if (snake.movementAxis === 'horizontal') {
         snake.direction = { x: 1, y: 0 }; // Start moving east
@@ -712,13 +712,13 @@ function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number, currentTime
         x: -snake.direction.x,
         y: -snake.direction.y
       };
-      
+
       // Try moving in the reversed direction
       const reversedPosition = {
         x: snake.position.x + snake.direction.x * snake.speed * dt,
         y: snake.position.y + snake.direction.y * snake.speed * dt
       };
-      
+
       // Only move if the reversed direction is clear
       if (!checkWallCollision(snake, reversedPosition, walls)) {
         snake.position = reversedPosition;
@@ -732,12 +732,12 @@ function updateSpitterSnake(snake: Snake, walls: Wall[], dt: number, currentTime
   // Handle firing logic if currentTime is provided
   if (currentTime && snake.lastFireTime !== undefined && snake.fireInterval) {
     const timeSinceLastFire = currentTime - snake.lastFireTime;
-    
+
     if (timeSinceLastFire >= snake.fireInterval) {
       // Update the snake's firing timestamp and shot count
       snake.lastFireTime = currentTime;
       snake.shotCount = (snake.shotCount || 0) + 1;
-      
+
       // Set a flag that the main game loop can check to create projectiles
       snake.shouldFire = true;
     }
@@ -757,7 +757,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
 
   // Get lighting state from game state (passed through gameState parameter)
   let isDark = false;
-  
+
   if (gameState) {
     if (gameState.currentLevel === 5) {
       // Level 5 (0-indexed as 4) - Use quadrant-based lighting
@@ -778,7 +778,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       // ON → OFF (1st) → ON (2nd) → OFF (3rd) → ON (4th)
       const destroyedBoulders = gameState.boulders?.filter((boulder: any) => boulder.isDestroyed) || [];
       const destroyedCount = destroyedBoulders.length;
-      
+
       if (destroyedCount === 0) {
         isDark = false; // Light is on at start
       } else if (destroyedCount === 1) {
@@ -792,13 +792,20 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
     }
   }
-  
+
+  // REMOVED FORCE OVERRIDE
+  // Logic now relies entirely on 'isDark' (boulder state) and 'nearestSound' (walking vs running)
+  // If isDark=true:
+  //   - Walking -> No Sound -> Fall through to Stop/Wait
+  //   - Running/Dashing -> Sound -> Chase at 50% speed
+
+
   // Check if currently paused (100ms pause states for light mode)
   if (snake.isPaused && snake.pauseStartTime) {
     if (currentTime - snake.pauseStartTime >= 100) { // 100ms
       snake.isPaused = false;
       snake.pauseStartTime = undefined;
-      
+
       // After pause, start charging at captured player position
       if (snake.chargeDirection) {
         snake.isCharging = true;
@@ -825,48 +832,16 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
     snake.isCharging = false;
     snake.chargeDirection = undefined; // Clear any previous charge direction
 
-    // Level 6 specific behavior: return to spawn when player is walking OR when no sounds to chase
-    if (gameState && gameState.currentLevel === 6 && snake.spawnPoint) {
-      const hasCurrentSounds = sounds && sounds.length > 0;
-      const playerIsWalking = gameState.player && gameState.player.isWalking;
-      
-      // Check for audio pause trigger before spawn return - snake stops hearing sounds
-      const currentlyHearingPlayer = hasCurrentSounds;
-      if (snake.wasHearingPlayer && !currentlyHearingPlayer && !snake.isAudioPaused) {
-        // Snake was hearing player but now isn't - trigger 500ms pause
-        snake.isAudioPaused = true;
-        snake.audioPauseStartTime = currentTime;
-        snake.wasHearingPlayer = false;
-        return snake; // Stay still during audio pause
-      }
-      
-      // Update hearing state for next frame
-      snake.wasHearingPlayer = currentlyHearingPlayer;
-      
-      // Return to spawn if player is walking OR if no current sounds to chase
-      if (playerIsWalking || !hasCurrentSounds) {
-        // Stop chasing sounds and return to spawn point
-        snake.lastHeardSound = undefined;
-        snake.isChasing = false;
-        snake.soundCooldown = 0;
-        
-        const distanceToSpawn = getDistance(snake.position, snake.spawnPoint);
-        
-        if (distanceToSpawn > 10) { // If not at spawn point
-          const newPosition = moveTowards(snake.position, snake.spawnPoint, snake.speed * dt);
-          if (!checkWallCollision(snake, newPosition, walls)) {
-            snake.position = newPosition;
-          } else {
-            // Try sliding along wall if blocked
-            const slidePosition = slideAlongWall(snake.position, newPosition, walls, snake.size);
-            snake.position = slidePosition;
-          }
-          snake.direction = getDirectionVector(snake.position, snake.spawnPoint);
-        }
-        
-        return snake; // Exit early, don't process sound hunting
-      }
-    }
+    snake.chargeDirection = undefined; // Clear any previous charge direction
+
+    // Updated Level 6 Logic:
+    // We removed the specific "Return to Spawn" block here.
+    // Now, if isDark is true (which means we ARE walking, due to the override above),
+    // it falls through to the standard logic below.
+    // Standard logic:
+    // - If Sound -> Chase Sound.
+    // - If No Sound -> Fall through to default (Stop/Wait).
+    // This matches: "stop and wait ... or ... move to where the noise was last detected".
 
     // Update sound cooldown
     if (snake.soundCooldown && snake.soundCooldown > 0) {
@@ -876,7 +851,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
     // Check for current sounds to chase
     let nearestSound: Position | null = null;
     let nearestSoundDistance = Infinity;
-    
+
     if (sounds && sounds.length > 0 && snake.hearingRange) {
       for (const sound of sounds) {
         const distanceToSound = getDistance(snake.position, sound);
@@ -887,8 +862,9 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
     }
 
-    // For non-Level 6 snakes, also check for audio pause when losing sounds
-    if (gameState && gameState.currentLevel !== 6) {
+    // Check for audio pause when losing sounds (Universal for all levels now)
+    // For Level 6, this occurs if Walking + No Sound.
+    if (gameState) {
       const currentlyHearingPlayer = !!nearestSound;
       if (snake.wasHearingPlayer && !currentlyHearingPlayer && !snake.isAudioPaused) {
         // Snake was hearing player but now isn't - trigger 500ms pause
@@ -906,9 +882,12 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       snake.lastHeardSound = nearestSound;
       snake.isChasing = true;
       snake.soundCooldown = 0;
-      
+
       // Move toward the sound
-      const newPosition = moveTowards(snake.position, nearestSound, snake.speed * dt);
+      // Requirement: "speed that the photophobic snake chases the player in the dark should be 50% slower than when the photophobic snake isBerserk=true"
+      // Berserk mode uses 'chaseSpeed'. So we use chaseSpeed * 0.5.
+      const darkChaseSpeed = snake.chaseSpeed ? snake.chaseSpeed * 0.5 : snake.speed * 0.5;
+      const newPosition = moveTowards(snake.position, nearestSound, darkChaseSpeed * dt);
       if (!checkWallCollision(snake, newPosition, walls)) {
         snake.position = newPosition;
       } else {
@@ -917,18 +896,19 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
         snake.position = slidePosition;
       }
       snake.direction = getDirectionVector(snake.position, nearestSound);
-      
+
     } else if (snake.lastHeardSound && snake.isChasing) {
       // Continue moving toward last heard sound
       const distanceToLastSound = getDistance(snake.position, snake.lastHeardSound);
-      
+
       if (distanceToLastSound > 25) {
         // Still moving toward the last heard sound
         if (!snake.soundCooldown) {
           snake.soundCooldown = 3.0; // Give time to reach the location
         }
-        
-        const newPosition = moveTowards(snake.position, snake.lastHeardSound, snake.speed * dt);
+
+        const darkChaseSpeed = snake.chaseSpeed ? snake.chaseSpeed * 0.5 : snake.speed * 0.5;
+        const newPosition = moveTowards(snake.position, snake.lastHeardSound, darkChaseSpeed * dt);
         if (!checkWallCollision(snake, newPosition, walls)) {
           snake.position = newPosition;
         } else {
@@ -936,7 +916,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
           snake.position = slidePosition;
         }
         snake.direction = getDirectionVector(snake.position, snake.lastHeardSound);
-        
+
       } else {
         // Reached last sound location, search briefly then stop
         if (!snake.soundCooldown || snake.soundCooldown > 2.0) {
@@ -950,14 +930,14 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
           }
         }
       }
-      
+
     } else {
       // Default behavior: stay still if no patrol points (photophobic snakes don't patrol)
       snake.isChasing = false;
       if (snake.patrolPoints && snake.patrolPoints.length > 0) {
         const targetPoint = getPatrolTarget(snake);
         const newPosition = moveTowards(snake.position, targetPoint, (snake.speed * 0.5) * dt); // Half speed patrol
-        
+
         if (!checkWallCollision(snake, newPosition, walls)) {
           snake.position = newPosition;
         }
@@ -965,7 +945,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       }
       // If no patrol points, snake stays in place
     }
-    
+
     return snake;
   }
 
@@ -975,8 +955,8 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
 
   // Check if snake can see player
   const distanceToPlayer = getDistance(snake.position, player.position);
-  const canSeePlayer = distanceToPlayer <= snake.sightRange && 
-                      hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
+  const canSeePlayer = distanceToPlayer <= snake.sightRange &&
+    hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
 
   // If charging and hit a wall, pause and redirect
   if (snake.isCharging && snake.chargeDirection) {
@@ -991,10 +971,10 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
       snake.pauseStartTime = currentTime;
       snake.isCharging = false;
       snake.chargeDirection = undefined;
-      
+
       // Set new charge direction toward player's current position
       snake.chargeDirection = getDirectionVector(snake.position, player.position);
-      
+
       return snake;
     } else {
       // Continue charging
@@ -1007,12 +987,12 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
   if (canSeePlayer && !snake.isPaused && !snake.isCharging) {
     // Capture player's current position for charge direction
     snake.chargeDirection = getDirectionVector(snake.position, player.position);
-    
+
     // Start 100ms pause
     snake.isPaused = true;
     snake.pauseStartTime = currentTime;
     snake.isChasing = true;
-    
+
     return snake;
   }
 
@@ -1020,7 +1000,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
   if (!snake.isCharging && !snake.isPaused) {
     const targetPoint = getPatrolTarget(snake);
     const newPosition = moveTowards(snake.position, targetPoint, snake.chaseSpeed * dt);
-    
+
     if (!checkWallCollision(snake, newPosition, walls)) {
       snake.position = newPosition;
     } else {
@@ -1034,7 +1014,7 @@ function updatePhotophobicSnake(snake: Snake, walls: Wall[], dt: number, player?
         snake.patrolDirection = 1;
       }
     }
-    
+
     snake.direction = getDirectionVector(snake.position, targetPoint);
   }
 
@@ -1049,21 +1029,21 @@ function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?
 
   // Determine behavior based on rattlesnake state
   let targetPoint: Position = snake.position;
-  
+
   // Handle different rattlesnake states
   if (snake.rattlesnakeState === "returningToPit") {
     // Find the pit this snake belongs to and move toward it
     let pitPosition = { x: 550 - 14, y: 450 - 14 }; // Default pit1 position
-    
+
     if (snakePits && snake.pitId) {
       const pit = snakePits.find(p => p.id === snake.pitId);
       if (pit) {
         pitPosition = { x: pit.x - 14, y: pit.y - 14 };
       }
     }
-    
+
     targetPoint = pitPosition;
-    
+
     // Don't chase player when returning to pit
     snake.isChasing = false;
   } else {
@@ -1071,12 +1051,12 @@ function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?
     // Check if can see player and start chasing
     if (player && snake.sightRange && snake.hearingRange) {
       const distanceToPlayer = getDistance(snake.position, player.position);
-      const canSeePlayer = distanceToPlayer <= snake.sightRange && 
-                          hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
-      
+      const canSeePlayer = distanceToPlayer <= snake.sightRange &&
+        hasLineOfSight(snake.position, player.position, walls, snake.sightRange);
+
       // Also check hearing range for rattlesnakes
       const canHearPlayer = distanceToPlayer <= snake.hearingRange;
-      
+
       if (canSeePlayer || canHearPlayer) {
         snake.isChasing = true;
         targetPoint = player.position;
@@ -1099,13 +1079,13 @@ function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?
       targetPoint = getPatrolTarget(snake);
     }
   }
-  
+
   // Calculate movement speed
   const moveSpeed = snake.isChasing ? snake.chaseSpeed : snake.speed;
-  
+
   // Move toward target
   const newPosition = moveTowards(snake.position, targetPoint, moveSpeed * dt);
-  
+
   // Check collision and update position
   if (!checkWallCollision(snake, newPosition, walls)) {
     snake.position = newPosition;
@@ -1117,13 +1097,13 @@ function updateRattlesnakeSnake(snake: Snake, walls: Wall[], dt: number, player?
     // Use smart pathfinding for patrol behavior
     const smartTarget = findPathAroundWalls(snake.position, targetPoint, walls, snake.size);
     const smartNewPosition = moveTowards(snake.position, smartTarget, moveSpeed * dt);
-    
+
     if (!checkWallCollision(snake, smartNewPosition, walls)) {
       snake.position = smartNewPosition;
     } else {
       // If still blocked during patrol, skip to next patrol point
       snake.currentPatrolIndex += snake.patrolDirection;
-      
+
       // Reverse direction if we've reached the end
       if (snake.currentPatrolIndex >= snake.patrolPoints.length) {
         snake.currentPatrolIndex = snake.patrolPoints.length - 2;
@@ -1147,7 +1127,7 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
 
   // Calculate movement speed (use time-based movement like other snakes)
   const moveSpeed = snake.speed * dt; // Use time-based movement for consistent speed regardless of framerate
-  
+
   let newPosition = { ...snake.position };
   let hitWall = false;
 
@@ -1190,7 +1170,7 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
   // Update position
   const oldPosition = { ...snake.position };
   snake.position = newPosition;
-  
+
   // Movement tracking removed for cleaner logs
 
   // Turn 90 degrees based on rotation direction when hitting a wall
@@ -1250,11 +1230,11 @@ function updatePhantomSnake(snake: Snake, walls: Wall[], dt: number, levelBounds
 
   // Only check for return if phantom has traveled at least around the perimeter once (roughly 1200 pixels for single loop)
   const minimumTravelDistance = 1200;
-  
+
   if (distanceToSpawn <= 15 && !snake.hasReturnedToSpawn && snake.totalTravelDistance >= minimumTravelDistance) {
     snake.hasReturnedToSpawn = true;
   }
-  
+
   // Stop moving if phantom has returned to spawn
   if (snake.hasReturnedToSpawn) {
     return snake;
@@ -1271,7 +1251,7 @@ export function updateRainSnake(snake: Snake, walls: Wall[], dt: number, levelBo
 
   // Rain snakes move continuously based on their movement pattern
   const moveSpeed = snake.rainSpeed ? snake.rainSpeed * dt : snake.speed * dt;
-  
+
   let newPosition = { x: snake.position.x, y: snake.position.y };
 
   if (snake.rainMovementPattern === 'straight') {
@@ -1280,7 +1260,7 @@ export function updateRainSnake(snake: Snake, walls: Wall[], dt: number, levelBo
       x: snake.position.x, // X position stays constant
       y: snake.position.y + moveSpeed // Move downward (south)
     };
-    
+
   } else if (snake.rainMovementPattern === 'angled' && snake.rainAngle) {
     // Pattern 2: 30-degree angled movement
     const radians = (snake.rainAngle * Math.PI) / 180;
@@ -1288,17 +1268,17 @@ export function updateRainSnake(snake: Snake, walls: Wall[], dt: number, levelBo
       x: snake.position.x + Math.sin(radians) * moveSpeed,
       y: snake.position.y + Math.cos(radians) * moveSpeed
     };
-    
+
   } else if (snake.rainMovementPattern === 'sine' && snake.sineAmplitude && snake.sineFrequency && snake.initialX !== undefined) {
     // Pattern 3: Large sine wave curve north-to-south
     const distanceTraveled = snake.position.y - (-50); // Distance from initial spawn Y (-50)
     const sineOffset = Math.sin(distanceTraveled * snake.sineFrequency) * snake.sineAmplitude;
-    
+
     newPosition = {
       x: snake.initialX + sineOffset, // Oscillate around initial X position
       y: snake.position.y + moveSpeed // Continue moving south
     };
-    
+
   } else {
     // Fallback to straight movement
     newPosition = {

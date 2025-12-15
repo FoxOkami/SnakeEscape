@@ -2,6 +2,83 @@ import React, { useRef, useEffect, useCallback } from "react";
 import { useSnakeGame } from "../../lib/stores/useSnakeGame";
 import { checkAABBCollision } from "../../lib/game/collision";
 import { drawPickupTooltip, drawStandardTooltip, drawInteractionTooltip, drawSecondaryInteractionTooltip, drawRotationTooltip } from "../../lib/utils/tooltips";
+import { Snake } from "../../lib/game/types";
+
+// Snake color overlays
+const snakeColors: Record<string, string> = {
+  screensaver: '#9ACD32',
+  stalker: '#8A2BE2',
+  burster: '#FFFF00',
+  guard: '#EE82EE',
+  rattlesnake: '#FF4500',
+  plumber: '#0d98ba',
+  spitter: '#008000',
+  photophobic: '#FF0000',
+  rainsnake: '#0000FF',
+  boss: '#C71585',
+  phantom: '#C71585',
+};
+
+// Helper to get sprite rect and animation info
+const getSnakeSpriteRect = (snake: Snake, dir: 'east' | 'west', isMoving: boolean, levelKey: string) => {
+  const isChasing = snake.isChasing || snake.isCharging || snake.isDashing || snake.isBerserk;
+  // Charging/Chasing = 8fps, Normal = 4fps
+  const fps = isChasing ? 8 : 4;
+  const frameCount = 4;
+
+  let sx = 0;
+  let sy = 0;
+  let sw = 32;
+  let sh = 32;
+
+  // Skate Rink special cases (Level 6)
+  if (levelKey === 'boss_valerie') {
+    if (snake.type === 'screensaver') {
+      sw = 64;
+      sh = 64;
+      sx = 256;
+      sy = dir === 'west' ? 0 : 64;
+      const finalFps = isMoving ? fps : 2; // Idle is 2fps
+      return { sx, sy, sw, sh, frameCount, fps: finalFps };
+    }
+    if (snake.type === 'boss' || snake.type === 'phantom') {
+      sw = 128;
+      sh = 128;
+      sx = 0;
+      sy = dir === 'west' ? 128 : 256;
+      const finalFps = isMoving ? fps : 2; // Idle is 2fps
+      return { sx, sy, sw, sh, frameCount, fps: finalFps };
+    }
+  }
+
+  // Force specific FPS for standard Screensavers too
+  if (snake.type === 'screensaver') {
+    return { sx: 128, sy: dir === 'west' ? 0 : 32, sw: 32, sh: 32, frameCount, fps: 8 };
+  }
+
+  // Force 8 FPS and constant movement for Rainsnake
+  if (snake.type === 'rainsnake') {
+    return { sx: 128, sy: dir === 'west' ? 64 : 96, sw: 32, sh: 32, frameCount, fps: 8 };
+  }
+
+  // Standard Logic
+  if (!isMoving && snake.type !== 'boss') {
+    // Idle animation for all except boss
+    return { sx: 0, sy: 0, sw: 32, sh: 32, frameCount, fps };
+  }
+
+  // Moving animations (or idle for screensaver/boss which use directional)
+  if (snake.type === 'photophobic' || snake.type === 'rainsnake') {
+    sx = 128;
+    sy = dir === 'west' ? 64 : 96;
+  } else {
+    // Screensaver, Stalker, Burster, Guard, Rattlesnake, Plumber, Spitter
+    sx = 128;
+    sy = dir === 'west' ? 0 : 32;
+  }
+
+  return { sx, sy, sw, sh, frameCount, fps };
+};
 
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -12,6 +89,14 @@ const GameCanvas: React.FC = () => {
   const lastFpsUpdateRef = useRef<number>(0);
   const playerImageRef = useRef<HTMLImageElement | null>(null);
   const [imageLoaded, setImageLoaded] = React.useState(false);
+
+  const enemyImageRef = useRef<HTMLImageElement | null>(null);
+  const [enemyImageLoaded, setEnemyImageLoaded] = React.useState(false);
+
+  // Track last horizontal direction for each snake to handle vertical movement
+  const lastSnakeHorizontalDirections = useRef<Record<string, 'east' | 'west'>>({});
+  // Track last positions to determine if snake is actually moving
+  const lastSnakePositions = useRef<Record<string, { x: number, y: number }>>({});
 
   const {
     gameState,
@@ -67,6 +152,150 @@ const GameCanvas: React.FC = () => {
     // Add cache busting parameter to ensure fresh load
     img.src = "/player-character.png?" + Date.now();
   }, []);
+
+  // Load enemy image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      enemyImageRef.current = img;
+      setEnemyImageLoaded(true);
+    };
+    img.onerror = (error) => {
+      setEnemyImageLoaded(false);
+    };
+    img.src = "/enemy-sheet.png?" + Date.now();
+  }, []);
+
+  // Helper function to draw a snake sprite
+  const drawSnakeSprite = (snake: Snake, ctx: CanvasRenderingContext2D, currentLevelKey: string) => {
+    // 1. Draw friendly game master with original logic
+    if (snake.type === 'friendly') {
+      const baseColor = "#FFB74D";
+      const accentColor = "#FFA726";
+      const eyeColor = "#4CAF50";
+
+      ctx.fillStyle = baseColor;
+      ctx.fillRect(snake.position.x, snake.position.y, snake.size.width, snake.size.height);
+
+      const centerX = snake.position.x + snake.size.width / 2;
+      ctx.fillStyle = accentColor;
+      // Crown points
+      ctx.fillRect(centerX - 8, snake.position.y + 2, 4, 8);
+      ctx.fillRect(centerX - 4, snake.position.y + 2, 4, 12);
+      ctx.fillRect(centerX, snake.position.y + 2, 4, 8);
+      ctx.fillRect(centerX + 4, snake.position.y + 2, 4, 12);
+      // Crown base
+      ctx.fillRect(centerX - 10, snake.position.y + 10, 20, 4);
+
+      // Interaction prompt for Game Master (Level 0)
+      if (currentLevel === 0 && player) {
+        const distance = Math.sqrt(
+          Math.pow(player.position.x - snake.position.x, 2) +
+          Math.pow(player.position.y - snake.position.y, 2)
+        );
+
+        if (distance < 80) {
+          drawStandardTooltip("Game Master", ctx, player.position.x, player.position.y, player.size.width);
+          drawInteractionTooltip("to start adventure", ctx, player.position.x, player.position.y - 5, player.size.width);
+        }
+      }
+      return;
+    }
+
+    // 2. Sprite Rendering
+    if (enemyImageRef.current && enemyImageLoaded) {
+      // Update direction history with higher sensitivity (was 0.1)
+      if (snake.direction.x > 0.01) lastSnakeHorizontalDirections.current[snake.id] = 'east';
+      else if (snake.direction.x < -0.01) lastSnakeHorizontalDirections.current[snake.id] = 'west';
+
+      const dir = lastSnakeHorizontalDirections.current[snake.id] || 'west';
+
+      // Determine if actually moving by comparing positions using float precision
+      const currentX = snake.position.x;
+      const currentY = snake.position.y;
+      const lastPos = lastSnakePositions.current[snake.id];
+
+      let isMoving = false;
+      if (lastPos) {
+        // Use a small epsilon for float comparison to prevent jitter
+        const dx = Math.abs(currentX - lastPos.x);
+        const dy = Math.abs(currentY - lastPos.y);
+        isMoving = dx > 0.01 || dy > 0.01;
+      }
+      // Update last position (store raw float values)
+      lastSnakePositions.current[snake.id] = { x: currentX, y: currentY };
+
+      // Screensaver always animates as if moving
+      if (snake.type === 'screensaver') isMoving = true;
+
+      // Get sprite info
+      const { sx, sy, sw, sh, frameCount, fps } = getSnakeSpriteRect(snake, dir, isMoving, currentLevelKey);
+
+      // Calculate frame index
+      const msPerFrame = 1000 / fps;
+      const currentFrame = Math.floor(Date.now() / msPerFrame) % frameCount;
+      const frameSx = sx + (currentFrame * sw);
+
+      // Draw Tinted Sprite
+      const overlayColor = snakeColors[snake.type] || '#FFFFFF';
+
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = sw;
+      tempCanvas.height = sh;
+      const tempCtx = tempCanvas.getContext('2d');
+
+      if (tempCtx) {
+        // Correct approach for preserving transparency
+        // 1. Draw Sprite normal
+        tempCtx.drawImage(enemyImageRef.current, frameSx, sy, sw, sh, 0, 0, sw, sh);
+
+        // 2. Multiply color (Tints visible pixels, but transparent stays transparent if 0*C=0)
+        tempCtx.globalCompositeOperation = 'multiply';
+        tempCtx.fillStyle = overlayColor;
+        tempCtx.fillRect(0, 0, sw, sh);
+
+        // 3. To be absolutely sure, utilize destination-in to cut out original alpha again
+        tempCtx.globalCompositeOperation = 'destination-in';
+        tempCtx.drawImage(enemyImageRef.current, frameSx, sy, sw, sh, 0, 0, sw, sh);
+
+        // Now draw to main canvas
+        ctx.globalAlpha = snake.type === 'phantom' ? 0.5 : 1.0;
+        ctx.drawImage(
+          tempCanvas,
+          0, 0, sw, sh,
+          snake.position.x, snake.position.y, snake.size.width, snake.size.height
+        );
+        ctx.globalAlpha = 1.0;
+      }
+
+    } else {
+      // Fallback rendering
+      ctx.fillStyle = snakeColors[snake.type] || '#808080';
+      ctx.fillRect(snake.position.x, snake.position.y, snake.size.width, snake.size.height);
+    }
+
+    // 3. Special Indicators
+
+    // Burster Dash
+    // Burster Dash indicator removed
+    // if (snake.type === "burster" && snake.isDashing) { ... }
+
+    // Sight Range (Debug/Feedback) - not for stalkers or screensavers
+    // Sight Range indicator removed
+    // if (snake.isChasing && snake.type !== "stalker" && snake.type !== "screensaver") { ... }
+
+    // Boss Phase
+    if (snake.type === "boss" && snake.bossPhase) {
+      ctx.font = "bold 18px Arial";
+      ctx.textAlign = "center";
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 3;
+      ctx.strokeText(`Phase ${snake.bossPhase}`, snake.position.x + snake.size.width / 2, snake.position.y - 10);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(`Phase ${snake.bossPhase}`, snake.position.x + snake.size.width / 2, snake.position.y - 10);
+      ctx.textAlign = "left";
+    }
+  };
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D) => {
@@ -1220,420 +1449,7 @@ const GameCanvas: React.FC = () => {
         if (currentLevelKey === "light_reflection") {
           return;
         }
-        // Skip rendering phase-restricted snakes that aren't in their active phase
-        // For now, render all snakes (phase system can be enhanced later)
-        // if (snake.activePhase && currentLevelKey === "light_switch" && snake.activePhase !== currentPhase) {
-        //   return; // Don't render this snake
-        // }
-        let baseColor = "#2d3748";
-        let accentColor = "#ff6b6b";
-        let eyeColor = "#ff6b6b";
-
-        // Different colors and indicators for each snake type
-        switch (snake.type) {
-          case "stalker":
-            baseColor = snake.isChasing ? "#805ad5" : "#553c9a"; // Purple
-            accentColor = "#d69e2e"; // Gold accents
-            eyeColor = "#2d3748"; // No visible eyes (blind)
-            break;
-          case "guard":
-            baseColor = snake.isChasing ? "#e53e3e" : "#c53030"; // Red
-            accentColor = "#f56565";
-            eyeColor = "#ff6b6b"; // Red eyes (good sight)
-            break;
-          case "burster":
-            baseColor = snake.isDashing ? "#f6ad55" : "#dd6b20"; // Orange
-            accentColor = snake.isDashing ? "#fbb6ce" : "#e53e3e";
-            eyeColor = "#f6ad55"; // Orange eyes
-            break;
-          case "screensaver":
-            baseColor = "#38b2ac"; // Teal/cyan
-            accentColor = "#4fd1c7"; // Lighter teal
-            eyeColor = "#2d3748"; // Dark eyes
-            break;
-          case "plumber":
-            baseColor = "#8b4513"; // Brown/copper color for plumber
-            accentColor = "#ffd700"; // Gold accent for pipe-like appearance
-            eyeColor = "#4682b4"; // Steel blue eyes
-            break;
-          case "spitter":
-            baseColor = "#2d7d32"; // Dark green for spitter
-            accentColor = "#00ff41"; // Neon green accent
-            eyeColor = "#00ff41"; // Neon green eyes
-            break;
-          case "photophobic":
-            // Change colors based on state
-            if (snake.isInDarkness) {
-              baseColor = "#4a5568"; // Dark gray when in darkness
-              accentColor = "#718096"; // Lighter gray
-              eyeColor = "#a0aec0"; // Light gray eyes
-            } else if (snake.isBerserk) {
-              baseColor = snake.isCharging ? "#ff0000" : "#cc0000"; // Bright red when berserk
-              accentColor = snake.isCharging ? "#ff6b6b" : "#e53e3e";
-              eyeColor = "#ffff00"; // Yellow eyes when aggressive
-            } else {
-              baseColor = "#805ad5"; // Purple default
-              accentColor = "#b794f6";
-              eyeColor = "#d69e2e";
-            }
-            break;
-          case "rattlesnake":
-            baseColor = snake.isChasing ? "#8b4513" : "#a0522d"; // Brown/tan
-            accentColor = "#daa520"; // Golden accents
-            eyeColor = snake.isChasing ? "#ff4500" : "#ffd700"; // Orange/gold eyes
-            break;
-          case "boss":
-            // Boss "Valerie" - changes color based on charging state
-            if (snake.bossColor === 'charging') {
-              baseColor = "#ff1493"; // Deep pink when charging
-              accentColor = "#ff69b4"; // Hot pink accents
-              eyeColor = "#ffffff"; // White eyes when charging
-            } else {
-              baseColor = "#4b0082"; // Indigo/purple (regal boss color)
-              accentColor = "#8a2be2"; // Blue violet accents
-              eyeColor = "#ffd700"; // Gold eyes (intimidating)
-            }
-            break;
-          case "phantom":
-            // Phantom - Semi-transparent version of Valerie (Phase 2 phantom)
-            baseColor = "#4b0082"; // Same indigo as Valerie
-            accentColor = "#8a2be2"; // Same blue violet accents  
-            eyeColor = "#ffd700"; // Same golden eyes
-            break;
-          case "rainsnake":
-            baseColor = "#4f46e5"; // Deep blue like rain
-            accentColor = "#a5b4fc"; // Light blue like water droplets
-            eyeColor = "#3b82f6"; // Bright blue eyes
-            break;
-          case "friendly":
-            baseColor = "#FFB74D"; // Warm orange/gold for Game Master
-            accentColor = "#FFA726"; // Lighter orange
-            eyeColor = "#4CAF50"; // Green eyes to show friendliness
-            break;
-        }
-
-        // Set transparency for phantoms
-        if (snake.type === "phantom") {
-          ctx.globalAlpha = 0.5; // 50% transparency for phantoms
-        }
-
-        // Main body
-        ctx.fillStyle = baseColor;
-        ctx.fillRect(
-          snake.position.x,
-          snake.position.y,
-          snake.size.width,
-          snake.size.height,
-        );
-
-        // Body pattern based on type
-        ctx.fillStyle = accentColor;
-        if (snake.type === "stalker") {
-          // Stripes for stalkers (sound-following pattern)
-          for (let i = 0; i < 3; i++) {
-            ctx.fillRect(
-              snake.position.x + i * 8,
-              snake.position.y + 2,
-              4,
-              snake.size.height - 4,
-            );
-          }
-        } else if (snake.type === "guard") {
-          // Crosshatch for guards (patrol pattern)
-          ctx.fillRect(
-            snake.position.x + 2,
-            snake.position.y + 2,
-            snake.size.width - 4,
-            4,
-          );
-          ctx.fillRect(
-            snake.position.x + 2,
-            snake.position.y + snake.size.height - 6,
-            snake.size.width - 4,
-            4,
-          );
-        } else if (snake.type === "burster") {
-          // Diamond shape for bursters (dash pattern)
-          ctx.fillRect(
-            snake.position.x + snake.size.width / 2 - 4,
-            snake.position.y + 2,
-            8,
-            8,
-          );
-          ctx.fillRect(
-            snake.position.x + snake.size.width / 2 - 4,
-            snake.position.y + snake.size.height - 10,
-            8,
-            8,
-          );
-        } else if (snake.type === "screensaver") {
-          // Grid pattern for screensaver (screensaver-like pattern)
-          ctx.fillRect(snake.position.x + 3, snake.position.y + 3, 6, 6);
-          ctx.fillRect(snake.position.x + 15, snake.position.y + 3, 6, 6);
-          ctx.fillRect(snake.position.x + 3, snake.position.y + 15, 6, 6);
-          ctx.fillRect(snake.position.x + 15, snake.position.y + 15, 6, 6);
-        } else if (snake.type === "plumber") {
-          // Pipe junction pattern for plumber (cross shape like pipe fittings)
-          const centerX = snake.position.x + snake.size.width / 2;
-          const centerY = snake.position.y + snake.size.height / 2;
-          // Horizontal pipe
-          ctx.fillRect(
-            snake.position.x + 2,
-            centerY - 2,
-            snake.size.width - 4,
-            4,
-          );
-          // Vertical pipe
-          ctx.fillRect(
-            centerX - 2,
-            snake.position.y + 2,
-            4,
-            snake.size.height - 4,
-          );
-        } else if (snake.type === "spitter") {
-          // Star/explosion pattern for spitter (represents projectile firing)
-          const centerX = snake.position.x + snake.size.width / 2;
-          const centerY = snake.position.y + snake.size.height / 2;
-          // 8-pointed star pattern
-          ctx.fillRect(
-            centerX - 1,
-            snake.position.y + 2,
-            2,
-            snake.size.height - 4,
-          ); // Vertical
-          ctx.fillRect(
-            snake.position.x + 2,
-            centerY - 1,
-            snake.size.width - 4,
-            2,
-          ); // Horizontal
-          // Diagonal lines
-          ctx.fillRect(centerX - 5, centerY - 1, 10, 2); // Diagonal 1
-          ctx.fillRect(centerX - 1, centerY - 5, 2, 10); // Diagonal 2
-        } else if (snake.type === "photophobic") {
-          // Lightning/energy pattern for photophobic (represents light sensitivity)
-          const centerX = snake.position.x + snake.size.width / 2;
-          const centerY = snake.position.y + snake.size.height / 2;
-
-          if (snake.isInDarkness) {
-            // Subtle dots pattern when in darkness
-            ctx.fillRect(snake.position.x + 4, snake.position.y + 4, 2, 2);
-            ctx.fillRect(snake.position.x + 12, snake.position.y + 8, 2, 2);
-            ctx.fillRect(snake.position.x + 8, snake.position.y + 16, 2, 2);
-            ctx.fillRect(snake.position.x + 20, snake.position.y + 20, 2, 2);
-          } else {
-            // Jagged lightning pattern when berserk
-            ctx.fillRect(
-              snake.position.x + 3,
-              snake.position.y + 3,
-              snake.size.width - 6,
-              3,
-            );
-            ctx.fillRect(
-              snake.position.x + 8,
-              snake.position.y + 8,
-              snake.size.width - 16,
-              2,
-            );
-            ctx.fillRect(
-              snake.position.x + 5,
-              snake.position.y + 13,
-              snake.size.width - 10,
-              3,
-            );
-            ctx.fillRect(
-              snake.position.x + 10,
-              snake.position.y + 18,
-              snake.size.width - 20,
-              2,
-            );
-          }
-        } else if (snake.type === "rattlesnake") {
-          // Diamond/rattle pattern for rattlesnake
-          const centerX = snake.position.x + snake.size.width / 2;
-          const centerY = snake.position.y + snake.size.height / 2;
-
-          // Diamond pattern to represent rattle segments
-          ctx.fillRect(centerX - 3, snake.position.y + 3, 6, 4);
-          ctx.fillRect(centerX - 4, snake.position.y + 8, 8, 4);
-          ctx.fillRect(centerX - 3, snake.position.y + 13, 6, 4);
-          ctx.fillRect(centerX - 2, snake.position.y + 18, 4, 4);
-
-          // Add rattle sound indicator when chasing
-          if (snake.isChasing) {
-            ctx.strokeStyle = "#ffd700";
-            ctx.lineWidth = 1;
-            ctx.setLineDash([2, 2]);
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, snake.size.width / 2 + 8, 0, 2 * Math.PI);
-            ctx.stroke();
-            ctx.setLineDash([]);
-          }
-        } else if (snake.type === "rainsnake") {
-          // Water droplet pattern for rain snakes (falling rain effect)
-          const centerX = snake.position.x + snake.size.width / 2;
-
-          // Vertical droplet pattern to represent falling rain
-          ctx.fillRect(centerX - 2, snake.position.y + 2, 4, 6);
-          ctx.fillRect(centerX - 1, snake.position.y + 10, 2, 8);
-          ctx.fillRect(centerX - 3, snake.position.y + 20, 6, 4);
-
-          // Small droplet at top
-          ctx.fillRect(centerX - 1, snake.position.y + 30, 2, 4);
-        } else if (snake.type === "friendly") {
-          // Crown pattern for Game Master (friendly NPC)
-          const centerX = snake.position.x + snake.size.width / 2;
-
-          // Crown points
-          ctx.fillRect(centerX - 8, snake.position.y + 2, 4, 8);
-          ctx.fillRect(centerX - 4, snake.position.y + 2, 4, 12);
-          ctx.fillRect(centerX, snake.position.y + 2, 4, 8);
-          ctx.fillRect(centerX + 4, snake.position.y + 2, 4, 12);
-
-          // Crown base
-          ctx.fillRect(centerX - 10, snake.position.y + 10, 20, 4);
-        }
-
-        // Add snake eyes (stalkers have no visible eyes)
-        if (snake.type !== "stalker") {
-          // Check if snake is in dark quadrant on level 5 for yellow eyes
-          let finalEyeColor = eyeColor;
-          if (currentLevelKey === "light_switch") {
-            // Level 5
-            const snakeCenterX = snake.position.x + snake.size.width / 2;
-            const snakeCenterY = snake.position.y + snake.size.height / 2;
-
-            // Use the same dark quadrant logic as for silhouettes
-            const centerX = 390; // Vertical wall position
-            const centerY = 290; // Horizontal wall position
-
-            // Get switch states for lighting logic
-            const A =
-              switches.find((s) => s.id === "light_switch")?.isPressed || false;
-            const B =
-              switches.find((s) => s.id === "switch_1")?.isPressed || false;
-            const C =
-              switches.find((s) => s.id === "switch_2")?.isPressed || false;
-            const D =
-              switches.find((s) => s.id === "switch_3")?.isPressed || false;
-            const E =
-              switches.find((s) => s.id === "switch_4")?.isPressed || false;
-            const F =
-              switches.find((s) => s.id === "switch_5")?.isPressed || false;
-
-            // Calculate lighting conditions for each quadrant
-            const topLeftLit = (A && !B) || (!A && B); // A XOR B
-            const topRightLit = C && D; // C AND D
-            const bottomLeftLit = !(E && F); // NOT (E AND F)
-            const bottomRightLit = topLeftLit && topRightLit; // (A XOR B) AND (C AND D)
-
-            // Check if snake is in a dark quadrant
-            let isInDark = false;
-            if (snakeCenterX < centerX && snakeCenterY < centerY)
-              isInDark = !topLeftLit;
-            else if (snakeCenterX > centerX + 20 && snakeCenterY < centerY)
-              isInDark = !topRightLit;
-            else if (snakeCenterX < centerX && snakeCenterY > centerY + 20)
-              isInDark = !bottomLeftLit;
-            else if (snakeCenterX > centerX + 20 && snakeCenterY > centerY + 20)
-              isInDark = !bottomRightLit;
-
-            if (isInDark) {
-              finalEyeColor = "#ffff00"; // Yellow eyes in dark areas
-            }
-          }
-
-          ctx.fillStyle = finalEyeColor;
-          ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
-          ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
-        }
-
-        // Special dash indicator for bursters
-        if (snake.type === "burster" && snake.isDashing) {
-          ctx.fillStyle = "#fff5b4";
-          ctx.strokeStyle = "#f6ad55";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(
-            snake.position.x + snake.size.width / 2,
-            snake.position.y + snake.size.height / 2,
-            snake.size.width / 2 + 5,
-            0,
-            2 * Math.PI,
-          );
-          ctx.stroke();
-        }
-
-        // Draw sight range when chasing (for visual feedback) - not for stalkers
-        if (snake.isChasing && snake.type !== "stalker") {
-          ctx.strokeStyle = baseColor;
-          ctx.lineWidth = 1;
-          ctx.setLineDash([5, 5]);
-          ctx.beginPath();
-          const centerX = snake.position.x + snake.size.width / 2;
-          const centerY = snake.position.y + snake.size.height / 2;
-          ctx.arc(centerX, centerY, snake.sightRange, 0, 2 * Math.PI);
-          ctx.stroke();
-          ctx.setLineDash([]); // Reset line dash
-        }
-
-        // Display phase number above boss snake (Valerie)
-        if (snake.type === "boss" && snake.bossPhase) {
-          ctx.font = "bold 18px Arial";
-          ctx.textAlign = "center";
-
-          // Draw text outline (black)
-          ctx.strokeStyle = "#000000";
-          ctx.lineWidth = 3;
-          ctx.strokeText(
-            `Phase ${snake.bossPhase}`,
-            snake.position.x + snake.size.width / 2,
-            snake.position.y - 10
-          );
-
-          // Draw text fill (white)
-          ctx.fillStyle = "#ffffff";
-          ctx.fillText(
-            `Phase ${snake.bossPhase}`,
-            snake.position.x + snake.size.width / 2,
-            snake.position.y - 10
-          );
-
-          ctx.textAlign = "left"; // Reset text alignment
-        }
-
-        // Display Game Master interaction prompt (only on Level 0)
-        if (snake.type === "friendly" && currentLevel === 0) {
-          const distance = Math.sqrt(
-            Math.pow(player.position.x - snake.position.x, 2) +
-            Math.pow(player.position.y - snake.position.y, 2)
-          );
-
-          if (distance < 80) {
-            // Draw "Game Master" name above player
-            drawStandardTooltip(
-              "Game Master",
-              ctx,
-              player.position.x,
-              player.position.y,
-              player.size.width
-            );
-
-            // Draw interaction prompt slightly below the name
-            drawInteractionTooltip(
-              "to start adventure",
-              ctx,
-              player.position.x,
-              player.position.y - 5,
-              player.size.width
-            );
-          }
-        }
-
-        // Reset transparency for phantom snakes
-        if (snake.type === "phantom") {
-          ctx.globalAlpha = 1.0; // Reset transparency
-        }
+        drawSnakeSprite(snake, ctx, currentLevelKey);
       });
 
       // Draw snake pits (holes in the ground) - drawn after snakes so they appear "inside" the pits
@@ -1882,287 +1698,7 @@ const GameCanvas: React.FC = () => {
       // Draw snakes on Level 3 after mirrors (so they appear on top)
       if (currentLevelKey === "light_reflection") {
         snakes.forEach((snake) => {
-
-          let baseColor = "#2d3748";
-          let accentColor = "#ff6b6b";
-          let eyeColor = "#ff6b6b";
-
-          // Different colors and indicators for each snake type
-          switch (snake.type) {
-            case "stalker":
-              baseColor = snake.isChasing ? "#805ad5" : "#553c9a"; // Purple
-              accentColor = "#d69e2e"; // Gold accents
-              eyeColor = "#2d3748"; // No visible eyes (blind)
-              break;
-            case "guard":
-              baseColor = snake.isChasing ? "#e53e3e" : "#c53030"; // Red
-              accentColor = "#f56565";
-              eyeColor = "#ff6b6b"; // Red eyes (good sight)
-              break;
-            case "burster":
-              baseColor = snake.isDashing ? "#f6ad55" : "#dd6b20"; // Orange
-              accentColor = snake.isDashing ? "#fbb6ce" : "#e53e3e";
-              eyeColor = "#f6ad55"; // Orange eyes
-              break;
-            case "screensaver":
-              baseColor = "#38b2ac"; // Teal/cyan
-              accentColor = "#4fd1c7"; // Lighter teal
-              eyeColor = "#2d3748"; // Dark eyes
-              break;
-            case "plumber":
-              baseColor = "#8b4513"; // Brown/copper color for plumber
-              accentColor = "#ffd700"; // Gold accent for pipe-like appearance
-              eyeColor = "#4682b4"; // Steel blue eyes
-              break;
-            case "spitter":
-              baseColor = "#2d7d32"; // Dark green for spitter
-              accentColor = "#00ff41"; // Neon green accent
-              eyeColor = "#00ff41"; // Neon green eyes
-              break;
-            case "photophobic":
-              // Change colors based on state
-              if (snake.isInDarkness) {
-                baseColor = "#4a5568"; // Dark gray when in darkness
-                accentColor = "#718096"; // Lighter gray
-                eyeColor = "#a0aec0"; // Light gray eyes
-              } else if (snake.isBerserk) {
-                baseColor = snake.isCharging ? "#ff0000" : "#cc0000"; // Bright red when berserk
-                accentColor = snake.isCharging ? "#ff6b6b" : "#e53e3e";
-                eyeColor = "#ffff00"; // Yellow eyes when aggressive
-              } else {
-                baseColor = "#805ad5"; // Purple default
-                accentColor = "#b794f6";
-                eyeColor = "#d69e2e";
-              }
-              break;
-            case "rattlesnake":
-              baseColor = "#8b4513"; // Brown color
-              accentColor = "#daa520"; // Golden rod accent
-              eyeColor = "#ff4500"; // Orange red eyes
-              break;
-            case "rainsnake":
-              baseColor = "#4f46e5"; // Deep blue like rain
-              accentColor = "#a5b4fc"; // Light blue like water droplets
-              eyeColor = "#3b82f6"; // Bright blue eyes
-              break;
-          }
-
-          // Base snake body
-          ctx.fillStyle = baseColor;
-          ctx.fillRect(
-            snake.position.x,
-            snake.position.y,
-            snake.size.width,
-            snake.size.height,
-          );
-
-          // Add snake pattern/details based on type
-          ctx.fillStyle = accentColor;
-          if (snake.type === "stalker") {
-            // Chevron pattern for stalkers (stealth pattern)
-            ctx.fillRect(
-              snake.position.x + 4,
-              snake.position.y + 4,
-              snake.size.width - 8,
-              3,
-            );
-            ctx.fillRect(
-              snake.position.x + 8,
-              snake.position.y + 9,
-              snake.size.width - 16,
-              3,
-            );
-            ctx.fillRect(
-              snake.position.x + 4,
-              snake.position.y + 14,
-              snake.size.width - 8,
-              3,
-            );
-          } else if (snake.type === "guard") {
-            // Stripe pattern for guards (uniform-like pattern)
-            ctx.fillRect(
-              snake.position.x + 2,
-              snake.position.y + 2,
-              snake.size.width - 4,
-              4,
-            );
-            ctx.fillRect(
-              snake.position.x + 2,
-              snake.position.y + snake.size.height - 6,
-              snake.size.width - 4,
-              4,
-            );
-          } else if (snake.type === "burster") {
-            // Diamond shape for bursters (dash pattern)
-            ctx.fillRect(
-              snake.position.x + snake.size.width / 2 - 4,
-              snake.position.y + 2,
-              8,
-              8,
-            );
-            ctx.fillRect(
-              snake.position.x + snake.size.width / 2 - 4,
-              snake.position.y + snake.size.height - 10,
-              8,
-              8,
-            );
-          } else if (snake.type === "screensaver") {
-            // Grid pattern for screensaver (screensaver-like pattern)
-            ctx.fillRect(snake.position.x + 3, snake.position.y + 3, 6, 6);
-            ctx.fillRect(snake.position.x + 15, snake.position.y + 3, 6, 6);
-            ctx.fillRect(snake.position.x + 3, snake.position.y + 15, 6, 6);
-            ctx.fillRect(snake.position.x + 15, snake.position.y + 15, 6, 6);
-          } else if (snake.type === "plumber") {
-            // Pipe junction pattern for plumber (cross shape like pipe fittings)
-            const centerX = snake.position.x + snake.size.width / 2;
-            const centerY = snake.position.y + snake.size.height / 2;
-            // Horizontal pipe
-            ctx.fillRect(
-              snake.position.x + 2,
-              centerY - 2,
-              snake.size.width - 4,
-              4,
-            );
-            // Vertical pipe
-            ctx.fillRect(
-              centerX - 2,
-              snake.position.y + 2,
-              4,
-              snake.size.height - 4,
-            );
-          } else if (snake.type === "spitter") {
-            // Star/explosion pattern for spitter (represents projectile firing)
-            const centerX = snake.position.x + snake.size.width / 2;
-            const centerY = snake.position.y + snake.size.height / 2;
-            // 8-pointed star pattern
-            ctx.fillRect(
-              centerX - 1,
-              snake.position.y + 2,
-              2,
-              snake.size.height - 4,
-            ); // Vertical
-            ctx.fillRect(
-              snake.position.x + 2,
-              centerY - 1,
-              snake.size.width - 4,
-              2,
-            ); // Horizontal
-            // Diagonal lines
-            ctx.fillRect(centerX - 5, centerY - 1, 10, 2); // Diagonal 1
-            ctx.fillRect(centerX - 1, centerY - 5, 2, 10); // Diagonal 2
-          } else if (snake.type === "photophobic") {
-            // Lightning/energy pattern for photophobic (represents light sensitivity)
-            const centerX = snake.position.x + snake.size.width / 2;
-            const centerY = snake.position.y + snake.size.height / 2;
-
-            if (snake.isInDarkness) {
-              // Subtle dots pattern when in darkness
-              ctx.fillRect(snake.position.x + 4, snake.position.y + 4, 2, 2);
-              ctx.fillRect(snake.position.x + 12, snake.position.y + 8, 2, 2);
-              ctx.fillRect(snake.position.x + 8, snake.position.y + 16, 2, 2);
-              ctx.fillRect(snake.position.x + 20, snake.position.y + 20, 2, 2);
-            } else {
-              // Jagged lightning pattern when berserk
-              ctx.fillRect(
-                snake.position.x + 3,
-                snake.position.y + 3,
-                snake.size.width - 6,
-                3,
-              );
-              ctx.fillRect(
-                snake.position.x + 8,
-                snake.position.y + 8,
-                snake.size.width - 16,
-                2,
-              );
-              ctx.fillRect(
-                snake.position.x + 5,
-                snake.position.y + 13,
-                snake.size.width - 10,
-                3,
-              );
-              ctx.fillRect(
-                snake.position.x + 10,
-                snake.position.y + 18,
-                snake.size.width - 20,
-                2,
-              );
-            }
-          } else if (snake.type === "rattlesnake") {
-            // Diamond/rattle pattern for rattlesnake
-            const centerX = snake.position.x + snake.size.width / 2;
-            const centerY = snake.position.y + snake.size.height / 2;
-
-            // Diamond pattern to represent rattle segments
-            ctx.fillRect(centerX - 3, snake.position.y + 3, 6, 4);
-            ctx.fillRect(centerX - 4, snake.position.y + 8, 8, 4);
-            ctx.fillRect(centerX - 3, snake.position.y + 13, 6, 4);
-            ctx.fillRect(centerX - 2, snake.position.y + 18, 4, 4);
-
-            // Add rattle sound indicator when chasing
-            if (snake.isChasing) {
-              ctx.strokeStyle = "#ffd700";
-              ctx.lineWidth = 1;
-              ctx.setLineDash([2, 2]);
-              ctx.beginPath();
-              ctx.arc(
-                centerX,
-                centerY,
-                snake.size.width / 2 + 8,
-                0,
-                2 * Math.PI,
-              );
-              ctx.stroke();
-              ctx.setLineDash([]);
-            }
-          } else if (snake.type === "rainsnake") {
-            // Water droplet pattern for rain snakes (falling rain effect)
-            const centerX = snake.position.x + snake.size.width / 2;
-
-            // Vertical droplet pattern to represent falling rain
-            ctx.fillRect(centerX - 2, snake.position.y + 2, 4, 6);
-            ctx.fillRect(centerX - 1, snake.position.y + 10, 2, 8);
-            ctx.fillRect(centerX - 3, snake.position.y + 20, 6, 4);
-
-            // Small droplet at top
-            ctx.fillRect(centerX - 1, snake.position.y + 30, 2, 4);
-          }
-
-          // Add snake eyes (stalkers have no visible eyes)
-          if (snake.type !== "stalker") {
-            ctx.fillStyle = eyeColor;
-            ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
-            ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
-          }
-
-          // Special dash indicator for bursters
-          if (snake.type === "burster" && snake.isDashing) {
-            ctx.fillStyle = "#fff5b4";
-            ctx.strokeStyle = "#f6ad55";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(
-              snake.position.x + snake.size.width / 2,
-              snake.position.y + snake.size.height / 2,
-              snake.size.width / 2 + 5,
-              0,
-              2 * Math.PI,
-            );
-            ctx.stroke();
-          }
-
-          // Draw sight range when chasing (for visual feedback) - not for stalkers
-          if (snake.isChasing && snake.type !== "stalker") {
-            ctx.strokeStyle = baseColor;
-            ctx.lineWidth = 1;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            const centerX = snake.position.x + snake.size.width / 2;
-            const centerY = snake.position.y + snake.size.height / 2;
-            ctx.arc(centerX, centerY, snake.sightRange, 0, 2 * Math.PI);
-            ctx.stroke();
-            ctx.setLineDash([]); // Reset line dash
-          }
+          drawSnakeSprite(snake, ctx, currentLevelKey);
         });
       }
 
@@ -2621,19 +2157,6 @@ const GameCanvas: React.FC = () => {
           }
         });
 
-        // Redraw snake eyes on top of darkness overlay (Level 5 only)
-        snakes.forEach((snake) => {
-          const snakeCenterX = snake.position.x + snake.size.width / 2;
-          const snakeCenterY = snake.position.y + snake.size.height / 2;
-
-          if (isInDarkQuadrant(snakeCenterX, snakeCenterY)) {
-            // Draw bright yellow eyes for all snakes in dark areas (including stalkers)
-            ctx.fillStyle = "#ffff00";
-            ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
-            ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
-          }
-        });
-
         // Redraw key with faint glow on top of darkness overlay (Level 5 only)
         if (key && !key.collected) {
           const keyCenterX = key.x + key.width / 2;
@@ -2858,16 +2381,6 @@ const GameCanvas: React.FC = () => {
           // Draw darkness overlay over entire map
           ctx.fillStyle = "rgba(0, 0, 0, 0.8)"; // Semi-transparent black overlay
           ctx.fillRect(0, 0, levelSize.width, levelSize.height);
-
-          // Redraw snake eyes on top of darkness overlay (Level 6 only)
-          snakes.forEach((snake) => {
-            // Draw bright yellow eyes for all snakes in dark areas (except stalkers)
-            if (snake.type !== "stalker") {
-              ctx.fillStyle = "#ffff00";
-              ctx.fillRect(snake.position.x + 5, snake.position.y + 5, 4, 4);
-              ctx.fillRect(snake.position.x + 15, snake.position.y + 5, 4, 4);
-            }
-          });
 
           // Redraw player character image on top of darkness overlay (Level 6 only)
           // Apply the same invincibility flashing logic as main player rendering
