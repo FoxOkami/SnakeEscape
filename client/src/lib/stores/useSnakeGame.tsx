@@ -1296,13 +1296,12 @@ export const useSnakeGame = create<SnakeGameState>()(
         updatedState.currentVelocity.x !== 0 ||
         updatedState.currentVelocity.y !== 0;
       if (
-        isMoving &&
-        !updatedState.isWalking &&
+        ((isMoving && !updatedState.isWalking) || updatedState.isDashing) &&
         updatedState.player.position &&
         typeof updatedState.player.position.x === "number" &&
         typeof updatedState.player.position.y === "number"
       ) {
-        // Player makes sound when moving normally (not walking stealthily)
+        // Player makes sound when moving normally or dashing
         playerSounds.push(updatedState.player.position);
       }
 
@@ -1708,17 +1707,25 @@ export const useSnakeGame = create<SnakeGameState>()(
           return snake; // If in pit, just return as-is
         }
 
-        // Apply snake chase multiplier to non-boss snakes (but not on Skate Rink level)
+        // Apply snake chase multiplier to non-boss snakes
         let modifiedSnake = snake;
-        if (
-          snake.type !== "boss" &&
-          snakeChaseMultiplier !== 1 &&
-          updatedState.currentLevelKey !== "boss_valerie"
-        ) {
-          modifiedSnake = {
-            ...snake,
-            speed: snake.speed * Math.max(0.1, snakeChaseMultiplier), // Ensure minimum speed for animation
-          };
+        if (snake.type !== "boss") {
+          // Special case: Photophobic snakes in Skate Rink (Level 6) ALWAYS chase
+          if (updatedState.currentLevelKey === "boss_valerie" && snake.type === "photophobic") {
+            // Force active chase state properties if they aren't already set
+            // This is a logic override - the actual entity update handles the movement
+            // But we ensure the speed isn't dampened by the 'non-chase' check below
+            modifiedSnake = { ...snake, isChasing: true };
+          } else if (snakeChaseMultiplier !== 1 && updatedState.currentLevelKey !== "boss_valerie") {
+            // Normal item modifier logic for other levels
+            // ALLOW speed to go to 0 if multiplier is 0 (for Stapler)
+            // Apply multiplier to BOTH speed and chaseSpeed
+            modifiedSnake = {
+              ...snake,
+              speed: snake.speed * snakeChaseMultiplier,
+              chaseSpeed: snake.chaseSpeed * snakeChaseMultiplier,
+            };
+          }
         }
 
         const updatedSnake = updateSnake(
@@ -1731,6 +1738,16 @@ export const useSnakeGame = create<SnakeGameState>()(
           LEVELS[updatedState.currentLevel]?.size,
           updatedState.boulders,
         );
+
+        // RESTORE ORIGINAL SPEED
+        // The updateSnake function might return the modified speed from 'modifiedSnake'.
+        // We must ensure the state persists the BASE speed, not the multiplied speed.
+        if (updatedSnake.speed !== snake.speed) {
+          updatedSnake.speed = snake.speed;
+        }
+        if (updatedSnake.chaseSpeed !== snake.chaseSpeed) {
+          updatedSnake.chaseSpeed = snake.chaseSpeed;
+        }
 
         // Check for environmental effects triggered by boss boulder collision
         if (updatedSnake.environmentalEffects?.spawnMiniBoulders) {
@@ -1798,33 +1815,6 @@ export const useSnakeGame = create<SnakeGameState>()(
           }
           // Clear rain snake spawn flag after spawning
           updatedSnake.environmentalEffects.spawnRainSnake = false;
-        }
-
-        if (
-          updatedSnake.environmentalEffects?.fireProjectiles &&
-          updatedSnake.environmentalEffects?.projectileSourceId
-        ) {
-          // TODO: determine if this makes sense here... I think this block is for non-boss snakes
-          // this doesn't seem to ever be used... might this be needed for projectiles?!
-          // Fire projectiles for Phase 3 boss
-          console.log("[1754] get().fireProjectiles");
-          get().fireProjectiles(
-            updatedSnake.environmentalEffects.projectileSourceId,
-            updatedSnake.environmentalEffects.sequentialProjectileIndex,
-            updatedSnake.environmentalEffects.projectileClockwise,
-            updatedSnake.environmentalEffects.startingAngle,
-            updatedSnake.environmentalEffects.burstRound,
-            updatedSnake.environmentalEffects.roundAngleShift,
-          );
-          // Clear projectile firing flag after firing
-          updatedSnake.environmentalEffects.fireProjectiles = false;
-          updatedSnake.environmentalEffects.projectileSourceId = undefined;
-          updatedSnake.environmentalEffects.sequentialProjectileIndex =
-            undefined;
-          updatedSnake.environmentalEffects.projectileClockwise = undefined;
-          updatedSnake.environmentalEffects.startingAngle = undefined;
-          updatedSnake.environmentalEffects.burstRound = undefined;
-          updatedSnake.environmentalEffects.roundAngleShift = undefined;
         }
 
         // Clear environmental effects after processing (except phantom spawning which is handled separately)
@@ -3786,7 +3776,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           x: spawnX,
           y: spawnY,
         },
-        size: { width: 60, height: 60 },
+        size: { width: 64, height: 64 },
         speed: 125 + Math.random() * 125, // Random speed between 125 and 250
         direction: { x: initialDirection.x, y: initialDirection.y },
         patrolPoints: [],
@@ -3908,7 +3898,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         patrolDirection: 1,
         chaseSpeed: Math.round(baseChaseSpeed * speedMultiplier), // 188 for first, 250 for second
         sightRange: 800, // Entire map width for Level 6
-        hearingRange: 600, // Entire map height for Level 6
+        hearingRange: 800, // Entire map height for Level 6
         isChasing: false,
         isInDarkness: isDark, // Set based on actual lighting conditions
         isBerserk: !isDark, // If not dark, start in berserk mode
@@ -3953,7 +3943,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         id: phantomId,
         type: "phantom" as const,
         position: { x: spawnPosition.x, y: spawnPosition.y },
-        size: { width: 130, height: 130 }, // Same size as boss Valerie (130x130)
+        size: { width: 128, height: 128 }, // Same size as boss Valerie (130x130)
         speed: 540, // Triple Valerie's max speed for extremely fast phantom movement
         direction: directionVector, // Set based on spawn side
         patrolPoints: [],
@@ -3994,7 +3984,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         id: rainSnakeId,
         type: "rainsnake" as const,
         position: { x: spawnPosition.x, y: spawnPosition.y },
-        size: { width: 40, height: 40 }, // Standard snake size
+        size: { width: 32, height: 32 }, // Standard snake size
         speed: randomSpeed,
         direction: direction,
         patrolPoints: [],
@@ -4039,7 +4029,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         id: spitterId,
         type: "spitter",
         position: { x: position.x - 12.5, y: position.y - 12.5 }, // Center the 25x25 snake
-        size: { width: 25, height: 25 },
+        size: { width: 32, height: 32 },
         speed: 50, // Moving snake
         direction: { x: 0, y: 0 }, // Will be set by movement logic
         patrolPoints: [],
