@@ -20,6 +20,9 @@ const HubRoom: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const playerImageRef = useRef<HTMLImageElement | null>(null);
+  const frameRef = useRef<number>(0);
+  const frameTimerRef = useRef<number>(0);
+  const lastDirectionRef = useRef<"south" | "north" | "east" | "west">("south");
 
   const {
     player,
@@ -418,7 +421,7 @@ const HubRoom: React.FC = () => {
       setImageLoaded(false);
     };
     // Add cache busting parameter to ensure fresh load
-    img.src = "/player-character.png?" + Date.now();
+    img.src = "/player-sheet.png?" + Date.now();
   }, []);
 
   useEffect(() => {
@@ -561,11 +564,62 @@ const HubRoom: React.FC = () => {
       ctx.fillRect(0, 0, 20, 600); // Left wall
       ctx.fillRect(780, 0, 20, 600); // Right wall
 
-      // Draw player (use player-character.png like main game)
+      // Draw player (use player-sheet.png like main game)
       if (imageLoaded && playerImageRef.current) {
+        // Animation Logic
+        const isUp = keys.has(keyBindings.up);
+        const isDown = keys.has(keyBindings.down);
+        const isLeft = keys.has(keyBindings.left);
+        const isRight = keys.has(keyBindings.right);
+        const isWalking = keys.has(keyBindings.walking) || keys.has("ShiftLeft") || keys.has("ShiftRight");
+
+        // Determine direction and state
+        let direction = lastDirectionRef.current;
+        if (isDown) direction = "south";
+        else if (isUp) direction = "north";
+        else if (isRight) direction = "east";
+        else if (isLeft) direction = "west";
+
+        const isMoving = isUp || isDown || isLeft || isRight;
+
+        if (isMoving) {
+          lastDirectionRef.current = direction;
+        } else {
+          direction = lastDirectionRef.current;
+        }
+
+        // Determine Row
+        let row = 0;
+        switch (direction) {
+          case "south": row = isMoving ? 1 : 0; break;
+          case "north": row = isMoving ? 3 : 2; break;
+          case "east": row = isMoving ? 5 : 4; break;
+          case "west": row = isMoving ? 7 : 6; break;
+        }
+
+        // Animation Timer
+        let speedFps = 12; // Default running speed
+        if (!isMoving) {
+          speedFps = 4; // Always 4 FPS when idle
+        } else if (isWalking) {
+          speedFps = 6; // 6 FPS when walking
+        }
+
+        const frameDuration = 1000 / speedFps;
+
+        frameTimerRef.current += deltaTime;
+        if (frameTimerRef.current >= frameDuration) {
+          frameRef.current = (frameRef.current + 1) % 6;
+          frameTimerRef.current -= frameDuration;
+        }
+
         // Draw custom player image
         ctx.drawImage(
           playerImageRef.current,
+          frameRef.current * 32,
+          row * 32,
+          32,
+          32,
           player.position.x,
           player.position.y,
           player.size.width,
