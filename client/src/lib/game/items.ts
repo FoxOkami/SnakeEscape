@@ -43,7 +43,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       biteProtection: 6,
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 396,
   }),
 
@@ -72,7 +72,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       snakeSightMultiplier: 0.97, // 3% reduction in snake sight detection radius
       snakeHearingMultiplier: 0.97, // 3% reduction in snake hearing detection radius
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 262,
   }),
 
@@ -98,7 +98,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       walkSpeed: 1.35, // 35% increase in walk speed
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 174,
   }),
 
@@ -124,7 +124,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       snakeHearingMultiplier: 0.96, // 4% reduction in snake hearing detection radius
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 115,
   }),
 
@@ -152,7 +152,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
       dashSpeed: 1.1, // 10% increase in dash speed
       dashDuration: 0.91, // ~9% decrease in duration (1/1.1) to maintain similar distance as base
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 76,
   }),
 
@@ -178,7 +178,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       biteProtection: 4,
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 50,
   }),
 
@@ -191,7 +191,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       snakeSightMultiplier: 0.97, // 3% reduction in snake sight detection radius
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 41,
   }),
 
@@ -217,7 +217,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       playerSpeed: 1.15,
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 27,
   }),
 
@@ -243,7 +243,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       snakeChaseMultiplier: 0.95,
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 18,
   }),
 
@@ -282,7 +282,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       snakeHearingMultiplier: 0.98,
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 10,
   }),
 
@@ -308,7 +308,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       dashCooldown: 0.9,
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 6,
   }),
 
@@ -334,7 +334,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       biteProtection: 2,
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 4,
   }),
 
@@ -347,7 +347,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       snakeSightMultiplier: 0.99, // 1% reduction in snake sight detection radius
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 3,
   }),
 
@@ -373,7 +373,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       playerSpeed: 1.05, // increase run speed by 5%
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 2,
   }),
 
@@ -401,7 +401,7 @@ export const GAME_ITEMS: Record<string, () => InventoryItem> = {
     modifiers: {
       walkSpeed: 1.05, // increases walk speed by 5%
     },
-    isActive: false,
+    isActive: true,
     ticketCost: 2,
   }),
 
