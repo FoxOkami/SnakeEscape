@@ -28,7 +28,8 @@ const GameUI: React.FC = () => {
     inventoryItems,
     useInventoryItem,
     togglePermanentItem,
-    dashState
+    dashState,
+    lastRunTickets
   } = useSnakeGame();
 
   const { isMuted, toggleMute, playSuccess, backgroundMusic } = useAudio();
@@ -55,9 +56,9 @@ const GameUI: React.FC = () => {
     }
   }, [gameState]);
 
-  // Play success sound on level complete or victory
+  // Play success sound on victory
   React.useEffect(() => {
-    if (gameState === 'levelComplete' || gameState === 'victory') {
+    if (gameState === 'victory') {
       playSuccess();
     }
   }, [gameState, playSuccess]);
@@ -90,7 +91,7 @@ const GameUI: React.FC = () => {
             <div className="grid grid-cols-2 gap-3">
               {LEVELS.map((level, index) => {
                 // Count different elements to give difficulty indication
-                const snakeCount = level.snakes.length;
+                const snakeCount = level.snakes?.length || 0;
                 const hasSpecialFeatures = level.switches || level.throwableItems || level.mirrors;
 
                 let difficultyColor = "bg-green-600"; // Easy
@@ -178,16 +179,13 @@ const GameUI: React.FC = () => {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-red-400">Game Over!</CardTitle>
           <CardDescription className="text-gray-300">
-            A snake caught you! Try again.
+            Congrats! You earned {lastRunTickets} tickets!
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-2">
-            <Button onClick={resetGame} className="w-full bg-red-600 hover:bg-red-700">
-              Try Again
-            </Button>
             <Button onClick={returnToMenu} variant="outline" className="w-full">
-              Return to Menu
+              Return to Hub
             </Button>
           </div>
         </CardContent>
@@ -195,51 +193,22 @@ const GameUI: React.FC = () => {
     </div>
   );
 
-  const renderLevelComplete = () => (
-    <div className="absolute inset-0 bg-green-900 bg-opacity-80 flex justify-center pt-8 z-10 p-4 min-h-screen">
-      <Card className="w-96 h-fit bg-gray-800 text-white border-green-600">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-green-400">Level Complete!</CardTitle>
-          <CardDescription className="text-gray-300">
-            Well done! Ready for the next challenge?
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col gap-2">
-            <Button onClick={() => {
-              console.log('DEBUG: Next Level button clicked');
-              nextLevel();
-            }} className="w-full bg-green-600 hover:bg-green-700">
-              Next Level
-            </Button>
-            <Button onClick={returnToMenu} variant="outline" className="w-full">
-              Return to Menu
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+
 
   const renderVictory = () => (
     <div className="absolute inset-0 bg-yellow-900 bg-opacity-80 flex justify-center pt-8 z-10 p-4 min-h-screen">
       <Card className="w-96 h-fit bg-gray-800 text-white border-yellow-600">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-yellow-400">Victory!</CardTitle>
-          <CardDescription className="text-gray-300">
-            Congratulations! You've escaped all the rooms!
-          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center">
-            <p className="text-lg">🎉 You are a true escape artist! 🎉</p>
+            <p className="text-lg">Congratulations! You completed all the levels of Snake Room!</p>
+            <p className="text-md text-green-400 mt-2">You earned {lastRunTickets} tickets!</p>
           </div>
           <div className="flex flex-col gap-2">
-            <Button onClick={startGame} className="w-full bg-yellow-600 hover:bg-yellow-700">
-              Play Again
-            </Button>
             <Button onClick={returnToMenu} variant="outline" className="w-full">
-              Return to Menu
+              Return to Hub
             </Button>
           </div>
         </CardContent>
@@ -326,14 +295,6 @@ const GameUI: React.FC = () => {
         >
           📦 Inventory
         </Button>
-        <Button
-          onClick={returnToMenu}
-          variant="outline"
-          size="sm"
-          className="bg-gray-800 text-white border-gray-600 hover:bg-gray-700"
-        >
-          Menu
-        </Button>
       </div>
     </div>
   );
@@ -343,7 +304,7 @@ const GameUI: React.FC = () => {
       {gameState === 'menu' && !showLevelSelect && renderMenu()}
       {gameState === 'menu' && showLevelSelect && renderLevelSelect()}
       {gameState === 'gameOver' && renderGameOver()}
-      {gameState === 'levelComplete' && renderLevelComplete()}
+
       {gameState === 'victory' && renderVictory()}
       {gameState === 'playing' && renderGameHUD()}
       {gameState === 'playing' && renderHealthDisplay()}

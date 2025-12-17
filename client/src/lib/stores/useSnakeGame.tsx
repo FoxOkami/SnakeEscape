@@ -250,6 +250,10 @@ interface SnakeGameState extends GameData {
   spawnRainSnake: (spawnPosition: Position, rainSnakeId: string, movementPattern?: string, angle?: number, amplitude?: number, frequency?: number) => Snake;
   spawnMiniBoulders: (centerPosition: Position, levelSize: { width: number; height: number }) => MiniBoulder[];
   updateMiniBoulders: (deltaTime: number) => void;
+
+  // Game over state
+  lastRunTickets: number;
+  currentRunTickets: number;
 }
 
 const BASE_PLAYER_SPEED = 150; // base pixels per second
@@ -528,6 +532,10 @@ export const useSnakeGame = create<SnakeGameState>()(
     showInventory: false,
     inventoryItems: [], // Inventory starts empty - items can be obtained through cheat codes
     randomizedSymbols: null, // Level 1 randomization
+
+    // Game over state
+    lastRunTickets: 0,
+    currentRunTickets: 0,
 
     // Unified Player Controller
     playerController: null,
@@ -990,11 +998,19 @@ export const useSnakeGame = create<SnakeGameState>()(
 
         useTicketStore.getState().addTickets(ticketsEarned);
 
+        // Update cumulative tickets for this run
+        const newTotalRunTickets = state.currentRunTickets + ticketsEarned;
+
         const nextLevelIndex = state.currentLevel + 1;
 
         if (nextLevelIndex >= LEVELS.length) {
-          // All levels completed, return to hub
-          get().resetForHub();
+          // All levels completed, victory!
+          set({
+            gameState: "victory",
+            isTransitioning: false,
+            lastRunTickets: newTotalRunTickets,
+            currentRunTickets: newTotalRunTickets
+          });
           return;
         }
 
@@ -1045,6 +1061,7 @@ export const useSnakeGame = create<SnakeGameState>()(
           currentLevelKey: getLevelKeyByIndex(nextLevelIndex),
           gameState: "playing",
           isTransitioning: false, // FIX: Reset transitioning flag
+          currentRunTickets: newTotalRunTickets,
           player: {
             position: { ...level.player },
             size: { width: 32, height: 32 },
@@ -1333,10 +1350,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       // NOTE: state.currentLevel appears to already be 1-indexed (Level 1 = 1, not 0)
       const diedOnLevelNum = state.currentLevel; // Use as-is, don't add 1
       const ticketsEarned = factorial(diedOnLevelNum);
-
       useTicketStore.getState().addTickets(ticketsEarned);
 
-      set({ gameState: "gameOver", isTransitioning: false });
+      const totalRunTickets = state.currentRunTickets + ticketsEarned;
+      set({ gameState: "gameOver", isTransitioning: false, lastRunTickets: totalRunTickets });
     },
 
     updateGame: (deltaTime: number) => {
@@ -2561,7 +2578,10 @@ export const useSnakeGame = create<SnakeGameState>()(
       };
 
       if (updatedDoor.isOpen && checkCircleRectCollision(exitCollisionCircle, updatedDoor)) {
-        set({ gameState: "levelComplete" });
+        // Automatically progress to next level
+        useAudio.getState().playSuccess();
+        set({ gameState: "playing" }); // Ensure we stay in playing state
+        get().nextLevel();
         return;
       }
 

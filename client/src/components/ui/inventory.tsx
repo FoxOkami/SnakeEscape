@@ -80,8 +80,8 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                   <div
                     key={item.id}
                     className={`p-3 border rounded-lg transition-colors ${item.isActive
-                        ? 'bg-green-100 border-green-300 hover:bg-green-200'
-                        : 'bg-gray-100 border-gray-300 hover:bg-gray-200'
+                      ? 'bg-green-100 border-green-300 hover:bg-green-200'
+                      : 'bg-gray-100 border-gray-300 hover:bg-gray-200'
                       }`}
                   >
                     <div className="flex items-center justify-between gap-2 mb-1">
@@ -94,8 +94,8 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
                           <button
                             onClick={() => onTogglePermanentItem(item.id)}
                             className={`px-2 py-1 text-white text-xs rounded transition-colors ${item.isActive
-                                ? 'bg-red-600 hover:bg-red-700'
-                                : 'bg-blue-600 hover:bg-blue-700'
+                              ? 'bg-red-600 hover:bg-red-700'
+                              : 'bg-blue-600 hover:bg-blue-700'
                               }`}
                           >
                             {item.isActive ? 'Deactivate' : 'Activate'}
@@ -115,7 +115,7 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({
             ) : (
               <div className="text-center py-6 text-gray-500">
                 <p className="text-sm">No items collected yet</p>
-                <p className="text-xs mt-1">Complete levels to unlock items!</p>
+                <p className="text-xs mt-1">Complete levels to get tickets and buy items from Rick!</p>
               </div>
             )}
           </div>
