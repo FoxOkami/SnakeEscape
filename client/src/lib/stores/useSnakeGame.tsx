@@ -4744,6 +4744,7 @@ export const useSnakeGame = create<SnakeGameState>()(
         gameState: "hub",
         currentLevel: 0,
         currentLevelKey: "hub",
+        isTransitioning: false, // Ensure this is reset so subsequent levels can transition
         player: {
           ...state.player,
           position: { x: 400, y: 300 }, // Default hub position (will be overridden by useHubStore)

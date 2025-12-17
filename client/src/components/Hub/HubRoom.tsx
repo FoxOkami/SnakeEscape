@@ -15,6 +15,7 @@ import { InventoryModal } from "../ui/inventory";
 import { ShopModal } from "./ShopModal";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import { STATIC_SPRITES } from "../../lib/game/sprites";
 
 const HubRoom: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -72,7 +73,9 @@ const HubRoom: React.FC = () => {
   );
   const [keyBindingError, setKeyBindingError] = useState<string | null>(null);
   const [cheatCodeInput, setCheatCodeInput] = useState<string>("");
+  /*-----------*/
   const [cheatCodeSuccess, setCheatCodeSuccess] = useState<boolean>(false);
+  const isInitializedRef = useRef(false);
 
   // Use global key bindings store
   const { keyBindings, setKeyBinding, getKeyDisplayText } = useKeyBindings();
@@ -439,8 +442,28 @@ const HubRoom: React.FC = () => {
     img.src = "/player-sheet.png?" + Date.now();
   }, []);
 
+  const staticImageRef = useRef<HTMLImageElement | null>(null);
+  const [staticImageLoaded, setStaticImageLoaded] = useState(false);
+
+  // Load static sheet
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      staticImageRef.current = img;
+      setStaticImageLoaded(true);
+    };
+    img.onerror = (error) => {
+      setStaticImageLoaded(false);
+    };
+    img.src = "/static-sheet.png?" + Date.now();
+  }, []);
+
   useEffect(() => {
     initializeHub();
+    // Use setTimeout to ensure the store update has propagated and we're in a fresh frame
+    setTimeout(() => {
+      isInitializedRef.current = true;
+    }, 0);
   }, [initializeHub]);
 
   useEffect(() => {
@@ -584,7 +607,7 @@ const HubRoom: React.FC = () => {
 
   // Handle game start
   useEffect(() => {
-    if (interactionState === "startGame") {
+    if (isInitializedRef.current && interactionState === "startGame") {
       // Start first game level using level name
       startLevelByName("pattern_memory");
     }
@@ -605,7 +628,7 @@ const HubRoom: React.FC = () => {
       lastTime = currentTime;
 
       // Update game state - don't update when settings modal or inventory is open
-      if (interactionState === "idle" && !showSettingsModal && !showInventory && !useHubStore.getState().showShopModal) {
+      if (isInitializedRef.current && interactionState === "idle" && !showSettingsModal && !showInventory && !useHubStore.getState().showShopModal) {
         updateHub(deltaTime, keys, keyBindings);
       }
 
@@ -683,13 +706,23 @@ const HubRoom: React.FC = () => {
 
       // Draw NPCs
       npcs.forEach((npc) => {
-        ctx.fillStyle = "#FFB74D";
-        ctx.fillRect(
-          npc.position.x,
-          npc.position.y,
-          npc.size.width,
-          npc.size.height,
-        );
+        const spriteDef = STATIC_SPRITES[npc.id === "game_master" ? "game_master" : npc.id.includes("lenny") ? "lenny_sterner" : npc.id === "rick" ? "rick" : npc.id === "dr_j" ? "dr_j" : npc.id.includes("old_man") ? "dying_old_man" : npc.id === "hospital_bed" ? "hospital_bed" : ""];
+
+        if (staticImageRef.current && staticImageLoaded && spriteDef) {
+          ctx.drawImage(
+            staticImageRef.current,
+            spriteDef.x, spriteDef.y, spriteDef.width, spriteDef.height,
+            npc.position.x, npc.position.y, npc.size.width, npc.size.height
+          );
+        } else {
+          ctx.fillStyle = "#FFB74D";
+          ctx.fillRect(
+            npc.position.x,
+            npc.position.y,
+            npc.size.width,
+            npc.size.height,
+          );
+        }
 
         // Draw NPC name
         ctx.fillStyle = "#FFFFFF";
@@ -795,19 +828,23 @@ const HubRoom: React.FC = () => {
         ctx.fillRect(door.position.x + 5, door.position.y + 15, 5, 10);
       }
 
-      // Draw key (if not collected and visible)
-      if (!key.collected && key.position.x > 0) {
-        ctx.fillStyle = "#ffd700";
-        ctx.fillRect(
-          key.position.x,
-          key.position.y,
-          key.size.width,
-          key.size.height,
-        );
+      // Draw key (if not collected)
+      if (!key.collected) {
+        const spriteDef = STATIC_SPRITES['key'];
+        if (staticImageRef.current && staticImageLoaded && spriteDef) {
+          ctx.drawImage(
+            staticImageRef.current,
+            spriteDef.x, spriteDef.y, spriteDef.width, spriteDef.height,
+            key.position.x, key.position.y, key.size.width, key.size.height
+          );
+        } else {
+          ctx.fillStyle = "#ffd700";
+          ctx.fillRect(key.position.x, key.position.y, key.size.width, key.size.height);
 
-        // Add sparkle effect
-        ctx.fillStyle = "#ffeb3b";
-        ctx.fillRect(key.position.x + 5, key.position.y + 5, 10, 10);
+          // Add sparkle effect
+          ctx.fillStyle = "#ffeb3b";
+          ctx.fillRect(key.position.x + 5, key.position.y + 5, 10, 10);
+        }
       }
 
       // Draw key indicator on player (small yellow square in top-left corner)
