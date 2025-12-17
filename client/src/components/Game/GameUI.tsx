@@ -206,7 +206,10 @@ const GameUI: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-2">
-            <Button onClick={nextLevel} className="w-full bg-green-600 hover:bg-green-700">
+            <Button onClick={() => {
+              console.log('DEBUG: Next Level button clicked');
+              nextLevel();
+            }} className="w-full bg-green-600 hover:bg-green-700">
               Next Level
             </Button>
             <Button onClick={returnToMenu} variant="outline" className="w-full">

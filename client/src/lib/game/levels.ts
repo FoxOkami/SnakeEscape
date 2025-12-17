@@ -189,9 +189,9 @@ export const LEVELS: Level[] = [
       },
     ],
     door: { x: 0, y: 0, width: 30, height: 40, isOpen: false },
-    key: { x: 0, y: 0, width: 20, height: 20, collected: false },
+    key: { x: 0, y: 0, width: 32, height: 32, collected: false },
     switches: [],
-    items: [],
+    // items removed
     patternTiles: [],
     mirrors: [],
     crystals: [],
@@ -200,7 +200,7 @@ export const LEVELS: Level[] = [
     snakePits: [],
     boulders: [],
     miniBoulders: [],
-    flowTiles: [],
+    // flowTiles removed
   },
   // Level 1: Pattern-matching puzzle
   {
@@ -283,7 +283,7 @@ export const LEVELS: Level[] = [
       },
     ],
     door: { x: 770, y: 280, width: 30, height: 40, isOpen: false },
-    key: { x: 640, y: 300, width: 20, height: 20, collected: false }, // Key in small chamber
+    key: { x: 640, y: 300, width: 32, height: 32, collected: false }, // Key in small chamber
     patternTiles: [
       // These will be randomized by the randomizeLevel1() function
       // Default positions that will be shuffled
@@ -494,7 +494,7 @@ export const LEVELS: Level[] = [
       },
     ],
     door: { x: 770, y: 50, width: 30, height: 40, isOpen: false },
-    key: { x: 650, y: 350, width: 20, height: 20, collected: false },
+    key: { x: 650, y: 350, width: 32, height: 32, collected: false },
     switches: [
       {
         x: 200,
@@ -750,7 +750,7 @@ export const LEVELS: Level[] = [
       },
     ],
     door: { x: 150, y: -10, width: 30, height: 40, isOpen: false },
-    key: { x: 690, y: 300, width: 20, height: 20, collected: false },
+    key: { x: 690, y: 300, width: 32, height: 32, collected: false },
     snakePits: [
       {
         id: "pit1",
@@ -1007,7 +1007,7 @@ export const LEVELS: Level[] = [
         })(),
       ],
       door: { x: 70, y: -10, width: 30, height: 40, isOpen: false },
-      key: { x: 750, y: 30, width: 20, height: 20, collected: false },
+      key: { x: 750, y: 30, width: 32, height: 32, collected: false },
       // 8x8 centered tile grid with randomized start and end positions
       patternTiles: (() => {
         const tiles: PatternTile[] = [];
@@ -1265,7 +1265,7 @@ export const LEVELS: Level[] = [
       },
     ],
     door: { x: 730, y: 560, width: 30, height: 40, isOpen: false },
-    key: { x: 745, y: 35, width: 20, height: 20, collected: false },
+    key: { x: 745, y: 35, width: 32, height: 32, collected: false },
     teleporters: [
       {
         // NW
@@ -1476,7 +1476,7 @@ export const LEVELS: Level[] = [
       },
     ],
     door: { x: 0, y: 460, width: 30, height: 40, isOpen: false },
-    key: { x: -100, y: -100, width: 20, height: 20, collected: false }, // Key hidden until final boulder breaks
+    key: { x: -100, y: -100, width: 32, height: 32, collected: false }, // Key hidden until final boulder breaks
     boulders: [
       {
         id: "boulder_top_left",

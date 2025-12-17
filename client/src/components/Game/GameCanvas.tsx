@@ -3,6 +3,7 @@ import { useSnakeGame } from "../../lib/stores/useSnakeGame";
 import { checkAABBCollision } from "../../lib/game/collision";
 import { drawPickupTooltip, drawStandardTooltip, drawInteractionTooltip, drawSecondaryInteractionTooltip, drawRotationTooltip } from "../../lib/utils/tooltips";
 import { Snake } from "../../lib/game/types";
+import { STATIC_SPRITES } from "../../lib/game/sprites";
 
 // Snake color overlays
 const snakeColors: Record<string, string> = {
@@ -144,6 +145,10 @@ const GameCanvas: React.FC = () => {
     toggleDebugNotes,
   } = useSnakeGame();
 
+  const staticImageRef = useRef<HTMLImageElement | null>(null);
+  const [staticImageLoaded, setStaticImageLoaded] = React.useState(false);
+
+
   // Cheat code listener
   const cheatCodeBufferRef = useRef("");
   useEffect(() => {
@@ -188,10 +193,54 @@ const GameCanvas: React.FC = () => {
     img.src = "/enemy-sheet.png?" + Date.now();
   }, []);
 
+  // Load static sheet
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      staticImageRef.current = img;
+      setStaticImageLoaded(true);
+    };
+    img.onerror = (error) => {
+      setStaticImageLoaded(false);
+    };
+    img.src = "/static-sheet.png?" + Date.now();
+  }, []);
+
   // Helper function to draw a snake sprite
   const drawSnakeSprite = (snake: Snake, ctx: CanvasRenderingContext2D, currentLevelKey: string) => {
     // 1. Draw friendly game master with original logic
+    // 1. Draw friendly game master with sprite or fallback
     if (snake.type === 'friendly') {
+      if (staticImageRef.current && staticImageLoaded) {
+        // Use static sprite for Game Master
+        const spriteDef = STATIC_SPRITES['game_master'];
+        if (spriteDef) {
+          ctx.drawImage(
+            staticImageRef.current,
+            spriteDef.x, spriteDef.y, spriteDef.width, spriteDef.height,
+            snake.position.x, snake.position.y, snake.size.width, snake.size.height
+          );
+        } else {
+          // Fallback if sprite definition missing
+          ctx.fillStyle = "#FFB74D";
+          ctx.fillRect(snake.position.x, snake.position.y, snake.size.width, snake.size.height);
+        }
+
+        // Interaction prompt (keep existing logic)
+        if (currentLevel === 0 && player) {
+          const distance = Math.sqrt(
+            Math.pow(player.position.x - snake.position.x, 2) +
+            Math.pow(player.position.y - snake.position.y, 2)
+          );
+
+          if (distance < 80) {
+            drawStandardTooltip("Game Master", ctx, player.position.x, player.position.y, player.size.width);
+            drawInteractionTooltip("to start adventure", ctx, player.position.x, player.position.y - 5, player.size.width);
+          }
+        }
+        return;
+      }
+
       const baseColor = "#FFB74D";
       const accentColor = "#FFA726";
       const eyeColor = "#4CAF50";
@@ -306,17 +355,7 @@ const GameCanvas: React.FC = () => {
     // Sight Range indicator removed
     // if (snake.isChasing && snake.type !== "stalker" && snake.type !== "screensaver") { ... }
 
-    // Boss Phase
-    if (snake.type === "boss" && snake.bossPhase) {
-      ctx.font = "bold 18px Arial";
-      ctx.textAlign = "center";
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 3;
-      ctx.strokeText(`Phase ${snake.bossPhase}`, snake.position.x + snake.size.width / 2, snake.position.y - 10);
-      ctx.fillStyle = "#ffffff";
-      ctx.fillText(`Phase ${snake.bossPhase}`, snake.position.x + snake.size.width / 2, snake.position.y - 10);
-      ctx.textAlign = "left";
-    }
+    // Boss Phase indicator removed
   };
 
   const draw = useCallback(
@@ -1077,136 +1116,149 @@ const GameCanvas: React.FC = () => {
       throwableItems.forEach((item) => {
         if (item.isPickedUp && !item.isThrown) return; // Don't draw picked up items unless being thrown
 
-        if (item.type === "rock") {
-          // Draw rock as a gray/brown circle
-          ctx.fillStyle = "#8b7355";
-          ctx.beginPath();
-          ctx.arc(
-            item.x + item.width / 2,
-            item.y + item.height / 2,
-            item.width / 2,
-            0,
-            2 * Math.PI,
+        // Check if we have a sprite definition for this item
+        const spriteDef = STATIC_SPRITES[item.type];
+
+        if (staticImageRef.current && staticImageLoaded && spriteDef) {
+          // Draw item using sprite sheet
+          ctx.drawImage(
+            staticImageRef.current,
+            spriteDef.x, spriteDef.y, spriteDef.width, spriteDef.height,
+            item.x, item.y, item.width, item.height
           );
-          ctx.fill();
+        } else {
+          // Fallback to original shape rendering if sprite not loaded
+          if (item.type === "rock") {
+            // Draw rock as a gray/brown circle
+            ctx.fillStyle = "#8b7355";
+            ctx.beginPath();
+            ctx.arc(
+              item.x + item.width / 2,
+              item.y + item.height / 2,
+              item.width / 2,
+              0,
+              2 * Math.PI,
+            );
+            ctx.fill();
 
-          // Add darker center for texture
-          ctx.fillStyle = "#6d5a47";
-          ctx.beginPath();
-          ctx.arc(
-            item.x + item.width / 2,
-            item.y + item.height / 2,
-            item.width / 3,
-            0,
-            2 * Math.PI,
-          );
-          ctx.fill();
-        } else if (item.type === "chubbs_hand") {
-          // Draw Chubbs's hand as a flesh-colored hand shape
-          ctx.fillStyle = "#f4a460";
-          ctx.fillRect(item.x, item.y, item.width, item.height);
+            // Add darker center for texture
+            ctx.fillStyle = "#6d5a47";
+            ctx.beginPath();
+            ctx.arc(
+              item.x + item.width / 2,
+              item.y + item.height / 2,
+              item.width / 3,
+              0,
+              2 * Math.PI,
+            );
+            ctx.fill();
+          } else if (item.type === "chubbs_hand") {
+            // Draw Chubbs's hand as a flesh-colored hand shape
+            ctx.fillStyle = "#f4a460";
+            ctx.fillRect(item.x, item.y, item.width, item.height);
 
-          // Add fingers
-          ctx.fillStyle = "#d2691e";
-          ctx.fillRect(item.x + 5, item.y, 3, 8);
-          ctx.fillRect(item.x + 10, item.y, 3, 10);
-          ctx.fillRect(item.x + 15, item.y, 3, 9);
-          ctx.fillRect(item.x + 20, item.y, 3, 7);
-        } else if (item.type === "elis_hip") {
-          // Draw Eli's hip as a bone-like shape
-          ctx.fillStyle = "#f5f5dc";
-          ctx.fillRect(item.x, item.y, item.width, item.height);
+            // Add fingers
+            ctx.fillStyle = "#d2691e";
+            ctx.fillRect(item.x + 5, item.y, 3, 8);
+            ctx.fillRect(item.x + 10, item.y, 3, 10);
+            ctx.fillRect(item.x + 15, item.y, 3, 9);
+            ctx.fillRect(item.x + 20, item.y, 3, 7);
+          } else if (item.type === "elis_hip") {
+            // Draw Eli's hip as a bone-like shape
+            ctx.fillStyle = "#f5f5dc";
+            ctx.fillRect(item.x, item.y, item.width, item.height);
 
-          // Add bone joints
-          ctx.fillStyle = "#deb887";
-          ctx.fillRect(item.x, item.y + 5, 6, 15);
-          ctx.fillRect(item.x + 19, item.y + 5, 6, 15);
-          ctx.fillRect(item.x + 6, item.y + 8, 13, 9);
-        } else if (item.type === "barbra_hat") {
-          // Draw Barbra Streisand hat as a fancy hat
-          ctx.fillStyle = "#8b4513";
-          ctx.fillRect(item.x, item.y + 10, item.width, 10);
+            // Add bone joints
+            ctx.fillStyle = "#deb887";
+            ctx.fillRect(item.x, item.y + 5, 6, 15);
+            ctx.fillRect(item.x + 19, item.y + 5, 6, 15);
+            ctx.fillRect(item.x + 6, item.y + 8, 13, 9);
+          } else if (item.type === "barbra_hat") {
+            // Draw Barbra Streisand hat as a fancy hat
+            ctx.fillStyle = "#8b4513";
+            ctx.fillRect(item.x, item.y + 10, item.width, 10);
 
-          // Hat top
-          ctx.fillStyle = "#654321";
-          ctx.fillRect(item.x + 5, item.y, 15, 15);
+            // Hat top
+            ctx.fillStyle = "#654321";
+            ctx.fillRect(item.x + 5, item.y, 15, 15);
 
-          // Hat decoration
-          ctx.fillStyle = "#ffd700";
-          ctx.fillRect(item.x + 8, item.y + 3, 9, 3);
-        } else if (item.type === "box_of_golf_balls") {
-          // Draw box of golf balls
-          ctx.fillStyle = "#8b4513";
-          ctx.fillRect(item.x, item.y, item.width, item.height);
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.arc(item.x + 6, item.y + 6, 3, 0, 2 * Math.PI);
-          ctx.arc(item.x + 16, item.y + 6, 3, 0, 2 * Math.PI);
-          ctx.arc(item.x + 6, item.y + 16, 3, 0, 2 * Math.PI);
-          ctx.fill();
-        } else if (item.type === "4_iron") {
-          // Draw 4 iron golf club
-          ctx.fillStyle = "#c0c0c0";
-          ctx.fillRect(item.x + 8, item.y, 4, item.height);
-          ctx.fillStyle = "#8b4513";
-          ctx.fillRect(item.x, item.y + item.height - 8, 15, 8);
-        } else if (item.type === "the_prophecy") {
-          // Draw ancient scroll
-          ctx.fillStyle = "#f5deb3";
-          ctx.fillRect(item.x, item.y + 3, item.width, item.height - 6);
-          ctx.fillStyle = "#8b4513";
-          ctx.fillRect(item.x, item.y, item.width, 3);
-          ctx.fillRect(item.x, item.y + item.height - 3, item.width, 3);
-        } else if (item.type === "hammer") {
-          // Draw hammer
-          ctx.fillStyle = "#8b4513";
-          ctx.fillRect(item.x + 8, item.y + 5, 4, 15);
-          ctx.fillStyle = "#696969";
-          ctx.fillRect(item.x, item.y, item.width, 8);
-        } else if (item.type === "box_of_nails") {
-          // Draw box of nails
-          ctx.fillStyle = "#8b4513";
-          ctx.fillRect(item.x, item.y, item.width, item.height);
-          ctx.fillStyle = "#c0c0c0";
-          for (let i = 0; i < 3; i++) {
-            ctx.fillRect(item.x + 3 + i * 6, item.y + 3, 2, 8);
+            // Hat decoration
+            ctx.fillStyle = "#ffd700";
+            ctx.fillRect(item.x + 8, item.y + 3, 9, 3);
+          } else if (item.type === "box_of_golf_balls") {
+            // Draw box of golf balls
+            ctx.fillStyle = "#8b4513";
+            ctx.fillRect(item.x, item.y, item.width, item.height);
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(item.x + 6, item.y + 6, 3, 0, 2 * Math.PI);
+            ctx.arc(item.x + 16, item.y + 6, 3, 0, 2 * Math.PI);
+            ctx.arc(item.x + 6, item.y + 16, 3, 0, 2 * Math.PI);
+            ctx.fill();
+          } else if (item.type === "4_iron") {
+            // Draw 4 iron golf club
+            ctx.fillStyle = "#c0c0c0";
+            ctx.fillRect(item.x + 8, item.y, 4, item.height);
+            ctx.fillStyle = "#8b4513";
+            ctx.fillRect(item.x, item.y + item.height - 8, 15, 8);
+          } else if (item.type === "the_prophecy") {
+            // Draw ancient scroll
+            ctx.fillStyle = "#f5deb3";
+            ctx.fillRect(item.x, item.y + 3, item.width, item.height - 6);
+            ctx.fillStyle = "#8b4513";
+            ctx.fillRect(item.x, item.y, item.width, 3);
+            ctx.fillRect(item.x, item.y + item.height - 3, item.width, 3);
+          } else if (item.type === "hammer") {
+            // Draw hammer
+            ctx.fillStyle = "#8b4513";
+            ctx.fillRect(item.x + 8, item.y + 5, 4, 15);
+            ctx.fillStyle = "#696969";
+            ctx.fillRect(item.x, item.y, item.width, 8);
+          } else if (item.type === "box_of_nails") {
+            // Draw box of nails
+            ctx.fillStyle = "#8b4513";
+            ctx.fillRect(item.x, item.y, item.width, item.height);
+            ctx.fillStyle = "#c0c0c0";
+            for (let i = 0; i < 3; i++) {
+              ctx.fillRect(item.x + 3 + i * 6, item.y + 3, 2, 8);
+            }
+          } else if (item.type === "bag_of_concrete") {
+            // Draw concrete bag
+            ctx.fillStyle = "#a0a0a0";
+            ctx.fillRect(item.x, item.y, item.width, item.height);
+            ctx.fillStyle = "#696969";
+            ctx.fillRect(item.x + 2, item.y + 2, item.width - 4, 3);
+          } else if (item.type === "the_blue_album") {
+            // Draw blue album
+            ctx.fillStyle = "#4169e1";
+            ctx.fillRect(item.x, item.y, item.width, item.height);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(item.x + 5, item.y + 5, item.width - 10, 3);
+            ctx.fillRect(item.x + 5, item.y + 10, item.width - 10, 2);
+          } else if (item.type === "origami_book") {
+            // Draw origami book
+            ctx.fillStyle = "#ff6347";
+            ctx.fillRect(item.x, item.y, item.width, item.height);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(item.x + 3, item.y + 3, 8, 8);
+            ctx.fillStyle = "#ff6347";
+            ctx.fillRect(item.x + 5, item.y + 5, 4, 4);
+          } else if (item.type === "tennis_racket") {
+            // Draw tennis racket
+            ctx.fillStyle = "#8b4513";
+            ctx.fillRect(item.x + 8, item.y + 10, 4, 15);
+            ctx.strokeStyle = "#8b4513";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(item.x + 10, item.y + 8, 8, 0, 2 * Math.PI);
+            ctx.stroke();
+          } else if (item.type === "yoga_block") {
+            // Draw yoga block
+            ctx.fillStyle = "#9370db";
+            ctx.fillRect(item.x, item.y, item.width, item.height);
+            ctx.fillStyle = "#8a2be2";
+            ctx.fillRect(item.x + 2, item.y + 2, item.width - 4, item.height - 4);
           }
-        } else if (item.type === "bag_of_concrete") {
-          // Draw concrete bag
-          ctx.fillStyle = "#a0a0a0";
-          ctx.fillRect(item.x, item.y, item.width, item.height);
-          ctx.fillStyle = "#696969";
-          ctx.fillRect(item.x + 2, item.y + 2, item.width - 4, 3);
-        } else if (item.type === "the_blue_album") {
-          // Draw blue album
-          ctx.fillStyle = "#4169e1";
-          ctx.fillRect(item.x, item.y, item.width, item.height);
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(item.x + 5, item.y + 5, item.width - 10, 3);
-          ctx.fillRect(item.x + 5, item.y + 10, item.width - 10, 2);
-        } else if (item.type === "origami_book") {
-          // Draw origami book
-          ctx.fillStyle = "#ff6347";
-          ctx.fillRect(item.x, item.y, item.width, item.height);
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(item.x + 3, item.y + 3, 8, 8);
-          ctx.fillStyle = "#ff6347";
-          ctx.fillRect(item.x + 5, item.y + 5, 4, 4);
-        } else if (item.type === "tennis_racket") {
-          // Draw tennis racket
-          ctx.fillStyle = "#8b4513";
-          ctx.fillRect(item.x + 8, item.y + 10, 4, 15);
-          ctx.strokeStyle = "#8b4513";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(item.x + 10, item.y + 8, 8, 0, 2 * Math.PI);
-          ctx.stroke();
-        } else if (item.type === "yoga_block") {
-          // Draw yoga block
-          ctx.fillStyle = "#9370db";
-          ctx.fillRect(item.x, item.y, item.width, item.height);
-          ctx.fillStyle = "#8a2be2";
-          ctx.fillRect(item.x + 2, item.y + 2, item.width - 4, item.height - 4);
         }
 
         // Add pickup indicator if player is nearby and not carrying anything
@@ -1258,12 +1310,22 @@ const GameCanvas: React.FC = () => {
 
       // Draw key (if not collected)
       if (!key.collected) {
-        ctx.fillStyle = "#ffd700";
-        ctx.fillRect(key.x, key.y, key.width, key.height);
+        const spriteDef = STATIC_SPRITES['key'];
+        if (staticImageRef.current && staticImageLoaded && spriteDef) {
+          ctx.drawImage(
+            staticImageRef.current,
+            spriteDef.x, spriteDef.y, spriteDef.width, spriteDef.height,
+            key.x, key.y, key.width, key.height
+          );
+        } else {
+          // Fallback
+          ctx.fillStyle = "#ffd700";
+          ctx.fillRect(key.x, key.y, key.width, key.height);
 
-        // Add sparkle effect
-        ctx.fillStyle = "#ffeb3b";
-        ctx.fillRect(key.x + 5, key.y + 5, 10, 10);
+          // Add sparkle effect
+          ctx.fillStyle = "#ffeb3b";
+          ctx.fillRect(key.x + 5, key.y + 5, 10, 10);
+        }
       }
 
       // Draw door
@@ -1654,10 +1716,11 @@ const GameCanvas: React.FC = () => {
       projectiles.forEach((projectile) => {
 
         // Handle both nested and flat schemas for robust rendering
-        const x = projectile.position?.x ?? projectile.x ?? 0;
-        const y = projectile.position?.y ?? projectile.y ?? 0;
-        const width = projectile.size?.width ?? projectile.width ?? 6;
-        const height = projectile.size?.height ?? projectile.height ?? 6;
+        // Handle nested schema
+        const x = projectile.position?.x ?? 0;
+        const y = projectile.position?.y ?? 0;
+        const width = projectile.size?.width ?? 6;
+        const height = projectile.size?.height ?? 6;
 
         ctx.fillStyle = projectile.color || "#ff0000"; // Default to red if no color
         ctx.fillRect(x, y, width, height);
@@ -2472,10 +2535,11 @@ const GameCanvas: React.FC = () => {
           // Redraw projectiles on top of darkness overlay (Level 6 only)
           projectiles.forEach((projectile) => {
             // Handle both nested and flat schemas for robust rendering
-            const x = projectile.position?.x ?? projectile.x ?? 0;
-            const y = projectile.position?.y ?? projectile.y ?? 0;
-            const width = projectile.size?.width ?? projectile.width ?? 6;
-            const height = projectile.size?.height ?? projectile.height ?? 6;
+            // Handle nested schema
+            const x = projectile.position?.x ?? 0;
+            const y = projectile.position?.y ?? 0;
+            const width = projectile.size?.width ?? 6;
+            const height = projectile.size?.height ?? 6;
 
             ctx.fillStyle = projectile.color || "#ff0000"; // Default to red if no color
             ctx.fillRect(x, y, width, height);

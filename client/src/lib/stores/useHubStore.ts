@@ -85,7 +85,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
   },
   key: {
     position: { x: -100, y: -100 }, // Hidden initially
-    size: { width: 20, height: 20 },
+    size: { width: 32, height: 32 },
     collected: false
   },
   hasKey: false,
@@ -125,7 +125,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
       },
       key: {
         position: { x: -100, y: -100 }, // Hidden initially
-        size: { width: 20, height: 20 },
+        size: { width: 32, height: 32 },
         collected: false
       },
       hasKey: false,
@@ -138,36 +138,43 @@ export const useHubStore = create<HubStore>((set, get) => ({
           id: 'game_master',
           name: 'Game Master',
           position: { x: 200, y: 150 },
-          size: { width: 40, height: 40 },
+          size: { width: 32, height: 32 },
           dialogue: 'Press E to receive the key to the door.'
         },
         {
           id: 'lenny_sterner',
           name: 'Lenny Sterner',
           position: { x: 600, y: 150 },
-          size: { width: 40, height: 40 },
+          size: { width: 32, height: 32 },
           dialogue: 'Hello there! Good luck in the levels ahead.'
         },
         {
           id: 'rick',
           name: 'Rick',
           position: { x: 200, y: 450 },
-          size: { width: 40, height: 40 },
+          size: { width: 32, height: 32 },
           dialogue: 'Got some rare items for sale!'
         },
         {
           id: 'dr_j',
           name: 'Dr. J',
           position: { x: 600, y: 450 },
-          size: { width: 40, height: 40 },
+          size: { width: 32, height: 32 },
           dialogue: '' // Dynamic
         },
         {
           id: 'dying_old_man',
           name: 'Dying old man filled with regret',
           position: { x: 400, y: 525 },
-          size: { width: 40, height: 40 },
+          size: { width: 32, height: 32 },
           dialogue: 'You know, before I got sucked into the Snake Room world, I use to make a damn good shirt.'
+        },
+        {
+          id: 'hospital_bed',
+          name: '', // No name tag
+          position: { x: 660, y: 450 }, // East of Dr. J
+          size: { width: 64, height: 32 },
+          dialogue: '' // No dialogue
         }
       ]
     });
