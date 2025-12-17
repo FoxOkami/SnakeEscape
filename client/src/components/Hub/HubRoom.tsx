@@ -41,6 +41,8 @@ const HubRoom: React.FC = () => {
     confirmSelection,
     endInteraction,
     closeSettingsModal,
+    closeMessage,
+    activeDialogue,
   } = useHubStore();
 
   const tickets = useTicketStore((state) => state.tickets);
@@ -439,7 +441,9 @@ const HubRoom: React.FC = () => {
 
   useEffect(() => {
     initializeHub();
+  }, [initializeHub]);
 
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Handle key binding editing - use refs to get current values
       const currentEditingKey = editingKeyBindingRef.current;
@@ -503,6 +507,10 @@ const HubRoom: React.FC = () => {
         } else if (e.code === keyBindings.interact || e.code === "Enter") {
           confirmSelection();
         }
+      } else if (interactionState === "message") {
+        if (e.code === "Enter" || e.code === "Escape") {
+          closeMessage();
+        }
       }
     };
 
@@ -523,16 +531,51 @@ const HubRoom: React.FC = () => {
       setKeyPressed(e.code, false);
     };
 
+    // Handle mouse clicks on the canvas
+    const handleCanvasClick = (e: MouseEvent) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Check for clicks on the "X" button in message dialog
+      if (interactionState === "message") {
+        const dialogWidth = 600;
+        const dialogHeight = 200;
+        const dialogX = (canvas.width - dialogWidth) / 2;
+        const dialogY = (canvas.height - dialogHeight) / 2;
+
+        // Button area (approximate based on rendering)
+        // 40x40 area at top right of dialog
+        const buttonSize = 40;
+        const buttonX = dialogX + dialogWidth - buttonSize;
+        const buttonY = dialogY;
+
+        if (x >= buttonX && x <= buttonX + buttonSize && y >= buttonY && y <= buttonY + buttonSize) {
+          closeMessage();
+        }
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
+    // Bind click listener to the canvas element itself would be better, but we are inside useEffect
+    // So we'll attach to the canvas ref if possible, but the ref is available
+    if (canvasRef.current) {
+      canvasRef.current.addEventListener('click', handleCanvasClick);
+    }
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
+      if (canvasRef.current) {
+        canvasRef.current.removeEventListener('click', handleCanvasClick);
+      }
     };
   }, [
     interactionState,
-    initializeHub,
     selectOption,
     confirmSelection,
     interactWithNPC,
@@ -850,6 +893,78 @@ const HubRoom: React.FC = () => {
           canvas.width / 2,
           dialogY + dialogHeight - 20,
         );
+      } else if (interactionState === "message" && activeDialogue) {
+        // Semi-transparent overlay
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Dialog box
+        const dialogWidth = 600;
+        const dialogHeight = 200;
+        const dialogX = (canvas.width - dialogWidth) / 2;
+        const dialogY = (canvas.height - dialogHeight) / 2;
+
+        ctx.fillStyle = "#2C3E50";
+        ctx.fillRect(dialogX, dialogY, dialogWidth, dialogHeight);
+        ctx.strokeStyle = "#34495E";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(dialogX, dialogY, dialogWidth, dialogHeight);
+
+        // Dialogue Text
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "20px Arial";
+        ctx.textAlign = "center";
+
+        // Handling multiline text if needed (basic splitting for now)
+        const maxCharsPerLine = 60;
+        if (activeDialogue.length > maxCharsPerLine) {
+          const words = activeDialogue.split(' ');
+          let line = '';
+          let yOffset = 60;
+
+          for (let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
+            if (testLine.length > maxCharsPerLine && n > 0) {
+              ctx.fillText(line, canvas.width / 2, dialogY + yOffset);
+              line = words[n] + ' ';
+              yOffset += 30;
+            } else {
+              line = testLine;
+            }
+          }
+          ctx.fillText(line, canvas.width / 2, dialogY + yOffset);
+        } else {
+          ctx.fillText(activeDialogue, canvas.width / 2, dialogY + 80);
+        }
+
+        // Instructions
+        ctx.fillStyle = "#BDC3C7";
+        ctx.font = "14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(
+          "Press Enter or Escape to close",
+          canvas.width / 2,
+          dialogY + dialogHeight - 20,
+        );
+
+        // Draw "X" Close Button
+        const buttonSize = 30;
+        const padding = 10;
+        const buttonX = dialogX + dialogWidth - buttonSize - padding;
+        const buttonY = dialogY + padding;
+
+        // Button background (hover effect could be added if we tracked mouse pos, but simple for now)
+        ctx.fillStyle = "#C0392B";
+        ctx.fillRect(buttonX, buttonY, buttonSize, buttonSize);
+
+        // "X" text
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("✕", buttonX + buttonSize / 2, buttonY + buttonSize / 2);
+        // Reset text baseline
+        ctx.textBaseline = "alphabetic";
       }
 
       // Draw debug visualizations if enabled
