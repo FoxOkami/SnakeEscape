@@ -1165,9 +1165,33 @@ export const useSnakeGame = create<SnakeGameState>()(
     },
 
     addInventoryItem: (item: InventoryItem) => {
-      set((state) => ({
-        inventoryItems: [...state.inventoryItems, item],
-      }));
+      set((state) => {
+        const updatedInventory = [...state.inventoryItems, item];
+
+        // Calculate shield health from all active items
+        let totalBiteProtection = 0;
+        updatedInventory.forEach((inventoryItem) => {
+          if (
+            inventoryItem.isActive &&
+            inventoryItem.modifiers.biteProtection
+          ) {
+            totalBiteProtection += inventoryItem.modifiers.biteProtection;
+          }
+        });
+
+        // Update player shield health if needed
+        const updatedPlayer = {
+          ...state.player,
+          maxShieldHealth: totalBiteProtection, // Update max shield
+          shieldHealth: totalBiteProtection, // Update current shield (assuming full heal on purchase/equip?)
+          // Or should we just add the difference? For now, let's assume getting the item grants the shield points.
+        };
+
+        return {
+          inventoryItems: updatedInventory,
+          player: updatedPlayer,
+        };
+      });
     },
 
     removeInventoryItem: (itemId: string) => {
