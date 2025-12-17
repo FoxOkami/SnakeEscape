@@ -36,8 +36,10 @@ interface Key {
 
 interface HubStore {
   gameState: 'hub' | 'transitioning';
-  interactionState: 'idle' | 'conversation' | 'confirmed' | 'startGame';
+  interactionState: 'idle' | 'conversation' | 'confirmed' | 'startGame' | 'message';
   selectedOption: 'yes' | 'no';
+  activeDialogue: string | null;
+  drJDialogueIndex: number;
   player: Player;
   npcs: NPC[];
   door: Door;
@@ -61,12 +63,15 @@ interface HubStore {
   closeSettingsModal: () => void;
   openShopModal: () => void;
   closeShopModal: () => void;
+  closeMessage: () => void;
 }
 
 export const useHubStore = create<HubStore>((set, get) => ({
   gameState: 'hub',
   interactionState: 'idle',
   selectedOption: 'no',
+  activeDialogue: null,
+  drJDialogueIndex: 0,
   customKeyBindings: null,
   player: {
     position: { x: 400, y: 300 },
@@ -108,6 +113,7 @@ export const useHubStore = create<HubStore>((set, get) => ({
       gameState: 'hub',
       interactionState: 'idle',
       selectedOption: 'no',
+      activeDialogue: null,
       player: {
         position: playerPosition,
         size: playerSize
@@ -148,6 +154,20 @@ export const useHubStore = create<HubStore>((set, get) => ({
           position: { x: 200, y: 450 },
           size: { width: 40, height: 40 },
           dialogue: 'Got some rare items for sale!'
+        },
+        {
+          id: 'dr_j',
+          name: 'Dr. J',
+          position: { x: 600, y: 450 },
+          size: { width: 40, height: 40 },
+          dialogue: '' // Dynamic
+        },
+        {
+          id: 'dying_old_man',
+          name: 'Dying old man filled with regret',
+          position: { x: 400, y: 525 },
+          size: { width: 40, height: 40 },
+          dialogue: 'You know, before I got sucked into the Snake Room world, I use to make a damn good shirt.'
         }
       ]
     });
@@ -249,8 +269,50 @@ export const useHubStore = create<HubStore>((set, get) => ({
         // Open shop modal
         set({ lastInteractionTime: now });
         get().openShopModal();
+      } else if (nearbyNPC.id === 'dr_j') {
+        // Dr. J Cycling Dialogue
+        const quotes = [
+          "I think it's time to adopt a champion's mindset.",
+          "Have you created your identity statement yet?",
+          "Your practice needs to be deliberate and measurable.",
+          "Remember, growth over outcomes.",
+          "Control the controllables.",
+          "Rephrase negative thoughts into positive intentions.",
+          "You must practice under pressure to acclimate yourself to it."
+        ];
+
+        const currentQuote = quotes[state.drJDialogueIndex % quotes.length];
+
+        set({
+          interactionState: 'message',
+          activeDialogue: currentQuote,
+          drJDialogueIndex: state.drJDialogueIndex + 1,
+          lastInteractionTime: now
+        });
+      } else if (nearbyNPC.id === 'dying_old_man') {
+        // Dying old man logic
+        const updatedNPCs = state.npcs.map(npc => {
+          if (npc.id === 'dying_old_man' && npc.name === 'Dying old man filled with regret') {
+            return { ...npc, name: 'Ralph Leeward' };
+          }
+          return npc;
+        });
+
+        set({
+          npcs: updatedNPCs,
+          interactionState: 'message',
+          activeDialogue: nearbyNPC.dialogue,
+          lastInteractionTime: now
+        });
       }
     }
+  },
+
+  closeMessage: () => {
+    set({
+      interactionState: 'idle',
+      activeDialogue: null
+    });
   },
 
   checkDoorInteraction: () => {
